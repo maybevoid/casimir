@@ -1,0 +1,43 @@
+name:                implicit-effect
+version:             0.1.0.0
+synopsis:            Demo effects
+
+license:             BSD-3-Clause
+license-file:        LICENSE
+author:              Soares Chen
+maintainer:          soares.chen@maybevoid.com
+
+ghc-options:
+  -Wall -O2
+
+dependencies:
+  - base ^>=4.12.0.0 && < 5
+  - mtl
+  - stm
+  - free
+  - transformers
+
+default-extensions:
+  - GADTs
+  - Strict
+  - StrictData
+  - RankNTypes
+  - TypeFamilies
+  - InstanceSigs
+  - ImplicitParams
+  - ExplicitForAll
+  - KindSignatures
+  - ConstraintKinds
+  - TypeApplications
+  - ScopedTypeVariables
+  - MultiParamTypeClasses
+
+library:
+  source-dirs:  src/lib
+
+executables:
+  effect-demo:
+    main:          Main.hs
+    source-dirs:   src/main
+    dependencies:
+      - implicit-effect
