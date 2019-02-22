@@ -16,16 +16,15 @@ import Control.Effect.Union
 import Control.Effect.Ops.IO
 import Control.Effect.Ops.Env
 import Control.Effect.Ops.State
-import Control.Effect.Computation
 
-readerTHandler :: forall a eff . (Monad eff) => EnvOps a (ReaderT a eff)
+readerTHandler :: forall a eff . (Effect eff) => EnvOps a (ReaderT a eff)
 readerTHandler = EnvOps {
   askOp = MR.ask
 }
 
 handleReaderT
   :: forall r a eff effRow .
-  (Monad eff, EffRow effRow)
+  (Effect eff, EffRow effRow)
   => (forall eff' . effRow eff')
   -> (( EffConstraint effRow (ReaderT a eff)
       , EnvEff a (ReaderT a eff)
@@ -35,10 +34,10 @@ handleReaderT
 handleReaderT effRow comp =
   bindConstraint effRow' comp
     where
-      effRow' :: UnionEffRow (EnvOps a) effRow (ReaderT a eff)
+      effRow' :: Union (EnvOps a) effRow (ReaderT a eff)
       effRow' = stackEffHandlers readerTHandler effRow $ LiftEff lift
 
-mkEnvHandler :: forall a eff . (Monad eff) => a -> EnvOps a eff
+mkEnvHandler :: forall a eff . (Effect eff) => a -> EnvOps a eff
 mkEnvHandler x = EnvOps {
   askOp = return x
 }
@@ -60,21 +59,21 @@ ioHandler = IoOps {
 ioAndStateHandler
   :: forall a .
   IORef a
-  -> UnionEffRow IoOps (StateOps a) IO
+  -> Union IoOps (StateOps a) IO
 ioAndStateHandler ref =
   composeEffHandlers ioHandler (refStateHandler ref)
 
 comp1 :: forall eff .
-  (Monad eff, EnvEff Int eff)
+  (Effect eff, EnvEff Int eff)
   => eff Int
 comp1 = do
   val <- ask
   return $ val + 1
 
 comp2 :: forall eff .
-  (Monad eff)
+  (Effect eff)
   => ReaderT Int eff Int
-comp2 = handleReaderT EmptyEffRow comp1
+comp2 = handleReaderT EmptyRow comp1
 
 comp3 :: ReaderT Int Identity Int
 comp3 = comp2

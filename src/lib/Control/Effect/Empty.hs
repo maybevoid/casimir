@@ -3,12 +3,12 @@ module Control.Effect.Empty where
 
 import Control.Effect.Class
 
-data EmptyEffRow (eff :: * -> *) = EmptyEffRow
+data EmptyRow (eff :: * -> *) = EmptyRow
 
-instance EffFunctor EmptyEffRow where
-  effmap _ _ = EmptyEffRow
+instance EffFunctor EmptyRow where
+  effmap _ _ = EmptyRow
 
-instance EffRow EmptyEffRow where
-  type EffConstraint EmptyEffRow eff = ()
+instance EffRow EmptyRow where
+  type EffConstraint EmptyRow eff = ()
 
   bindConstraint _ = id
