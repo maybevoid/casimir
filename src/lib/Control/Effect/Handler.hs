@@ -6,6 +6,8 @@ import Control.Effect.Ops.NoOp
 import Control.Effect.Union
 import Control.Effect.Computation
 
+type BaseHandler handler eff = Handler NoOp handler eff eff
+
 mkHandler
   :: forall ops handler outerEff innerEff .
   ( EffOps ops
@@ -54,7 +56,7 @@ baseHandler
   :: forall handler eff .
   (EffOps handler, Effect eff)
   => handler eff
-  -> Handler NoOp handler eff eff
+  -> BaseHandler handler eff
 baseHandler handler = Handler idLift $
   Computation $ \lifter -> effmap lifter handler
 
@@ -105,3 +107,22 @@ composeHandlers
             handler2' :: handler2 eff0
             handler2' = bindConstraint handler1' $
               runComp handler2 $ joinLift lift21 lift10
+
+withHandler
+  :: forall ops handler eff1 eff2 r .
+  ( EffOps ops
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  , EffConstraint ops eff1
+  )
+  => Handler ops handler eff1 eff2
+  -> Computation (Union ops handler) r eff2
+  -> r eff1
+withHandler (Handler lift21 handler1) comp1 = comp2
+    where
+      handler2 :: handler eff1
+      handler2 = runComp handler1 idLift
+
+      comp2 :: (EffConstraint ops eff1) => r eff1
+      comp2 = bindConstraint handler2 $ runComp comp1 lift21

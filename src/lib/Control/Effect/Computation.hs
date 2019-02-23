@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Control.Effect.Computation where
 
@@ -5,19 +6,44 @@ import Control.Effect.Class
 import Control.Effect.Union
 import Control.Effect.Ops.NoOp
 
-data Pure a (eff :: * -> *) = Pure a
+newtype Return a (eff :: * -> *) = Return {
+  returnVal :: a
+}
 
-pureComputation :: forall a eff .
-  (Effect eff)
-  => a
-  -> Computation NoOp (Pure a) eff
-pureComputation x = Computation comp
+newtype EffVal a eff = EffVal {
+  effVal :: eff a
+}
+
+type PureValue a =
+  forall eff . Computation NoOp (Return a) eff
+
+type EffectfulValue ops a =
+  forall eff . Computation ops (EffVal a) eff
+
+pureValue
+  :: forall a .
+  a
+  -> PureValue a
+pureValue x = Computation comp
   where
-    comp :: forall eff' .
-      (Effect eff')
-      => LiftEff eff eff'
-      -> Pure a eff'
-    comp _ = Pure x
+    comp :: forall eff1 eff2 .
+      (Effect eff1, Effect eff2)
+      => LiftEff eff1 eff2
+      -> Return a eff2
+    comp _ = Return x
+
+effectfulValue
+  :: forall ops a.
+  (EffOps ops)
+  => (forall eff . (Effect eff, EffConstraint ops eff) => eff a)
+  -> EffectfulValue ops a
+effectfulValue comp1 = Computation comp2
+  where
+    comp2 :: forall eff1 eff2 .
+      (Effect eff1, Effect eff2, EffConstraint ops eff2)
+      => LiftEff eff1 eff2
+      -> EffVal a eff2
+    comp2 _ = EffVal comp1
 
 liftComputation :: forall ops comp eff1 eff2 .
   (EffOps ops, Effect eff1, Effect eff2)

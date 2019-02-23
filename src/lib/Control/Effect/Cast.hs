@@ -7,16 +7,16 @@ import Control.Effect.Class
 
 data Cast p = p => Cast
 
-data Caster ops1 ops2 = Caster
+data CastOps ops1 ops2 = CastOps
   (forall eff . EffConstraint ops1 eff => Cast (EffConstraint ops2 eff))
 
 runCast
   :: forall eff ops1 ops2 r .
   ( EffConstraint ops1 eff )
-  => Caster ops1 ops2
+  => CastOps ops1 ops2
   -> (EffConstraint ops2 eff => r)
   -> r
-runCast (Caster cast) res =
+runCast (CastOps cast) res =
   case cast @eff of
     Cast -> res
 
@@ -26,7 +26,7 @@ castComputation
   , EffOps ops2
   , Effect eff
   )
-  => Caster ops2 ops1
+  => CastOps ops2 ops1
   -> Computation ops1 comp eff
   -> Computation ops2 comp eff
 castComputation cast comp1 = Computation comp2
@@ -44,7 +44,7 @@ castHandler
   , Effect eff1
   , Effect eff2
   )
-  => Caster ops2 ops1
+  => CastOps ops2 ops1
   -> Handler ops1 handler eff1 eff2
   -> Handler ops2 handler eff1 eff2
 castHandler cast (Handler lifter handler) =
@@ -61,7 +61,7 @@ swapOps
   )
   => Computation (Union ops1 ops2) comp eff
   -> Computation (Union ops2 ops1) comp eff
-swapOps = castComputation $ Caster Cast
+swapOps = castComputation $ CastOps Cast
 
 weakenComputation
   :: forall ops1 ops2 comp eff .
@@ -71,4 +71,4 @@ weakenComputation
   )
   => Computation ops1 comp eff
   -> Computation (Union ops2 ops1) comp eff
-weakenComputation = castComputation $ Caster Cast
+weakenComputation = castComputation $ CastOps Cast
