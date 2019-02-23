@@ -8,7 +8,6 @@ import Control.Effect.Cast
 import Control.Effect.Class
 import Control.Effect.Union
 import Control.Effect.Handler
-import Control.Effect.Computation
 
 import Control.Effect.Ops.IO
 import Control.Effect.Ops.Env
@@ -27,21 +26,15 @@ mkEnvHandler
   -> BaseHandler (EnvOps a) eff
 mkEnvHandler = baseHandler . mkEnvOps
 
-comp1 :: forall eff .
+readerComp1 :: forall eff .
   (Effect eff, EnvEff Int eff)
   => eff Int
-comp1 = do
+readerComp1 = do
   val <- ask
   return $ val + 1
 
-comp2 :: forall eff . (Effect eff) => EffectfulValue (EnvOps Int) Int eff
-comp2 = effectfulValue comp1
-
-comp3 :: forall eff . (Effect eff) => Return Int eff
-comp3 = withHandler (mkEnvHandler 3) comp2 (CastOps Cast)
-
-comp4 :: Int
-comp4 = extractReturn comp3
+readerComp2 :: Identity Int
+readerComp2 = withHandler (mkEnvHandler 3) readerComp1
 
 refStateOps
   :: forall a eff .
@@ -76,3 +69,18 @@ ioAndStateHandler ref = castHandler handler $ CastOps Cast
       (refStateHandler ref)
       (CastOps Cast)
       (CastOps Cast)
+
+stateIoComp1
+  :: forall eff .
+  (Effect eff, EffConstraint IoOps eff)
+  => eff Int
+stateIoComp1 = do
+  ref <- liftIO $ newIORef 3
+  withHandler (refStateHandler ref) $ do
+    state <- get
+    put $ state + 1
+  finalVal <- liftIO $ readIORef ref
+  return finalVal
+
+stateIoComp4 :: IO Int
+stateIoComp4 = withHandler ioHandler stateIoComp1

@@ -1,8 +1,20 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
-module Control.Effect.Class where
+module Control.Effect.Class
+  ( module Control.Monad.Identity
+  , Effect
+  , LiftEff (..)
+  , Computation (..)
+  , Handler (..)
+  , EffFunctor (..)
+  , EffOps (..)
+  , idLift
+  , joinLift
+  )
+where
 
 import GHC.Exts
+import Control.Monad.Identity (Identity (..), runIdentity)
 
 type Effect eff = Monad eff
 
@@ -36,11 +48,11 @@ class EffFunctor f => EffOps (f :: (* -> *) -> *) where
     -> (EffConstraint f eff => r)
     -> r
 
+idLift :: forall eff . LiftEff eff eff
+idLift = LiftEff id
+
 joinLift :: forall eff1 eff2 eff3 .
   LiftEff eff1 eff2
   -> LiftEff eff2 eff3
   -> LiftEff eff1 eff3
 joinLift lift12 lift23 = LiftEff $ (liftEff lift23) . (liftEff lift12)
-
-idLift :: forall eff . LiftEff eff eff
-idLift = LiftEff id

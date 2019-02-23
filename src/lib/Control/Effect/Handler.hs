@@ -77,6 +77,24 @@ genericHandler handler = Handler idLift $ Computation comp1
       -> ((EffConstraint ops eff2) => handler eff2)
     comp1 _ = handler
 
+withHandler
+  :: forall ops handler eff1 eff2 r .
+  ( EffOps ops
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  , EffConstraint ops eff1
+  )
+  => Handler ops handler eff1 eff2
+  -> (EffConstraint handler eff1 => r)
+  -> r
+withHandler (Handler _ handler1) comp1 = comp2
+  where
+    comp2 = bindConstraint handler2 comp1
+
+    handler2 :: handler eff1
+    handler2 = runComp handler1 idLift
+
 composeExactHandlers
   :: forall ops1 ops2 handler1 handler2 eff1 eff2 eff3 .
   ( EffOps ops1
@@ -137,7 +155,7 @@ composeHandlers handler1 handler2 cast1 cast2 =
       handler2' :: Handler (Union handler1 ops4) handler2 eff2 eff3
       handler2' = castHandler handler2 cast1
 
-withExactHandler
+applyExactHandler
   :: forall ops handler eff1 eff2 r .
   ( EffOps ops
   , EffOps handler
@@ -148,15 +166,15 @@ withExactHandler
   => Handler ops handler eff1 eff2
   -> Computation (Union ops handler) r eff2
   -> r eff1
-withExactHandler (Handler lift21 handler1) comp1 = comp2
+applyExactHandler (Handler lift21 handler1) comp1 = comp2
   where
+    comp2 :: r eff1
+    comp2 = bindConstraint handler2 $ runComp comp1 lift21
+
     handler2 :: handler eff1
     handler2 = runComp handler1 idLift
 
-    comp2 :: (EffConstraint ops eff1) => r eff1
-    comp2 = bindConstraint handler2 $ runComp comp1 lift21
-
-withHandler
+applyHandler
   :: forall ops1 ops2 handler eff1 eff2 r .
   ( EffOps ops1
   , EffOps ops2
@@ -169,5 +187,5 @@ withHandler
   -> Computation ops2 r eff2
   -> CastOps (Union ops1 handler) ops2
   -> r eff1
-withHandler handler comp cast =
-  withExactHandler handler $ castComputation comp cast
+applyHandler handler comp cast =
+  applyExactHandler handler $ castComputation comp cast

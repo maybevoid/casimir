@@ -2,10 +2,7 @@
 
 module Control.Effect.Computation where
 
-import Control.Monad.Identity
-
 import Control.Effect.Class
-import Control.Effect.Union
 import Control.Effect.Ops.NoOp
 
 newtype Pure a (eff :: * -> *) = Pure {
