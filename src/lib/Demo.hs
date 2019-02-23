@@ -4,12 +4,7 @@ module Demo where
 
 import Data.IORef
 
-import Control.Monad.Identity
-import Control.Monad.Reader (ReaderT (..))
-import qualified Control.Monad.Reader as MR
-import Control.Monad.Trans.Class (MonadTrans (..))
-
-import Control.Effect.Util
+import Control.Effect.Cast
 import Control.Effect.Class
 import Control.Effect.Union
 import Control.Effect.Handler
@@ -32,7 +27,24 @@ mkEnvHandler
   -> BaseHandler (EnvOps a) eff
 mkEnvHandler = baseHandler . mkEnvOps
 
-refStateOps :: forall a eff .
+comp1 :: forall eff .
+  (Effect eff, EnvEff Int eff)
+  => eff Int
+comp1 = do
+  val <- ask
+  return $ val + 1
+
+comp2 :: forall eff . (Effect eff) => EffectfulValue (EnvOps Int) Int eff
+comp2 = effectfulValue comp1
+
+comp3 :: forall eff . (Effect eff) => Return Int eff
+comp3 = withHandler (mkEnvHandler 3) comp2 (CastOps Cast)
+
+comp4 :: Int
+comp4 = extractReturn comp3
+
+refStateOps
+  :: forall a eff .
   (IoEff eff)
   => IORef a
   -> StateOps a eff
@@ -41,64 +53,26 @@ refStateOps ref = StateOps {
   putOp = liftIO . (writeIORef ref)
 }
 
-comp1 :: forall eff .
-  (Effect eff, EnvEff Int eff)
-  => eff Int
-comp1 = do
-  val <- ask
-  return $ val + 1
+refStateHandler :: forall a . IORef a -> GenericHandler IoOps (StateOps a)
+refStateHandler ioRef = genericHandler $ refStateOps ioRef
 
-comp2 :: EffectfulValue (EnvOps Int) Int
-comp2 = effectfulValue comp1
+ioOps :: IoOps IO
+ioOps = IoOps {
+  liftIoOp = id
+}
 
--- comp2 :: forall eff .
---   (Effect eff)
---   => ReaderT Int eff Int
--- comp2 = handleReaderT NoOp comp1
+ioHandler :: BaseHandler IoOps IO
+ioHandler = baseHandler ioOps
 
--- readerTHandler :: forall a eff . (Effect eff) => EnvOps a (ReaderT a eff)
--- readerTHandler = EnvOps {
---   askOp = MR.ask
--- }
-
--- handleReaderT
---   :: forall r a eff effRow .
---   (Effect eff, EffOps effRow)
---   => (forall eff' . effRow eff')
---   -> (( EffConstraint effRow (ReaderT a eff)
---       , EnvEff a (ReaderT a eff)
---       )
---       => ReaderT a eff r)
---   -> ReaderT a eff r
--- handleReaderT effRow comp =
---   bindConstraint effRow' comp
---     where
---       effRow' :: Union (EnvOps a) effRow (ReaderT a eff)
---       effRow' = stackEffHandlers readerTHandler effRow $ LiftEff lift
-
--- refStateHandler :: forall a eff .
---   (IoEff eff)
---   => IORef a
---   -> StateOps a eff
--- refStateHandler ref = StateOps {
---   getOp = liftIO $ readIORef ref,
---   putOp = liftIO . (writeIORef ref)
--- }
-
--- ioHandler :: IoOps IO
--- ioHandler = IoOps {
---   liftIoOp = id
--- }
-
--- ioAndStateHandler
---   :: forall a .
---   IORef a
---   -> Union IoOps (StateOps a) IO
--- ioAndStateHandler ref =
---   composeEffHandlers ioHandler (refStateHandler ref)
-
--- comp3 :: ReaderT Int Identity Int
--- comp3 = comp2
-
--- comp4 :: Identity Int
--- comp4 = bindConstraint (mkEnvHandler 3) comp1
+ioAndStateHandler
+  :: forall a .
+  IORef a
+  -> BaseHandler (Union IoOps (StateOps a)) IO
+ioAndStateHandler ref = castHandler handler $ CastOps Cast
+  where
+    handler = composeHandlers
+      @_ @_ @NoOp @NoOp
+      ioHandler
+      (refStateHandler ref)
+      (CastOps Cast)
+      (CastOps Cast)

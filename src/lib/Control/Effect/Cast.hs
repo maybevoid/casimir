@@ -26,10 +26,10 @@ castComputation
   , EffOps ops2
   , Effect eff
   )
-  => CastOps ops2 ops1
-  -> Computation ops1 comp eff
+  => Computation ops1 comp eff
+  -> CastOps ops2 ops1
   -> Computation ops2 comp eff
-castComputation cast comp1 = Computation comp2
+castComputation comp1 cast = Computation comp2
   where
     comp2 :: forall eff' .
       (Effect eff')
@@ -44,14 +44,14 @@ castHandler
   , Effect eff1
   , Effect eff2
   )
-  => CastOps ops2 ops1
-  -> Handler ops1 handler eff1 eff2
+  => Handler ops1 handler eff1 eff2
+  -> CastOps ops2 ops1
   -> Handler ops2 handler eff1 eff2
-castHandler cast (Handler lifter handler) =
+castHandler (Handler lifter handler) cast =
   Handler lifter handler2
     where
       handler2 :: Computation ops2 handler eff1
-      handler2 = castComputation cast handler
+      handler2 = castComputation handler cast
 
 swapOps
   :: forall ops1 ops2 comp eff .
@@ -61,7 +61,7 @@ swapOps
   )
   => Computation (Union ops1 ops2) comp eff
   -> Computation (Union ops2 ops1) comp eff
-swapOps = castComputation $ CastOps Cast
+swapOps comp = castComputation comp $ CastOps Cast
 
 weakenComputation
   :: forall ops1 ops2 comp eff .
@@ -71,4 +71,4 @@ weakenComputation
   )
   => Computation ops1 comp eff
   -> Computation (Union ops2 ops1) comp eff
-weakenComputation = castComputation $ CastOps Cast
+weakenComputation comp = castComputation comp $ CastOps Cast
