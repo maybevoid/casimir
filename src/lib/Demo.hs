@@ -12,14 +12,11 @@ import Control.Monad.Trans.Class (MonadTrans (..))
 import Control.Effect.Util
 import Control.Effect.Class
 import Control.Effect.Union
-import Control.Effect.Handler
 
 import Control.Effect.Ops.IO
 import Control.Effect.Ops.Env
 import Control.Effect.Ops.NoOp
 import Control.Effect.Ops.State
-
--- readerTHandler :: forall a eff . Computation NoOp
 
 readerTHandler :: forall a eff . (Effect eff) => EnvOps a (ReaderT a eff)
 readerTHandler = EnvOps {
