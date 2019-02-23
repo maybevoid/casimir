@@ -10,14 +10,15 @@ data LiftEff eff1 eff2 = LiftEff {
   liftEff :: forall a. eff1 a -> eff2 a
 }
 
-joinLift :: forall eff1 eff2 eff3 .
-  LiftEff eff1 eff2
-  -> LiftEff eff2 eff3
-  -> LiftEff eff1 eff3
-joinLift lift12 lift23 = LiftEff $ (liftEff lift23) . (liftEff lift12)
+data Computation ops comp eff = Computation {
+  runComp :: forall eff' .
+    (EffOps ops, Effect eff, Effect eff')
+    => LiftEff eff eff'
+    -> ((EffConstraint ops eff') => comp eff')
+}
 
-idLift :: forall eff . LiftEff eff eff
-idLift = LiftEff id
+data Handler ops handler outerEff innerEff =
+  Handler (LiftEff innerEff outerEff) (Computation ops handler outerEff)
 
 class EffFunctor (f :: (* -> *) -> *) where
   effmap :: forall eff1 eff2 .
@@ -26,7 +27,7 @@ class EffFunctor (f :: (* -> *) -> *) where
     -> f eff1
     -> f eff2
 
-class EffFunctor f => EffRow (f :: (* -> *) -> *) where
+class EffFunctor f => EffOps (f :: (* -> *) -> *) where
   type family EffConstraint f (eff :: * -> *) :: Constraint
 
   bindConstraint :: forall eff r .
@@ -35,9 +36,11 @@ class EffFunctor f => EffRow (f :: (* -> *) -> *) where
     -> (EffConstraint f eff => r)
     -> r
 
-data Computation row comp eff = Computation {
-  runComp :: forall eff' .
-    (EffRow row, Effect eff, Effect eff')
-    => LiftEff eff eff'
-    -> ((EffConstraint row eff') => comp eff')
-}
+joinLift :: forall eff1 eff2 eff3 .
+  LiftEff eff1 eff2
+  -> LiftEff eff2 eff3
+  -> LiftEff eff1 eff3
+joinLift lift12 lift23 = LiftEff $ (liftEff lift23) . (liftEff lift12)
+
+idLift :: forall eff . LiftEff eff eff
+idLift = LiftEff id

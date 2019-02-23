@@ -14,7 +14,7 @@ instance EffFunctor (EnvOps a) where
     askOp = liftEff f $ askOp envOps
   }
 
-instance EffRow (EnvOps a) where
+instance EffOps (EnvOps a) where
   type EffConstraint (EnvOps a) eff = (EnvEff a eff)
 
   bindConstraint envOps comp = let ?envOps = envOps in comp

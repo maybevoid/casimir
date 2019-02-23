@@ -7,8 +7,8 @@ import Control.Effect.Union
 composeEffHandlers
   :: forall eff effRow1 effRow2 .
     ( Effect eff
-    , EffRow effRow1
-    , EffRow effRow2
+    , EffOps effRow1
+    , EffOps effRow2
     )
   => effRow1 eff
   -> (EffConstraint effRow1 eff => effRow2 eff)
@@ -25,8 +25,8 @@ stackEffHandlers
       effRow2 .
     ( Effect eff1
     , Effect eff2
-    , EffRow effRow1
-    , EffRow effRow2
+    , EffOps effRow1
+    , EffOps effRow2
     )
   => effRow1 eff1
   -> (forall eff . effRow2 eff)

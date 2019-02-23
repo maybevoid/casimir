@@ -11,11 +11,15 @@ import Control.Monad.Trans.Class (MonadTrans (..))
 
 import Control.Effect.Util
 import Control.Effect.Class
-import Control.Effect.Empty
 import Control.Effect.Union
+import Control.Effect.Handler
+
 import Control.Effect.Ops.IO
 import Control.Effect.Ops.Env
+import Control.Effect.Ops.NoOp
 import Control.Effect.Ops.State
+
+-- readerTHandler :: forall a eff . Computation NoOp
 
 readerTHandler :: forall a eff . (Effect eff) => EnvOps a (ReaderT a eff)
 readerTHandler = EnvOps {
@@ -24,7 +28,7 @@ readerTHandler = EnvOps {
 
 handleReaderT
   :: forall r a eff effRow .
-  (Effect eff, EffRow effRow)
+  (Effect eff, EffOps effRow)
   => (forall eff' . effRow eff')
   -> (( EffConstraint effRow (ReaderT a eff)
       , EnvEff a (ReaderT a eff)
@@ -73,7 +77,7 @@ comp1 = do
 comp2 :: forall eff .
   (Effect eff)
   => ReaderT Int eff Int
-comp2 = handleReaderT EmptyRow comp1
+comp2 = handleReaderT NoOp comp1
 
 comp3 :: ReaderT Int Identity Int
 comp3 = comp2

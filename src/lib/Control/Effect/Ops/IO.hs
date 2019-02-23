@@ -14,7 +14,7 @@ instance EffFunctor IoOps where
     liftIoOp = liftEff f . liftIoOp ioOps
   }
 
-instance EffRow IoOps where
+instance EffOps IoOps where
   type EffConstraint IoOps eff = (IoEff eff)
 
   bindConstraint ioOps comp = let ?ioOps = ioOps in comp

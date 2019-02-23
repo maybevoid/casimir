@@ -16,7 +16,7 @@ instance EffFunctor (StateOps a) where
     putOp = liftEff f . putOp stateOps
   }
 
-instance EffRow (StateOps a) where
+instance EffOps (StateOps a) where
   type EffConstraint (StateOps a) eff = StateEff a eff
 
   bindConstraint stateOps comp = let ?stateOps = stateOps in comp
