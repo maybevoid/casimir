@@ -17,7 +17,6 @@ where
 import GHC.Exts
 import Control.Natural
 import Control.Monad.Free (Free)
-import Control.Monad.Identity (Identity (..), runIdentity)
 
 type Effect eff = Monad eff
 

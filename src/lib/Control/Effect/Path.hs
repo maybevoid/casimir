@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -165,3 +166,19 @@ instance {-# OVERLAPPABLE #-}
         handler2
         castOps
         castOps
+
+applyHandler
+  :: forall ops1 ops2 handler eff1 eff2 r .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  , EffConstraint ops1 eff1
+  , OpsPath (Union ops1 handler) ops2
+  )
+  => Handler ops1 handler eff1 eff2
+  -> Computation ops2 r eff2
+  -> r eff1
+applyHandler handler comp =
+  applyHandlerWithCast handler comp castOps

@@ -7,15 +7,7 @@ import Data.IORef
 import Control.Monad.Free
 import Control.Monad.Identity
 
-import Control.Effect.Path
-import Control.Effect.Class
-import Control.Effect.Union
-import Control.Effect.Handler
-
-import Control.Effect.Ops.IO
-import Control.Effect.Ops.Env
-import Control.Effect.Ops.NoOp
-import Control.Effect.Ops.State
+import Control.Effect
 
 mkEnvOps :: forall a eff . (Effect eff) => a -> EnvOps a eff
 mkEnvOps x = EnvOps {

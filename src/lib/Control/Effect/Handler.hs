@@ -9,9 +9,11 @@ import Control.Effect.Union
 import Control.Effect.Ops.NoOp
 import Control.Effect.Computation
 
-type BaseHandler handler eff = Handler NoOp handler eff eff
+type FlatHandler ops handler eff = Handler ops handler eff eff
 
-type GenericHandler ops handler = forall eff . Handler ops handler eff eff
+type BaseHandler handler eff = FlatHandler NoOp handler eff
+
+type GenericHandler ops handler = forall eff . FlatHandler ops handler eff
 
 type FreeHandler handler = BaseHandler handler (Free (FreeModel handler))
 
@@ -86,6 +88,17 @@ freeHandler
   (EffOps handler)
   => FreeHandler handler
 freeHandler = baseHandler $ freeModel id
+
+flattenHandler
+  :: forall ops handler eff1 eff2 .
+  ( EffOps ops
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  )
+  => Handler ops handler eff1 eff2
+  -> FlatHandler ops handler eff1
+flattenHandler (Handler _ handler) = Handler idLift handler
 
 withHandler
   :: forall ops handler eff1 eff2 r .
@@ -184,7 +197,7 @@ applyExactHandler (Handler lift21 handler1) comp1 = comp2
     handler2 :: handler eff1
     handler2 = runComp handler1 idLift
 
-applyHandler
+applyHandlerWithCast
   :: forall ops1 ops2 handler eff1 eff2 r .
   ( EffOps ops1
   , EffOps ops2
@@ -197,5 +210,5 @@ applyHandler
   -> Computation ops2 r eff2
   -> CastOps (Union ops1 handler) ops2
   -> r eff1
-applyHandler handler comp cast =
+applyHandlerWithCast handler comp cast =
   applyExactHandler handler $ castComputation comp cast
