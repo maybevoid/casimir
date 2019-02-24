@@ -1,6 +1,8 @@
 
 module Control.Effect.Handler where
 
+import Control.Monad.Free
+
 import Control.Effect.Cast
 import Control.Effect.Class
 import Control.Effect.Union
@@ -10,6 +12,8 @@ import Control.Effect.Computation
 type BaseHandler handler eff = Handler NoOp handler eff eff
 
 type GenericHandler ops handler = forall eff . Handler ops handler eff eff
+
+type FreeHandler handler = BaseHandler handler (Free (FreeModel handler))
 
 mkHandler
   :: forall ops handler outerEff innerEff .
@@ -64,7 +68,7 @@ baseHandler handler = Handler idLift $
   Computation $ \lifter -> effmap lifter handler
 
 genericHandler
-  :: forall ops handler.
+  :: forall ops handler .
   (EffOps ops, EffOps handler)
   => (forall eff . (Effect eff, EffConstraint ops eff) => handler eff)
   -> GenericHandler ops handler
@@ -76,6 +80,12 @@ genericHandler handler = Handler idLift $ Computation comp1
       => LiftEff eff1 eff2
       -> ((EffConstraint ops eff2) => handler eff2)
     comp1 _ = handler
+
+freeHandler
+  :: forall handler .
+  (EffOps handler)
+  => FreeHandler handler
+freeHandler = baseHandler $ freeModel id
 
 withHandler
   :: forall ops handler eff1 eff2 r .

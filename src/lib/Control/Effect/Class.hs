@@ -1,11 +1,12 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Control.Effect.Class
-  ( module Control.Monad.Identity
-  , Effect
+  ( Effect
   , LiftEff (..)
   , Computation (..)
   , Handler (..)
+  , FreeEff (..)
   , EffFunctor (..)
   , EffOps (..)
   , idLift
@@ -14,6 +15,8 @@ module Control.Effect.Class
 where
 
 import GHC.Exts
+import Control.Natural
+import Control.Monad.Free (Free)
 import Control.Monad.Identity (Identity (..), runIdentity)
 
 type Effect eff = Monad eff
@@ -39,14 +42,28 @@ class EffFunctor (f :: (* -> *) -> *) where
     -> f eff1
     -> f eff2
 
-class EffFunctor f => EffOps (f :: (* -> *) -> *) where
-  type family EffConstraint f (eff :: * -> *) :: Constraint
+class FreeEff f where
+  type family FreeModel f :: (* -> *)
 
-  bindConstraint :: forall eff r .
-    (Effect eff)
-    => f eff
-    -> (EffConstraint f eff => r)
-    -> r
+  freeModel
+    :: forall g .
+    (Functor g)
+    => (FreeModel f ~> g)
+    -> f (Free g)
+
+class
+  ( EffFunctor f
+  , FreeEff f
+  , Functor (FreeModel f)
+  )
+  => EffOps (f :: (* -> *) -> *) where
+    type family EffConstraint f (eff :: * -> *) :: Constraint
+
+    bindConstraint :: forall eff r .
+      (Effect eff)
+      => f eff
+      -> (EffConstraint f eff => r)
+      -> r
 
 idLift :: forall eff . LiftEff eff eff
 idLift = LiftEff id

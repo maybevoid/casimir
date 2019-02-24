@@ -16,6 +16,7 @@ dependencies:
   - stm
   - free
   - transformers
+  - natural-transformation
 
 default-extensions:
   - GADTs
@@ -24,13 +25,16 @@ default-extensions:
   - RankNTypes
   - TypeFamilies
   - InstanceSigs
+  - TypeOperators
   - ImplicitParams
   - ExplicitForAll
   - KindSignatures
   - ConstraintKinds
   - TypeApplications
+  - DerivingStrategies
   - ScopedTypeVariables
   - MultiParamTypeClasses
+  - GeneralizedNewtypeDeriving
 
 library:
   source-dirs:  src/lib

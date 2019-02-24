@@ -2,6 +2,8 @@
 
 module Control.Effect.Computation where
 
+import Control.Monad.Identity
+
 import Control.Effect.Class
 import Control.Effect.Ops.NoOp
 

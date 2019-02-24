@@ -4,6 +4,9 @@ module Demo where
 
 import Data.IORef
 
+import Control.Monad.Free
+import Control.Monad.Identity
+
 import Control.Effect.Cast
 import Control.Effect.Class
 import Control.Effect.Union
@@ -35,6 +38,12 @@ readerComp1 = do
 
 readerComp2 :: Identity Int
 readerComp2 = withHandler (mkEnvHandler 3) readerComp1
+
+readerHandler :: FreeHandler (EnvOps Int)
+readerHandler = freeHandler
+
+readerComp3 :: Free (EnvModel Int) Int
+readerComp3 = withHandler readerHandler readerComp1
 
 refStateOps
   :: forall a eff .
@@ -82,5 +91,5 @@ stateIoComp1 = do
   finalVal <- liftIO $ readIORef ref
   return finalVal
 
-stateIoComp4 :: IO Int
-stateIoComp4 = withHandler ioHandler stateIoComp1
+stateIoComp2 :: IO Int
+stateIoComp2 = withHandler ioHandler stateIoComp1
