@@ -7,7 +7,7 @@ import Data.IORef
 import Control.Monad.Free
 import Control.Monad.Identity
 
-import Control.Effect.Cast
+import Control.Effect.Path
 import Control.Effect.Class
 import Control.Effect.Union
 import Control.Effect.Handler
@@ -70,14 +70,12 @@ ioAndStateHandler
   :: forall a .
   IORef a
   -> BaseHandler (Union IoOps (StateOps a)) IO
-ioAndStateHandler ref = castHandler handler $ CastOps Cast
+ioAndStateHandler ref = handler
   where
     handler = composeHandlers
-      @_ @_ @NoOp @NoOp
+      @NoOp @IoOps @NoOp @IoOps
       ioHandler
       (refStateHandler ref)
-      (CastOps Cast)
-      (CastOps Cast)
 
 stateIoComp1
   :: forall eff .

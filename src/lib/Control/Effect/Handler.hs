@@ -139,7 +139,7 @@ composeExactHandlers
             handler2' = bindConstraint handler1' $
               runComp handler2 $ joinLift lift21 lift10
 
-composeHandlers
+composeHandlersWithCast
   :: forall ops1 ops2 ops3 ops4 handler1 handler2 eff1 eff2 eff3 .
   ( EffOps ops1
   , EffOps ops2
@@ -156,7 +156,7 @@ composeHandlers
   -> CastOps (Union handler1 ops4) ops2
   -> CastOps ops3 (Union ops1 ops4)
   -> Handler ops3 (Union handler1 handler2) eff1 eff3
-composeHandlers handler1 handler2 cast1 cast2 =
+composeHandlersWithCast handler1 handler2 cast1 cast2 =
   castHandler handler3 cast2
     where
       handler3 :: Handler (Union ops1 ops4) (Union handler1 handler2) eff1 eff3
