@@ -1,9 +1,22 @@
 
-module Control.Effect.Ops.Env where
+module Control.Effect.Ops.Env
+  ( EnvOps (..)
+  , EnvModel (..)
+  , EnvEff
+  , ask
+  , freeEnvOps
+  )
+where
 
-import Control.Natural
-import Control.Monad.Free
+import Control.Natural (type (~>))
+import Control.Monad.Free (Free, liftF)
+
 import Control.Effect.Class
+  ( EffFunctor (..)
+  , FreeEff (..)
+  , EffOps (..)
+  , liftEff
+  )
 
 data EnvOps a eff = EnvOps {
   askOp :: eff a

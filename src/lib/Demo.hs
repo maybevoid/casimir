@@ -21,15 +21,18 @@ mkEnvHandler
   -> BaseHandler (EnvOps a) eff
 mkEnvHandler = baseHandler . mkEnvOps
 
+envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvOps Int) eff
+envHandler1 = mkEnvHandler 3
+
 readerComp1 :: forall eff .
-  (Effect eff, EnvEff Int eff)
+  (Effect eff, EffConstraint (EnvOps Int) eff)
   => eff Int
 readerComp1 = do
   val <- ask
   return $ val + 1
 
 readerComp2 :: Identity Int
-readerComp2 = withHandler (mkEnvHandler 3) readerComp1
+readerComp2 = withHandler envHandler1 readerComp1
 
 readerHandler :: FreeHandler (EnvOps Int)
 readerHandler = freeHandler
@@ -37,14 +40,34 @@ readerHandler = freeHandler
 readerComp3 :: Free (EnvModel Int) Int
 readerComp3 = withHandler readerHandler readerComp1
 
+readerComp4 :: forall eff . EffectfulComputation (EnvOps Int) Int eff
+readerComp4 = effectfulComputation readerComp1
+
+readerComp5 :: IdentityComputation Int
+readerComp5 = bindHandler envHandler1 readerComp4
+
+readerComp6 :: Int
+readerComp6 = runIdentityComp readerComp5
+
+readerComp7 :: forall eff .
+  (Monad eff)
+  => EffectfulComputation
+    (Union NoOp (Union (EnvOps Int) NoOp))
+    Int
+    eff
+readerComp7 = castComputation readerComp4 $ CastOps Cast
+
+readerComp8 :: IdentityComputation Int
+readerComp8 = bindHandler envHandler1 readerComp7
+
 refStateOps
   :: forall a eff .
   (IoEff eff)
   => IORef a
   -> StateOps a eff
 refStateOps ref = StateOps {
-  getOp = liftIO $ readIORef ref,
-  putOp = liftIO . (writeIORef ref)
+  getOp = liftIo $ readIORef ref,
+  putOp = liftIo . (writeIORef ref)
 }
 
 refStateHandler :: forall a . IORef a -> GenericHandler IoOps (StateOps a)
@@ -74,11 +97,11 @@ stateIoComp1
   (Effect eff, EffConstraint IoOps eff)
   => eff Int
 stateIoComp1 = do
-  ref <- liftIO $ newIORef 3
+  ref <- liftIo $ newIORef 3
   withHandler (refStateHandler ref) $ do
     state <- get
     put $ state + 1
-  finalVal <- liftIO $ readIORef ref
+  finalVal <- liftIo $ readIORef ref
   return finalVal
 
 stateIoComp2 :: IO Int

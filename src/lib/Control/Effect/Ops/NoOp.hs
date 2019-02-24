@@ -1,7 +1,15 @@
 
-module Control.Effect.Ops.NoOp where
+module Control.Effect.Ops.NoOp
+  ( NoOp (..)
+  , NoModel (..)
+  )
+where
 
 import Control.Effect.Class
+  ( EffFunctor (..)
+  , FreeEff (..)
+  , EffOps (..)
+  )
 
 data NoOp (eff :: * -> *) = NoOp
 

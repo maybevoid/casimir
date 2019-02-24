@@ -1,13 +1,50 @@
 
-module Control.Effect.Handler where
+module Control.Effect.Handler
+  ( FlatHandler
+  , BaseHandler
+  , GenericHandler
+  , FreeHandler
+  , mkHandler
+  , outerLiftHandler
+  , innerLiftHandler
+  , baseHandler
+  , genericHandler
+  , freeHandler
+  , flattenHandler
+  , withHandler
+  , composeExactHandlers
+  , composeHandlersWithCast
+  , applyExactHandler
+  , applyHandlerWithCast
+  , bindExactHandler
+  , bindHandlerWithCast
+  )
+where
 
-import Control.Monad.Free
+import Control.Monad.Free (Free)
+
+import Control.Effect.Ops.NoOp (NoOp)
+import Control.Effect.Union (Union (..))
+import Control.Effect.Computation (liftComputation)
 
 import Control.Effect.Cast
+  ( CastOps (..)
+  , castHandler
+  , castComputation
+  )
+
 import Control.Effect.Class
-import Control.Effect.Union
-import Control.Effect.Ops.NoOp
-import Control.Effect.Computation
+  ( Effect
+  , EffOps (..)
+  , FreeEff (..)
+  , LiftEff (..)
+  , Handler (..)
+  , EffConstraint
+  , EffFunctor (..)
+  , Computation (..)
+  , idLift
+  , joinLift
+  )
 
 type FlatHandler ops handler eff = Handler ops handler eff eff
 
@@ -212,3 +249,37 @@ applyHandlerWithCast
   -> r eff1
 applyHandlerWithCast handler comp cast =
   applyExactHandler handler $ castComputation comp cast
+
+bindExactHandler
+  :: forall ops handler eff1 eff2 r .
+  ( EffOps ops
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  )
+  => Handler ops handler eff1 eff2
+  -> Computation (Union ops handler) r eff2
+  -> Computation ops r eff1
+bindExactHandler handler comp1 = Computation comp2
+  where
+    comp2
+      :: forall eff0 .
+      (Effect eff0)
+      => LiftEff eff1 eff0
+      -> (EffConstraint ops eff0 => r eff0)
+    comp2 lift10 = applyExactHandler (outerLiftHandler lift10 handler) comp1
+
+bindHandlerWithCast
+  :: forall ops1 ops2 handler eff1 eff2 r .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  )
+  => Handler ops1 handler eff1 eff2
+  -> Computation ops2 r eff2
+  -> CastOps (Union ops1 handler) ops2
+  -> Computation ops1 r eff1
+bindHandlerWithCast handler comp cast =
+  bindExactHandler handler $ castComputation comp cast

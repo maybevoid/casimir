@@ -14,9 +14,9 @@ module Control.Effect.Class
   )
 where
 
-import GHC.Exts
-import Control.Natural
+import GHC.Exts (Constraint)
 import Control.Monad.Free (Free)
+import Control.Natural (type (~>))
 
 type Effect eff = Monad eff
 

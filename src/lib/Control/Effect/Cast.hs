@@ -1,9 +1,26 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
-module Control.Effect.Cast where
+module Control.Effect.Cast
+  ( Cast (..)
+  , CastOps (..)
+  , runCast
+  , castComputation
+  , castHandler
+  , swapOps
+  , weakenComputation
+  )
+where
 
-import Control.Effect.Union
+import Control.Effect.Union (Union (..))
+
 import Control.Effect.Class
+  ( Effect
+  , EffOps
+  , LiftEff
+  , Handler (..)
+  , EffConstraint
+  , Computation (..)
+  )
 
 data Cast p = p => Cast
 

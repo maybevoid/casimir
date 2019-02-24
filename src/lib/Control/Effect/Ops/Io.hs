@@ -1,10 +1,22 @@
 
-module Control.Effect.Ops.IO where
+module Control.Effect.Ops.Io
+  ( IoOps (..)
+  , IoModel (..)
+  , IoEff
+  , liftIo
+  , freeIoOps
+  )
+where
 
-import Control.Natural
-import Control.Monad.Free
+import Control.Natural (type (~>))
+import Control.Monad.Free (Free, liftF)
 
 import Control.Effect.Class
+  ( EffFunctor (..)
+  , FreeEff (..)
+  , EffOps (..)
+  , liftEff
+  )
 
 data IoOps eff = IoOps {
   liftIoOp :: forall a . IO a -> eff a
@@ -32,10 +44,10 @@ instance EffOps IoOps where
 
   bindConstraint ioOps comp = let ?ioOps = ioOps in comp
 
-liftIO :: forall a eff .
+liftIo :: forall a eff .
   (IoEff eff)
   => IO a -> eff a
-liftIO = liftIoOp ?ioOps
+liftIo = liftIoOp ?ioOps
 
 freeIoOps
   :: forall f .

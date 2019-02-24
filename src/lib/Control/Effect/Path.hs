@@ -3,13 +3,31 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Control.Effect.Path where
+module Control.Effect.Path
+  ( OpsPath (..)
+  , Composable (..)
+  , applyHandler
+  , bindHandler
+  )
+where
 
-import Control.Effect.Cast
-import Control.Effect.Class
-import Control.Effect.Union
+import Control.Effect.Ops.NoOp (NoOp)
+import Control.Effect.Union (Union (..))
+import Control.Effect.Cast (CastOps (..), Cast (..))
+
 import Control.Effect.Handler
-import Control.Effect.Ops.NoOp
+  ( composeExactHandlers
+  , composeHandlersWithCast
+  , applyHandlerWithCast
+  , bindHandlerWithCast
+  )
+
+import Control.Effect.Class
+  ( Effect
+  , EffOps (..)
+  , Handler (..)
+  , Computation (..)
+  )
 
 class (EffOps ops1, EffOps ops2) => OpsPath ops1 ops2 where
   castOps :: CastOps ops1 ops2
@@ -182,3 +200,18 @@ applyHandler
   -> r eff1
 applyHandler handler comp =
   applyHandlerWithCast handler comp castOps
+
+bindHandler
+  :: forall ops1 ops2 handler eff1 eff2 r .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  , OpsPath (Union ops1 handler) ops2
+  )
+  => Handler ops1 handler eff1 eff2
+  -> Computation ops2 r eff2
+  -> Computation ops1 r eff1
+bindHandler handler comp =
+  bindHandlerWithCast handler comp castOps

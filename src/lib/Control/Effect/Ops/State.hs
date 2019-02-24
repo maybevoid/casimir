@@ -1,9 +1,23 @@
 
-module Control.Effect.Ops.State where
+module Control.Effect.Ops.State
+  ( StateOps (..)
+  , StateModel (..)
+  , StateEff
+  , get
+  , put
+  , freeStateOps
+  )
+where
 
-import Control.Natural
-import Control.Monad.Free
+import Control.Natural (type (~>))
+import Control.Monad.Free (Free, liftF)
+
 import Control.Effect.Class
+  ( EffFunctor (..)
+  , FreeEff (..)
+  , EffOps (..)
+  , liftEff
+  )
 
 data StateOps a eff = StateOps {
   getOp :: eff a,
