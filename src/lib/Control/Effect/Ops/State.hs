@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 
 module Control.Effect.Ops.State
   ( StateOps (..)

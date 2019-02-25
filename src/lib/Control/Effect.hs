@@ -4,7 +4,7 @@ module Control.Effect
   , module Control.Effect.Computation
   , module Control.Effect.Handler
   , module Control.Effect.Cast
-  , module Control.Effect.Path
+  , module Control.Effect.AutoCast
   , module Control.Effect.Ops
   , module Control.Effect.Transform
   )
@@ -15,6 +15,6 @@ import Control.Effect.Union
 import Control.Effect.Computation
 import Control.Effect.Handler
 import Control.Effect.Cast
-import Control.Effect.Path
+import Control.Effect.AutoCast
 import Control.Effect.Ops
 import Control.Effect.Transform

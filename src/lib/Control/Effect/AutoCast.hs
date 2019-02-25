@@ -3,17 +3,26 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Control.Effect.Path
-  ( OpsPath (..)
+module Control.Effect.AutoCast
+  ( AutoCast (..)
   , Composable (..)
   , applyHandler
   , bindHandler
   )
 where
 
-import Control.Effect.Ops.NoOp (NoOp)
 import Control.Effect.Union (Union (..))
-import Control.Effect.Cast (CastOps (..), Cast (..))
+import Control.Effect.Ops.NoOp (NoOp (..))
+
+import Control.Effect.Cast
+  ( CastOps (..)
+  , Cast (..)
+  , extendNoOpCast
+  , weakenLeftCast
+  , weakenRightCast
+  , distributeLeftCast
+  , distributeRightCast
+  )
 
 import Control.Effect.Handler
   ( composeExactHandlers
@@ -29,9 +38,8 @@ import Control.Effect.Class
   , Computation (..)
   )
 
-class (EffOps ops1, EffOps ops2) => OpsPath ops1 ops2 where
+class (EffOps ops1, EffOps ops2) => AutoCast ops1 ops2 where
   castOps :: CastOps ops1 ops2
-  castOpsRev :: CastOps ops2 ops1
 
 class
   (EffOps ops1, EffOps ops2, EffOps ops3, EffOps handler1)
@@ -47,38 +55,107 @@ class
     -> Handler ops2 handler2 eff2 eff3
     -> Handler ops3 (Union handler1 handler2) eff1 eff3
 
-instance (EffOps ops) => OpsPath ops ops where
+instance (EffOps ops) => AutoCast ops ops where
   castOps = CastOps Cast
-  castOpsRev = CastOps Cast
 
-instance {-# OVERLAPPABLE #-}
-  (EffOps ops1, EffOps ops2, OpsPath ops1 ops2)
-  => OpsPath ops2 ops1
-  where
-    castOps = castOpsRev
-    castOpsRev = castOps
-
-instance {-# OVERLAPPABLE #-}
-  (EffOps ops1, EffOps ops2, OpsPath ops1 ops2)
-  => OpsPath (Union NoOp ops1) ops2
+instance {-# INCOHERENT #-}
+  (EffOps ops1, EffOps ops2, AutoCast ops1 ops2)
+  => AutoCast (Union NoOp ops1) ops2
   where
     castOps = castOps
-    castOpsRev = castOpsRev
 
-instance (EffOps ops) => OpsPath (Union NoOp ops) ops where
-  castOps = CastOps Cast
-  castOpsRev = CastOps Cast
-
-instance (EffOps ops) => OpsPath (Union ops NoOp) ops where
-  castOps = CastOps Cast
-  castOpsRev = CastOps Cast
-
-instance
-  (EffOps ops1, EffOps ops2)
-  => OpsPath (Union ops1 ops2) (Union ops2 ops1)
+instance {-# INCOHERENT #-}
+  (EffOps ops)
+  => AutoCast (Union NoOp ops) ops
   where
     castOps = CastOps Cast
-    castOpsRev = CastOps Cast
+
+instance {-# INCOHERENT #-}
+  (EffOps ops)
+  => AutoCast (Union ops NoOp) ops
+  where
+    castOps = CastOps Cast
+
+instance {-# INCOHERENT #-}
+  (EffOps ops)
+  => AutoCast ops (Union NoOp ops)
+  where
+    castOps = CastOps Cast
+
+instance {-# INCOHERENT #-}
+  (EffOps ops)
+  => AutoCast ops (Union ops NoOp)
+  where
+    castOps = CastOps Cast
+
+-- identity right
+-- (ops1 :> ops2) :- (ops1 :> ((), ops2))
+instance {-# INCOHERENT #-}
+  ( EffOps ops1
+  , EffOps ops2
+  , AutoCast ops1 ops2
+  )
+  => AutoCast ops1 (Union NoOp ops2) where
+  castOps = extendNoOpCast castOps
+
+-- weaken left cast
+-- (ops1 :> ops2) :- ((ops1, ops3) :> ops2)
+instance {-# INCOHERENT #-}
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , AutoCast ops1 ops2
+  )
+  => AutoCast (Union ops1 ops3) ops2 where
+  castOps = weakenLeftCast castOps
+
+-- weaken right cast
+-- (ops1 :> (ops2, ops3)) :- (ops1 :> ops2)
+instance {-# INCOHERENT #-}
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , AutoCast ops1 (Union ops2 ops3)
+  )
+  => AutoCast ops1 ops2 where
+  castOps = weakenRightCast @ops1 @ops2 @ops3 castOps
+
+instance {-# INCOHERENT #-}
+  (EffOps ops1, EffOps ops2)
+  => AutoCast (Union ops1 ops2) (Union ops2 ops1)
+  where
+    castOps = CastOps Cast
+
+-- distributive
+-- ((ops1, ops2), ops3) :> (ops1, (ops2, ops3))
+instance {-# INCOHERENT #-}
+  (EffOps ops1, EffOps ops2, EffOps ops3)
+  => AutoCast (Union (Union ops1 ops2) ops3) (Union ops1 (Union ops2 ops3))
+  where
+    castOps = CastOps Cast
+
+instance {-# INCOHERENT #-}
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps ops4
+  , AutoCast ops1 (Union (Union ops2 ops3) ops4)
+  )
+  => AutoCast ops1 (Union ops2 (Union ops3 ops4))
+  where
+    castOps = distributeRightCast castOps
+
+
+instance {-# INCOHERENT #-}
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps ops4
+  , AutoCast (Union (Union ops1 ops2) ops3) ops4
+  )
+  => AutoCast (Union ops1 (Union ops2 ops3)) ops4
+  where
+    castOps = distributeLeftCast castOps
 
 instance {-# OVERLAPPING #-}
   (EffOps ops1, EffOps ops2, EffOps handler1)
@@ -100,7 +177,7 @@ instance {-# OVERLAPPING #-}
       -> Handler (Union ops1 ops2) (Union handler1 handler2) eff1 eff3
     composeHandlers = composeExactHandlers
 
-instance {-# OVERLAPPABLE #-}
+instance {-# INCOHERENT #-}
   (EffOps ops1, EffOps ops2, EffOps handler1)
   => Composable
     ops1
@@ -126,7 +203,7 @@ instance {-# OVERLAPPABLE #-}
         (CastOps Cast)
         (CastOps Cast)
 
-instance {-# OVERLAPPABLE #-}
+instance {-# INCOHERENT #-}
   (EffOps ops1, EffOps handler1)
   => Composable
     ops1
@@ -152,14 +229,14 @@ instance {-# OVERLAPPABLE #-}
         (CastOps Cast)
         (CastOps Cast)
 
-instance {-# OVERLAPPABLE #-}
+instance {-# INCOHERENT #-}
   ( EffOps ops1
   , EffOps ops2
   , EffOps ops3
   , EffOps ops4
   , EffOps handler1
-  , OpsPath (Union handler1 ops4) ops2
-  , OpsPath ops3 (Union ops1 ops4)
+  , AutoCast (Union handler1 ops4) ops2
+  , AutoCast ops3 (Union ops1 ops4)
   )
   => Composable
     ops1
@@ -193,7 +270,7 @@ applyHandler
   , Effect eff1
   , Effect eff2
   , EffConstraint ops1 eff1
-  , OpsPath (Union ops1 handler) ops2
+  , AutoCast (Union ops1 handler) ops2
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
@@ -208,7 +285,7 @@ bindHandler
   , EffOps handler
   , Effect eff1
   , Effect eff2
-  , OpsPath (Union ops1 handler) ops2
+  , AutoCast (Union ops1 handler) ops2
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2

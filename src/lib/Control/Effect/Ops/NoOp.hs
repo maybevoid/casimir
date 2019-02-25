@@ -1,7 +1,9 @@
+{-# LANGUAGE FlexibleInstances #-}
 
 module Control.Effect.Ops.NoOp
   ( NoOp (..)
   , NoModel (..)
+  , NoConstraint
   )
 where
 
@@ -16,6 +18,10 @@ data NoOp (eff :: * -> *) = NoOp
 -- e.g. Proxy
 data NoModel a = NoModel
 
+class NoConstraint (eff :: * -> *) where
+
+instance NoConstraint eff where
+
 instance Functor NoModel where
   fmap _ _ = NoModel
 
@@ -28,6 +34,6 @@ instance FreeEff NoOp where
   freeModel _ = NoOp
 
 instance EffOps NoOp where
-  type EffConstraint NoOp eff = ()
+  type EffConstraint NoOp eff = NoConstraint eff
 
   bindConstraint _ = id

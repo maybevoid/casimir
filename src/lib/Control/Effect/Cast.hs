@@ -4,6 +4,11 @@ module Control.Effect.Cast
   ( Cast (..)
   , CastOps (..)
   , runCast
+  , extendNoOpCast
+  , weakenLeftCast
+  , weakenRightCast
+  , distributeLeftCast
+  , distributeRightCast
   , castComputation
   , castHandler
   , swapOps
@@ -12,6 +17,7 @@ module Control.Effect.Cast
 where
 
 import Control.Effect.Union (Union (..))
+import Control.Effect.Ops.NoOp (NoOp (..))
 
 import Control.Effect.Class
   ( Effect
@@ -36,6 +42,83 @@ runCast
 runCast (CastOps cast) res =
   case cast @eff of
     Cast -> res
+
+extendNoOpCast
+  :: forall ops1 ops2 .
+  ( EffOps ops1
+  , EffOps ops2
+  )
+  => CastOps ops1 ops2
+  -> CastOps ops1 (Union NoOp ops2)
+extendNoOpCast (CastOps cast1) = CastOps cast2
+  where
+    cast2
+      :: forall eff .
+      (EffConstraint ops1 eff)
+      => Cast (EffConstraint (Union NoOp ops2) eff)
+    cast2 = case cast1 @eff of
+      Cast -> Cast
+
+weakenRightCast
+  :: forall ops1 ops2 ops3 .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  )
+  => CastOps ops1 (Union ops2 ops3)
+  -> CastOps ops1 ops2
+weakenRightCast (CastOps cast1) = CastOps cast2
+  where
+    cast2
+      :: forall eff .
+      (EffConstraint ops1 eff)
+      => Cast (EffConstraint ops2 eff)
+    cast2 = case cast1 @eff of
+      Cast -> Cast
+
+weakenLeftCast
+  :: forall ops1 ops2 ops3 .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  )
+  => CastOps ops1 ops2
+  -> CastOps (Union ops1 ops3) ops2
+weakenLeftCast (CastOps cast) = CastOps cast
+
+distributeRightCast
+  :: forall ops1 ops2 ops3 ops4 .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps ops4
+  )
+  => CastOps ops1 (Union (Union ops2 ops3) ops4)
+  -> CastOps ops1 (Union ops2 (Union ops3 ops4))
+distributeRightCast (CastOps cast1) = CastOps cast2
+  where
+    cast2
+      :: forall eff .
+      (EffConstraint ops1 eff)
+      => Cast
+        ( EffConstraint ops2 eff
+        , ( EffConstraint ops3 eff
+          , EffConstraint ops4 eff
+          )
+        )
+    cast2 = case cast1 @eff of
+      Cast -> Cast
+
+distributeLeftCast
+  :: forall ops1 ops2 ops3 ops4 .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps ops4
+  )
+  => CastOps (Union (Union ops1 ops2) ops3) ops4
+  -> CastOps (Union ops1 (Union ops2 ops3)) ops4
+distributeLeftCast (CastOps cast) = CastOps cast
 
 castComputation
   :: forall eff ops1 ops2 comp .

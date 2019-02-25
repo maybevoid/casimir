@@ -15,6 +15,7 @@ dependencies:
   - mtl
   - stm
   - free
+  - TypeCompose
   - transformers
   - natural-transformation
 

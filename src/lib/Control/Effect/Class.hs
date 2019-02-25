@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TypeFamilyDependencies #-}
 
 module Control.Effect.Class
   ( Effect
@@ -56,7 +57,7 @@ class
   , Functor (FreeModel f)
   )
   => EffOps (f :: (* -> *) -> *) where
-    type family EffConstraint f (eff :: * -> *) :: Constraint
+    type family EffConstraint f (eff :: * -> *) = (c :: Constraint) | c -> f eff
 
     bindConstraint :: forall eff r .
       (Effect eff)
