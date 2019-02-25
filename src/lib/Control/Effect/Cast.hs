@@ -4,6 +4,7 @@ module Control.Effect.Cast
   ( Cast (..)
   , CastOps (..)
   , runCast
+  , composeCast
   , extendNoOpCast
   , weakenLeftCast
   , weakenRightCast
@@ -43,6 +44,23 @@ runCast (CastOps cast) res =
   case cast @eff of
     Cast -> res
 
+composeCast
+  :: forall ops1 ops2 ops3.
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  )
+  => CastOps ops1 ops2
+  -> CastOps ops2 ops3
+  -> CastOps ops1 ops3
+composeCast cast1 cast2 = CastOps cast3
+  where
+    cast3
+      :: forall eff .
+      (EffConstraint ops1 eff)
+      => Cast (EffConstraint ops3 eff)
+    cast3 = runCast @eff cast1 $ runCast @eff cast2 Cast
+
 extendNoOpCast
   :: forall ops1 ops2 .
   ( EffOps ops1
@@ -50,14 +68,13 @@ extendNoOpCast
   )
   => CastOps ops1 ops2
   -> CastOps ops1 (Union NoOp ops2)
-extendNoOpCast (CastOps cast1) = CastOps cast2
+extendNoOpCast cast1 = CastOps cast2
   where
     cast2
       :: forall eff .
       (EffConstraint ops1 eff)
       => Cast (EffConstraint (Union NoOp ops2) eff)
-    cast2 = case cast1 @eff of
-      Cast -> Cast
+    cast2 = runCast @eff cast1 Cast
 
 weakenRightCast
   :: forall ops1 ops2 ops3 .
@@ -67,14 +84,13 @@ weakenRightCast
   )
   => CastOps ops1 (Union ops2 ops3)
   -> CastOps ops1 ops2
-weakenRightCast (CastOps cast1) = CastOps cast2
+weakenRightCast cast1 = CastOps cast2
   where
     cast2
       :: forall eff .
       (EffConstraint ops1 eff)
       => Cast (EffConstraint ops2 eff)
-    cast2 = case cast1 @eff of
-      Cast -> Cast
+    cast2 = runCast @eff cast1 Cast
 
 weakenLeftCast
   :: forall ops1 ops2 ops3 .
@@ -95,19 +111,18 @@ distributeRightCast
   )
   => CastOps ops1 (Union (Union ops2 ops3) ops4)
   -> CastOps ops1 (Union ops2 (Union ops3 ops4))
-distributeRightCast (CastOps cast1) = CastOps cast2
+distributeRightCast cast1 = CastOps cast2
   where
     cast2
       :: forall eff .
       (EffConstraint ops1 eff)
       => Cast
-        ( EffConstraint ops2 eff
-        , ( EffConstraint ops3 eff
-          , EffConstraint ops4 eff
+        ( ( EffConstraint ops4 eff
+          , EffConstraint ops3 eff
           )
+        , EffConstraint ops2 eff
         )
-    cast2 = case cast1 @eff of
-      Cast -> Cast
+    cast2 = runCast @eff cast1 Cast
 
 distributeLeftCast
   :: forall ops1 ops2 ops3 ops4 .

@@ -37,7 +37,9 @@ instance (EffOps f, EffOps g) => FreeEff (Union f g) where
   freeModel = freeUnionOps
 
 instance (EffOps f, EffOps g) => EffOps (Union f g) where
-  type EffConstraint (Union f g) eff = (EffConstraint f eff, EffConstraint g eff)
+  -- reverse the order as the left most constraint gets
+  -- precedence if there is an overlap
+  type EffConstraint (Union f g) eff = (EffConstraint g eff, EffConstraint f eff)
 
   bindConstraint (Union x y) comp =
     bindConstraint x $ bindConstraint y comp

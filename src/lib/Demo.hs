@@ -24,6 +24,19 @@ mkEnvHandler = baseHandler . mkEnvOps
 envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvOps Int) eff
 envHandler1 = mkEnvHandler 3
 
+envHandler2 :: forall eff . (Effect eff) => BaseHandler (EnvOps Int) eff
+envHandler2 = mkEnvHandler 8
+
+envHandler3
+  :: forall eff .
+  (Effect eff)
+  => BaseHandler (Union (EnvOps Int) (EnvOps Int)) eff
+envHandler3 =
+  composeHandlersWithCast
+    @NoOp @NoOp @NoOp @NoOp
+    envHandler1 envHandler2
+    (CastOps Cast) (CastOps Cast)
+
 readerComp1 :: forall eff .
   (Effect eff, EffConstraint (EnvOps Int) eff)
   => eff Int
@@ -34,11 +47,11 @@ readerComp1 = do
 readerComp2 :: Identity Int
 readerComp2 = withHandler envHandler1 readerComp1
 
-readerHandler :: FreeHandler (EnvOps Int)
-readerHandler = freeHandler
+envHandler4 :: FreeHandler (EnvOps Int)
+envHandler4 = freeHandler
 
 readerComp3 :: Free (EnvModel Int) Int
-readerComp3 = withHandler readerHandler readerComp1
+readerComp3 = withHandler envHandler4 readerComp1
 
 readerComp4 :: forall eff . EffectfulComputation (EnvOps Int) Int eff
 readerComp4 = effectfulComputation readerComp1
@@ -58,7 +71,29 @@ readerComp7 :: forall eff .
 readerComp7 = castComputation readerComp4 $ CastOps Cast
 
 readerComp8 :: IdentityComputation Int
-readerComp8 = bindHandler envHandler1 readerComp7
+readerComp8 = bindHandlerWithCast envHandler1 readerComp7 (CastOps Cast)
+
+readerComp9 :: Identity Int
+readerComp9 = withHandler envHandler3 readerComp1
+
+readerComp10 :: Identity Int
+readerComp10 = withHandler envHandler1 comp
+  where
+    comp :: (EffConstraint (EnvOps Int) Identity) => Identity Int
+    comp = withHandler envHandler2 readerComp1
+
+readerComp11 :: Int
+readerComp11 = runIdentityComp $
+  bindHandlerWithCast envHandler3 readerComp4 (CastOps Cast)
+
+readerComp12 :: forall eff . (Effect eff) => EffectfulComputation NoOp Int eff
+readerComp12 = bindHandler envHandler2 readerComp4
+
+readerComp13 :: forall eff . (Effect eff) => EffectfulComputation NoOp Int eff
+readerComp13 = bindHandlerWithCast envHandler1 readerComp12 (CastOps Cast)
+
+readerComp14 :: Int
+readerComp14 = runIdentityComp readerComp13
 
 refStateOps
   :: forall a eff .

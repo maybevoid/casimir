@@ -17,9 +17,8 @@ import Control.Effect.Ops.NoOp (NoOp (..))
 import Control.Effect.Cast
   ( CastOps (..)
   , Cast (..)
+  , composeCast
   , extendNoOpCast
-  , weakenLeftCast
-  , weakenRightCast
   , distributeLeftCast
   , distributeRightCast
   )
@@ -88,6 +87,17 @@ instance {-# INCOHERENT #-}
   where
     castOps = CastOps Cast
 
+-- Transitivity
+instance {-# INCOHERENT #-}
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , AutoCast ops1 ops2
+  , AutoCast ops2 ops3
+  )
+  => AutoCast ops1 ops3 where
+  castOps = composeCast @ops1 @ops2 @ops3 castOps castOps
+
 -- identity right
 -- (ops1 :> ops2) :- (ops1 :> ((), ops2))
 instance {-# INCOHERENT #-}
@@ -97,28 +107,6 @@ instance {-# INCOHERENT #-}
   )
   => AutoCast ops1 (Union NoOp ops2) where
   castOps = extendNoOpCast castOps
-
--- weaken left cast
--- (ops1 :> ops2) :- ((ops1, ops3) :> ops2)
-instance {-# INCOHERENT #-}
-  ( EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
-  , AutoCast ops1 ops2
-  )
-  => AutoCast (Union ops1 ops3) ops2 where
-  castOps = weakenLeftCast castOps
-
--- weaken right cast
--- (ops1 :> (ops2, ops3)) :- (ops1 :> ops2)
-instance {-# INCOHERENT #-}
-  ( EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
-  , AutoCast ops1 (Union ops2 ops3)
-  )
-  => AutoCast ops1 ops2 where
-  castOps = weakenRightCast @ops1 @ops2 @ops3 castOps
 
 instance {-# INCOHERENT #-}
   (EffOps ops1, EffOps ops2)
@@ -144,7 +132,6 @@ instance {-# INCOHERENT #-}
   => AutoCast ops1 (Union ops2 (Union ops3 ops4))
   where
     castOps = distributeRightCast castOps
-
 
 instance {-# INCOHERENT #-}
   ( EffOps ops1
