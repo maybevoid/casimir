@@ -9,10 +9,11 @@ module Control.Effect.Ops.Io
 where
 
 import Control.Natural (type (~>))
-import Control.Monad.Free (Free, liftF)
+import Control.Monad.Trans.Free (FreeT, liftF)
 
 import Control.Effect.Class
-  ( EffFunctor (..)
+  ( Effect
+  , EffFunctor (..)
   , FreeEff (..)
   , EffOps (..)
   , liftEff
@@ -50,10 +51,10 @@ liftIo :: forall a eff .
 liftIo = liftIoOp ?ioOps
 
 freeIoOps
-  :: forall f .
-  (Functor f)
+  :: forall f eff .
+  (Functor f, Effect eff)
   => IoModel ~> f
-  -> IoOps (Free f)
+  -> IoOps (FreeT f eff)
 freeIoOps liftModel = IoOps {
   liftIoOp = \io -> liftF $ liftModel $ LiftIO io
 }

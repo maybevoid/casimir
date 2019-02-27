@@ -7,14 +7,16 @@ module Control.Effect.Ops.State
   , get
   , put
   , freeStateOps
+  , bindStateModel
   )
 where
 
 import Control.Natural (type (~>))
-import Control.Monad.Free (Free, liftF)
+import Control.Monad.Trans.Free (FreeT, liftF)
 
 import Control.Effect.Class
-  ( EffFunctor (..)
+  ( Effect
+  , EffFunctor (..)
   , FreeEff (..)
   , EffOps (..)
   , liftEff
@@ -45,6 +47,7 @@ instance FreeEff (StateOps a) where
   type FreeModel (StateOps a) = StateModel a
 
   freeModel = freeStateOps
+  -- bindModel = bindStateModel
 
 instance EffOps (StateOps a) where
   type EffConstraint (StateOps a) eff = StateEff a eff
@@ -64,11 +67,22 @@ put :: forall a eff .
 put = putOp ?stateOps
 
 freeStateOps
-  :: forall a f .
-  (Functor f)
+  :: forall a f eff .
+  (Functor f, Effect eff)
   => StateModel a ~> f
-  -> StateOps a (Free f)
+  -> StateOps a (FreeT f eff)
 freeStateOps liftModel = StateOps {
   getOp = liftF $ liftModel $ GetOp id,
   putOp = \x -> liftF $ liftModel $ PutOp x id
 }
+
+bindStateModel
+  :: forall eff s a b .
+  (Effect eff)
+  => StateModel s (eff a)
+  -> (a -> eff b)
+  -> StateModel s (eff b)
+bindStateModel (GetOp cont1) cont2 = GetOp $
+  \x -> cont1 x >>= cont2
+bindStateModel (PutOp x cont1) cont2 = PutOp x $
+  \_ -> cont1 () >>= cont2

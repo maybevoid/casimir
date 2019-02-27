@@ -21,7 +21,7 @@ module Control.Effect.Handler
   )
 where
 
-import Control.Monad.Free (Free)
+import Control.Monad.Trans.Free (Free)
 
 import Control.Effect.Ops.NoOp (NoOp)
 import Control.Effect.Union (Union (..))

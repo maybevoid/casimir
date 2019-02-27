@@ -11,10 +11,11 @@ where
 
 import Control.Compose (Flip (..))
 import Control.Natural (type (~>))
-import Control.Monad.Free (Free, liftF)
+import Control.Monad.Trans.Free (FreeT, liftF)
 
 import Control.Effect.Class
-  ( EffFunctor (..)
+  ( Effect
+  , EffFunctor (..)
   , FreeEff (..)
   , EffOps (..)
   , liftEff
@@ -51,10 +52,10 @@ ask :: forall a eff . (EnvEff a eff) => eff a
 ask = askOp ?envOps
 
 freeEnvOps
-  :: forall a f .
-  (Functor f)
+  :: forall a f eff.
+  (Functor f, Effect eff)
   => EnvModel a ~> f
-  -> EnvOps a (Free f)
+  -> EnvOps a (FreeT f eff)
 freeEnvOps liftModel = EnvOps {
   askOp = liftF $ liftModel $ AskOp id
 }

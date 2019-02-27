@@ -17,10 +17,6 @@ import Control.Effect.Ops.NoOp (NoOp (..))
 import Control.Effect.Cast
   ( CastOps (..)
   , Cast (..)
-  , composeCast
-  , extendNoOpCast
-  , distributeLeftCast
-  , distributeRightCast
   )
 
 import Control.Effect.Handler
@@ -58,12 +54,6 @@ instance (EffOps ops) => AutoCast ops ops where
   castOps = CastOps Cast
 
 instance {-# INCOHERENT #-}
-  (EffOps ops1, EffOps ops2, AutoCast ops1 ops2)
-  => AutoCast (Union NoOp ops1) ops2
-  where
-    castOps = castOps
-
-instance {-# INCOHERENT #-}
   (EffOps ops)
   => AutoCast (Union NoOp ops) ops
   where
@@ -87,27 +77,6 @@ instance {-# INCOHERENT #-}
   where
     castOps = CastOps Cast
 
--- Transitivity
-instance {-# INCOHERENT #-}
-  ( EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
-  , AutoCast ops1 ops2
-  , AutoCast ops2 ops3
-  )
-  => AutoCast ops1 ops3 where
-  castOps = composeCast @ops1 @ops2 @ops3 castOps castOps
-
--- identity right
--- (ops1 :> ops2) :- (ops1 :> ((), ops2))
-instance {-# INCOHERENT #-}
-  ( EffOps ops1
-  , EffOps ops2
-  , AutoCast ops1 ops2
-  )
-  => AutoCast ops1 (Union NoOp ops2) where
-  castOps = extendNoOpCast castOps
-
 instance {-# INCOHERENT #-}
   (EffOps ops1, EffOps ops2)
   => AutoCast (Union ops1 ops2) (Union ops2 ops1)
@@ -121,28 +90,6 @@ instance {-# INCOHERENT #-}
   => AutoCast (Union (Union ops1 ops2) ops3) (Union ops1 (Union ops2 ops3))
   where
     castOps = CastOps Cast
-
-instance {-# INCOHERENT #-}
-  ( EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
-  , EffOps ops4
-  , AutoCast ops1 (Union (Union ops2 ops3) ops4)
-  )
-  => AutoCast ops1 (Union ops2 (Union ops3 ops4))
-  where
-    castOps = distributeRightCast castOps
-
-instance {-# INCOHERENT #-}
-  ( EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
-  , EffOps ops4
-  , AutoCast (Union (Union ops1 ops2) ops3) ops4
-  )
-  => AutoCast (Union ops1 (Union ops2 ops3)) ops4
-  where
-    castOps = distributeLeftCast castOps
 
 instance {-# OVERLAPPING #-}
   (EffOps ops1, EffOps ops2, EffOps handler1)

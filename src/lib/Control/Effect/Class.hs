@@ -16,8 +16,8 @@ module Control.Effect.Class
 where
 
 import GHC.Exts (Constraint)
-import Control.Monad.Free (Free)
 import Control.Natural (type (~>))
+import Control.Monad.Trans.Free (FreeT)
 
 type Effect eff = Monad eff
 
@@ -35,34 +35,41 @@ data Computation ops comp eff = Computation {
 data Handler ops handler outerEff innerEff =
   Handler (LiftEff innerEff outerEff) (Computation ops handler outerEff)
 
-class EffFunctor (f :: (* -> *) -> *) where
+class EffFunctor (ops :: (* -> *) -> *) where
   effmap :: forall eff1 eff2 .
     (Effect eff1, Effect eff2)
     => LiftEff eff1 eff2
-    -> f eff1
-    -> f eff2
+    -> ops eff1
+    -> ops eff2
 
-class FreeEff f where
-  type family FreeModel f :: (* -> *)
+class FreeEff ops where
+  type family FreeModel ops :: (* -> *)
 
   freeModel
-    :: forall g .
-    (Functor g)
-    => (FreeModel f ~> g)
-    -> f (Free g)
+    :: forall ops' eff .
+    (Functor ops', Effect eff)
+    => (FreeModel ops ~> ops')
+    -> ops (FreeT ops' eff)
+
+  -- bindModel
+  --   :: forall eff a b .
+  --   (Effect eff)
+  --   => FreeModel ops (eff a)
+  --   -> (a -> eff b)
+  --   -> FreeModel ops (eff b)
 
 class
-  ( EffFunctor f
-  , FreeEff f
-  , Functor (FreeModel f)
+  ( EffFunctor ops
+  , FreeEff ops
+  , Functor (FreeModel ops)
   )
-  => EffOps (f :: (* -> *) -> *) where
-    type family EffConstraint f (eff :: * -> *) = (c :: Constraint) | c -> f eff
+  => EffOps (ops :: (* -> *) -> *) where
+    type family EffConstraint ops (eff :: * -> *) = (c :: Constraint) | c -> ops eff
 
     bindConstraint :: forall eff r .
       (Effect eff)
-      => f eff
-      -> (EffConstraint f eff => r)
+      => ops eff
+      -> (EffConstraint ops eff => r)
       -> r
 
 idLift :: forall eff . LiftEff eff eff

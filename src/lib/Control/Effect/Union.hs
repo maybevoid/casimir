@@ -5,10 +5,11 @@ module Control.Effect.Union
 where
 
 import Control.Natural (type (~>))
-import Control.Monad.Free (Free)
+import Control.Monad.Trans.Free (FreeT)
 
 import Control.Effect.Class
-  ( EffOps (..)
+  ( Effect
+  , EffOps (..)
   , FreeEff (..)
   , EffFunctor (..)
   )
@@ -45,17 +46,18 @@ instance (EffOps f, EffOps g) => EffOps (Union f g) where
     bindConstraint x $ bindConstraint y comp
 
 freeUnionOps
-  :: forall ops1 ops2 f .
+  :: forall ops1 ops2 f eff.
   ( EffOps ops1
   , EffOps ops2
   , Functor f
+  , Effect eff
   )
   => UnionModel ops1 ops2 ~> f
-  -> Union ops1 ops2 (Free f)
+  -> Union ops1 ops2 (FreeT f eff)
 freeUnionOps liftModel = Union ops1 ops2
   where
-    ops1 :: ops1 (Free f)
+    ops1 :: ops1 (FreeT f eff)
     ops1 = freeModel (liftModel . LeftModel)
 
-    ops2 :: ops2 (Free f)
+    ops2 :: ops2 (FreeT f eff)
     ops2 = freeModel (liftModel . RightModel)
