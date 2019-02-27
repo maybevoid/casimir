@@ -7,7 +7,6 @@ module Control.Effect.Ops.State
   , get
   , put
   , freeStateOps
-  , bindStateModel
   )
 where
 
@@ -22,16 +21,16 @@ import Control.Effect.Class
   , liftEff
   )
 
-data StateOps a eff = StateOps {
-  getOp :: eff a,
-  putOp :: a -> eff ()
+data StateOps s eff = StateOps {
+  getOp :: eff s,
+  putOp :: s -> eff ()
 }
 
 data StateModel s a =
     GetOp (s -> a)
   | PutOp s (() -> a)
 
-type StateEff a eff = (?stateOps :: StateOps a eff)
+type StateEff s eff = (?stateOps :: StateOps s eff)
 
 instance Functor (StateModel s) where
   fmap f (GetOp cont) = GetOp $ fmap f cont
@@ -43,14 +42,13 @@ instance EffFunctor (StateOps a) where
     putOp = liftEff f . putOp stateOps
   }
 
-instance FreeEff (StateOps a) where
-  type FreeModel (StateOps a) = StateModel a
+instance FreeEff (StateOps s) where
+  type FreeModel (StateOps s) = StateModel s
 
   freeModel = freeStateOps
-  -- bindModel = bindStateModel
 
-instance EffOps (StateOps a) where
-  type EffConstraint (StateOps a) eff = StateEff a eff
+instance EffOps (StateOps s) where
+  type EffConstraint (StateOps s) eff = StateEff s eff
 
   bindConstraint stateOps comp = let ?stateOps = stateOps in comp
 
@@ -58,7 +56,6 @@ get :: forall a eff .
   (StateEff a eff)
   => eff a
 get = getOp ?stateOps
-
 
 put :: forall a eff .
   (StateEff a eff)
@@ -75,14 +72,3 @@ freeStateOps liftModel = StateOps {
   getOp = liftF $ liftModel $ GetOp id,
   putOp = \x -> liftF $ liftModel $ PutOp x id
 }
-
-bindStateModel
-  :: forall eff s a b .
-  (Effect eff)
-  => StateModel s (eff a)
-  -> (a -> eff b)
-  -> StateModel s (eff b)
-bindStateModel (GetOp cont1) cont2 = GetOp $
-  \x -> cont1 x >>= cont2
-bindStateModel (PutOp x cont1) cont2 = PutOp x $
-  \_ -> cont1 () >>= cont2

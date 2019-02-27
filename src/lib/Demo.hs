@@ -63,7 +63,7 @@ readerComp6 :: Int
 readerComp6 = runIdentityComp readerComp5
 
 readerComp7 :: forall eff .
-  (Monad eff)
+  (Effect eff)
   => EffectfulComputation
     (Union NoOp (Union (EnvOps Int) NoOp))
     Int
@@ -141,3 +141,59 @@ stateIoComp1 = do
 
 stateIoComp2 :: IO Int
 stateIoComp2 = withHandler ioHandler stateIoComp1
+
+trueHandler
+  :: forall eff .
+  (Effect eff)
+  => OpsHandler (DecideModel Bool) eff Int String
+trueHandler = OpsHandler {
+  handleReturn = return . show,
+  handleOps = \(DecideOp cont) -> cont True
+}
+
+nonDetHandler
+  :: forall eff .
+  (Effect eff)
+  => OpsHandler (DecideModel Bool) eff Int [Int]
+nonDetHandler = OpsHandler {
+  handleReturn = \x -> return [x],
+  handleOps = \(DecideOp cont) -> do
+    res1 <- cont True
+    res2 <- cont False
+    return $ res1 ++ res2
+}
+
+testDecide
+  :: forall eff .
+  ( Effect eff
+  , DecideEff Bool eff
+  -- , IoEff eff
+  ) => eff Int
+testDecide = do
+  a <- decide
+  -- liftIo $ putStrLn $ "a: " ++ (show a)
+  b <- decide
+  -- liftIo $ putStrLn $ "b: " ++ (show b)
+  return $ if a
+    then if b then 1 else 2
+    else if b then 3 else 4
+
+decideRes1
+  :: forall eff .
+  (Effect eff)
+  => eff [Int]
+decideRes1 = handleDynamic @(DecideOps Bool) @eff @Int @[Int]
+  nonDetHandler (testDecide :: DynamicEff (DecideModel Bool) eff Int)
+
+-- testDecide :: DynamicEff (DecideModel Bool) IO Int
+-- testDecide = do
+--   a <- liftOps (DecideOp return)
+--   liftReturn $ putStrLn $ "a: " ++ (show a)
+--   b <- liftOps (DecideOp return)
+--   liftReturn $ putStrLn $ "b: " ++ (show b)
+--   return $ if a
+--     then if b then 1 else 2
+--     else if b then 3 else 4
+
+-- decideRes :: IO [Int]
+-- decideRes = runDynamicEff testDecide nonDetHandler

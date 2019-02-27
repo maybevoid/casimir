@@ -7,6 +7,7 @@ module Control.Effect
   , module Control.Effect.AutoCast
   , module Control.Effect.Ops
   , module Control.Effect.Transform
+  , module Control.Effect.Dynamic
   )
 where
 
@@ -18,3 +19,4 @@ import Control.Effect.Cast
 import Control.Effect.AutoCast
 import Control.Effect.Ops
 import Control.Effect.Transform
+import Control.Effect.Dynamic

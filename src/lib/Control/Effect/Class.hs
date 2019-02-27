@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 
 module Control.Effect.Class
@@ -43,20 +42,13 @@ class EffFunctor (ops :: (* -> *) -> *) where
     -> ops eff2
 
 class FreeEff ops where
-  type family FreeModel ops :: (* -> *)
+  type family FreeModel ops = (m :: (* -> *)) | m -> ops
 
   freeModel
     :: forall ops' eff .
     (Functor ops', Effect eff)
     => (FreeModel ops ~> ops')
     -> ops (FreeT ops' eff)
-
-  -- bindModel
-  --   :: forall eff a b .
-  --   (Effect eff)
-  --   => FreeModel ops (eff a)
-  --   -> (a -> eff b)
-  --   -> FreeModel ops (eff b)
 
 class
   ( EffFunctor ops
