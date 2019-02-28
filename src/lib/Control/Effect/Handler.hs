@@ -224,7 +224,7 @@ applyExactHandler
   , EffConstraint ops eff1
   )
   => Handler ops handler eff1 eff2
-  -> Computation (Union ops handler) r eff2
+  -> Computation (Union handler ops) r eff2
   -> r eff1
 applyExactHandler (Handler lift21 handler1) comp1 = comp2
   where
@@ -245,7 +245,7 @@ applyHandlerWithCast
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
-  -> CastOps (Union ops1 handler) ops2
+  -> CastOps (Union handler ops1) ops2
   -> r eff1
 applyHandlerWithCast handler comp cast =
   applyExactHandler handler $ castComputation comp cast
@@ -258,7 +258,7 @@ bindExactHandler
   , Effect eff2
   )
   => Handler ops handler eff1 eff2
-  -> Computation (Union ops handler) r eff2
+  -> Computation (Union handler ops) r eff2
   -> Computation ops r eff1
 bindExactHandler handler comp1 = Computation comp2
   where
@@ -279,7 +279,7 @@ bindHandlerWithCast
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
-  -> CastOps (Union ops1 handler) ops2
+  -> CastOps (Union handler ops1) ops2
   -> Computation ops1 r eff1
 bindHandlerWithCast handler comp cast =
   bindExactHandler handler $ castComputation comp cast

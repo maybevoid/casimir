@@ -145,17 +145,17 @@ stateIoComp2 = withHandler ioHandler stateIoComp1
 trueHandler
   :: forall eff .
   (Effect eff)
-  => OpsHandler (DecideModel Bool) eff Int String
+  => OpsHandler (DecideModel Bool) Int String eff
 trueHandler = OpsHandler {
   handleReturn = return . show,
   handleOps = \(DecideOp cont) -> cont True
 }
 
-nonDetHandler
+nonDetHandler1
   :: forall eff .
   (Effect eff)
-  => OpsHandler (DecideModel Bool) eff Int [Int]
-nonDetHandler = OpsHandler {
+  => OpsHandler (DecideModel Bool) Int [Int] eff
+nonDetHandler1 = OpsHandler {
   handleReturn = \x -> return [x],
   handleOps = \(DecideOp cont) -> do
     res1 <- cont True
@@ -163,37 +163,37 @@ nonDetHandler = OpsHandler {
     return $ res1 ++ res2
 }
 
-testDecide
+nonDetHandler2
+  :: forall eff .
+  (Effect eff)
+  => DynamicHandler NoOp (DecideOps Bool) Int [Int] eff
+nonDetHandler2 = genericDynamicHandler nonDetHandler1
+
+decideComp1
   :: forall eff .
   ( Effect eff
   , DecideEff Bool eff
-  -- , IoEff eff
+  , IoEff eff
   ) => eff Int
-testDecide = do
+decideComp1 = do
   a <- decide
-  -- liftIo $ putStrLn $ "a: " ++ (show a)
+  liftIo $ putStrLn $ "a: " ++ (show a)
   b <- decide
-  -- liftIo $ putStrLn $ "b: " ++ (show b)
+  liftIo $ putStrLn $ "b: " ++ (show b)
   return $ if a
     then if b then 1 else 2
     else if b then 3 else 4
 
-decideRes1
+decideComp2
   :: forall eff .
   (Effect eff)
-  => eff [Int]
-decideRes1 = handleDynamic @(DecideOps Bool) @eff @Int @[Int]
-  nonDetHandler (testDecide :: DynamicEff (DecideModel Bool) eff Int)
+  => Computation (Union IoOps (DecideOps Bool)) (Return Int) eff
+decideComp2 = effectfulComputation decideComp1
 
--- testDecide :: DynamicEff (DecideModel Bool) IO Int
--- testDecide = do
---   a <- liftOps (DecideOp return)
---   liftReturn $ putStrLn $ "a: " ++ (show a)
---   b <- liftOps (DecideOp return)
---   liftReturn $ putStrLn $ "b: " ++ (show b)
---   return $ if a
---     then if b then 1 else 2
---     else if b then 3 else 4
+decideComp3 :: EffectfulComputation (DecideOps Bool) Int IO
+decideComp3 = bindExactHandler @(DecideOps Bool) @IoOps
+  ((castHandler ioHandler (CastOps Cast)) :: Handler (DecideOps Bool) IoOps IO IO)
+  decideComp2
 
--- decideRes :: IO [Int]
--- decideRes = runDynamicEff testDecide nonDetHandler
+decideComp4 :: IO [Int]
+decideComp4 = applyDynamic nonDetHandler2 decideComp3

@@ -4,15 +4,25 @@ module Control.Effect.Dynamic
 where
 
 import Control.Effect.Class
+import Control.Effect.Union
+import Control.Effect.Computation
 
-data OpsHandler f eff a r = OpsHandler {
+data OpsHandler f a r eff = OpsHandler {
   handleReturn :: a -> eff r,
   handleOps :: f (eff r) -> eff r
 }
 
 newtype DynamicEff f eff a = DynamicEff {
-  runDynamicEff :: forall r . OpsHandler f eff a r -> eff r
+  runDynamicEff :: forall r . OpsHandler f a r eff -> eff r
 }
+
+type DynamicHandler ops1 ops2 a r eff =
+  Computation ops1 (OpsHandler (FreeModel ops2) a r) eff
+
+data DynamicContext ops1 ops2 ops3 a r eff =
+  DynamicContext
+    (DynamicHandler ops2 ops1 a r eff)
+    (Computation (Union ops1 ops3) (Return a) eff)
 
 class (EffOps ops) => DynamicOps ops where
   dynamicOps
@@ -43,7 +53,7 @@ mapDynamicEff
   -> DynamicEff f eff b
 mapDynamicEff f (DynamicEff m1) = DynamicEff m2
  where
-  m2 :: forall r . OpsHandler f eff b r -> eff r
+  m2 :: forall r . OpsHandler f b r eff -> eff r
   m2 handler = m1 $ OpsHandler {
     handleReturn = \x -> handleReturn handler (f x),
     handleOps = handleOps handler
@@ -59,10 +69,10 @@ bindDynamicEff
   -> DynamicEff f eff b
 bindDynamicEff (DynamicEff m1) cont1 = DynamicEff m2
  where
-  m2 :: forall r . OpsHandler f eff b r -> eff r
+  m2 :: forall r . OpsHandler f b r eff -> eff r
   m2 handler1 = m1 handler2
    where
-    handler2 :: OpsHandler f eff a r
+    handler2 :: OpsHandler f a r eff
     handler2 = OpsHandler {
       handleReturn = \x -> runDynamicEff (cont1 x) handler1,
       handleOps = handleOps handler1
@@ -97,7 +107,7 @@ liftOps
   -> DynamicEff f eff a
 liftOps ops = DynamicEff $ cont
  where
-  cont :: forall r . OpsHandler f eff a r -> eff r
+  cont :: forall r . OpsHandler f a r eff -> eff r
   cont handler = handleOps handler $ fmap mapper ops
    where
     mapper :: eff a -> eff r
@@ -111,7 +121,7 @@ handleDynamic
   , EffOps ops
   , DynamicOps ops
   )
-  => OpsHandler (FreeModel ops) eff a b
+  => OpsHandler (FreeModel ops) a b eff
   -> (EffConstraint ops (DynamicEff (FreeModel ops) eff)
       => (DynamicEff (FreeModel ops) eff) a)
   -> eff b
@@ -122,3 +132,49 @@ handleDynamic handler comp1 = runDynamicEff comp2 handler
 
   comp2 :: DynamicEff (FreeModel ops) eff a
   comp2 = bindConstraint ops comp1
+
+mkDynamicHandler
+  :: forall ops1 ops2 a r eff1 .
+  ( EffOps ops1
+  , EffOps ops2
+  , Effect eff1
+  )
+  => (forall eff2 .
+      (Effect eff2)
+      => LiftEff eff1 eff2
+      -> (EffConstraint ops1 eff2
+          => OpsHandler (FreeModel ops2) a r eff2))
+  -> DynamicHandler ops1 ops2 a r eff1
+mkDynamicHandler = Computation
+
+genericDynamicHandler
+  :: forall ops1 ops2 a r eff1.
+  ( EffOps ops1
+  , EffOps ops2
+  , Effect eff1
+  )
+  => (forall eff2 .
+      (Effect eff2, EffConstraint ops1 eff2)
+      => OpsHandler (FreeModel ops2) a r eff2)
+  -> DynamicHandler ops1 ops2 a r eff1
+genericDynamicHandler comp = mkDynamicHandler $ \_ -> comp
+
+applyDynamic
+  :: forall ops1 ops2 a r eff .
+  ( EffOps ops1
+  , EffOps ops2
+  , DynamicOps ops1
+  , Effect eff
+  , EffConstraint ops2 eff
+  )
+  => DynamicHandler ops2 ops1 a r eff
+  -> Computation ops1 (Return a) eff
+  -> eff r
+applyDynamic handler1 comp1 = comp2
+ where
+  handler2 :: OpsHandler (FreeModel ops1) a r eff
+  handler2 = runComp handler1 idLift
+
+  comp2 :: eff r
+  comp2 = handleDynamic handler2 $ returnVal $
+    runComp comp1 (LiftEff liftReturn)

@@ -204,7 +204,7 @@ applyHandler
   , Effect eff1
   , Effect eff2
   , EffConstraint ops1 eff1
-  , AutoCast (Union ops1 handler) ops2
+  , AutoCast (Union handler ops1) ops2
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
@@ -219,7 +219,7 @@ bindHandler
   , EffOps handler
   , Effect eff1
   , Effect eff2
-  , AutoCast (Union ops1 handler) ops2
+  , AutoCast (Union handler ops1) ops2
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
