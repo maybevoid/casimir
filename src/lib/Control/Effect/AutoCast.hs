@@ -202,7 +202,7 @@ applyHandler
   , EffOps handler
   , Effect eff1
   , Effect eff2
-  , EffConstraint ops1 eff1
+  , OpsConstraint ops1 eff1
   , AutoCast (Union handler ops1) ops2
   )
   => Handler ops1 handler eff1 eff2

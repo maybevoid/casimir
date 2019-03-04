@@ -40,7 +40,7 @@ import Control.Effect.Base
   , FreeEff (..)
   , Handler (..)
   , UnionOps (..)
-  , EffConstraint
+  , OpsConstraint
   , EffFunctor (..)
   , Computation (..)
   , joinLift
@@ -65,7 +65,7 @@ mkHandler
   -> (forall eff .
       (Effect eff)
       => LiftEff outerEff eff
-      -> (EffConstraint ops eff) => Operation handler eff)
+      -> (OpsConstraint ops eff) => Operation handler eff)
   -> Handler ops handler outerEff innerEff
 mkHandler lifter comp = Handler lifter $ Computation comp
 
@@ -110,7 +110,7 @@ genericHandler
   :: forall ops handler .
   (EffOps ops, EffOps handler)
   => (forall eff .
-      (Effect eff, EffConstraint ops eff)
+      (Effect eff, OpsConstraint ops eff)
       => Operation handler eff)
   -> GenericHandler ops handler
 genericHandler handler = Handler id $ Computation comp1
@@ -119,7 +119,7 @@ genericHandler handler = Handler id $ Computation comp1
       :: forall eff1 eff2 .
       (Effect eff1, Effect eff2)
       => LiftEff eff1 eff2
-      -> ((EffConstraint ops eff2)
+      -> ((OpsConstraint ops eff2)
           => Operation handler eff2)
     comp1 _ = handler
 
@@ -146,10 +146,10 @@ withHandler
   , EffOps handler
   , Effect eff1
   , Effect eff2
-  , EffConstraint ops eff1
+  , OpsConstraint ops eff1
   )
   => Handler ops handler eff1 eff2
-  -> (EffConstraint handler eff1 => r)
+  -> (OpsConstraint handler eff1 => r)
   -> r
 withHandler (Handler _ handler1) comp1 = comp2
   where
@@ -179,8 +179,8 @@ composeExactHandlers
         comp1 :: forall eff0 .
           (Effect eff0)
           => LiftEff eff1 eff0
-          -> (( EffConstraint ops1 eff0
-              , EffConstraint ops2 eff0
+          -> (( OpsConstraint ops1 eff0
+              , OpsConstraint ops2 eff0
               )
               => UnionOps handler1 handler2 eff0)
         comp1 lift10 = UnionOps handler1' handler2'
@@ -224,7 +224,7 @@ applyExactHandler
   , EffOps handler
   , Effect eff1
   , Effect eff2
-  , EffConstraint ops eff1
+  , OpsConstraint ops eff1
   )
   => Handler ops handler eff1 eff2
   -> Computation (Union handler ops) r eff2
@@ -244,7 +244,7 @@ applyHandlerWithCast
   , EffOps handler
   , Effect eff1
   , Effect eff2
-  , EffConstraint ops1 eff1
+  , OpsConstraint ops1 eff1
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
@@ -269,7 +269,7 @@ bindExactHandler handler comp1 = Computation comp2
       :: forall eff0 .
       (Effect eff0)
       => LiftEff eff1 eff0
-      -> (EffConstraint ops eff0 => r eff0)
+      -> (OpsConstraint ops eff0 => r eff0)
     comp2 lift10 = applyExactHandler (outerLiftHandler lift10 handler) comp1
 
 bindHandlerWithCast

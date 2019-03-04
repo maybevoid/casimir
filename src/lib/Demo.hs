@@ -38,7 +38,7 @@ envHandler3 =
     (CastOps Cast) (CastOps Cast)
 
 readerComp1 :: forall eff .
-  (Effect eff, EffConstraint (EnvEff Int) eff)
+  (Effect eff, OpsConstraint (EnvEff Int) eff)
   => eff Int
 readerComp1 = do
   val <- ask
@@ -79,7 +79,7 @@ readerComp9 = withHandler envHandler3 readerComp1
 readerComp10 :: Identity Int
 readerComp10 = withHandler envHandler1 comp
   where
-    comp :: (EffConstraint (EnvEff Int) Identity) => Identity Int
+    comp :: (OpsConstraint (EnvEff Int) Identity) => Identity Int
     comp = withHandler envHandler2 readerComp1
 
 readerComp11 :: Int
@@ -129,7 +129,7 @@ ioAndStateHandler ref = handler
 
 stateIoComp1
   :: forall eff .
-  (Effect eff, EffConstraint IoEff eff)
+  (Effect eff, OpsConstraint IoEff eff)
   => eff Int
 stateIoComp1 = do
   ref <- liftIo $ newIORef 3

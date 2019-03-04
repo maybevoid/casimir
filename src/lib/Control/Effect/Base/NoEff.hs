@@ -35,6 +35,6 @@ instance FreeEff NoEff where
   freeMonad _ = NoOp
 
 instance EffOps NoEff where
-  type EffConstraint NoEff eff = NoConstraint eff
+  type OpsConstraint NoEff eff = NoConstraint eff
 
   bindConstraint _ = id

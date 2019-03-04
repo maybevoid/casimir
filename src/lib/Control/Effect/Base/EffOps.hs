@@ -15,10 +15,11 @@ class
   , EffFunctor (Operation ops)
   )
   => EffOps (ops :: *) where
-    type family EffConstraint ops (eff :: * -> *) = (c :: Constraint) | c -> ops eff
+    type family OpsConstraint ops (eff :: * -> *)
+      = (c :: Constraint) | c -> ops eff
 
     bindConstraint :: forall eff r .
       (Effect eff)
       => Operation ops eff
-      -> (EffConstraint ops eff => r)
+      -> (OpsConstraint ops eff => r)
       -> r

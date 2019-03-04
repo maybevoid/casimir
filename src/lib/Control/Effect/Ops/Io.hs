@@ -44,7 +44,7 @@ instance FreeEff IoEff where
   freeMonad = freeIoOps
 
 instance EffOps IoEff where
-  type EffConstraint IoEff eff = (IoConstraint eff)
+  type OpsConstraint IoEff eff = (IoConstraint eff)
 
   bindConstraint ioOps comp = let ?ioOps = ioOps in comp
 

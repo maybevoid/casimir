@@ -47,7 +47,7 @@ instance FreeEff (EnvEff a) where
   freeMonad = freeEnvOps
 
 instance EffOps (EnvEff a) where
-  type EffConstraint (EnvEff a) eff = (EnvConstraint a eff)
+  type OpsConstraint (EnvEff a) eff = (EnvConstraint a eff)
 
   bindConstraint envOps comp = let ?envOps = envOps in comp
 

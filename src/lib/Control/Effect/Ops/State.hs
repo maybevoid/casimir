@@ -51,7 +51,7 @@ instance FreeEff (StateEff s) where
   freeMonad = freeStateOps
 
 instance EffOps (StateEff s) where
-  type EffConstraint (StateEff s) eff = StateConstraint s eff
+  type OpsConstraint (StateEff s) eff = StateConstraint s eff
 
   bindConstraint stateOps comp = let ?stateOps = stateOps in comp
 

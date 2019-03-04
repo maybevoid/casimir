@@ -43,8 +43,8 @@ instance (EffOps f, EffOps g) => FreeEff (Union f g) where
 instance (EffOps f, EffOps g) => EffOps (Union f g) where
   -- reverse the order as the left most constraint
   -- gets precedence if there is an overlap
-  type EffConstraint (Union f g) eff =
-    (EffConstraint g eff, EffConstraint f eff)
+  type OpsConstraint (Union f g) eff =
+    (OpsConstraint g eff, OpsConstraint f eff)
 
   bindConstraint (UnionOps x y) comp =
     bindConstraint x $ bindConstraint y comp

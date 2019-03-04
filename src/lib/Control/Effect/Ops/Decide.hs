@@ -33,7 +33,7 @@ instance FreeEff (DecideEff s) where
   freeMonad = freeDecideOps
 
 instance EffOps (DecideEff s) where
-  type EffConstraint (DecideEff s) eff = DecideConstraint s eff
+  type OpsConstraint (DecideEff s) eff = DecideConstraint s eff
 
   bindConstraint decideOps comp = let ?decideOps = decideOps in comp
 

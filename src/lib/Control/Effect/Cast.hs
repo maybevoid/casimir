@@ -25,20 +25,20 @@ import Control.Effect.Base
   , LiftEff
   , Handler (..)
   , FreeEff (..)
-  , EffConstraint
+  , OpsConstraint
   , Computation (..)
   )
 
 data Cast p = p => Cast
 
 data CastOps ops1 ops2 = CastOps
-  (forall eff . EffConstraint ops1 eff => Cast (EffConstraint ops2 eff))
+  (forall eff . OpsConstraint ops1 eff => Cast (OpsConstraint ops2 eff))
 
 runCast
   :: forall eff ops1 ops2 r .
-  ( EffConstraint ops1 eff )
+  ( OpsConstraint ops1 eff )
   => CastOps ops1 ops2
-  -> (EffConstraint ops2 eff => r)
+  -> (OpsConstraint ops2 eff => r)
   -> r
 runCast (CastOps cast) res =
   case cast @eff of
@@ -57,8 +57,8 @@ composeCast cast1 cast2 = CastOps cast3
   where
     cast3
       :: forall eff .
-      (EffConstraint ops1 eff)
-      => Cast (EffConstraint ops3 eff)
+      (OpsConstraint ops1 eff)
+      => Cast (OpsConstraint ops3 eff)
     cast3 = runCast @eff cast1 $ runCast @eff cast2 Cast
 
 extendNoEffCast
@@ -72,8 +72,8 @@ extendNoEffCast cast1 = CastOps cast2
   where
     cast2
       :: forall eff .
-      (EffConstraint ops1 eff)
-      => Cast (EffConstraint (Union NoEff ops2) eff)
+      (OpsConstraint ops1 eff)
+      => Cast (OpsConstraint (Union NoEff ops2) eff)
     cast2 = runCast @eff cast1 Cast
 
 weakenRightCast
@@ -88,8 +88,8 @@ weakenRightCast cast1 = CastOps cast2
   where
     cast2
       :: forall eff .
-      (EffConstraint ops1 eff)
-      => Cast (EffConstraint ops2 eff)
+      (OpsConstraint ops1 eff)
+      => Cast (OpsConstraint ops2 eff)
     cast2 = runCast @eff cast1 Cast
 
 weakenLeftCast
@@ -115,12 +115,12 @@ distributeRightCast cast1 = CastOps cast2
   where
     cast2
       :: forall eff .
-      (EffConstraint ops1 eff)
+      (OpsConstraint ops1 eff)
       => Cast
-        ( ( EffConstraint ops4 eff
-          , EffConstraint ops3 eff
+        ( ( OpsConstraint ops4 eff
+          , OpsConstraint ops3 eff
           )
-        , EffConstraint ops2 eff
+        , OpsConstraint ops2 eff
         )
     cast2 = runCast @eff cast1 Cast
 
@@ -149,7 +149,7 @@ castComputation comp1 cast = Computation comp2
     comp2 :: forall eff' .
       (Effect eff')
       => LiftEff eff eff'
-      -> (EffConstraint ops2 eff' => comp eff')
+      -> (OpsConstraint ops2 eff' => comp eff')
     comp2 lifter = runCast @eff' cast $ runComp comp1 lifter
 
 castHandler

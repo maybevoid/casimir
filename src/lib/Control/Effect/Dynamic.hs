@@ -121,7 +121,7 @@ handleDynamic
   , DynamicOps ops
   )
   => OpsHandler (CoOperation ops) a b eff
-  -> (EffConstraint ops (DynamicEff (CoOperation ops) eff)
+  -> (OpsConstraint ops (DynamicEff (CoOperation ops) eff)
       => (DynamicEff (CoOperation ops) eff) a)
   -> eff b
 handleDynamic handler comp1 = runDynamicEff comp2 handler
@@ -141,7 +141,7 @@ mkDynamicHandler
   => (forall eff2 .
       (Effect eff2)
       => LiftEff eff1 eff2
-      -> (EffConstraint ops1 eff2
+      -> (OpsConstraint ops1 eff2
           => OpsHandler (CoOperation ops2) a r eff2))
   -> DynamicHandler ops1 ops2 a r eff1
 mkDynamicHandler = Computation
@@ -153,7 +153,7 @@ genericDynamicHandler
   , Effect eff1
   )
   => (forall eff2 .
-      (Effect eff2, EffConstraint ops1 eff2)
+      (Effect eff2, OpsConstraint ops1 eff2)
       => OpsHandler (CoOperation ops2) a r eff2)
   -> DynamicHandler ops1 ops2 a r eff1
 genericDynamicHandler comp = mkDynamicHandler $ \_ -> comp
@@ -164,7 +164,7 @@ applyDynamic
   , EffOps ops2
   , DynamicOps ops1
   , Effect eff
-  , EffConstraint ops2 eff
+  , OpsConstraint ops2 eff
   )
   => DynamicHandler ops2 ops1 a r eff
   -> Computation ops1 (Return a) eff
