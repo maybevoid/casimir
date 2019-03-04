@@ -18,10 +18,15 @@ newtype DynamicEff ops eff a = DynamicEff {
 type DynamicHandler ops1 ops2 a r eff =
   Computation ops1 (OpsHandler ops2 a r) eff
 
-data DynamicContext ops1 ops2 ops3 a r eff =
-  DynamicContext
-    (DynamicHandler ops2 ops1 a r eff)
-    (Computation (Union ops1 ops3) (Return a) eff)
+data DynamicComputation ops comp eff where
+  BindDynamic
+    :: forall ops comp eff1 .
+    (forall eff2 .
+      (Effect eff2)
+      => LiftEff eff1 eff2
+      -> Operation ops eff2
+      -> comp eff2)
+    -> DynamicComputation ops comp eff1
 
 class (EffOps ops) => DynamicOps ops where
   dynamicOps

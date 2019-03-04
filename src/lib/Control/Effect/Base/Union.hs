@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
 
 module Control.Effect.Base.Union
 
@@ -14,29 +13,46 @@ import Control.Effect.Base.EffFunctor
 
 data Union f g where
 
-data UnionOps f g eff
+data UnionOps
+  (f :: (* -> *) -> *)
+  (g :: (* -> *) -> *)
+  (eff :: * -> *)
+  = (EffFunctor f, EffFunctor g)
+  => UnionOps (f eff) (g eff)
+
+data UnionModel
+  (f :: (* -> *))
+  (g :: (* -> *))
+  (a :: *)
+  = LeftModel (f a)
+  | RightModel (g a)
+
+instance (Functor f, Functor g)
+  => Functor (UnionModel f g)
   where
-    UnionOps
-      :: Operation f eff
-      -> Operation g eff
-      -> UnionOps f g eff
-
-data UnionModel f g a
-  = LeftModel (CoOperation f a)
-  | RightModel (CoOperation g a)
-
-instance (EffOps f, EffOps g) => Functor (UnionModel f g) where
-  fmap f (LeftModel x) = LeftModel $ fmap f x
-  fmap f (RightModel x) = RightModel $ fmap f x
+    fmap f (LeftModel x) = LeftModel $ fmap f x
+    fmap f (RightModel x) = RightModel $ fmap f x
 
 instance
-  (EffOps f, EffOps g)
-  => EffFunctor (UnionOps f g) where
-  effmap f (UnionOps x y) = UnionOps (effmap f x) (effmap f y)
+  ( EffFunctor f
+  , EffFunctor g
+  )
+  => EffFunctor (UnionOps f g)
+  where
+    -- type WrapComp (UnionOps f g) h = UnionOps (WrapComp f h) (WrapComp g h)
+
+    effmap f (UnionOps x y)
+      = UnionOps (effmap f x) (effmap f y)
+
+    -- wrapVal
+    --   :: forall h eff .
+    --   (Effect eff, EffFunctor (WrapComp f h), EffFunctor (WrapComp g h))
+    -- wrapVal f (UnionOps x y)
+    --   = UnionOps (wrapVal f x) (wrapVal f y)
 
 instance (EffOps f, EffOps g) => FreeEff (Union f g) where
-  type Operation (Union f g) = UnionOps f g
-  type CoOperation (Union f g) = UnionModel f g
+  type Operation (Union f g) = UnionOps (Operation f) (Operation g)
+  type CoOperation (Union f g) = UnionModel (CoOperation f) (CoOperation g)
 
   freeMonad = freeUnionOps
 
@@ -56,8 +72,8 @@ freeUnionOps
   , Functor f
   , Effect eff
   )
-  => UnionModel ops1 ops2 ~> f
-  -> UnionOps ops1 ops2 (FreeT f eff)
+  => UnionModel (CoOperation ops1) (CoOperation ops2) ~> f
+  -> UnionOps (Operation ops1) (Operation ops2) (FreeT f eff)
 freeUnionOps liftModel = UnionOps ops1 ops2
   where
     ops1 :: Operation ops1 (FreeT f eff)

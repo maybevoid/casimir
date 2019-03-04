@@ -1,4 +1,3 @@
-
 module Control.Effect.Computation
   ( Pure (..)
   , Return (..)
@@ -20,6 +19,7 @@ import Control.Effect.Base
   , LiftEff
   , joinLift
   , EffOps (..)
+  , EffFunctor (..)
   , Computation (..)
   )
 
@@ -30,6 +30,13 @@ newtype Pure a (eff :: * -> *) = Pure {
 newtype Return a eff = Return {
   returnVal :: eff a
 }
+
+instance EffFunctor (Return a) where
+  -- type WrapComp (Return a) f = (Return (f a))
+
+  effmap liftEff (Return mx) = Return $ liftEff mx
+
+  -- wrapVal wrap (Return mx) = Return $ fmap wrap mx
 
 type PureComputation a =
   forall eff . Computation NoEff (Pure a) eff

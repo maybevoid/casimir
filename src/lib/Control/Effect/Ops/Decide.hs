@@ -22,9 +22,15 @@ data DecideModel s a = DecideOp (s -> a)
 type DecideConstraint s eff = (?decideOps :: DecideOps s eff)
 
 instance EffFunctor (DecideOps s) where
+  -- type WrapComp (DecideOps s) f = DecideOps (f s)
+
   effmap liftEff decideOps = DecideOps {
     decideOp = liftEff $ decideOp decideOps
   }
+
+  -- wrapVal wrap decideOps = DecideOps {
+  --   decideOp = fmap wrap $ decideOp decideOps
+  -- }
 
 instance FreeEff (DecideEff s) where
   type Operation (DecideEff s) = DecideOps s

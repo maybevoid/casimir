@@ -182,7 +182,7 @@ composeExactHandlers
           -> (( OpsConstraint ops1 eff0
               , OpsConstraint ops2 eff0
               )
-              => UnionOps handler1 handler2 eff0)
+              => Operation (Union handler1 handler2) eff0)
         comp1 lift10 = UnionOps handler1' handler2'
           where
             handler1' :: Operation handler1 eff0

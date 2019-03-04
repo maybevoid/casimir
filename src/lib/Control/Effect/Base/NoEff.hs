@@ -14,7 +14,7 @@ import Control.Effect.Base.EffFunctor
 
 data NoEff where
 
-data NoOp (eff :: * -> *) = NoOp
+data NoOp a (eff :: * -> *) = NoOp
 
 data NoModel a = NoModel
 
@@ -25,11 +25,15 @@ instance NoConstraint eff where
 instance Functor NoModel where
   fmap _ _ = NoModel
 
-instance EffFunctor NoOp where
+instance EffFunctor (NoOp a) where
+  -- type WrapComp (NoOp a) f = (NoOp (f a))
+
   effmap _ _ = NoOp
 
+  -- wrapVal _ _ = NoOp
+
 instance FreeEff NoEff where
-  type Operation NoEff = NoOp
+  type Operation NoEff = (NoOp ())
   type CoOperation NoEff = NoModel
 
   freeMonad _ = NoOp

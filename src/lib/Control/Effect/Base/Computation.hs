@@ -14,7 +14,7 @@ data Computation ops comp eff = Computation {
     -> ((OpsConstraint ops eff') => comp eff')
 }
 
-data Handler ops handler outerEff innerEff
+data Handler ops handler eff1 eff2
   = Handler
-    (LiftEff innerEff outerEff)
-    (Computation ops (Operation handler) outerEff)
+    (LiftEff eff2 eff1)
+    (Computation ops (Operation handler) eff1)
