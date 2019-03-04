@@ -23,3 +23,7 @@ class
       => Operation ops eff
       -> (OpsConstraint ops eff => r)
       -> r
+
+    captureOps :: forall eff .
+      (Effect eff, OpsConstraint ops eff)
+      => Operation ops eff

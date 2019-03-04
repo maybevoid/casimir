@@ -42,3 +42,5 @@ instance EffOps NoEff where
   type OpsConstraint NoEff eff = NoConstraint eff
 
   bindConstraint _ = id
+
+  captureOps = NoOp

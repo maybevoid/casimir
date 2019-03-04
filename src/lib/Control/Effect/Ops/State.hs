@@ -55,6 +55,8 @@ instance EffOps (StateEff s) where
 
   bindConstraint stateOps comp = let ?stateOps = stateOps in comp
 
+  captureOps = ?stateOps
+
 get :: forall a eff .
   (StateConstraint a eff)
   => eff a

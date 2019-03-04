@@ -48,6 +48,8 @@ instance EffOps IoEff where
 
   bindConstraint ioOps comp = let ?ioOps = ioOps in comp
 
+  captureOps = ?ioOps
+
 liftIo :: forall a eff .
   (IoConstraint eff)
   => IO a -> eff a

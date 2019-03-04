@@ -2,7 +2,8 @@
 
 module Control.Effect.Cast
   ( Cast (..)
-  , CastOps (..)
+  , OpsCast (..)
+  , castOps
   , runCast
   , composeCast
   , extendNoEffCast
@@ -21,8 +22,8 @@ import Control.Effect.Base
   ( NoEff
   , Union
   , Effect
-  , EffOps
   , LiftEff
+  , EffOps (..)
   , Handler (..)
   , FreeEff (..)
   , OpsConstraint
@@ -31,18 +32,29 @@ import Control.Effect.Base
 
 data Cast p = p => Cast
 
-data CastOps ops1 ops2 = CastOps
+data OpsCast ops1 ops2 = OpsCast
   (forall eff . OpsConstraint ops1 eff => Cast (OpsConstraint ops2 eff))
 
 runCast
   :: forall eff ops1 ops2 r .
   ( OpsConstraint ops1 eff )
-  => CastOps ops1 ops2
+  => OpsCast ops1 ops2
   -> (OpsConstraint ops2 eff => r)
   -> r
-runCast (CastOps cast) res =
+runCast (OpsCast cast) res =
   case cast @eff of
     Cast -> res
+
+castOps
+  :: forall eff ops1 ops2 .
+  ( Effect eff
+  , EffOps ops1
+  , EffOps ops2
+  )
+  => OpsCast ops1 ops2
+  -> Operation ops1 eff
+  -> Operation ops2 eff
+castOps cast ops = bindConstraint ops $ runCast @eff cast captureOps
 
 composeCast
   :: forall ops1 ops2 ops3.
@@ -50,10 +62,10 @@ composeCast
   , EffOps ops2
   , EffOps ops3
   )
-  => CastOps ops1 ops2
-  -> CastOps ops2 ops3
-  -> CastOps ops1 ops3
-composeCast cast1 cast2 = CastOps cast3
+  => OpsCast ops1 ops2
+  -> OpsCast ops2 ops3
+  -> OpsCast ops1 ops3
+composeCast cast1 cast2 = OpsCast cast3
   where
     cast3
       :: forall eff .
@@ -66,9 +78,9 @@ extendNoEffCast
   ( EffOps ops1
   , EffOps ops2
   )
-  => CastOps ops1 ops2
-  -> CastOps ops1 (Union NoEff ops2)
-extendNoEffCast cast1 = CastOps cast2
+  => OpsCast ops1 ops2
+  -> OpsCast ops1 (Union NoEff ops2)
+extendNoEffCast cast1 = OpsCast cast2
   where
     cast2
       :: forall eff .
@@ -82,9 +94,9 @@ weakenRightCast
   , EffOps ops2
   , EffOps ops3
   )
-  => CastOps ops1 (Union ops2 ops3)
-  -> CastOps ops1 ops2
-weakenRightCast cast1 = CastOps cast2
+  => OpsCast ops1 (Union ops2 ops3)
+  -> OpsCast ops1 ops2
+weakenRightCast cast1 = OpsCast cast2
   where
     cast2
       :: forall eff .
@@ -98,9 +110,9 @@ weakenLeftCast
   , EffOps ops2
   , EffOps ops3
   )
-  => CastOps ops1 ops2
-  -> CastOps (Union ops1 ops3) ops2
-weakenLeftCast (CastOps cast) = CastOps cast
+  => OpsCast ops1 ops2
+  -> OpsCast (Union ops1 ops3) ops2
+weakenLeftCast (OpsCast cast) = OpsCast cast
 
 distributeRightCast
   :: forall ops1 ops2 ops3 ops4 .
@@ -109,9 +121,9 @@ distributeRightCast
   , EffOps ops3
   , EffOps ops4
   )
-  => CastOps ops1 (Union (Union ops2 ops3) ops4)
-  -> CastOps ops1 (Union ops2 (Union ops3 ops4))
-distributeRightCast cast1 = CastOps cast2
+  => OpsCast ops1 (Union (Union ops2 ops3) ops4)
+  -> OpsCast ops1 (Union ops2 (Union ops3 ops4))
+distributeRightCast cast1 = OpsCast cast2
   where
     cast2
       :: forall eff .
@@ -131,9 +143,9 @@ distributeLeftCast
   , EffOps ops3
   , EffOps ops4
   )
-  => CastOps (Union (Union ops1 ops2) ops3) ops4
-  -> CastOps (Union ops1 (Union ops2 ops3)) ops4
-distributeLeftCast (CastOps cast) = CastOps cast
+  => OpsCast (Union (Union ops1 ops2) ops3) ops4
+  -> OpsCast (Union ops1 (Union ops2 ops3)) ops4
+distributeLeftCast (OpsCast cast) = OpsCast cast
 
 castComputation
   :: forall eff ops1 ops2 comp .
@@ -142,7 +154,7 @@ castComputation
   , Effect eff
   )
   => Computation ops1 comp eff
-  -> CastOps ops2 ops1
+  -> OpsCast ops2 ops1
   -> Computation ops2 comp eff
 castComputation comp1 cast = Computation comp2
   where
@@ -160,7 +172,7 @@ castHandler
   , Effect eff2
   )
   => Handler ops1 handler eff1 eff2
-  -> CastOps ops2 ops1
+  -> OpsCast ops2 ops1
   -> Handler ops2 handler eff1 eff2
 castHandler (Handler lifter handler) cast =
   Handler lifter handler2
@@ -176,7 +188,7 @@ swapOps
   )
   => Computation (Union ops1 ops2) comp eff
   -> Computation (Union ops2 ops1) comp eff
-swapOps comp = castComputation comp $ CastOps Cast
+swapOps comp = castComputation comp $ OpsCast Cast
 
 weakenComputation
   :: forall ops1 ops2 comp eff .
@@ -186,4 +198,4 @@ weakenComputation
   )
   => Computation ops1 comp eff
   -> Computation (Union ops2 ops1) comp eff
-weakenComputation comp = castComputation comp $ CastOps Cast
+weakenComputation comp = castComputation comp $ OpsCast Cast

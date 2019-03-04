@@ -35,7 +35,7 @@ envHandler3 =
   composeHandlersWithCast
     @NoEff @NoEff @NoEff @NoEff
     envHandler1 envHandler2
-    (CastOps Cast) (CastOps Cast)
+    (OpsCast Cast) (OpsCast Cast)
 
 readerComp1 :: forall eff .
   (Effect eff, OpsConstraint (EnvEff Int) eff)
@@ -68,10 +68,10 @@ readerComp7 :: forall eff .
     (Union NoEff (Union (EnvEff Int) NoEff))
     Int
     eff
-readerComp7 = castComputation readerComp4 $ CastOps Cast
+readerComp7 = castComputation readerComp4 $ OpsCast Cast
 
 readerComp8 :: IdentityComputation Int
-readerComp8 = bindHandlerWithCast envHandler1 readerComp7 (CastOps Cast)
+readerComp8 = bindHandlerWithCast envHandler1 readerComp7 (OpsCast Cast)
 
 readerComp9 :: Identity Int
 readerComp9 = withHandler envHandler3 readerComp1
@@ -84,13 +84,13 @@ readerComp10 = withHandler envHandler1 comp
 
 readerComp11 :: Int
 readerComp11 = runIdentityComp $
-  bindHandlerWithCast envHandler3 readerComp4 (CastOps Cast)
+  bindHandlerWithCast envHandler3 readerComp4 (OpsCast Cast)
 
 readerComp12 :: forall eff . (Effect eff) => EffectfulComputation NoEff Int eff
 readerComp12 = bindHandler envHandler2 readerComp4
 
 readerComp13 :: forall eff . (Effect eff) => EffectfulComputation NoEff Int eff
-readerComp13 = bindHandlerWithCast envHandler1 readerComp12 (CastOps Cast)
+readerComp13 = bindHandlerWithCast envHandler1 readerComp12 (OpsCast Cast)
 
 readerComp14 :: Int
 readerComp14 = runIdentityComp readerComp13
@@ -192,7 +192,7 @@ decideComp2 = effectfulComputation decideComp1
 
 decideComp3 :: EffectfulComputation (DecideEff Bool) Int IO
 decideComp3 = bindExactHandler @(DecideEff Bool) @IoEff
-  ((castHandler ioHandler (CastOps Cast)) :: Handler (DecideEff Bool) IoEff IO IO)
+  ((castHandler ioHandler (OpsCast Cast)) :: Handler (DecideEff Bool) IoEff IO IO)
   decideComp2
 
 decideComp4 :: IO [Int]

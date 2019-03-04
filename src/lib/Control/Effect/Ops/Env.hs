@@ -57,6 +57,8 @@ instance EffOps (EnvEff a) where
 
   bindConstraint envOps comp = let ?envOps = envOps in comp
 
+  captureOps = ?envOps
+
 ask :: forall a eff . (EnvConstraint a eff) => eff a
 ask = askOp ?envOps
 

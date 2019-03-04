@@ -26,7 +26,7 @@ import Control.Monad.Trans.Free (Free)
 import Control.Effect.Computation (liftComputation)
 
 import Control.Effect.Cast
-  ( CastOps (..)
+  ( OpsCast (..)
   , castHandler
   , castComputation
   )
@@ -206,8 +206,8 @@ composeHandlersWithCast
   )
   => Handler ops1 handler1 eff1 eff2
   -> Handler ops2 handler2 eff2 eff3
-  -> CastOps (Union handler1 ops4) ops2
-  -> CastOps ops3 (Union ops1 ops4)
+  -> OpsCast (Union handler1 ops4) ops2
+  -> OpsCast ops3 (Union ops1 ops4)
   -> Handler ops3 (Union handler1 handler2) eff1 eff3
 composeHandlersWithCast handler1 handler2 cast1 cast2 =
   castHandler handler3 cast2
@@ -248,7 +248,7 @@ applyHandlerWithCast
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
-  -> CastOps (Union handler ops1) ops2
+  -> OpsCast (Union handler ops1) ops2
   -> r eff1
 applyHandlerWithCast handler comp cast =
   applyExactHandler handler $ castComputation comp cast
@@ -282,7 +282,7 @@ bindHandlerWithCast
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
-  -> CastOps (Union handler ops1) ops2
+  -> OpsCast (Union handler ops1) ops2
   -> Computation ops1 r eff1
 bindHandlerWithCast handler comp cast =
   bindExactHandler handler $ castComputation comp cast

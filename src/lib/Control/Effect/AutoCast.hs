@@ -14,7 +14,7 @@ where
 import Control.Effect.Base (Union, NoEff)
 
 import Control.Effect.Cast
-  ( CastOps (..)
+  ( OpsCast (..)
   , Cast (..)
   )
 
@@ -33,7 +33,7 @@ import Control.Effect.Base
   )
 
 class (EffOps ops1, EffOps ops2) => AutoCast ops1 ops2 where
-  castOps :: CastOps ops1 ops2
+  autocast :: OpsCast ops1 ops2
 
 class
   (EffOps ops1, EffOps ops2, EffOps ops3, EffOps handler1)
@@ -50,37 +50,37 @@ class
     -> Handler ops3 (Union handler1 handler2) eff1 eff3
 
 instance (EffOps ops) => AutoCast ops ops where
-  castOps = CastOps Cast
+  autocast = OpsCast Cast
 
 instance {-# INCOHERENT #-}
   (EffOps ops)
   => AutoCast (Union NoEff ops) ops
   where
-    castOps = CastOps Cast
+    autocast = OpsCast Cast
 
 instance {-# INCOHERENT #-}
   (EffOps ops)
   => AutoCast (Union ops NoEff) ops
   where
-    castOps = CastOps Cast
+    autocast = OpsCast Cast
 
 instance {-# INCOHERENT #-}
   (EffOps ops)
   => AutoCast ops (Union NoEff ops)
   where
-    castOps = CastOps Cast
+    autocast = OpsCast Cast
 
 instance {-# INCOHERENT #-}
   (EffOps ops)
   => AutoCast ops (Union ops NoEff)
   where
-    castOps = CastOps Cast
+    autocast = OpsCast Cast
 
 instance {-# INCOHERENT #-}
   (EffOps ops1, EffOps ops2)
   => AutoCast (Union ops1 ops2) (Union ops2 ops1)
   where
-    castOps = CastOps Cast
+    autocast = OpsCast Cast
 
 -- distributive
 -- ((ops1, ops2), ops3) :> (ops1, (ops2, ops3))
@@ -88,7 +88,7 @@ instance {-# INCOHERENT #-}
   (EffOps ops1, EffOps ops2, EffOps ops3)
   => AutoCast (Union (Union ops1 ops2) ops3) (Union ops1 (Union ops2 ops3))
   where
-    castOps = CastOps Cast
+    autocast = OpsCast Cast
 
 instance {-# OVERLAPPING #-}
   (EffOps ops1, EffOps ops2, EffOps handler1)
@@ -133,8 +133,8 @@ instance {-# INCOHERENT #-}
         @ops1 @ops2 @(Union ops1 ops2) @ops2
         handler1
         handler2
-        (CastOps Cast)
-        (CastOps Cast)
+        (OpsCast Cast)
+        (OpsCast Cast)
 
 instance {-# INCOHERENT #-}
   (EffOps ops1, EffOps handler1)
@@ -159,8 +159,8 @@ instance {-# INCOHERENT #-}
         @ops1 @handler1 @ops1 @NoEff
         handler1
         handler2
-        (CastOps Cast)
-        (CastOps Cast)
+        (OpsCast Cast)
+        (OpsCast Cast)
 
 instance {-# INCOHERENT #-}
   ( EffOps ops1
@@ -192,8 +192,8 @@ instance {-# INCOHERENT #-}
         @ops1 @ops2 @ops3 @ops4
         handler1
         handler2
-        castOps
-        castOps
+        autocast
+        autocast
 
 applyHandler
   :: forall ops1 ops2 handler eff1 eff2 r .
@@ -209,7 +209,7 @@ applyHandler
   -> Computation ops2 r eff2
   -> r eff1
 applyHandler handler comp =
-  applyHandlerWithCast handler comp castOps
+  applyHandlerWithCast handler comp autocast
 
 bindHandler
   :: forall ops1 ops2 handler eff1 eff2 r .
@@ -224,4 +224,4 @@ bindHandler
   -> Computation ops2 r eff2
   -> Computation ops1 r eff1
 bindHandler handler comp =
-  bindHandlerWithCast handler comp castOps
+  bindHandlerWithCast handler comp autocast

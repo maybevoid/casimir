@@ -65,6 +65,8 @@ instance (EffOps f, EffOps g) => EffOps (Union f g) where
   bindConstraint (UnionOps x y) comp =
     bindConstraint x $ bindConstraint y comp
 
+  captureOps = UnionOps captureOps captureOps
+
 freeUnionOps
   :: forall ops1 ops2 f eff.
   ( EffOps ops1

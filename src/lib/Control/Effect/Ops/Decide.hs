@@ -43,6 +43,8 @@ instance EffOps (DecideEff s) where
 
   bindConstraint decideOps comp = let ?decideOps = decideOps in comp
 
+  captureOps = ?decideOps
+
 instance DynamicOps (DecideEff s) where
   dynamicOps = dynamicDecideOps
 
