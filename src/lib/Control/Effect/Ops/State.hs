@@ -13,12 +13,11 @@ where
 import Control.Natural (type (~>))
 import Control.Monad.Trans.Free (FreeT, liftF)
 
-import Control.Effect.Class
+import Control.Effect.Base
   ( Effect
   , EffFunctor (..)
   , FreeEff (..)
   , EffOps (..)
-  , liftEff
   )
 
 data StateOps s eff = StateOps {
@@ -37,9 +36,9 @@ instance Functor (StateModel s) where
   fmap f (PutOp s cont) = PutOp s $ fmap f cont
 
 instance EffFunctor (StateOps a) where
-  effmap f stateOps = StateOps {
-    getOp = liftEff f $ getOp stateOps,
-    putOp = liftEff f . putOp stateOps
+  effmap liftEff stateOps = StateOps {
+    getOp = liftEff $ getOp stateOps,
+    putOp = liftEff . putOp stateOps
   }
 
 instance FreeEff (StateOps s) where

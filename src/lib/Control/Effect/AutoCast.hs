@@ -11,8 +11,7 @@ module Control.Effect.AutoCast
   )
 where
 
-import Control.Effect.Union (Union (..))
-import Control.Effect.Ops.NoOp (NoOp (..))
+import Control.Effect.Base (Union (..), NoOp (..))
 
 import Control.Effect.Cast
   ( CastOps (..)
@@ -26,7 +25,7 @@ import Control.Effect.Handler
   , bindHandlerWithCast
   )
 
-import Control.Effect.Class
+import Control.Effect.Base
   ( Effect
   , EffOps (..)
   , Handler (..)

@@ -11,12 +11,11 @@ where
 import Control.Natural (type (~>))
 import Control.Monad.Trans.Free (FreeT, liftF)
 
-import Control.Effect.Class
+import Control.Effect.Base
   ( Effect
   , EffFunctor (..)
   , FreeEff (..)
   , EffOps (..)
-  , liftEff
   )
 
 data IoOps eff = IoOps {
@@ -31,8 +30,8 @@ instance Functor IoModel where
   fmap f (LiftIO io) = LiftIO $ fmap f io
 
 instance EffFunctor IoOps where
-  effmap f ioOps = IoOps {
-    liftIoOp = liftEff f . liftIoOp ioOps
+  effmap liftEff ioOps = IoOps {
+    liftIoOp = liftEff . liftIoOp ioOps
   }
 
 instance FreeEff IoOps where

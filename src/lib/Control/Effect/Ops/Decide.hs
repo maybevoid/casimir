@@ -7,7 +7,7 @@ where
 import Control.Natural (type (~>))
 import Control.Monad.Trans.Free (FreeT, liftF)
 
-import Control.Effect.Class
+import Control.Effect.Base
 import Control.Effect.Dynamic
 
 data DecideOps s eff = DecideOps {
@@ -20,8 +20,8 @@ data DecideModel s a = DecideOp (s -> a)
 type DecideEff s eff = (?decideOps :: DecideOps s eff)
 
 instance EffFunctor (DecideOps s) where
-  effmap f decideOps = DecideOps {
-    decideOp = liftEff f $ decideOp decideOps
+  effmap liftEff decideOps = DecideOps {
+    decideOp = liftEff $ decideOp decideOps
   }
 
 instance FreeEff (DecideOps s) where

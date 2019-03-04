@@ -3,8 +3,7 @@ module Control.Effect.Dynamic
 
 where
 
-import Control.Effect.Class
-import Control.Effect.Union
+import Control.Effect.Base
 import Control.Effect.Computation
 
 data OpsHandler f a r eff = OpsHandler {
@@ -173,8 +172,8 @@ applyDynamic
 applyDynamic handler1 comp1 = comp2
  where
   handler2 :: OpsHandler (FreeModel ops1) a r eff
-  handler2 = runComp handler1 idLift
+  handler2 = runComp handler1 id
 
   comp2 :: eff r
   comp2 = handleDynamic handler2 $ returnVal $
-    runComp comp1 (LiftEff liftReturn)
+    runComp comp1 liftReturn

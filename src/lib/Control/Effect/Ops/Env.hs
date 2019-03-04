@@ -13,12 +13,11 @@ import Control.Compose (Flip (..))
 import Control.Natural (type (~>))
 import Control.Monad.Trans.Free (FreeT, liftF)
 
-import Control.Effect.Class
+import Control.Effect.Base
   ( Effect
   , EffFunctor (..)
   , FreeEff (..)
   , EffOps (..)
-  , liftEff
   )
 
 data EnvOps a eff = EnvOps {
@@ -31,8 +30,8 @@ data EnvModel env r =
 type EnvEff a eff = (?envOps :: EnvOps a eff)
 
 instance EffFunctor (EnvOps a) where
-  effmap f envOps = EnvOps {
-    askOp = liftEff f $ askOp envOps
+  effmap liftEff envOps = EnvOps {
+    askOp = liftEff $ askOp envOps
   }
 
 instance Functor (EnvModel r) where

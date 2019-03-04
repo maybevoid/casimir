@@ -17,13 +17,12 @@ module Control.Effect.Cast
   )
 where
 
-import Control.Effect.Union (Union (..))
-import Control.Effect.Ops.NoOp (NoOp (..))
-
-import Control.Effect.Class
+import Control.Effect.Base
   ( Effect
   , EffOps
   , LiftEff
+  , NoOp (..)
+  , Union (..)
   , Handler (..)
   , EffConstraint
   , Computation (..)

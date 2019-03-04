@@ -14,15 +14,13 @@ where
 
 import Control.Monad.Identity (Identity (..))
 
-import Control.Effect.Ops.NoOp (NoOp)
-
-import Control.Effect.Class
-  ( Effect
-  , EffOps (..)
-  , LiftEff (..)
-  , Computation (..)
-  , idLift
+import Control.Effect.Base
+  ( NoOp
+  , Effect
+  , LiftEff
   , joinLift
+  , EffOps (..)
+  , Computation (..)
   )
 
 newtype Pure a (eff :: * -> *) = Pure {
@@ -77,4 +75,4 @@ effectfulComputation comp1 = Computation comp2
     comp2 _ = Return comp1
 
 runIdentityComp :: forall a . IdentityComputation a -> a
-runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift
+runIdentityComp comp = runIdentity $ returnVal $ runComp comp id

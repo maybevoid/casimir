@@ -1,17 +1,15 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Control.Effect.Ops.NoOp
+module Control.Effect.Base.NoOp
   ( NoOp (..)
   , NoModel (..)
   , NoConstraint
   )
 where
 
-import Control.Effect.Class
-  ( EffFunctor (..)
-  , FreeEff (..)
-  , EffOps (..)
-  )
+import Control.Effect.Base.EffOps
+import Control.Effect.Base.FreeEff
+import Control.Effect.Base.EffFunctor
 
 data NoOp (eff :: * -> *) = NoOp
 

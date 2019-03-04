@@ -1,6 +1,5 @@
 module Control.Effect
-  ( module Control.Effect.Class
-  , module Control.Effect.Union
+  ( module Control.Effect.Base
   , module Control.Effect.Computation
   , module Control.Effect.Handler
   , module Control.Effect.Cast
@@ -11,8 +10,7 @@ module Control.Effect
   )
 where
 
-import Control.Effect.Class
-import Control.Effect.Union
+import Control.Effect.Base
 import Control.Effect.Computation
 import Control.Effect.Handler
 import Control.Effect.Cast

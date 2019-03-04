@@ -23,8 +23,6 @@ where
 
 import Control.Monad.Trans.Free (Free)
 
-import Control.Effect.Ops.NoOp (NoOp)
-import Control.Effect.Union (Union (..))
 import Control.Effect.Computation (liftComputation)
 
 import Control.Effect.Cast
@@ -33,16 +31,17 @@ import Control.Effect.Cast
   , castComputation
   )
 
-import Control.Effect.Class
-  ( Effect
+import Control.Effect.Base
+  ( NoOp
+  , Effect
+  , LiftEff
+  , Union (..)
   , EffOps (..)
   , FreeEff (..)
-  , LiftEff (..)
   , Handler (..)
   , EffConstraint
   , EffFunctor (..)
   , Computation (..)
-  , idLift
   , joinLift
   )
 
@@ -103,7 +102,7 @@ baseHandler
   (EffOps handler, Effect eff)
   => handler eff
   -> BaseHandler handler eff
-baseHandler handler = Handler idLift $
+baseHandler handler = Handler id $
   Computation $ \lifter -> effmap lifter handler
 
 genericHandler
@@ -111,7 +110,7 @@ genericHandler
   (EffOps ops, EffOps handler)
   => (forall eff . (Effect eff, EffConstraint ops eff) => handler eff)
   -> GenericHandler ops handler
-genericHandler handler = Handler idLift $ Computation comp1
+genericHandler handler = Handler id $ Computation comp1
   where
     comp1
       :: forall eff1 eff2 .
@@ -135,7 +134,7 @@ flattenHandler
   )
   => Handler ops handler eff1 eff2
   -> FlatHandler ops handler eff1
-flattenHandler (Handler _ handler) = Handler idLift handler
+flattenHandler (Handler _ handler) = Handler id handler
 
 withHandler
   :: forall ops handler eff1 eff2 r .
@@ -153,7 +152,7 @@ withHandler (Handler _ handler1) comp1 = comp2
     comp2 = bindConstraint handler2 comp1
 
     handler2 :: handler eff1
-    handler2 = runComp handler1 idLift
+    handler2 = runComp handler1 id
 
 composeExactHandlers
   :: forall ops1 ops2 handler1 handler2 eff1 eff2 eff3 .
@@ -232,7 +231,7 @@ applyExactHandler (Handler lift21 handler1) comp1 = comp2
     comp2 = bindConstraint handler2 $ runComp comp1 lift21
 
     handler2 :: handler eff1
-    handler2 = runComp handler1 idLift
+    handler2 = runComp handler1 id
 
 applyHandlerWithCast
   :: forall ops1 ops2 handler eff1 eff2 r .

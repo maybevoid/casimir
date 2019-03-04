@@ -1,18 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Control.Effect.Union
+module Control.Effect.Base.Union
 
 where
 
 import Control.Natural (type (~>))
 import Control.Monad.Trans.Free (FreeT)
 
-import Control.Effect.Class
-  ( Effect
-  , EffOps (..)
-  , FreeEff (..)
-  , EffFunctor (..)
-  )
+import Control.Effect.Base.Effect
+import Control.Effect.Base.EffOps
+import Control.Effect.Base.FreeEff
+import Control.Effect.Base.EffFunctor
 
 data Union
   (f :: (* -> *) -> *)

@@ -32,6 +32,8 @@ default-extensions:
   - KindSignatures
   - ConstraintKinds
   - TypeApplications
+  - FlexibleContexts
+  - FlexibleInstances
   - DerivingStrategies
   - ScopedTypeVariables
   - MultiParamTypeClasses
