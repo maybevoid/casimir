@@ -11,7 +11,7 @@ module Control.Effect.AutoCast
   )
 where
 
-import Control.Effect.Base (Union (..), NoOp (..))
+import Control.Effect.Base (Union, NoEff)
 
 import Control.Effect.Cast
   ( CastOps (..)
@@ -54,25 +54,25 @@ instance (EffOps ops) => AutoCast ops ops where
 
 instance {-# INCOHERENT #-}
   (EffOps ops)
-  => AutoCast (Union NoOp ops) ops
+  => AutoCast (Union NoEff ops) ops
   where
     castOps = CastOps Cast
 
 instance {-# INCOHERENT #-}
   (EffOps ops)
-  => AutoCast (Union ops NoOp) ops
+  => AutoCast (Union ops NoEff) ops
   where
     castOps = CastOps Cast
 
 instance {-# INCOHERENT #-}
   (EffOps ops)
-  => AutoCast ops (Union NoOp ops)
+  => AutoCast ops (Union NoEff ops)
   where
     castOps = CastOps Cast
 
 instance {-# INCOHERENT #-}
   (EffOps ops)
-  => AutoCast ops (Union ops NoOp)
+  => AutoCast ops (Union ops NoEff)
   where
     castOps = CastOps Cast
 
@@ -156,7 +156,7 @@ instance {-# INCOHERENT #-}
       -> Handler ops1 (Union handler1 handler2) eff1 eff3
     composeHandlers handler1 handler2 =
       composeHandlersWithCast
-        @ops1 @handler1 @ops1 @NoOp
+        @ops1 @handler1 @ops1 @NoEff
         handler1
         handler2
         (CastOps Cast)

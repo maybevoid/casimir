@@ -10,15 +10,15 @@ import Control.Effect.Base.FreeEff
 import Control.Effect.Base.EffFunctor
 
 class
-  ( EffFunctor ops
-  , FreeEff ops
-  , Functor (FreeModel ops)
+  ( FreeEff ops
+  , Functor (CoOperation ops)
+  , EffFunctor (Operation ops)
   )
-  => EffOps (ops :: (* -> *) -> *) where
+  => EffOps (ops :: *) where
     type family EffConstraint ops (eff :: * -> *) = (c :: Constraint) | c -> ops eff
 
     bindConstraint :: forall eff r .
       (Effect eff)
-      => ops eff
+      => Operation ops eff
       -> (EffConstraint ops eff => r)
       -> r

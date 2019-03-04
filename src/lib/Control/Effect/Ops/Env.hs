@@ -1,9 +1,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Control.Effect.Ops.Env
-  ( EnvOps (..)
+  ( EnvEff
+  , EnvOps (..)
   , EnvModel (..)
-  , EnvEff
+  , EnvConstraint
   , ask
   , freeEnvOps
   )
@@ -20,6 +21,8 @@ import Control.Effect.Base
   , EffOps (..)
   )
 
+data EnvEff a where
+
 data EnvOps a eff = EnvOps {
   askOp :: eff a
 }
@@ -27,7 +30,7 @@ data EnvOps a eff = EnvOps {
 data EnvModel env r =
   AskOp (env -> r)
 
-type EnvEff a eff = (?envOps :: EnvOps a eff)
+type EnvConstraint a eff = (?envOps :: EnvOps a eff)
 
 instance EffFunctor (EnvOps a) where
   effmap liftEff envOps = EnvOps {
@@ -37,17 +40,18 @@ instance EffFunctor (EnvOps a) where
 instance Functor (EnvModel r) where
   fmap f (AskOp cont) = AskOp $ fmap f cont
 
-instance FreeEff (EnvOps a) where
-  type FreeModel (EnvOps a) = EnvModel a
+instance FreeEff (EnvEff a) where
+  type Operation (EnvEff a) = EnvOps a
+  type CoOperation (EnvEff a) = EnvModel a
 
-  freeModel = freeEnvOps
+  freeMonad = freeEnvOps
 
-instance EffOps (EnvOps a) where
-  type EffConstraint (EnvOps a) eff = (EnvEff a eff)
+instance EffOps (EnvEff a) where
+  type EffConstraint (EnvEff a) eff = (EnvConstraint a eff)
 
   bindConstraint envOps comp = let ?envOps = envOps in comp
 
-ask :: forall a eff . (EnvEff a eff) => eff a
+ask :: forall a eff . (EnvConstraint a eff) => eff a
 ask = askOp ?envOps
 
 freeEnvOps

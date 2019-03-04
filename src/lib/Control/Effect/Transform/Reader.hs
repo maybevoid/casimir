@@ -12,18 +12,19 @@ import Control.Monad.Trans.Class
   (MonadTrans (..))
 
 import Control.Effect.Handler (mkHandler)
-import Control.Effect.Ops.Env (EnvOps (..))
+import Control.Effect.Ops.Env (EnvEff, EnvOps (..))
 
 import Control.Effect.Base
   ( Effect
   , Handler
+  , NoEff
   , NoOp (..)
   )
 
 readerTHandler
   :: forall a eff .
   (Effect eff)
-  => Handler NoOp (EnvOps a) (ReaderT a eff) eff
+  => Handler NoEff (EnvEff a) (ReaderT a eff) eff
 readerTHandler = mkHandler lift $
   \liftEff -> EnvOps {
     askOp = liftEff ask
@@ -33,7 +34,7 @@ runReaderTHandler
   :: forall a eff .
   (Effect eff)
   => a
-  -> Handler NoOp NoOp eff (ReaderT a eff)
+  -> Handler NoEff NoEff eff (ReaderT a eff)
 runReaderTHandler x =
   mkHandler  lifter $ \_ -> NoOp
     where

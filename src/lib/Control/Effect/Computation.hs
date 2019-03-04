@@ -15,7 +15,7 @@ where
 import Control.Monad.Identity (Identity (..))
 
 import Control.Effect.Base
-  ( NoOp
+  ( NoEff
   , Effect
   , LiftEff
   , joinLift
@@ -32,12 +32,12 @@ newtype Return a eff = Return {
 }
 
 type PureComputation a =
-  forall eff . Computation NoOp (Pure a) eff
+  forall eff . Computation NoEff (Pure a) eff
 
 type EffectfulComputation ops a eff =
   Computation ops (Return a) eff
 
-type IdentityComputation a = EffectfulComputation NoOp a Identity
+type IdentityComputation a = EffectfulComputation NoEff a Identity
 
 liftComputation :: forall ops comp eff1 eff2 .
   (EffOps ops, Effect eff1, Effect eff2)

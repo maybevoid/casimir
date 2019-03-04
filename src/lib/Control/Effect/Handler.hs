@@ -32,13 +32,14 @@ import Control.Effect.Cast
   )
 
 import Control.Effect.Base
-  ( NoOp
+  ( NoEff
   , Effect
   , LiftEff
-  , Union (..)
+  , Union
   , EffOps (..)
   , FreeEff (..)
   , Handler (..)
+  , UnionOps (..)
   , EffConstraint
   , EffFunctor (..)
   , Computation (..)
@@ -47,11 +48,11 @@ import Control.Effect.Base
 
 type FlatHandler ops handler eff = Handler ops handler eff eff
 
-type BaseHandler handler eff = FlatHandler NoOp handler eff
+type BaseHandler handler eff = FlatHandler NoEff handler eff
 
 type GenericHandler ops handler = forall eff . FlatHandler ops handler eff
 
-type FreeHandler handler = BaseHandler handler (Free (FreeModel handler))
+type FreeHandler handler = BaseHandler handler (Free (CoOperation handler))
 
 mkHandler
   :: forall ops handler outerEff innerEff .
@@ -64,7 +65,7 @@ mkHandler
   -> (forall eff .
       (Effect eff)
       => LiftEff outerEff eff
-      -> (EffConstraint ops eff) => handler eff)
+      -> (EffConstraint ops eff) => Operation handler eff)
   -> Handler ops handler outerEff innerEff
 mkHandler lifter comp = Handler lifter $ Computation comp
 
@@ -100,7 +101,7 @@ innerLiftHandler lift32 (Handler lift21 handler) =
 baseHandler
   :: forall handler eff .
   (EffOps handler, Effect eff)
-  => handler eff
+  => Operation handler eff
   -> BaseHandler handler eff
 baseHandler handler = Handler id $
   Computation $ \lifter -> effmap lifter handler
@@ -108,7 +109,9 @@ baseHandler handler = Handler id $
 genericHandler
   :: forall ops handler .
   (EffOps ops, EffOps handler)
-  => (forall eff . (Effect eff, EffConstraint ops eff) => handler eff)
+  => (forall eff .
+      (Effect eff, EffConstraint ops eff)
+      => Operation handler eff)
   -> GenericHandler ops handler
 genericHandler handler = Handler id $ Computation comp1
   where
@@ -116,14 +119,15 @@ genericHandler handler = Handler id $ Computation comp1
       :: forall eff1 eff2 .
       (Effect eff1, Effect eff2)
       => LiftEff eff1 eff2
-      -> ((EffConstraint ops eff2) => handler eff2)
+      -> ((EffConstraint ops eff2)
+          => Operation handler eff2)
     comp1 _ = handler
 
 freeHandler
   :: forall handler .
   (EffOps handler)
   => FreeHandler handler
-freeHandler = baseHandler $ freeModel id
+freeHandler = baseHandler $ freeMonad id
 
 flattenHandler
   :: forall ops handler eff1 eff2 .
@@ -151,7 +155,7 @@ withHandler (Handler _ handler1) comp1 = comp2
   where
     comp2 = bindConstraint handler2 comp1
 
-    handler2 :: handler eff1
+    handler2 :: Operation handler eff1
     handler2 = runComp handler1 id
 
 composeExactHandlers
@@ -178,13 +182,13 @@ composeExactHandlers
           -> (( EffConstraint ops1 eff0
               , EffConstraint ops2 eff0
               )
-              => Union handler1 handler2 eff0)
-        comp1 lift10 = Union handler1' handler2'
+              => UnionOps handler1 handler2 eff0)
+        comp1 lift10 = UnionOps handler1' handler2'
           where
-            handler1' :: handler1 eff0
+            handler1' :: Operation handler1 eff0
             handler1' = runComp handler1 lift10
 
-            handler2' :: handler2 eff0
+            handler2' :: Operation handler2 eff0
             handler2' = bindConstraint handler1' $
               runComp handler2 $ joinLift lift21 lift10
 
@@ -230,7 +234,7 @@ applyExactHandler (Handler lift21 handler1) comp1 = comp2
     comp2 :: r eff1
     comp2 = bindConstraint handler2 $ runComp comp1 lift21
 
-    handler2 :: handler eff1
+    handler2 :: Operation handler eff1
     handler2 = runComp handler1 id
 
 applyHandlerWithCast

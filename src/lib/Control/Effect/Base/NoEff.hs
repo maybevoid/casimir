@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Control.Effect.Base.NoOp
-  ( NoOp (..)
+module Control.Effect.Base.NoEff
+  ( NoEff
+  , NoOp (..)
   , NoModel (..)
   , NoConstraint
   )
@@ -11,9 +12,10 @@ import Control.Effect.Base.EffOps
 import Control.Effect.Base.FreeEff
 import Control.Effect.Base.EffFunctor
 
+data NoEff where
+
 data NoOp (eff :: * -> *) = NoOp
 
--- e.g. Proxy
 data NoModel a = NoModel
 
 class NoConstraint (eff :: * -> *) where
@@ -26,12 +28,13 @@ instance Functor NoModel where
 instance EffFunctor NoOp where
   effmap _ _ = NoOp
 
-instance FreeEff NoOp where
-  type FreeModel NoOp = NoModel
+instance FreeEff NoEff where
+  type Operation NoEff = NoOp
+  type CoOperation NoEff = NoModel
 
-  freeModel _ = NoOp
+  freeMonad _ = NoOp
 
-instance EffOps NoOp where
-  type EffConstraint NoOp eff = NoConstraint eff
+instance EffOps NoEff where
+  type EffConstraint NoEff eff = NoConstraint eff
 
   bindConstraint _ = id

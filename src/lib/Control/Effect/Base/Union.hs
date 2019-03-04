@@ -12,35 +12,41 @@ import Control.Effect.Base.EffOps
 import Control.Effect.Base.FreeEff
 import Control.Effect.Base.EffFunctor
 
-data Union
-  (f :: (* -> *) -> *)
-  (g :: (* -> *) -> *)
-  (eff :: * -> *)
-  where
-    Union :: f eff -> g eff -> Union f g eff
+data Union f g where
 
-data UnionModel f g a =
-  LeftModel (FreeModel f a)
-  | RightModel (FreeModel g a)
+data UnionOps f g eff
+  where
+    UnionOps
+      :: Operation f eff
+      -> Operation g eff
+      -> UnionOps f g eff
+
+data UnionModel f g a
+  = LeftModel (CoOperation f a)
+  | RightModel (CoOperation g a)
 
 instance (EffOps f, EffOps g) => Functor (UnionModel f g) where
   fmap f (LeftModel x) = LeftModel $ fmap f x
   fmap f (RightModel x) = RightModel $ fmap f x
 
-instance (EffOps f, EffOps g) => EffFunctor (Union f g) where
-  effmap f (Union x y) = Union (effmap f x) (effmap f y)
+instance
+  (EffOps f, EffOps g)
+  => EffFunctor (UnionOps f g) where
+  effmap f (UnionOps x y) = UnionOps (effmap f x) (effmap f y)
 
 instance (EffOps f, EffOps g) => FreeEff (Union f g) where
-  type FreeModel (Union f g) = UnionModel f g
+  type Operation (Union f g) = UnionOps f g
+  type CoOperation (Union f g) = UnionModel f g
 
-  freeModel = freeUnionOps
+  freeMonad = freeUnionOps
 
 instance (EffOps f, EffOps g) => EffOps (Union f g) where
-  -- reverse the order as the left most constraint gets
-  -- precedence if there is an overlap
-  type EffConstraint (Union f g) eff = (EffConstraint g eff, EffConstraint f eff)
+  -- reverse the order as the left most constraint
+  -- gets precedence if there is an overlap
+  type EffConstraint (Union f g) eff =
+    (EffConstraint g eff, EffConstraint f eff)
 
-  bindConstraint (Union x y) comp =
+  bindConstraint (UnionOps x y) comp =
     bindConstraint x $ bindConstraint y comp
 
 freeUnionOps
@@ -51,11 +57,11 @@ freeUnionOps
   , Effect eff
   )
   => UnionModel ops1 ops2 ~> f
-  -> Union ops1 ops2 (FreeT f eff)
-freeUnionOps liftModel = Union ops1 ops2
+  -> UnionOps ops1 ops2 (FreeT f eff)
+freeUnionOps liftModel = UnionOps ops1 ops2
   where
-    ops1 :: ops1 (FreeT f eff)
-    ops1 = freeModel (liftModel . LeftModel)
+    ops1 :: Operation ops1 (FreeT f eff)
+    ops1 = freeMonad (liftModel . LeftModel)
 
-    ops2 :: ops2 (FreeT f eff)
-    ops2 = freeModel (liftModel . RightModel)
+    ops2 :: Operation ops2 (FreeT f eff)
+    ops2 = freeMonad (liftModel . RightModel)

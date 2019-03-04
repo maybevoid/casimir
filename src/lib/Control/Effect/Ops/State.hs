@@ -1,9 +1,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Control.Effect.Ops.State
-  ( StateOps (..)
+  ( StateEff
+  , StateOps (..)
   , StateModel (..)
-  , StateEff
+  , StateConstraint
   , get
   , put
   , freeStateOps
@@ -20,6 +21,8 @@ import Control.Effect.Base
   , EffOps (..)
   )
 
+data StateEff s where
+
 data StateOps s eff = StateOps {
   getOp :: eff s,
   putOp :: s -> eff ()
@@ -29,7 +32,7 @@ data StateModel s a =
     GetOp (s -> a)
   | PutOp s (() -> a)
 
-type StateEff s eff = (?stateOps :: StateOps s eff)
+type StateConstraint s eff = (?stateOps :: StateOps s eff)
 
 instance Functor (StateModel s) where
   fmap f (GetOp cont) = GetOp $ fmap f cont
@@ -41,23 +44,24 @@ instance EffFunctor (StateOps a) where
     putOp = liftEff . putOp stateOps
   }
 
-instance FreeEff (StateOps s) where
-  type FreeModel (StateOps s) = StateModel s
+instance FreeEff (StateEff s) where
+  type Operation (StateEff s) = StateOps s
+  type CoOperation (StateEff s) = StateModel s
 
-  freeModel = freeStateOps
+  freeMonad = freeStateOps
 
-instance EffOps (StateOps s) where
-  type EffConstraint (StateOps s) eff = StateEff s eff
+instance EffOps (StateEff s) where
+  type EffConstraint (StateEff s) eff = StateConstraint s eff
 
   bindConstraint stateOps comp = let ?stateOps = stateOps in comp
 
 get :: forall a eff .
-  (StateEff a eff)
+  (StateConstraint a eff)
   => eff a
 get = getOp ?stateOps
 
 put :: forall a eff .
-  (StateEff a eff)
+  (StateConstraint a eff)
   => a
   -> eff ()
 put = putOp ?stateOps

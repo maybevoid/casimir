@@ -1,8 +1,9 @@
 
 module Control.Effect.Ops.Io
-  ( IoOps (..)
+  ( IoEff
+  , IoOps (..)
   , IoModel (..)
-  , IoEff
+  , IoConstraint
   , liftIo
   , freeIoOps
   )
@@ -18,13 +19,15 @@ import Control.Effect.Base
   , EffOps (..)
   )
 
+data IoEff where
+
 data IoOps eff = IoOps {
   liftIoOp :: forall a . IO a -> eff a
 }
 
 data IoModel a = LiftIO (IO a)
 
-type IoEff eff = (?ioOps :: IoOps eff)
+type IoConstraint eff = (?ioOps :: IoOps eff)
 
 instance Functor IoModel where
   fmap f (LiftIO io) = LiftIO $ fmap f io
@@ -34,18 +37,19 @@ instance EffFunctor IoOps where
     liftIoOp = liftEff . liftIoOp ioOps
   }
 
-instance FreeEff IoOps where
-  type FreeModel IoOps = IoModel
+instance FreeEff IoEff where
+  type Operation IoEff = IoOps
+  type CoOperation IoEff = IoModel
 
-  freeModel = freeIoOps
+  freeMonad = freeIoOps
 
-instance EffOps IoOps where
-  type EffConstraint IoOps eff = (IoEff eff)
+instance EffOps IoEff where
+  type EffConstraint IoEff eff = (IoConstraint eff)
 
   bindConstraint ioOps comp = let ?ioOps = ioOps in comp
 
 liftIo :: forall a eff .
-  (IoEff eff)
+  (IoConstraint eff)
   => IO a -> eff a
 liftIo = liftIoOp ?ioOps
 

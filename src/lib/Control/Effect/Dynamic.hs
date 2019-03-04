@@ -16,7 +16,7 @@ newtype DynamicEff f eff a = DynamicEff {
 }
 
 type DynamicHandler ops1 ops2 a r eff =
-  Computation ops1 (OpsHandler (FreeModel ops2) a r) eff
+  Computation ops1 (OpsHandler (CoOperation ops2) a r) eff
 
 data DynamicContext ops1 ops2 ops3 a r eff =
   DynamicContext
@@ -27,7 +27,7 @@ class (EffOps ops) => DynamicOps ops where
   dynamicOps
     :: forall eff .
     (Effect eff)
-    => ops (DynamicEff (FreeModel ops) eff)
+    => Operation ops (DynamicEff (CoOperation ops) eff)
 
 instance (Monad eff, Functor f) => Functor (DynamicEff f eff) where
   fmap = mapDynamicEff
@@ -120,16 +120,16 @@ handleDynamic
   , EffOps ops
   , DynamicOps ops
   )
-  => OpsHandler (FreeModel ops) a b eff
-  -> (EffConstraint ops (DynamicEff (FreeModel ops) eff)
-      => (DynamicEff (FreeModel ops) eff) a)
+  => OpsHandler (CoOperation ops) a b eff
+  -> (EffConstraint ops (DynamicEff (CoOperation ops) eff)
+      => (DynamicEff (CoOperation ops) eff) a)
   -> eff b
 handleDynamic handler comp1 = runDynamicEff comp2 handler
  where
-  ops :: ops (DynamicEff (FreeModel ops) eff)
+  ops :: Operation ops (DynamicEff (CoOperation ops) eff)
   ops = dynamicOps
 
-  comp2 :: DynamicEff (FreeModel ops) eff a
+  comp2 :: DynamicEff (CoOperation ops) eff a
   comp2 = bindConstraint ops comp1
 
 mkDynamicHandler
@@ -142,7 +142,7 @@ mkDynamicHandler
       (Effect eff2)
       => LiftEff eff1 eff2
       -> (EffConstraint ops1 eff2
-          => OpsHandler (FreeModel ops2) a r eff2))
+          => OpsHandler (CoOperation ops2) a r eff2))
   -> DynamicHandler ops1 ops2 a r eff1
 mkDynamicHandler = Computation
 
@@ -154,7 +154,7 @@ genericDynamicHandler
   )
   => (forall eff2 .
       (Effect eff2, EffConstraint ops1 eff2)
-      => OpsHandler (FreeModel ops2) a r eff2)
+      => OpsHandler (CoOperation ops2) a r eff2)
   -> DynamicHandler ops1 ops2 a r eff1
 genericDynamicHandler comp = mkDynamicHandler $ \_ -> comp
 
@@ -171,7 +171,7 @@ applyDynamic
   -> eff r
 applyDynamic handler1 comp1 = comp2
  where
-  handler2 :: OpsHandler (FreeModel ops1) a r eff
+  handler2 :: OpsHandler (CoOperation ops1) a r eff
   handler2 = runComp handler1 id
 
   comp2 :: eff r

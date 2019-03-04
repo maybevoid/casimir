@@ -10,6 +10,8 @@ import Control.Monad.Trans.Free (FreeT, liftF)
 import Control.Effect.Base
 import Control.Effect.Dynamic
 
+data DecideEff s where
+
 data DecideOps s eff = DecideOps {
   decideOp :: eff s
 }
@@ -17,28 +19,29 @@ data DecideOps s eff = DecideOps {
 data DecideModel s a = DecideOp (s -> a)
   deriving (Functor)
 
-type DecideEff s eff = (?decideOps :: DecideOps s eff)
+type DecideConstraint s eff = (?decideOps :: DecideOps s eff)
 
 instance EffFunctor (DecideOps s) where
   effmap liftEff decideOps = DecideOps {
     decideOp = liftEff $ decideOp decideOps
   }
 
-instance FreeEff (DecideOps s) where
-  type FreeModel (DecideOps s) = DecideModel s
+instance FreeEff (DecideEff s) where
+  type Operation (DecideEff s) = DecideOps s
+  type CoOperation (DecideEff s) = DecideModel s
 
-  freeModel = freeDecideOps
+  freeMonad = freeDecideOps
 
-instance EffOps (DecideOps s) where
-  type EffConstraint (DecideOps s) eff = DecideEff s eff
+instance EffOps (DecideEff s) where
+  type EffConstraint (DecideEff s) eff = DecideConstraint s eff
 
   bindConstraint decideOps comp = let ?decideOps = decideOps in comp
 
-instance DynamicOps (DecideOps s) where
+instance DynamicOps (DecideEff s) where
   dynamicOps = dynamicDecideOps
 
 decide :: forall a eff .
-  (DecideEff a eff)
+  (DecideConstraint a eff)
   => eff a
 decide = decideOp ?decideOps
 

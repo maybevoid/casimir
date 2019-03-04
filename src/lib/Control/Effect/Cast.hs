@@ -5,7 +5,7 @@ module Control.Effect.Cast
   , CastOps (..)
   , runCast
   , composeCast
-  , extendNoOpCast
+  , extendNoEffCast
   , weakenLeftCast
   , weakenRightCast
   , distributeLeftCast
@@ -18,12 +18,13 @@ module Control.Effect.Cast
 where
 
 import Control.Effect.Base
-  ( Effect
+  ( NoEff
+  , Union
+  , Effect
   , EffOps
   , LiftEff
-  , NoOp (..)
-  , Union (..)
   , Handler (..)
+  , FreeEff (..)
   , EffConstraint
   , Computation (..)
   )
@@ -60,19 +61,19 @@ composeCast cast1 cast2 = CastOps cast3
       => Cast (EffConstraint ops3 eff)
     cast3 = runCast @eff cast1 $ runCast @eff cast2 Cast
 
-extendNoOpCast
+extendNoEffCast
   :: forall ops1 ops2 .
   ( EffOps ops1
   , EffOps ops2
   )
   => CastOps ops1 ops2
-  -> CastOps ops1 (Union NoOp ops2)
-extendNoOpCast cast1 = CastOps cast2
+  -> CastOps ops1 (Union NoEff ops2)
+extendNoEffCast cast1 = CastOps cast2
   where
     cast2
       :: forall eff .
       (EffConstraint ops1 eff)
-      => Cast (EffConstraint (Union NoOp ops2) eff)
+      => Cast (EffConstraint (Union NoEff ops2) eff)
     cast2 = runCast @eff cast1 Cast
 
 weakenRightCast
@@ -164,7 +165,7 @@ castHandler
 castHandler (Handler lifter handler) cast =
   Handler lifter handler2
     where
-      handler2 :: Computation ops2 handler eff1
+      handler2 :: Computation ops2 (Operation handler) eff1
       handler2 = castComputation handler cast
 
 swapOps

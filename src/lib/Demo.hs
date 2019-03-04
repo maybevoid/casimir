@@ -18,27 +18,27 @@ mkEnvHandler
   :: forall a eff .
   (Effect eff)
   => a
-  -> BaseHandler (EnvOps a) eff
+  -> BaseHandler (EnvEff a) eff
 mkEnvHandler = baseHandler . mkEnvOps
 
-envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvOps Int) eff
+envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvEff Int) eff
 envHandler1 = mkEnvHandler 3
 
-envHandler2 :: forall eff . (Effect eff) => BaseHandler (EnvOps Int) eff
+envHandler2 :: forall eff . (Effect eff) => BaseHandler (EnvEff Int) eff
 envHandler2 = mkEnvHandler 8
 
 envHandler3
   :: forall eff .
   (Effect eff)
-  => BaseHandler (Union (EnvOps Int) (EnvOps Int)) eff
+  => BaseHandler (Union (EnvEff Int) (EnvEff Int)) eff
 envHandler3 =
   composeHandlersWithCast
-    @NoOp @NoOp @NoOp @NoOp
+    @NoEff @NoEff @NoEff @NoEff
     envHandler1 envHandler2
     (CastOps Cast) (CastOps Cast)
 
 readerComp1 :: forall eff .
-  (Effect eff, EffConstraint (EnvOps Int) eff)
+  (Effect eff, EffConstraint (EnvEff Int) eff)
   => eff Int
 readerComp1 = do
   val <- ask
@@ -47,13 +47,13 @@ readerComp1 = do
 readerComp2 :: Identity Int
 readerComp2 = withHandler envHandler1 readerComp1
 
-envHandler4 :: FreeHandler (EnvOps Int)
+envHandler4 :: FreeHandler (EnvEff Int)
 envHandler4 = freeHandler
 
 readerComp3 :: Free (EnvModel Int) Int
 readerComp3 = withHandler envHandler4 readerComp1
 
-readerComp4 :: forall eff . EffectfulComputation (EnvOps Int) Int eff
+readerComp4 :: forall eff . EffectfulComputation (EnvEff Int) Int eff
 readerComp4 = effectfulComputation readerComp1
 
 readerComp5 :: IdentityComputation Int
@@ -65,7 +65,7 @@ readerComp6 = runIdentityComp readerComp5
 readerComp7 :: forall eff .
   (Effect eff)
   => EffectfulComputation
-    (Union NoOp (Union (EnvOps Int) NoOp))
+    (Union NoEff (Union (EnvEff Int) NoEff))
     Int
     eff
 readerComp7 = castComputation readerComp4 $ CastOps Cast
@@ -79,17 +79,17 @@ readerComp9 = withHandler envHandler3 readerComp1
 readerComp10 :: Identity Int
 readerComp10 = withHandler envHandler1 comp
   where
-    comp :: (EffConstraint (EnvOps Int) Identity) => Identity Int
+    comp :: (EffConstraint (EnvEff Int) Identity) => Identity Int
     comp = withHandler envHandler2 readerComp1
 
 readerComp11 :: Int
 readerComp11 = runIdentityComp $
   bindHandlerWithCast envHandler3 readerComp4 (CastOps Cast)
 
-readerComp12 :: forall eff . (Effect eff) => EffectfulComputation NoOp Int eff
+readerComp12 :: forall eff . (Effect eff) => EffectfulComputation NoEff Int eff
 readerComp12 = bindHandler envHandler2 readerComp4
 
-readerComp13 :: forall eff . (Effect eff) => EffectfulComputation NoOp Int eff
+readerComp13 :: forall eff . (Effect eff) => EffectfulComputation NoEff Int eff
 readerComp13 = bindHandlerWithCast envHandler1 readerComp12 (CastOps Cast)
 
 readerComp14 :: Int
@@ -97,7 +97,7 @@ readerComp14 = runIdentityComp readerComp13
 
 refStateOps
   :: forall a eff .
-  (IoEff eff)
+  (IoConstraint eff)
   => IORef a
   -> StateOps a eff
 refStateOps ref = StateOps {
@@ -105,7 +105,7 @@ refStateOps ref = StateOps {
   putOp = liftIo . (writeIORef ref)
 }
 
-refStateHandler :: forall a . IORef a -> GenericHandler IoOps (StateOps a)
+refStateHandler :: forall a . IORef a -> GenericHandler IoEff (StateEff a)
 refStateHandler ioRef = genericHandler $ refStateOps ioRef
 
 ioOps :: IoOps IO
@@ -113,23 +113,23 @@ ioOps = IoOps {
   liftIoOp = id
 }
 
-ioHandler :: BaseHandler IoOps IO
+ioHandler :: BaseHandler IoEff IO
 ioHandler = baseHandler ioOps
 
 ioAndStateHandler
   :: forall a .
   IORef a
-  -> BaseHandler (Union IoOps (StateOps a)) IO
+  -> BaseHandler (Union IoEff (StateEff a)) IO
 ioAndStateHandler ref = handler
   where
     handler = composeHandlers
-      @NoOp @IoOps @NoOp @IoOps
+      @NoEff @IoEff @NoEff @IoEff
       ioHandler
       (refStateHandler ref)
 
 stateIoComp1
   :: forall eff .
-  (Effect eff, EffConstraint IoOps eff)
+  (Effect eff, EffConstraint IoEff eff)
   => eff Int
 stateIoComp1 = do
   ref <- liftIo $ newIORef 3
@@ -166,14 +166,14 @@ nonDetHandler1 = OpsHandler {
 nonDetHandler2
   :: forall eff .
   (Effect eff)
-  => DynamicHandler NoOp (DecideOps Bool) Int [Int] eff
+  => DynamicHandler NoEff (DecideEff Bool) Int [Int] eff
 nonDetHandler2 = genericDynamicHandler nonDetHandler1
 
 decideComp1
   :: forall eff .
   ( Effect eff
-  , DecideEff Bool eff
-  , IoEff eff
+  , DecideConstraint Bool eff
+  , IoConstraint eff
   ) => eff Int
 decideComp1 = do
   a <- decide
@@ -187,12 +187,12 @@ decideComp1 = do
 decideComp2
   :: forall eff .
   (Effect eff)
-  => Computation (Union IoOps (DecideOps Bool)) (Return Int) eff
+  => Computation (Union IoEff (DecideEff Bool)) (Return Int) eff
 decideComp2 = effectfulComputation decideComp1
 
-decideComp3 :: EffectfulComputation (DecideOps Bool) Int IO
-decideComp3 = bindExactHandler @(DecideOps Bool) @IoOps
-  ((castHandler ioHandler (CastOps Cast)) :: Handler (DecideOps Bool) IoOps IO IO)
+decideComp3 :: EffectfulComputation (DecideEff Bool) Int IO
+decideComp3 = bindExactHandler @(DecideEff Bool) @IoEff
+  ((castHandler ioHandler (CastOps Cast)) :: Handler (DecideEff Bool) IoEff IO IO)
   decideComp2
 
 decideComp4 :: IO [Int]
