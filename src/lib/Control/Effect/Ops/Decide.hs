@@ -57,7 +57,7 @@ freeDecideOps liftModel = DecideOps {
 dynamicDecideOps
   :: forall s eff .
   (Effect eff)
-  => DecideOps s (DynamicEff (DecideModel s) eff)
+  => DecideOps s (DynamicEff (DecideEff s) eff)
 dynamicDecideOps = DecideOps {
   decideOp = liftOps $ (DecideOp return)
 }

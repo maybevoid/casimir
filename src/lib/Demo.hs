@@ -145,7 +145,7 @@ stateIoComp2 = withHandler ioHandler stateIoComp1
 trueHandler
   :: forall eff .
   (Effect eff)
-  => OpsHandler (DecideModel Bool) Int String eff
+  => OpsHandler (DecideEff Bool) Int String eff
 trueHandler = OpsHandler {
   handleReturn = return . show,
   handleOps = \(DecideOp cont) -> cont True
@@ -154,7 +154,7 @@ trueHandler = OpsHandler {
 nonDetHandler1
   :: forall eff .
   (Effect eff)
-  => OpsHandler (DecideModel Bool) Int [Int] eff
+  => OpsHandler (DecideEff Bool) Int [Int] eff
 nonDetHandler1 = OpsHandler {
   handleReturn = \x -> return [x],
   handleOps = \(DecideOp cont) -> do
