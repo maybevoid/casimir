@@ -1,21 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
-module Control.Effect.Cast
-  ( Cast (..)
-  , OpsCast (..)
-  , castOps
-  , runCast
-  , composeCast
-  , extendNoEffCast
-  , weakenLeftCast
-  , weakenRightCast
-  , distributeLeftCast
-  , distributeRightCast
-  , castComputation
-  , castHandler
-  , swapOps
-  , weakenComputation
-  )
+module Control.Effect.Old.Cast
 where
 
 import Control.Effect.Base
@@ -24,11 +9,11 @@ import Control.Effect.Base
   , Effect
   , LiftEff
   , EffOps (..)
-  , Handler (..)
   , FreeEff (..)
   , OpsConstraint
-  , Computation (..)
   )
+
+import Control.Effect.Old.Computation
 
 data Cast p = p => Cast
 

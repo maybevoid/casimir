@@ -3,7 +3,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Control.Effect.AutoCast
+module Control.Effect.Old.AutoCast
   ( AutoCast (..)
   , Composable (..)
   , applyHandler
@@ -13,12 +13,12 @@ where
 
 import Control.Effect.Base (Union, NoEff)
 
-import Control.Effect.Cast
+import Control.Effect.Old.Cast
   ( OpsCast (..)
   , Cast (..)
   )
 
-import Control.Effect.Handler
+import Control.Effect.Old.Handler
   ( composeExactHandlers
   , composeHandlersWithCast
   , applyHandlerWithCast
@@ -28,9 +28,9 @@ import Control.Effect.Handler
 import Control.Effect.Base
   ( Effect
   , EffOps (..)
-  , Handler (..)
-  , Computation (..)
   )
+
+import Control.Effect.Old.Computation
 
 class (EffOps ops1, EffOps ops2) => AutoCast ops1 ops2 where
   autocast :: OpsCast ops1 ops2

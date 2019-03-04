@@ -4,7 +4,7 @@ module Control.Effect.Dynamic
 where
 
 import Control.Effect.Base
-import Control.Effect.Computation
+import Control.Effect.Old.Computation
 
 data OpsHandler ops a r eff = OpsHandler {
   handleReturn :: a -> eff r,

@@ -11,15 +11,16 @@ import Control.Monad.Reader
 import Control.Monad.Trans.Class
   (MonadTrans (..))
 
-import Control.Effect.Handler (mkHandler)
+import Control.Effect.Old.Handler (mkHandler)
 import Control.Effect.Ops.Env (EnvEff, EnvOps (..))
 
 import Control.Effect.Base
   ( Effect
-  , Handler
   , NoEff
   , NoOp (..)
   )
+
+import Control.Effect.Old.Computation
 
 readerTHandler
   :: forall a eff .

@@ -1,14 +1,4 @@
-module Control.Effect.Computation
-  ( Pure (..)
-  , Return (..)
-  , PureComputation
-  , IdentityComputation
-  , EffectfulComputation
-  , liftComputation
-  , pureComputation
-  , runIdentityComp
-  , effectfulComputation
-  )
+module Control.Effect.Old.Computation
 where
 
 import Control.Monad.Identity (Identity (..))
@@ -19,9 +9,21 @@ import Control.Effect.Base
   , LiftEff
   , joinLift
   , EffOps (..)
+  , FreeEff (..)
   , EffFunctor (..)
-  , Computation (..)
   )
+
+data Computation ops comp eff = Computation {
+  runComp :: forall eff' .
+    (EffOps ops, Effect eff, Effect eff')
+    => LiftEff eff eff'
+    -> ((OpsConstraint ops eff') => comp eff')
+}
+
+data Handler ops handler eff1 eff2
+  = Handler
+    (LiftEff eff2 eff1)
+    (Computation ops (Operation handler) eff1)
 
 newtype Pure a (eff :: * -> *) = Pure {
   pureVal :: a

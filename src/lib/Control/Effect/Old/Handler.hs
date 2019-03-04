@@ -1,31 +1,12 @@
 
-module Control.Effect.Handler
-  ( FlatHandler
-  , BaseHandler
-  , GenericHandler
-  , FreeHandler
-  , mkHandler
-  , outerLiftHandler
-  , innerLiftHandler
-  , baseHandler
-  , genericHandler
-  , freeHandler
-  , flattenHandler
-  , withHandler
-  , composeExactHandlers
-  , composeHandlersWithCast
-  , applyExactHandler
-  , applyHandlerWithCast
-  , bindExactHandler
-  , bindHandlerWithCast
-  )
+module Control.Effect.Old.Handler
 where
 
 import Control.Monad.Trans.Free (Free)
 
-import Control.Effect.Computation (liftComputation)
+import Control.Effect.Old.Computation
 
-import Control.Effect.Cast
+import Control.Effect.Old.Cast
   ( OpsCast (..)
   , castHandler
   , castComputation
@@ -38,11 +19,9 @@ import Control.Effect.Base
   , Union
   , EffOps (..)
   , FreeEff (..)
-  , Handler (..)
   , UnionOps (..)
   , OpsConstraint
   , EffFunctor (..)
-  , Computation (..)
   , joinLift
   )
 
