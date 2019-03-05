@@ -26,11 +26,7 @@ instance Functor NoModel where
   fmap _ _ = NoModel
 
 instance EffFunctor (NoOp a) where
-  -- type WrapComp (NoOp a) f = (NoOp (f a))
-
   effmap _ _ = NoOp
-
-  -- wrapVal _ _ = NoOp
 
 instance FreeEff NoEff where
   type Operation NoEff = (NoOp ())

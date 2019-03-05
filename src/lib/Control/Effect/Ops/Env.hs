@@ -33,15 +33,8 @@ data EnvModel env r =
 type EnvConstraint a eff = (?envOps :: EnvOps a eff)
 
 instance EffFunctor (EnvOps a) where
-  type WrapComp (EnvOps a) f = EnvOps (f a)
-  type WrapConstraint (EnvOps a) f = ()
-
   effmap liftEff envOps = EnvOps {
     askOp = liftEff $ askOp envOps
-  }
-
-  wrapEff wrap envOps = EnvOps {
-    askOp = wrap $ askOp envOps
   }
 
 instance Functor (EnvModel r) where

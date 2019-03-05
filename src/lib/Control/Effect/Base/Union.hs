@@ -39,34 +39,8 @@ instance
   )
   => EffFunctor (UnionOps ops1 ops2)
   where
-    type WrapComp (UnionOps ops1 ops2) h
-      = UnionOps (WrapComp ops1 h) (WrapComp ops2 h)
-
-    type WrapConstraint (UnionOps ops1 ops2) h
-      = ( EffFunctor (WrapComp ops1 h)
-        , EffFunctor (WrapComp ops2 h)
-        , WrapConstraint ops1 h
-        , WrapConstraint ops2 h
-        )
-
     effmap f (UnionOps x y)
       = UnionOps (effmap f x) (effmap f y)
-
-    wrapEff
-      :: forall h eff1 eff2 .
-      ( Effect eff1
-      , Effect eff2
-      , EffFunctor (WrapComp ops1 h)
-      , EffFunctor (WrapComp ops2 h)
-      , WrapConstraint ops1 h
-      , WrapConstraint ops2 h
-      , EffFunctor (WrapComp (UnionOps ops1 ops2) h)
-      )
-      => (forall a . eff1 a -> eff2 (h a))
-      -> (UnionOps ops1 ops2) eff1
-      -> UnionOps (WrapComp ops1 h) (WrapComp ops2 h) eff2
-    wrapEff f (UnionOps x y)
-      = UnionOps (wrapEff f x) (wrapEff f y)
 
 instance (EffOps f, EffOps g) => FreeEff (Union f g) where
   type Operation (Union f g) = UnionOps (Operation f) (Operation g)
