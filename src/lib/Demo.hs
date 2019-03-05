@@ -212,5 +212,7 @@ decideComp3 = bindHandlerWithCast
   (opsCast cast)
   (opsCast cast)
 
--- decideComp4 :: IO [Int]
--- decideComp4 = applyDynamic nonDetHandler2 decideComp3
+decideComp4 :: IO [Int]
+decideComp4 =
+  withDynamicHandler nonDetHandler1 $
+    returnVal $ runComp decideComp3 liftReturn captureOps

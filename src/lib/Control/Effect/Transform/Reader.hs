@@ -11,7 +11,7 @@ import Control.Monad.Reader
 import Control.Monad.Trans.Class
   (MonadTrans (..))
 
-import Control.Effect.Old.Handler (mkHandler)
+import Control.Effect.Computation
 import Control.Effect.Ops.Env (EnvEff, EnvOps (..))
 
 import Control.Effect.Base
@@ -19,8 +19,6 @@ import Control.Effect.Base
   , NoEff
   , NoOp (..)
   )
-
-import Control.Effect.Old.Computation
 
 readerTHandler
   :: forall a eff .
@@ -37,7 +35,7 @@ runReaderTHandler
   => a
   -> Handler NoEff NoEff eff (ReaderT a eff)
 runReaderTHandler x =
-  mkHandler  lifter $ \_ -> NoOp
+  mkHandler lifter $ \_ -> NoOp
     where
       lifter :: forall x . ReaderT a eff x -> eff x
       lifter eff = runReaderT eff x

@@ -7,7 +7,7 @@ import Control.Effect.Computation
 import Control.Effect.Dynamic.Class
 import Control.Effect.Dynamic.Lift
 
-applyDynamic
+bindDynamicHandler
   :: forall f ops handler comp eff1 .
   ( Effect eff1
   , EffOps ops
@@ -18,7 +18,7 @@ applyDynamic
   => DynamicHandler f ops handler eff1
   -> Computation (Union handler ops) comp eff1
   -> Computation ops comp eff1
-applyDynamic (DynamicHandler handler1) comp1 = Computation comp2
+bindDynamicHandler (DynamicHandler handler1) comp1 = Computation comp2
  where
   comp2
     :: forall eff2 .
@@ -53,7 +53,7 @@ applyDynamic (DynamicHandler handler1) comp1 = Computation comp2
     runDynamic eff =
       extract $ runDynamicEff eff handler2
 
-handleDynamic
+withDynamicHandler
   :: forall ops eff a b .
   ( Effect eff
   , EffOps ops
@@ -63,7 +63,7 @@ handleDynamic
   -> (OpsConstraint ops (DynamicEff ops eff)
       => DynamicEff ops eff a)
   -> eff b
-handleDynamic handler comp1 = runDynamicEff comp2 handler
+withDynamicHandler handler comp1 = runDynamicEff comp2 handler
  where
   ops :: Operation ops (DynamicEff ops eff)
   ops = dynamicOps
