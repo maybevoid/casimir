@@ -179,11 +179,11 @@ nonDetHandler1 = OpsHandler {
     return $ res1 ++ res2
 }
 
-nonDetHandler2
-  :: forall eff .
-  (Effect eff)
-  => DynamicHandler NoEff (DecideEff Bool) Int [Int] eff
-nonDetHandler2 = genericDynamicHandler nonDetHandler1
+-- nonDetHandler2
+--   :: forall eff .
+--   (Effect eff)
+--   => DynamicHandler NoEff (DecideEff Bool) Int [Int] eff
+-- nonDetHandler2 = genericDynamicHandler nonDetHandler1
 
 decideComp1
   :: forall eff .
@@ -212,5 +212,5 @@ decideComp3 = bindHandlerWithCast
   (opsCast cast)
   (opsCast cast)
 
-decideComp4 :: IO [Int]
-decideComp4 = applyDynamic nonDetHandler2 decideComp3
+-- decideComp4 :: IO [Int]
+-- decideComp4 = applyDynamic nonDetHandler2 decideComp3

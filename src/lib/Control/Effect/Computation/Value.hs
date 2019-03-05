@@ -16,7 +16,12 @@ newtype Return a eff = Return {
 }
 
 instance EffFunctor (Return a) where
+  type WrapComp (Return a) f = (Return (f a))
+  type WrapConstraint (Return a) f = ()
+
   effmap liftEff (Return mx) = Return $ liftEff mx
+
+  wrapEff wrap (Return mx) = Return $ wrap mx
 
 type PureComputation a =
   forall eff . Computation NoEff (Pure a) eff
