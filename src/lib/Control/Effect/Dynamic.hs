@@ -4,7 +4,7 @@ module Control.Effect.Dynamic
 where
 
 import Control.Effect.Base
-import Control.Effect.Old.Computation
+import Control.Effect.Computation
 
 data OpsHandler ops a r eff = OpsHandler {
   handleReturn :: a -> eff r,
@@ -17,16 +17,6 @@ newtype DynamicEff ops eff a = DynamicEff {
 
 type DynamicHandler ops1 ops2 a r eff =
   Computation ops1 (OpsHandler ops2 a r) eff
-
-data DynamicComputation ops comp eff where
-  BindDynamic
-    :: forall ops comp eff1 .
-    (forall eff2 .
-      (Effect eff2)
-      => LiftEff eff1 eff2
-      -> Operation ops eff2
-      -> comp eff2)
-    -> DynamicComputation ops comp eff1
 
 class (EffOps ops) => DynamicOps ops where
   dynamicOps
@@ -158,7 +148,8 @@ mkDynamicHandler
       -> (OpsConstraint ops1 eff2
           => OpsHandler ops2 a r eff2))
   -> DynamicHandler ops1 ops2 a r eff1
-mkDynamicHandler = Computation
+mkDynamicHandler handler = Computation $
+  \ liftEff ops -> bindConstraint ops $ handler liftEff
 
 genericDynamicHandler
   :: forall ops1 ops2 a r eff1.
@@ -186,8 +177,8 @@ applyDynamic
 applyDynamic handler1 comp1 = comp2
  where
   handler2 :: OpsHandler ops1 a r eff
-  handler2 = runComp handler1 id
+  handler2 = runComp handler1 id captureOps
 
   comp2 :: eff r
   comp2 = handleDynamic handler2 $ returnVal $
-    runComp comp1 liftReturn
+    runComp comp1 liftReturn dynamicOps

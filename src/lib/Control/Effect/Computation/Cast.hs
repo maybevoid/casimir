@@ -6,6 +6,7 @@ where
 
 import Control.Effect.Base
 import Control.Effect.Computation.Class
+import Control.Effect.Computation.Handler
 
 data Cast p = p => Cast
 
@@ -24,7 +25,7 @@ opsCast
       (Effect eff, OpsConstraint ops1 eff)
       => Cast (OpsConstraint ops2 eff))
   -> OpsCast ops1 ops2
-opsCast cast = OpsCast cast
+opsCast caster = OpsCast caster
 
 runCast
   :: forall eff ops1 ops2 r .
@@ -32,8 +33,8 @@ runCast
   => OpsCast ops1 ops2
   -> (OpsConstraint ops2 eff => r)
   -> r
-runCast (OpsCast cast) res =
-  case cast @eff of
+runCast (OpsCast caster) res =
+  case caster @eff of
     Cast -> res
 
 castOps
@@ -45,7 +46,7 @@ castOps
   => OpsCast ops1 ops2
   -> Operation ops1 eff
   -> Operation ops2 eff
-castOps cast ops = bindConstraint ops $ runCast @eff cast captureOps
+castOps caster ops = bindConstraint ops $ runCast @eff caster captureOps
 
 composeCast
   :: forall ops1 ops2 ops3.
@@ -73,9 +74,9 @@ castComputation
   => OpsCast ops1 ops2
   -> Computation ops2 comp eff
   -> Computation ops1 comp eff
-castComputation cast comp = Computation $
+castComputation caster comp = Computation $
   \ liftEff ops ->
-    runComp comp liftEff $ castOps cast ops
+    runComp comp liftEff $ castOps caster ops
 
 castHandler
   :: forall ops1 ops2 handler eff1 eff2 .
@@ -87,5 +88,48 @@ castHandler
   => OpsCast ops1 ops2
   -> Handler ops2 handler eff1 eff2
   -> Handler ops1 handler eff1 eff2
-castHandler cast (Handler liftEff handler)
-  = Handler liftEff $ castComputation cast handler
+castHandler caster (Handler liftEff handler)
+  = Handler liftEff $ castComputation caster handler
+
+composeHandlersWithCast
+  :: forall
+    ops1 ops2 ops3
+    handler1 handler2
+    eff1 eff2 eff3 .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps handler1
+  , EffOps handler2
+  , Effect eff1
+  , Effect eff2
+  , Effect eff3
+  )
+  => Handler ops1 handler1 eff1 eff2
+  -> Handler ops2 handler2 eff2 eff3
+  -> OpsCast ops3 ops1
+  -> OpsCast (Union handler1 ops3) ops2
+  -> Handler ops3 (Union handler1 handler2) eff1 eff3
+composeHandlersWithCast handler1 handler2 cast31 cast32 =
+  composeExactHandlers
+    (castHandler cast31 handler1) $
+    castHandler cast32 handler2
+
+bindHandlerWithCast
+  :: forall ops3 ops1 ops2 handler eff1 eff2 r .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  )
+  => Handler ops1 handler eff1 eff2
+  -> Computation ops2 r eff2
+  -> OpsCast ops3 ops1
+  -> OpsCast (Union handler ops3) ops2
+  -> Computation ops3 r eff1
+bindHandlerWithCast handler comp cast31 cast32 =
+  bindExactHandler
+    (castHandler cast31 handler) $
+    castComputation cast32 comp
