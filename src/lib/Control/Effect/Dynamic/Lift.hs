@@ -5,14 +5,14 @@ where
 import Control.Effect.Base
 import Control.Effect.Dynamic.Class
 
-liftReturn
+liftDynamicEff
   :: forall ops eff a .
   ( Effect eff
   , EffOps ops
   )
   => eff a
   -> DynamicEff ops eff a
-liftReturn mx = DynamicEff $ \handler -> do
+liftDynamicEff mx = DynamicEff $ \handler -> do
   x <- mx
   handleReturn handler x
 

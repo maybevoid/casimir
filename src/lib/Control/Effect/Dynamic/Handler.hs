@@ -38,10 +38,10 @@ bindDynamicHandler (DynamicHandler handler1) comp1 = Computation comp2
     (DynamicContext _ extract) = context
 
     ops2 :: Operation ops (DynamicEff handler eff2)
-    ops2 = effmap liftReturn ops1
+    ops2 = effmap liftDynamicEff ops1
 
     comp3 :: comp (DynamicEff handler eff2)
-    comp3 = runComp comp1 (liftReturn . liftEff) (UnionOps dynamicOps ops2)
+    comp3 = runComp comp1 (liftDynamicEff . liftEff) (UnionOps dynamicOps ops2)
 
     comp4 :: comp eff2
     comp4 = effmap runDynamic comp3
@@ -53,7 +53,7 @@ bindDynamicHandler (DynamicHandler handler1) comp1 = Computation comp2
     runDynamic eff =
       extract $ runDynamicEff eff handler2
 
-withDynamicHandler
+withOpsHandler
   :: forall ops eff a b .
   ( Effect eff
   , EffOps ops
@@ -63,10 +63,47 @@ withDynamicHandler
   -> (OpsConstraint ops (DynamicEff ops eff)
       => DynamicEff ops eff a)
   -> eff b
-withDynamicHandler handler comp1 = runDynamicEff comp2 handler
+withOpsHandler handler comp1 = runDynamicEff comp2 handler
  where
   ops :: Operation ops (DynamicEff ops eff)
   ops = dynamicOps
 
   comp2 :: DynamicEff ops eff a
   comp2 = bindConstraint ops comp1
+
+withDynamicHandler
+  :: forall f ops handler eff a .
+  ( Effect eff
+  , EffOps ops
+  , EffOps handler
+  , DynamicOps handler
+  , OpsConstraint ops eff
+  )
+  => DynamicHandler f ops handler eff
+  -> (( OpsConstraint handler (DynamicEff handler eff)
+      , OpsConstraint ops (DynamicEff handler eff)
+      )
+      => DynamicEff handler eff a)
+  -> eff (f a)
+withDynamicHandler (DynamicHandler handler1) comp1
+  = comp2
+   where
+    comp2 :: eff (f a)
+    comp2 = runDynamicEff comp3 handler2
+
+    liftedOps :: Operation ops (DynamicEff handler eff)
+    liftedOps = effmap liftDynamicEff captureOps
+
+    context :: DynamicContext f ops handler eff
+    context = runComp handler1 id captureOps
+
+    handler2 :: OpsHandler handler a (f a) eff
+    (DynamicContext handler2 _) = context
+
+    handler3 :: Operation handler (DynamicEff handler eff)
+    handler3 = dynamicOps
+
+    comp3 :: DynamicEff handler eff a
+    comp3 = bindConstraint handler3 $
+      bindConstraint liftedOps comp1
+

@@ -55,4 +55,4 @@ import Control.Effect.Dynamic.Lift
 
 --   comp2 :: eff r
 --   comp2 = handleDynamic handler2 $ returnVal $
---     runComp comp1 liftReturn dynamicOps
+--     runComp comp1 liftDynamicEff dynamicOps
