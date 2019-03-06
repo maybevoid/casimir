@@ -15,16 +15,8 @@ newtype DynamicEff ops eff a = DynamicEff {
   runDynamicEff :: forall r . OpsHandler ops a r eff -> eff r
 }
 
-data DynamicContext f ops handler eff
-  = DynamicContext
-    (forall a . OpsHandler handler a (f a) eff)
-    (forall a . eff (f a) -> eff a)
-
-newtype DynamicHandler f ops handler eff
-  = DynamicHandler {
-    runDynamicHandler
-      :: Computation ops (DynamicContext f ops handler) eff
-  }
+type DynamicHandler ops handler a r eff =
+  Computation ops (OpsHandler handler a r) eff
 
 class (EffOps ops) => DynamicOps ops where
   dynamicOps

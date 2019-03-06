@@ -62,14 +62,14 @@ bindArrow arrow1 comp1 = Computation comp2
       (UnionOps ops2 (effmap lift23 ops1))
 
 composeArrows
-  :: forall ops handler1 handler2 a b c eff1 .
+  :: forall ops handler2 handler1 a b c eff1 .
   ( Effect eff1
   , EffOps ops
-  , EffOps handler1
   , EffOps handler2
+  , EffOps handler1
   )
-  => ArrowComputation ops handler1 a b eff1
-  -> ArrowComputation ops handler2 b c eff1
+  => ArrowComputation ops handler1 b c eff1
+  -> ArrowComputation ops handler2 a b eff1
   -> ArrowComputation ops (Union handler1 handler2) a c eff1
 composeArrows arrow1 arrow2 = Computation arrow3
  where
@@ -89,7 +89,7 @@ composeArrows arrow1 arrow2 = Computation arrow3
       comp2 :: forall eff3 .
         (Effect eff3)
         => LiftEff eff2 eff3
-        -> Operation handler2 eff3
+        -> Operation handler1 eff3
         -> Return b eff3
       comp2 lift23 ops2 =
         Return $ applyComp arrow5 $ Computation comp3
@@ -98,17 +98,17 @@ composeArrows arrow1 arrow2 = Computation arrow3
           :: forall eff4 .
           (Effect eff4)
           => LiftEff eff3 eff4
-          -> Operation handler1 eff4
+          -> Operation handler2 eff4
           -> Return a eff4
         comp3 lift34 ops3 = runComp comp1
           (lift34 . lift23)
-          (UnionOps ops3 (effmap lift34 ops2))
+          (UnionOps (effmap lift34 ops2) ops3)
 
-        arrow5 :: Arrow handler1 a b eff3
-        arrow5 = runComp arrow1 (lift23 . lift12) (effmap lift23 ops1)
+        arrow5 :: Arrow handler2 a b eff3
+        arrow5 = runComp arrow2 (lift23 . lift12) (effmap lift23 ops1)
 
-    arrow6 :: Arrow handler2 b c eff2
-    arrow6 = runComp arrow2 lift12 ops1
+    arrow6 :: Arrow handler1 b c eff2
+    arrow6 = runComp arrow1 lift12 ops1
 
 mkHandlerArrow
   :: forall ops handler eff1 eff2 .
