@@ -58,3 +58,13 @@ genericComputation comp = Computation $
 
 runIdentityComp :: forall a . IdentityComputation a -> a
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp id NoOp
+
+execComp
+  :: forall ops eff a .
+  ( EffOps ops
+  , Effect eff
+  , OpsConstraint ops eff
+  )
+  => Computation ops (Return a) eff
+  -> eff a
+execComp comp = returnVal $ runComp comp id captureOps
