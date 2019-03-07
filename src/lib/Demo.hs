@@ -179,11 +179,21 @@ nonDetHandler1 = OpsHandler {
     return $ res1 ++ res2
 }
 
--- nonDetHandler2
---   :: forall eff .
---   (Effect eff)
---   => DynamicHandler NoEff (DecideEff Bool) Int [Int] eff
--- nonDetHandler2 = genericDynamicHandler nonDetHandler1
+nonDetHandler2
+  :: forall eff .
+  (Effect eff)
+  => Computation NoEff (OpsHandler (DecideEff Bool) Int [Int]) eff
+nonDetHandler2 = Computation $ \ _ _ -> nonDetHandler1
+
+nonDetPipeline
+  :: forall eff .
+  (Effect eff)
+  => Pipeline NoEff (DecideEff Bool) eff (Return Int) (Return [Int])
+nonDetPipeline = opsHandlerToPipeline nonDetHandler2
+
+ioPipeline
+  :: GenericPipeline NoEff IoEff IO
+ioPipeline = handlerToPipeline ioHandler
 
 decideComp1
   :: forall eff .
@@ -216,3 +226,21 @@ decideComp4 :: IO [Int]
 decideComp4 =
   withOpsHandler nonDetHandler1 $
     returnVal $ runComp decideComp3 liftDynamicEff captureOps
+
+decideComp5
+  :: forall eff .
+  (Effect eff)
+  => Computation IoEff (Return [Int]) eff
+decideComp5 = runPipelineWithCast
+  nonDetPipeline decideComp2
+  (opsCast cast)
+  (opsCast cast)
+
+decideComp6 :: Computation NoEff (Return [Int]) IO
+decideComp6 = runPipelineWithCast
+  ioPipeline decideComp5
+  (opsCast cast)
+  (opsCast cast)
+
+decideComp7 :: IO [Int]
+decideComp7 = returnVal $ runComp decideComp6 id NoOp

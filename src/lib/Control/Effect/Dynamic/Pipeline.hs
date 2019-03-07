@@ -52,9 +52,8 @@ genericOpsHandlerToPipeline
   , DynamicOps handler
   )
   => Computation ops1 (GenericOpsHandler f handler) eff1
-  -> (forall a . f a -> a)
   -> GenericPipeline ops1 handler eff1
-genericOpsHandlerToPipeline handler1 extract = pipeline
+genericOpsHandlerToPipeline handler1 = pipeline
  where
   pipeline :: forall ops2 comp .
     (EffOps ops2, EffFunctor comp)
@@ -71,7 +70,9 @@ genericOpsHandlerToPipeline handler1 extract = pipeline
     comp2 lift12 (UnionOps ops1 ops2) = comp4
      where
       handler2 :: forall a . OpsHandler handler a (f a) eff2
-      handler2 = unGenericOpsHandler $ runComp handler1 lift12 ops1
+      extract :: forall a . f a -> a
+      (GenericOpsHandler handler2 extract)
+        = runComp handler1 lift12 ops1
 
       comp3 :: comp (DynamicEff handler eff2)
       comp3 = runComp comp1

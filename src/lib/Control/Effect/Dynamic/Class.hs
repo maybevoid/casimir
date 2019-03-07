@@ -15,9 +15,11 @@ newtype DynamicEff ops eff a = DynamicEff {
   runDynamicEff :: forall r . OpsHandler ops a r eff -> eff r
 }
 
-newtype GenericOpsHandler f handler eff = GenericOpsHandler {
-  unGenericOpsHandler
-    :: forall a . OpsHandler handler a (f a) eff
+data GenericOpsHandler f handler eff = GenericOpsHandler {
+  runOpsHandler
+    :: forall a . OpsHandler handler a (f a) eff,
+
+  extractResult :: forall a . f a -> a
 }
 
 type DynamicHandler ops handler a r eff =

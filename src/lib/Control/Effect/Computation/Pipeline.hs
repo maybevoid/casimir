@@ -23,7 +23,7 @@ handlerToPipeline
   , EffOps ops1
   , EffOps handler
   )
-  => (Handler ops1 handler eff eff)
+  => Handler ops1 handler eff eff
   -> GenericPipeline ops1 handler eff
 handlerToPipeline handler1 = pipeline
  where
@@ -93,3 +93,25 @@ composePipelines pipeline1 pipeline2 = pipeline3
 
     comp4 :: Computation (Union ops2 (Union ops1 ops3)) comp3 eff
     comp4 = pipeline2 comp3'
+
+runPipelineWithCast
+  :: forall ops1 ops2 ops3 handler comp1 comp2 eff .
+  ( Effect eff
+  , EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps handler
+  )
+  => Pipeline ops1 handler eff comp1 comp2
+  -> Computation ops2 comp1 eff
+  -> OpsCast ops3 ops1
+  -> OpsCast (Union handler ops3) ops2
+  -> Computation ops3 comp2 eff
+runPipelineWithCast pipeline1 comp1 cast1 cast2
+  = castComputation (opsCast cast) $ pipeline2 comp2
+  where
+   pipeline2 :: Pipeline ops3 handler eff comp1 comp2
+   pipeline2 = castPipeline cast1 pipeline1
+
+   comp2 :: Computation (Union handler ops3) comp1 eff
+   comp2 = castComputation cast2 comp1
