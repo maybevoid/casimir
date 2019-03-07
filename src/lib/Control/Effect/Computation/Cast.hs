@@ -37,6 +37,23 @@ runCast (OpsCast caster) res =
   case caster @eff of
     Cast -> res
 
+extendCast
+  :: forall ops1 ops2 ops3 .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  )
+  => OpsCast ops1 ops2
+  -> OpsCast (Union ops1 ops3) (Union ops2 ops3)
+extendCast (OpsCast caster1) = opsCast caster2
+ where
+  caster2
+    :: forall eff .
+    (Effect eff, OpsConstraint (Union ops1 ops3) eff)
+    => Cast (OpsConstraint (Union ops2 ops3) eff)
+  caster2 = case caster1 @eff of
+    Cast -> Cast
+
 castOps
   :: forall eff ops1 ops2 .
   ( Effect eff

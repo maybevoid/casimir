@@ -57,15 +57,15 @@ freeHandler
 freeHandler = baseHandler $ freeMonad id
 
 bindExactHandler
-  :: forall ops handler eff1 eff2 r .
+  :: forall ops handler eff1 eff2 comp .
   ( EffOps ops
   , EffOps handler
   , Effect eff1
   , Effect eff2
   )
   => Handler ops handler eff1 eff2
-  -> Computation (Union handler ops) r eff2
-  -> Computation ops r eff1
+  -> Computation (Union handler ops) comp eff2
+  -> Computation ops comp eff1
 bindExactHandler (Handler lift21 handler1) comp1
   = Computation comp2
    where
@@ -74,7 +74,7 @@ bindExactHandler (Handler lift21 handler1) comp1
       (Effect eff3)
       => LiftEff eff1 eff3
       -> Operation ops eff3
-      -> r eff3
+      -> comp eff3
     comp2 liftEff ops
       = runComp comp1 (liftEff . lift21) (UnionOps handler2 ops)
        where

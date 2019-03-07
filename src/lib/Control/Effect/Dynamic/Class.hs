@@ -6,13 +6,18 @@ where
 import Control.Effect.Base
 import Control.Effect.Computation
 
-data OpsHandler ops a r eff = OpsHandler {
-  handleReturn :: a -> eff r,
-  handleOps :: CoOperation ops (eff r) -> eff r
+data OpsHandler handler a b eff = OpsHandler {
+  handleReturn :: a -> eff b,
+  handleOps :: CoOperation handler (eff b) -> eff b
 }
 
 newtype DynamicEff ops eff a = DynamicEff {
   runDynamicEff :: forall r . OpsHandler ops a r eff -> eff r
+}
+
+newtype GenericOpsHandler f handler eff = GenericOpsHandler {
+  unGenericOpsHandler
+    :: forall a . OpsHandler handler a (f a) eff
 }
 
 type DynamicHandler ops handler a r eff =
