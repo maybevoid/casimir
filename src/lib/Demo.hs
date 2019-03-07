@@ -244,3 +244,25 @@ decideComp6 = runPipelineWithCast
 
 decideComp7 :: IO [Int]
 decideComp7 = returnVal $ runComp decideComp6 id NoOp
+
+pipeline1
+  :: Pipeline
+      NoEff
+      (Union (DecideEff Bool) IoEff)
+      IO
+      (Return Int)
+      (Return [Int])
+pipeline1 = composePipelinesWithCast
+  ioPipeline nonDetPipeline
+  (opsCast cast)
+  (opsCast cast)
+  (opsCast cast)
+
+decideComp8 :: IO [Int]
+decideComp8 = returnVal $ runComp comp id NoOp
+ where
+  comp :: Computation NoEff (Return [Int]) IO
+  comp = runPipelineWithCast
+    pipeline1 decideComp2
+    (opsCast cast)
+    (opsCast cast)

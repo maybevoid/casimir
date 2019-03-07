@@ -63,6 +63,30 @@ castPipeline cast21 pipeline1 = pipeline2
     cast21' :: OpsCast (Union ops2 ops3) (Union ops1 ops3)
     cast21' = extendCast cast21
 
+castPipelineHandler
+  :: forall ops1 handler1 handler2 eff comp1 comp2 .
+  ( Effect eff
+  , EffOps ops1
+  , EffOps handler1
+  , EffOps handler2
+  )
+  => OpsCast handler1 handler2
+  -> Pipeline ops1 handler1 eff comp1 comp2
+  -> Pipeline ops1 handler2 eff comp1 comp2
+castPipelineHandler cast1 pipeline1 = pipeline2
+ where
+  pipeline2 :: forall ops2 .
+    (EffOps ops2)
+    => Computation (Union handler2 ops2) comp1 eff
+    -> Computation (Union ops1 ops2) comp2 eff
+  pipeline2 comp1 = pipeline1 comp2
+   where
+    comp2 :: Computation (Union handler1 ops2) comp1 eff
+    comp2 = castComputation cast2 comp1
+
+    cast2 :: OpsCast (Union handler1 ops2) (Union handler2 ops2)
+    cast2 = extendCast cast1
+
 composePipelines
   :: forall ops1 ops2 handler1 handler2 eff comp1 comp2 comp3 .
   ( Effect eff
@@ -115,3 +139,30 @@ runPipelineWithCast pipeline1 comp1 cast1 cast2
 
    comp2 :: Computation (Union handler ops3) comp1 eff
    comp2 = castComputation cast2 comp1
+
+composePipelinesWithCast
+  :: forall ops1 ops2 ops3 handler1 handler2 handler3 eff comp1 comp2 comp3 .
+  ( Effect eff
+  , EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps handler1
+  , EffOps handler2
+  , EffOps handler3
+  )
+  => Pipeline ops1 handler1 eff comp1 comp2
+  -> Pipeline ops2 handler2 eff comp2 comp3
+  -> OpsCast ops3 ops1
+  -> OpsCast ops3 ops2
+  -> OpsCast (Union handler1 handler2) handler3
+  -> Pipeline ops3 handler3 eff comp1 comp3
+composePipelinesWithCast pipeline1 pipeline2 cast1 cast2 cast3
+  = castPipelineHandler cast3 $
+    castPipeline (opsCast cast) $
+    composePipelines pipeline1' pipeline2'
+  where
+    pipeline1' :: Pipeline ops3 handler1 eff comp1 comp2
+    pipeline1' = castPipeline cast1 pipeline1
+
+    pipeline2' :: Pipeline ops3 handler2 eff comp2 comp3
+    pipeline2' = castPipeline cast2 pipeline2
