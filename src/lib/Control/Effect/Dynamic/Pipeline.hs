@@ -15,7 +15,7 @@ opsHandlerToPipeline
   , DynamicOps handler
   )
   => Computation ops1 (OpsHandler handler a b) eff1
-  -> Pipeline ops1 handler eff1 (Return a) (Return b)
+  -> Pipeline ops1 handler eff1 eff1 (Return a) (Return b)
 opsHandlerToPipeline handler1 = pipeline
  where
   pipeline

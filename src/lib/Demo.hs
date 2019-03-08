@@ -235,7 +235,7 @@ nonDetHandler2 = Computation $ \ _ _ -> nonDetHandler1
 nonDetPipeline
   :: forall eff .
   (Effect eff)
-  => Pipeline NoEff (DecideEff Bool) eff (Return Int) (Return [Int])
+  => Pipeline NoEff (DecideEff Bool) eff eff (Return Int) (Return [Int])
 nonDetPipeline = opsHandlerToPipeline nonDetHandler2
 
 decideComp1
@@ -292,6 +292,7 @@ pipeline1
   :: Pipeline
       NoEff
       (Union (DecideEff Bool) IoEff)
+      IO
       IO
       (Return Int)
       (Return [Int])
