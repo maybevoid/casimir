@@ -123,6 +123,13 @@ refStateOps ref = StateOps {
 refStateHandler :: forall a . IORef a -> GenericHandler IoEff (StateEff a)
 refStateHandler ioRef = genericHandler $ refStateOps ioRef
 
+refStatePipeline
+  :: forall eff a .
+  (Effect eff)
+  => IORef a
+  -> GenericPipeline IoEff (StateEff a) eff
+refStatePipeline ref = handlerToPipeline $ refStateHandler ref
+
 ioOps :: IoOps IO
 ioOps = IoOps {
   liftIoOp = id
@@ -130,6 +137,10 @@ ioOps = IoOps {
 
 ioHandler :: BaseHandler IoEff IO
 ioHandler = baseHandler ioOps
+
+ioPipeline
+  :: GenericPipeline NoEff IoEff IO
+ioPipeline = handlerToPipeline ioHandler
 
 ioAndStateHandler
   :: forall a .
@@ -142,6 +153,17 @@ ioAndStateHandler ref = handler
       (refStateHandler ref)
       (opsCast cast)
       (opsCast cast)
+
+stateIoPipeline
+  :: forall a .
+  IORef a
+  -> GenericPipeline NoEff (Union IoEff (StateEff a)) IO
+stateIoPipeline ref = composePipelinesWithCast
+  (refStatePipeline ref)
+  ioPipeline
+  (opsCast cast)
+  (opsCast cast)
+  (opsCast cast)
 
 stateIoComp1
   :: forall eff .
@@ -157,6 +179,31 @@ stateIoComp1 = do
 
 stateIoComp2 :: IO Int
 stateIoComp2 = withHandler ioHandler stateIoComp1
+
+stateComp1
+  :: forall eff .
+  (Effect eff, OpsConstraint (StateEff Int) eff)
+  => eff Int
+stateComp1 = do
+  state1 <- get
+  put $ state1 + 1
+  state2 <- get
+  return $ state2 + 1
+
+stateComp2 :: GenericComputation (StateEff Int) Int
+stateComp2 = genericComputation stateComp1
+
+stateIoComp3 :: IORef Int -> Computation NoEff (Return Int) IO
+stateIoComp3 ref = runPipelineWithCast
+  (stateIoPipeline ref)
+  stateComp2
+  (opsCast cast)
+  (opsCast cast)
+
+stateIoComp4 :: IO Int
+stateIoComp4 = do
+  ref <- newIORef 3
+  execComp $ stateIoComp3 ref
 
 trueHandler
   :: forall eff .
@@ -190,10 +237,6 @@ nonDetPipeline
   (Effect eff)
   => Pipeline NoEff (DecideEff Bool) eff (Return Int) (Return [Int])
 nonDetPipeline = opsHandlerToPipeline nonDetHandler2
-
-ioPipeline
-  :: GenericPipeline NoEff IoEff IO
-ioPipeline = handlerToPipeline ioHandler
 
 decideComp1
   :: forall eff .
