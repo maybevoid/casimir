@@ -95,7 +95,7 @@ composePipelines
   , EffOps handler1
   , EffOps handler2
   )
-  => Pipeline ops1 handler1 eff comp1 comp2
+  => Pipeline (Union handler2 ops1) handler1 eff comp1 comp2
   -> Pipeline ops2 handler2 eff comp2 comp3
   -> Pipeline (Union ops1 ops2) (Union handler1 handler2) eff comp1 comp3
 composePipelines pipeline1 pipeline2 = pipeline3
@@ -104,19 +104,20 @@ composePipelines pipeline1 pipeline2 = pipeline3
     (EffOps ops3)
     => Computation (Union (Union handler1 handler2) ops3) comp1 eff
     -> Computation (Union (Union ops1 ops2) ops3) comp3 eff
-  pipeline3 comp1 = castComputation (opsCast cast) comp4
-   where
-    comp1' :: Computation (Union handler1 (Union handler2 ops3)) comp1 eff
-    comp1' = castComputation (opsCast cast) comp1
+  pipeline3 comp1 =
+    castComputation (opsCast cast) comp4
+     where
+      comp1' :: Computation (Union handler1 (Union handler2 ops3)) comp1 eff
+      comp1' = castComputation (opsCast cast) comp1
 
-    comp3 :: Computation (Union ops1 (Union handler2 ops3)) comp2 eff
-    comp3 = pipeline1 comp1'
+      comp3 :: Computation (Union (Union handler2 ops1) (Union handler2 ops3)) comp2 eff
+      comp3 = pipeline1 comp1'
 
-    comp3' :: Computation (Union handler2 (Union ops1 ops3)) comp2 eff
-    comp3' = castComputation (opsCast cast) comp3
+      comp3' :: Computation (Union handler2 (Union ops1 ops3)) comp2 eff
+      comp3' = castComputation (opsCast cast) comp3
 
-    comp4 :: Computation (Union ops2 (Union ops1 ops3)) comp3 eff
-    comp4 = pipeline2 comp3'
+      comp4 :: Computation (Union ops2 (Union ops1 ops3)) comp3 eff
+      comp4 = pipeline2 comp3'
 
 runPipelineWithCast
   :: forall ops1 ops2 ops3 handler comp1 comp2 eff .
@@ -152,7 +153,7 @@ composePipelinesWithCast
   )
   => Pipeline ops1 handler1 eff comp1 comp2
   -> Pipeline ops2 handler2 eff comp2 comp3
-  -> OpsCast ops3 ops1
+  -> OpsCast (Union handler2 ops3) ops1
   -> OpsCast ops3 ops2
   -> OpsCast (Union handler1 handler2) handler3
   -> Pipeline ops3 handler3 eff comp1 comp3
@@ -161,7 +162,7 @@ composePipelinesWithCast pipeline1 pipeline2 cast1 cast2 cast3
     castPipeline (opsCast cast) $
     composePipelines pipeline1' pipeline2'
   where
-    pipeline1' :: Pipeline ops3 handler1 eff comp1 comp2
+    pipeline1' :: Pipeline (Union handler2 ops3) handler1 eff comp1 comp2
     pipeline1' = castPipeline cast1 pipeline1
 
     pipeline2' :: Pipeline ops3 handler2 eff comp2 comp3
