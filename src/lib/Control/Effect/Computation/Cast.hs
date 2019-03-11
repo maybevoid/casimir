@@ -10,22 +10,11 @@ import Control.Effect.Computation.Handler
 
 data Cast p = p => Cast
 
-data OpsCast ops1 ops2 = OpsCast
-  (forall eff . (Effect eff, OpsConstraint ops1 eff) => Cast (OpsConstraint ops2 eff))
+type OpsCast ops1 ops2 =
+  forall eff . (Effect eff, OpsConstraint ops1 eff) => Cast (OpsConstraint ops2 eff)
 
 cast :: forall p . p => Cast p
 cast = Cast
-
-opsCast
-  :: forall ops1 ops2 .
-  ( EffOps ops1
-  , EffOps ops2
-  )
-  => (forall eff .
-      (Effect eff, OpsConstraint ops1 eff)
-      => Cast (OpsConstraint ops2 eff))
-  -> OpsCast ops1 ops2
-opsCast caster = OpsCast caster
 
 runCast
   :: forall eff ops1 ops2 r .
@@ -33,7 +22,7 @@ runCast
   => OpsCast ops1 ops2
   -> (OpsConstraint ops2 eff => r)
   -> r
-runCast (OpsCast caster) res =
+runCast caster res =
   case caster @eff of
     Cast -> res
 
@@ -45,7 +34,7 @@ extendCast
   )
   => OpsCast ops1 ops2
   -> OpsCast (Union ops1 ops3) (Union ops2 ops3)
-extendCast (OpsCast caster1) = opsCast caster2
+extendCast caster1 = caster2
  where
   caster2
     :: forall eff .
@@ -63,7 +52,9 @@ castOps
   => OpsCast ops1 ops2
   -> Operation ops1 eff
   -> Operation ops2 eff
-castOps caster ops = bindConstraint ops $ runCast @eff caster captureOps
+castOps caster ops = bindConstraint ops $
+  runCast @eff @ops1 @ops2
+    caster captureOps
 
 composeCast
   :: forall ops1 ops2 ops3.
@@ -74,13 +65,14 @@ composeCast
   => OpsCast ops1 ops2
   -> OpsCast ops2 ops3
   -> OpsCast ops1 ops3
-composeCast cast1 cast2 = OpsCast cast3
+composeCast cast1 cast2 = cast3
   where
     cast3
       :: forall eff .
       (Effect eff, OpsConstraint ops1 eff)
       => Cast (OpsConstraint ops3 eff)
-    cast3 = runCast @eff cast1 $ runCast @eff cast2 Cast
+    cast3 = runCast @eff @ops1 @ops2 cast1 $
+      runCast @eff @ops2 @ops3 cast2 Cast
 
 castComputation
   :: forall ops1 ops2 comp eff .
