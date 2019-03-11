@@ -18,7 +18,7 @@ opsHandlerToPipeline
   )
   => Computation ops1 (OpsHandler handler a b) eff1
   -> Pipeline ops1 handler eff1 eff1 (Return a) (Return b)
-opsHandlerToPipeline handler1 = pipeline
+opsHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2 .
@@ -56,7 +56,7 @@ genericOpsHandlerToPipeline
   )
   => (forall a . Computation ops1 (OpsHandler handler a (w a)) eff1)
   -> GenericPipeline ops1 handler eff1
-genericOpsHandlerToPipeline handler1 = pipeline
+genericOpsHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline :: forall ops2 comp .
     (EffOps ops2, EffFunctor comp)

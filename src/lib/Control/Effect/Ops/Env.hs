@@ -10,7 +10,6 @@ module Control.Effect.Ops.Env
   )
 where
 
-import Control.Compose (Flip (..))
 import Control.Natural (type (~>))
 import Control.Monad.Trans.Free (FreeT, liftF)
 
@@ -69,23 +68,3 @@ freeEnvOps
 freeEnvOps liftModel = EnvOps {
   askOp = liftF $ liftModel $ AskOp id
 }
-
-instance (Functor eff) => Functor (Flip EnvOps eff) where
-  fmap f envOps = Flip $ EnvOps {
-    askOp = fmap f $ askOp $ unFlip envOps
-  }
-
-instance (Applicative eff) => Applicative (Flip EnvOps eff) where
-  pure x = Flip $ EnvOps {
-    askOp = pure x
-  }
-
-  f <*> x = Flip $ EnvOps {
-    askOp = (askOp $ unFlip f) <*> (askOp $ unFlip x)
-  }
-
-instance (Monad eff) => Monad (Flip EnvOps eff) where
-  mx >>= cont = Flip $ EnvOps {
-    askOp = (askOp $ unFlip mx) >>=
-      \x -> askOp $ unFlip $ cont x
-  }

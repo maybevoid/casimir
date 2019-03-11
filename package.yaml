@@ -16,7 +16,6 @@ dependencies:
   - stm
   - free
   - comonad
-  - TypeCompose
   - transformers
   - natural-transformation
 
@@ -34,6 +33,7 @@ default-extensions:
   - ConstraintKinds
   - TypeApplications
   - FlexibleContexts
+  - OverloadedStrings
   - FlexibleInstances
   - DerivingStrategies
   - ScopedTypeVariables

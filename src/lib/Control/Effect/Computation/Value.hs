@@ -25,7 +25,7 @@ type EffectfulComputation ops a eff =
   Computation ops (Return a) eff
 
 type GenericComputation ops a =
-  forall eff .  EffectfulComputation ops a eff
+  forall eff . (Effect eff) => EffectfulComputation ops a eff
 
 type IdentityComputation a = EffectfulComputation NoEff a Identity
 

@@ -1,4 +1,6 @@
 dist/
 dist-newstyle/
+.stack-work/
+.ghc*
 result
 *.cabal
