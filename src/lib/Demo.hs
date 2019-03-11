@@ -310,3 +310,61 @@ decideComp8 = returnVal $ runComp comp id NoOp
     pipeline1 decideComp2
     (opsCast cast)
     (opsCast cast)
+
+ops1 :: UnionOps (EnvOps Int) IoOps IO
+ops1 = UnionOps (mkEnvOps 2) ioOps
+
+ops2 :: UnionOps IoOps (EnvOps Int) IO
+ops2 = UnionOps ioOps (mkEnvOps 3)
+
+ops3 :: UnionOps
+  (UnionOps (EnvOps Int) IoOps)
+  (UnionOps IoOps (EnvOps Int))
+  IO
+ops3 = UnionOps ops1 ops2
+
+ops4 :: UnionOps (EnvOps Int)
+  (UnionOps IoOps
+    (UnionOps IoOps
+      (UnionOps (EnvOps Int) NoOp)))
+  IO
+ops4 = normalizeOps ops3
+
+readComp1 :: forall eff . (EnvConstraint Int eff, IoConstraint eff) => eff Int
+readComp1 = ask
+
+readComp2 :: forall eff . (IoConstraint eff, EnvConstraint Int eff) => eff Int
+readComp2 = ask
+
+readComp3 :: IO Int
+readComp3 = bindConstraint ops2 readComp1
+
+readComp4 :: IO Int
+readComp4 = bindConstraint ops3 readComp2
+
+readComp5 :: IO Int
+readComp5 = bindConstraint ops4 readComp2
+
+readComp6 :: GenericComputation (Union (EnvEff Int) IoEff) Int
+readComp6 = genericComputation readComp1
+
+readComp7 :: IO Int
+readComp7 = returnVal $ runComp readComp6 id ops1
+
+readComp9 :: IO Int
+readComp8 = returnVal $ runComp readComp6 id (castOps (opsCast cast) ops3)
+
+readComp8 :: IO Int
+readComp9 = returnVal $ runComp readComp6 id (castOps (opsCast cast) ops4)
+
+readComp10 :: GenericComputation (Union IoEff (EnvEff Int)) Int
+readComp10 = genericComputation readComp2
+
+readComp11 :: IO Int
+readComp11 = returnVal $ runComp readComp10 id (castOps (opsCast cast) ops3)
+
+readComp12 :: IO Int
+readComp12 = returnVal $ runComp readComp10 id (castOps (opsCast cast) ops4)
+
+-- ops2 :: UnionOps (EnvOps Int) (UnionOps IoOps (NoOp ())) IO
+-- ops2 = normalizeOps ops1

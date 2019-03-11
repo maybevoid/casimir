@@ -19,6 +19,8 @@ import Control.Effect.Base
   , EffFunctor (..)
   , FreeEff (..)
   , EffOps (..)
+  , UnionOps (..)
+  , Normalizable (..)
   )
 
 data StateEff s where
@@ -56,6 +58,9 @@ instance EffOps (StateEff s) where
   bindConstraint stateOps comp = let ?stateOps = stateOps in comp
 
   captureOps = ?stateOps
+
+instance Normalizable (StateEff s) where
+  unionOps = UnionOps
 
 get :: forall a eff .
   (StateConstraint a eff)

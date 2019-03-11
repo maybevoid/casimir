@@ -42,6 +42,9 @@ instance EffOps (DecideEff s) where
 instance DynamicOps (DecideEff s) where
   dynamicOps = dynamicDecideOps
 
+instance Normalizable (DecideEff s) where
+  unionOps = UnionOps
+
 decide :: forall a eff .
   (DecideConstraint a eff)
   => eff a

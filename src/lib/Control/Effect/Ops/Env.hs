@@ -19,6 +19,8 @@ import Control.Effect.Base
   , EffFunctor (..)
   , FreeEff (..)
   , EffOps (..)
+  , UnionOps (..)
+  , Normalizable (..)
   )
 
 data EnvEff a where
@@ -52,6 +54,9 @@ instance EffOps (EnvEff a) where
   bindConstraint envOps comp = let ?envOps = envOps in comp
 
   captureOps = ?envOps
+
+instance Normalizable (EnvEff a) where
+  unionOps = UnionOps
 
 ask :: forall a eff . (EnvConstraint a eff) => eff a
 ask = askOp ?envOps
