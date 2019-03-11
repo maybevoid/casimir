@@ -100,46 +100,40 @@ stateDynComp1
   => DynamicEff (StateEff Int) eff StateCompRes
 stateDynComp1 = bindConstraint @(StateEff Int) dynamicOps stateComp1
 
-type CoState s eff a = (s, s -> eff a)
+newtype CoState s eff a = CoState (s -> eff a)
+
+runCoState :: forall s eff . (Effect eff)
+  => s
+  -> (forall a . CoState s eff a -> eff a)
+runCoState i (CoState cont) = cont i
 
 stateOpsHandler
   :: forall eff s a .
   (Effect eff)
-  => s
-  -> OpsHandler (StateEff s) a (CoState s eff a) eff
-stateOpsHandler i = OpsHandler {
-  handleReturn = handleReturn',
-  handleOps = handleOps'
-}
+  => OpsHandler (StateEff s) a (CoState s eff a) eff
+stateOpsHandler = OpsHandler handleReturn' handleOps'
  where
   handleReturn' :: a -> eff (CoState s eff a)
-  handleReturn' x = (return $ (i, \_ -> return x))
+  handleReturn' x = return $ CoState $ \_ -> return x
 
   handleOps' :: StateModel s (eff (CoState s eff a)) -> eff (CoState s eff a)
-  handleOps' (GetOp cont1) = return $
-    ( i
-    , \s ->
-      do
-        (_, cont2) <- cont1 s
-        cont2 s
-    )
-  handleOps' (PutOp s cont1) = return $
-    ( i
-    , \_ ->
-      do
-        (_, cont2) <- cont1 ()
-        cont2 s
-    )
+  handleOps' (GetOp cont1) = return $ CoState $
+    \s ->
+     do
+      (CoState cont2) <- cont1 s
+      cont2 s
+  handleOps' (PutOp s cont1) = return $ CoState $
+    \_ ->
+     do
+      (CoState cont2) <- cont1 ()
+      cont2 s
 
 stateDynComp2 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
-stateDynComp2 = withOpsHandler (stateOpsHandler 5) stateDynComp1
+stateDynComp2 = withOpsHandler stateOpsHandler stateDynComp1
 
 stateDynComp3 :: Identity StateCompRes
-stateDynComp3 =
- do
-  (i, cont) <- stateDynComp2
-  cont i
+stateDynComp3 = stateDynComp2 >>= runCoState 5
 
 dynStateTest1 :: TestTree
 dynStateTest1 = testCase "Dynamic state test 1" $
@@ -147,9 +141,54 @@ dynStateTest1 = testCase "Dynamic state test 1" $
   (5, 7, 7) $
   runIdentity stateDynComp3
 
+statePipeline
+  :: forall s eff1 .
+  (Effect eff1)
+  => GenericPipeline (EnvEff s) (StateEff s) eff1
+statePipeline = contextualHandlerToPipeline @(CoState s) $
+  Computation handler
+   where
+    handler
+      :: forall eff2 .
+      (Effect eff2)
+      => LiftEff eff1 eff2
+      -> Operation (EnvEff s) eff2
+      -> ContextualHandler (CoState s) (StateEff s) eff2
+    handler _ envOps = ContextualHandler opsHandler extract
+     where
+      opsHandler :: forall a .
+        OpsHandler (StateEff s) a (CoState s eff2 a) eff2
+      opsHandler = stateOpsHandler
+
+      extract :: forall a . CoState s eff2 a -> eff2 a
+      extract (CoState cont) = bindConstraint envOps $
+       do
+        s <- ask
+        cont s
+
+stateDynComp4 :: forall eff . (Effect eff)
+  => Computation (EnvEff Int) (Return StateCompRes) eff
+stateDynComp4 = runPipelineWithCast
+  statePipeline stateComp2
+  cast cast
+
+stateDynComp5 :: forall eff . (Effect eff)
+  => Computation NoEff (Return StateCompRes) eff
+stateDynComp5 = bindHandlerWithCast
+  (mkEnvHandler (6 :: Int))
+  stateDynComp4
+  cast cast
+
+dynStateTest2 :: TestTree
+dynStateTest2 = testCase "Dynamic state test 2" $
+  assertEqual "State ops pipeline should handle state correctly"
+    (6, 8, 8) $
+    runIdentityComp stateDynComp5
+
 stateTests :: TestTree
 stateTests = testGroup "StateEff Tests"
   [ stateTHandlerTest
   , ioStateTest
   , dynStateTest1
+  , dynStateTest2
   ]
