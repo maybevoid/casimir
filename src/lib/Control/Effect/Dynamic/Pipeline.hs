@@ -2,6 +2,8 @@
 module Control.Effect.Dynamic.Pipeline
 where
 
+import Control.Comonad (Comonad (..))
+
 import Control.Effect.Base
 import Control.Effect.Computation
 import Control.Effect.Dynamic.Lift
@@ -45,13 +47,14 @@ opsHandlerToPipeline handler1 = pipeline
       comp4 = runDynamicEff comp3 handler2
 
 genericOpsHandlerToPipeline
-  :: forall f ops1 handler eff1 .
-  ( Effect eff1
+  :: forall w ops1 handler eff1 .
+  ( Comonad w
+  , Effect eff1
   , EffOps ops1
   , EffOps handler
   , DynamicOps handler
   )
-  => Computation ops1 (GenericOpsHandler f handler) eff1
+  => (forall a . Computation ops1 (OpsHandler handler a (w a)) eff1)
   -> GenericPipeline ops1 handler eff1
 genericOpsHandlerToPipeline handler1 = pipeline
  where
@@ -69,10 +72,8 @@ genericOpsHandlerToPipeline handler1 = pipeline
       -> comp eff2
     comp2 lift12 (UnionOps ops1 ops2) = comp4
      where
-      handler2 :: forall a . OpsHandler handler a (f a) eff2
-      extract :: forall a . f a -> a
-      (GenericOpsHandler handler2 extract)
-        = runComp handler1 lift12 ops1
+      handler2 :: forall a . OpsHandler handler a (w a) eff2
+      handler2 = runComp handler1 lift12 ops1
 
       comp3 :: comp (DynamicEff handler eff2)
       comp3 = runComp comp1

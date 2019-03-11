@@ -1,4 +1,4 @@
-name:                implicit-effect
+name:                implicit-effects
 version:             0.1.0.0
 synopsis:            Demo effects
 
@@ -15,6 +15,7 @@ dependencies:
   - mtl
   - stm
   - free
+  - comonad
   - TypeCompose
   - transformers
   - natural-transformation
@@ -43,8 +44,19 @@ library:
   source-dirs:  src/lib
 
 executables:
-  effect-demo:
+  implicit-effects-demo:
     main:          Main.hs
     source-dirs:   src/main
     dependencies:
-      - implicit-effect
+      - implicit-effects
+
+tests:
+  implicit-effects-test:
+    main:           Main.hs
+    source-dirs:    src/test
+    dependencies:
+      - implicit-effects
+      - tasty
+      - QuickCheck
+      - tasty-hunit
+      - tasty-quickcheck

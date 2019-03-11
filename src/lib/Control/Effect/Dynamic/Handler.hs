@@ -29,8 +29,8 @@ identityOpsHandler
   :: forall handler eff .
   (Effect eff, EffOps handler)
   => (forall a . OpsHandler handler a a eff)
-  -> GenericOpsHandler Identity handler eff
-identityOpsHandler handler1 = GenericOpsHandler handler2 runIdentity
+  -> (forall a . OpsHandler handler a (Identity a) eff)
+identityOpsHandler handler1 = handler2
  where
   handler2 :: forall a . OpsHandler handler a (Identity a) eff
   handler2 = OpsHandler {
