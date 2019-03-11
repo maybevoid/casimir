@@ -10,13 +10,6 @@ mkEnvOps x = EnvOps {
   askOp = return x
 }
 
-mkEnvHandler
-  :: forall a eff .
-  (Effect eff)
-  => a
-  -> BaseHandler (EnvEff a) eff
-mkEnvHandler = baseHandler . mkEnvOps
-
 envComp1
   :: forall eff a .
   (Effect eff, OpsConstraint (EnvEff a) eff, Show a)
@@ -70,7 +63,7 @@ envPipelineTest = testCase "Env pipeline test" $
     res "Env: 5"
 
 envTests :: TestTree
-envTests = testGroup "EnvOps Tests"
+envTests = testGroup "EnvEff Tests"
   [ envOpsTest
   , envHandlerTest
   , envPipelineTest

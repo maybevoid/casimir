@@ -7,6 +7,7 @@ module Control.Effect.Ops.Env
   , EnvConstraint
   , ask
   , freeEnvOps
+  , mkEnvHandler
   )
 where
 
@@ -21,6 +22,9 @@ import Control.Effect.Base
   , UnionOps (..)
   , Normalizable (..)
   )
+
+import Control.Effect.Computation
+  (BaseHandler, baseHandler)
 
 data EnvEff a where
 
@@ -67,4 +71,13 @@ freeEnvOps
   -> EnvOps a (FreeT f eff)
 freeEnvOps liftModel = EnvOps {
   askOp = liftF $ liftModel $ AskOp id
+}
+
+mkEnvHandler
+  :: forall a eff .
+  (Effect eff)
+  => a
+  -> BaseHandler (EnvEff a) eff
+mkEnvHandler x = baseHandler EnvOps {
+  askOp = return x
 }

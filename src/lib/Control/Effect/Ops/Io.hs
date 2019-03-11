@@ -6,6 +6,7 @@ module Control.Effect.Ops.Io
   , IoConstraint
   , liftIo
   , freeIoOps
+  , ioHandler
   )
 where
 
@@ -20,6 +21,9 @@ import Control.Effect.Base
   , UnionOps (..)
   , Normalizable (..)
   )
+
+import Control.Effect.Computation
+  (BaseHandler, baseHandler)
 
 data IoEff where
 
@@ -67,4 +71,9 @@ freeIoOps
   -> IoOps (FreeT f eff)
 freeIoOps liftModel = IoOps {
   liftIoOp = \io -> liftF $ liftModel $ LiftIO io
+}
+
+ioHandler :: BaseHandler IoEff IO
+ioHandler = baseHandler IoOps {
+  liftIoOp = id
 }

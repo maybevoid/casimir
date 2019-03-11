@@ -23,6 +23,8 @@ import Control.Effect.Base
   , Normalizable (..)
   )
 
+import Control.Effect.Dynamic
+
 data StateEff s where
 
 data StateOps s eff = StateOps {
@@ -59,6 +61,9 @@ instance EffOps (StateEff s) where
 
   captureOps = ?stateOps
 
+instance DynamicOps (StateEff s) where
+  dynamicOps = dynamicStateOps
+
 instance Normalizable (StateEff s) where
   unionOps = UnionOps
 
@@ -81,4 +86,13 @@ freeStateOps
 freeStateOps liftModel = StateOps {
   getOp = liftF $ liftModel $ GetOp id,
   putOp = \x -> liftF $ liftModel $ PutOp x id
+}
+
+dynamicStateOps
+  :: forall eff s .
+  (Effect eff)
+  => StateOps s (DynamicEff (StateEff s) eff)
+dynamicStateOps = StateOps {
+  getOp = liftOps $ GetOp return,
+  putOp = \x -> liftOps $ PutOp x return
 }

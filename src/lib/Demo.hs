@@ -14,13 +14,6 @@ mkEnvOps x = EnvOps {
   askOp = return x
 }
 
-mkEnvHandler
-  :: forall a eff .
-  (Effect eff)
-  => a
-  -> BaseHandler (EnvEff a) eff
-mkEnvHandler = baseHandler . mkEnvOps
-
 envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvEff Int) eff
 envHandler1 = mkEnvHandler 3
 
@@ -134,9 +127,6 @@ ioOps :: IoOps IO
 ioOps = IoOps {
   liftIoOp = id
 }
-
-ioHandler :: BaseHandler IoEff IO
-ioHandler = baseHandler ioOps
 
 ioPipeline
   :: GenericPipeline NoEff IoEff IO
