@@ -44,6 +44,36 @@ opsHandlerToPipeline handler1 = Pipeline pipeline
       comp4 :: eff2 b
       comp4 = runDynamicEff comp3 handler2
 
+genericOpsHandlerToPipeline
+  :: forall ops1 handler eff1 .
+  ( Effect eff1
+  , EffOps ops1
+  , EffOps handler
+  , DynamicOps handler
+  )
+  => Computation ops1 (GenericOpsHandler handler) eff1
+  -> GenericPipeline ops1 handler eff1
+genericOpsHandlerToPipeline handler1
+  = transformerPipeline $ Computation handler2
+ where
+  handler2
+    :: forall eff2 .
+    (Effect eff2)
+    => LiftEff eff1 eff2
+    -> Operation ops1 eff2
+    -> TransformerHandler (DynamicEff handler) handler eff2
+  handler2 lift12 ops1
+    = TransformerHandler dynamicOps liftDynamicEff unliftDynamic
+    where
+      (GenericOpsHandler handler3) = runComp handler1 lift12 ops1
+
+      unliftDynamic
+        :: forall a .
+        DynamicEff handler eff2 a
+        -> eff2 a
+      unliftDynamic eff = do
+        runDynamicEff eff handler3
+
 contextualHandlerToPipeline
   :: forall w ops1 handler eff1 .
   ( Effect eff1

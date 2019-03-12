@@ -1,22 +1,21 @@
 
 module Control.Effect.Dynamic.Class
-
 where
 
 import Control.Effect.Base
-import Control.Effect.Computation
 
 data OpsHandler handler a b eff = OpsHandler {
   handleReturn :: a -> eff b,
   handleOps :: CoOperation handler (eff b) -> eff b
 }
 
+newtype GenericOpsHandler handler eff
+  = GenericOpsHandler
+    (forall a . OpsHandler handler a a eff)
+
 newtype DynamicEff ops eff a = DynamicEff {
   runDynamicEff :: forall r . OpsHandler ops a r eff -> eff r
 }
-
-type DynamicHandler ops handler a r eff =
-  Computation ops (OpsHandler handler a r) eff
 
 data ContextualHandler w handler eff = ContextualHandler {
   runContextualHandler
