@@ -5,6 +5,13 @@ import Test.Tasty.HUnit
 
 import Control.Effect
 
+envTests :: TestTree
+envTests = testGroup "EnvEff Tests"
+  [ envOpsTest
+  , envHandlerTest
+  , envPipelineTest
+  ]
+
 mkEnvOps :: forall a eff . (Effect eff) => a -> EnvOps a eff
 mkEnvOps x = EnvOps {
   askOp = return x
@@ -21,8 +28,8 @@ envComp1 = do
 envComp2 ::
   forall a .
   (Show a)
-  => GenericComputation (EnvEff a) String
-envComp2 = genericComputation envComp1
+  => GenericReturn (EnvEff a) String
+envComp2 = genericComputation $ Return envComp1
 
 envOpsTest :: TestTree
 envOpsTest = testCase "Env ops test" $
@@ -61,10 +68,3 @@ envPipelineTest = testCase "Env pipeline test" $
   assertEqual
     "Computation should read and format '5' from environment"
     res "Env: 5"
-
-envTests :: TestTree
-envTests = testGroup "EnvEff Tests"
-  [ envOpsTest
-  , envHandlerTest
-  , envPipelineTest
-  ]

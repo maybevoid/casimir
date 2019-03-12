@@ -45,8 +45,8 @@ envHandler4 = freeHandler
 readerComp3 :: Free (EnvModel Int) Int
 readerComp3 = withHandler envHandler4 readerComp1
 
-readerComp4 :: GenericComputation (EnvEff Int) Int
-readerComp4 = genericComputation readerComp1
+readerComp4 :: GenericReturn (EnvEff Int) Int
+readerComp4 = genericComputation $ Return readerComp1
 
 readerComp5 :: IdentityComputation Int
 readerComp5 = bindHandlerWithCast
@@ -59,7 +59,7 @@ readerComp6 = runIdentityComp readerComp5
 
 readerComp7 :: forall eff .
   (Effect eff)
-  => EffectfulComputation
+  => ReturnComputation
     (Union NoEff (Union (EnvEff Int) NoEff))
     Int
     eff
@@ -88,13 +88,13 @@ readerComp11 = runIdentityComp $
     cast
     cast
 
-readerComp12 :: forall eff . (Effect eff) => EffectfulComputation NoEff Int eff
+readerComp12 :: forall eff . (Effect eff) => ReturnComputation NoEff Int eff
 readerComp12 = bindHandlerWithCast
   envHandler2 readerComp4
   cast
   cast
 
-readerComp13 :: forall eff . (Effect eff) => EffectfulComputation NoEff Int eff
+readerComp13 :: forall eff . (Effect eff) => ReturnComputation NoEff Int eff
 readerComp13 = bindHandlerWithCast
   envHandler1 readerComp12
   cast
@@ -180,8 +180,8 @@ stateComp1 = do
   state2 <- get
   return $ state2 + 1
 
-stateComp2 :: GenericComputation (StateEff Int) Int
-stateComp2 = genericComputation stateComp1
+stateComp2 :: GenericReturn (StateEff Int) Int
+stateComp2 = genericComputation $ Return stateComp1
 
 stateIoComp3 :: IORef Int -> Computation NoEff (Return Int) IO
 stateIoComp3 ref = runPipelineWithCast
@@ -247,9 +247,9 @@ decideComp2
   :: forall eff .
   (Effect eff)
   => Computation (Union IoEff (DecideEff Bool)) (Return Int) eff
-decideComp2 = genericComputation decideComp1
+decideComp2 = genericComputation $ Return decideComp1
 
-decideComp3 :: EffectfulComputation (DecideEff Bool) Int IO
+decideComp3 :: ReturnComputation (DecideEff Bool) Int IO
 decideComp3 = bindHandlerWithCast
   ioHandler decideComp2
   cast
@@ -335,8 +335,8 @@ readComp4 = bindConstraint ops3 readComp2
 readComp5 :: IO Int
 readComp5 = bindConstraint ops4 readComp2
 
-readComp6 :: GenericComputation (Union (EnvEff Int) IoEff) Int
-readComp6 = genericComputation readComp1
+readComp6 :: GenericReturn (Union (EnvEff Int) IoEff) Int
+readComp6 = genericComputation $ Return readComp1
 
 readComp7 :: IO Int
 readComp7 = returnVal $ runComp readComp6 id ops1
@@ -347,8 +347,8 @@ readComp8 = returnVal $ runComp readComp6 id (castOps cast ops3)
 readComp8 :: IO Int
 readComp9 = returnVal $ runComp readComp6 id (castOps cast ops4)
 
-readComp10 :: GenericComputation (Union IoEff (EnvEff Int)) Int
-readComp10 = genericComputation readComp2
+readComp10 :: GenericReturn (Union IoEff (EnvEff Int)) Int
+readComp10 = genericComputation $ Return readComp2
 
 readComp11 :: IO Int
 readComp11 = returnVal $ runComp readComp10 id (castOps cast ops3)

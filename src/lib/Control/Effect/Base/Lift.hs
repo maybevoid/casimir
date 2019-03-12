@@ -2,7 +2,9 @@
 module Control.Effect.Base.Lift
 where
 
-type LiftEff eff1 eff2 = forall a . eff1 a -> eff2 a
+import Control.Natural (type (~>))
+
+type LiftEff eff1 eff2 = eff1 ~> eff2
 
 joinLift :: forall eff1 eff2 eff3 .
   LiftEff eff1 eff2

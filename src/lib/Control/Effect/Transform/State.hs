@@ -13,6 +13,15 @@ import Control.Effect.Computation
 import Control.Effect.Ops.State
   (StateEff, StateOps(..))
 
+stateTOps
+  :: forall eff s .
+  (Effect eff)
+  => StateOps s (StateT s eff)
+stateTOps = StateOps {
+  getOp = get,
+  putOp = put
+}
+
 stateTHandler
   :: forall eff s .
   (Effect eff)
@@ -22,3 +31,15 @@ stateTHandler = mkHandler lift $
     getOp = liftEff get,
     putOp = \x -> liftEff $ put x
   }
+
+stateTPipeline
+  :: forall s eff1 comp .
+  (Effect eff1, EffFunctor comp)
+  => s
+  -> SimplePipeline NoEff (StateEff s) eff1 comp
+stateTPipeline i = transformerPipeline $ genericComputation handler
+ where
+  handler :: forall eff . (Effect eff)
+    => TransformerHandler (StateT s) (StateEff s) eff
+  handler = TransformerHandler stateTOps lift $
+    \eff -> evalStateT eff i

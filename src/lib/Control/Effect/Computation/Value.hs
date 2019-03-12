@@ -21,18 +21,21 @@ instance EffFunctor (Return a) where
 type PureComputation a =
   forall eff . Computation NoEff (Pure a) eff
 
-type EffectfulComputation ops a eff =
+type ReturnComputation ops a eff =
   Computation ops (Return a) eff
 
-type GenericComputation ops a =
-  forall eff . (Effect eff) => EffectfulComputation ops a eff
+type GenericReturn ops a =
+  forall eff . (Effect eff) => ReturnComputation ops a eff
 
-type IdentityComputation a = EffectfulComputation NoEff a Identity
+type GenericComputation ops comp =
+  forall eff . (Effect eff) => Computation ops comp eff
+
+type IdentityComputation a = ReturnComputation NoEff a Identity
 
 pureComputation :: forall a . a -> PureComputation a
 pureComputation x = Computation $ \ _ _ -> Pure x
 
-effectfulComputation
+returnComputation
   :: forall ops a eff1 .
   ( Effect eff1
   , EffOps ops
@@ -41,20 +44,20 @@ effectfulComputation
       (Effect eff2, OpsConstraint ops eff2)
       => LiftEff eff1 eff2
       -> eff2 a)
-  -> EffectfulComputation ops a eff1
-effectfulComputation comp1 = Computation $
+  -> ReturnComputation ops a eff1
+returnComputation comp1 = Computation $
   \ liftEff ops ->
     bindConstraint ops $ Return $ comp1 liftEff
 
 genericComputation
-  :: forall ops a .
-  ( EffOps ops )
+  :: forall ops comp .
+  (EffOps ops)
   => (forall eff .
       (Effect eff, OpsConstraint ops eff)
-      => eff a)
-  -> GenericComputation ops a
+      => comp eff)
+  -> (forall eff .Computation ops comp eff)
 genericComputation comp = Computation $
-  \ _ ops -> bindConstraint ops $ Return comp
+  \ _ ops -> bindConstraint ops comp
 
 runIdentityComp :: forall a . IdentityComputation a -> a
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp id NoOp

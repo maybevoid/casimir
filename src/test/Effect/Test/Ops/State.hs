@@ -13,6 +13,15 @@ import Control.Monad.Trans.State.Strict
 
 import Control.Effect
 
+stateTests :: TestTree
+stateTests = testGroup "StateEff Tests"
+  [ stateTHandlerTest
+  , stateTPipelineTest
+  , ioStateTest
+  , dynStateTest1
+  , dynStateTest2
+  ]
+
 type StateCompRes = (Int, Int, Int)
 
 stateComp1
@@ -26,8 +35,8 @@ stateComp1 = do
   s3 <- get
   return (s1, s2, s3)
 
-stateComp2 :: GenericComputation (StateEff Int) StateCompRes
-stateComp2 = genericComputation stateComp1
+stateComp2 :: GenericReturn (StateEff Int) StateCompRes
+stateComp2 = genericComputation $ Return stateComp1
 
 stateTComp
   :: forall eff .
@@ -51,6 +60,18 @@ stateTHandlerTest = testCase "StateT handler test" $
 
   assertEqual "StateT computation should have 5 as final state"
     5 s
+
+stateComp3 :: IdentityComputation StateCompRes
+stateComp3
+  = runPipelineWithCast
+    (stateTPipeline 4)
+    stateComp2
+    cast cast
+
+stateTPipelineTest :: TestTree
+stateTPipelineTest = testCase "StateT pipeline test" $
+  assertEqual "StateT pipeline should get/put the correct states"
+    (4, 6, 6) $ runIdentityComp stateComp3
 
 ioStateHandler
   :: forall eff s .
@@ -145,7 +166,7 @@ statePipeline
   :: forall s eff1 .
   (Effect eff1)
   => GenericPipeline (EnvEff s) (StateEff s) eff1
-statePipeline = contextualHandlerToPipeline @(CoState s) $
+statePipeline = contextualHandlerToPipeline $
   Computation handler
    where
     handler
@@ -184,11 +205,3 @@ dynStateTest2 = testCase "Dynamic state test 2" $
   assertEqual "State ops pipeline should handle state correctly"
     (6, 8, 8) $
     runIdentityComp stateDynComp5
-
-stateTests :: TestTree
-stateTests = testGroup "StateEff Tests"
-  [ stateTHandlerTest
-  , ioStateTest
-  , dynStateTest1
-  , dynStateTest2
-  ]
