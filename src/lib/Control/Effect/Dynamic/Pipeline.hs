@@ -53,39 +53,24 @@ contextualHandlerToPipeline
   )
   => Computation ops1 (ContextualHandler w handler) eff1
   -> GenericPipeline ops1 handler eff1
-contextualHandlerToPipeline handler1 = Pipeline pipeline
+contextualHandlerToPipeline handler1
+  = transformerPipeline $ Computation handler2
  where
-  pipeline :: forall ops2 comp .
-    (EffOps ops2, EffFunctor comp)
-    => Computation (Union handler ops2) comp eff1
-    -> Computation (Union ops1 ops2) comp eff1
-  pipeline comp1 = Computation comp2
+  handler2
+    :: forall eff2 .
+    (Effect eff2)
+    => LiftEff eff1 eff2
+    -> Operation ops1 eff2
+    -> TransformerHandler (DynamicEff handler) handler eff2
+  handler2 lift12 ops1
+    = TransformerHandler dynamicOps liftDynamicEff unliftDynamic
    where
-    comp2
-      :: forall eff2 .
-      (Effect eff2)
-      => LiftEff eff1 eff2
-      -> Operation (Union ops1 ops2) eff2
-      -> comp eff2
-    comp2 lift12 (UnionOps ops1 ops2) = comp4
-     where
-      handler2 :: forall a . OpsHandler handler a (w eff2 a) eff2
-      extract :: forall a . w eff2 a -> eff2 a
-      (ContextualHandler handler2 extract)
-        = runComp handler1 lift12 ops1
+    (ContextualHandler handler3 extract) = runComp handler1 lift12 ops1
 
-      comp3 :: comp (DynamicEff handler eff2)
-      comp3 = runComp comp1
-        (liftDynamicEff . lift12)
-        (UnionOps dynamicOps (effmap liftDynamicEff ops2))
-
-      unliftDynamic
-        :: forall a .
-        DynamicEff handler eff2 a
-        -> eff2 a
-      unliftDynamic eff = do
-        wx <- runDynamicEff eff handler2
-        extract wx
-
-      comp4 :: comp eff2
-      comp4 = effmap unliftDynamic comp3
+    unliftDynamic
+      :: forall a .
+      DynamicEff handler eff2 a
+      -> eff2 a
+    unliftDynamic eff = do
+      wx <- runDynamicEff eff handler3
+      extract wx
