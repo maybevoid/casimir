@@ -59,6 +59,16 @@ genericComputation
 genericComputation comp = Computation $
   \ _ ops -> bindConstraint ops comp
 
+genericReturn
+  :: forall ops a .
+  (EffOps ops)
+  => (forall eff .
+      (Effect eff, OpsConstraint ops eff)
+      => eff a)
+  -> GenericReturn ops a
+genericReturn comp = Computation $
+  \ _ ops -> Return $ bindConstraint ops comp
+
 runIdentityComp :: forall a . IdentityComputation a -> a
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp id NoOp
 
