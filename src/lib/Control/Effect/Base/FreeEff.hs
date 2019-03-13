@@ -15,7 +15,7 @@ class FreeEff (ops :: *) where
   type family CoOperation ops
     = (f :: (* -> *)) | f -> ops
 
-  freeMonad
+  freeOps
     :: forall ops' eff .
     (Functor ops', Effect eff)
     => (CoOperation ops ~> ops')

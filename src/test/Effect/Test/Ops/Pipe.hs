@@ -6,9 +6,11 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Control.Monad.Identity
-import Control.Monad.Trans.Free (liftF)
+import Control.Monad.Trans.Free
+import Control.Monad.Trans.Class
 
 import Control.Effect
+  hiding (Pure)
 
 data YieldEff a where
 data AwaitEff a where
@@ -17,13 +19,13 @@ data YieldOps a eff = YieldOps {
   yieldOp :: a -> eff ()
 }
 
-data YieldCoOps a r =
-  YieldOp a (() -> r)
-  deriving (Functor)
-
 data AwaitOps a eff = AwaitOps {
   awaitOp :: eff a
 }
+
+data YieldCoOps a r =
+  YieldOp a (() -> r)
+  deriving (Functor)
 
 data AwaitCoOps a r =
   AwaitOp (a -> r)
@@ -44,14 +46,14 @@ instance FreeEff (YieldEff a) where
   type Operation (YieldEff a) = YieldOps a
   type CoOperation (YieldEff a) = YieldCoOps a
 
-  freeMonad liftCoOps = YieldOps $
+  freeOps liftCoOps = YieldOps $
     \x -> liftF $ liftCoOps $ YieldOp x id
 
 instance FreeEff (AwaitEff a) where
   type Operation (AwaitEff a) = AwaitOps a
   type CoOperation (AwaitEff a) = AwaitCoOps a
 
-  freeMonad liftCoOps = AwaitOps $
+  freeOps liftCoOps = AwaitOps $
     liftF $ liftCoOps $ AwaitOp id
 
 instance EffOps (YieldEff a) where
@@ -89,41 +91,53 @@ await :: forall a eff
   => eff a
 await = awaitOp ?awaitOps
 
-pipe :: forall a r eff
+runPipe :: forall a r eff
    . (Effect eff)
   => Computation (YieldEff a) (Return r) eff
   -> Computation (AwaitEff a) (Return r) eff
   -> eff r
-pipe producer consumer = withOpsHandler handler1 $
-  returnVal $ runComp consumer liftDynamicEff captureOps
- where
-  handler1 :: OpsHandler (AwaitEff a) r r eff
-  handler1 = OpsHandler return handleAwait
-
-  handleAwait :: AwaitCoOps a (eff r) -> eff r
-  handleAwait (AwaitOp cont1) = copipe cont2 producer
+runPipe producer1 consumer1
+  = pipe producer2 consumer2
    where
-    cont2 :: a -> Computation (AwaitEff a) (Return r) eff
-    cont2 x = Computation $ \liftEff _ ->
-      Return $ liftEff $ cont1 x
+    producer2 :: FreeT (YieldCoOps a) eff r
+    producer2 = returnVal $ runComp producer1 lift (freeOps id)
 
-copipe :: forall a r eff
+    consumer2 :: FreeT (AwaitCoOps a) eff r
+    consumer2 = returnVal $ runComp consumer1 lift (freeOps id)
+
+pipe
+  :: forall a r eff
    . (Effect eff)
-  => (a -> Computation (AwaitEff a) (Return r) eff)
-  -> Computation (YieldEff a) (Return r) eff
+  => FreeT (YieldCoOps a) eff r
+  -> FreeT (AwaitCoOps a) eff r
   -> eff r
-copipe consumer producer = withOpsHandler handler1 $
-  returnVal $ runComp producer liftDynamicEff captureOps
+pipe producer consumer = runFreeT consumer >>= handleConsumer
  where
-  handler1 :: OpsHandler (YieldEff a) r r eff
-  handler1 = OpsHandler return handleYield
+  handleConsumer
+    :: FreeF (AwaitCoOps a) r (FreeT (AwaitCoOps a) eff r)
+    -> eff r
+  handleConsumer (Pure r) = return r
+  handleConsumer
+    (Free (AwaitOp
+      (cont :: a -> (FreeT (AwaitCoOps a) eff r))))
+    = copipe cont producer
 
-  handleYield :: YieldCoOps a (eff r) -> eff r
-  handleYield (YieldOp x cont1) = pipe cont2 $ consumer x
-   where
-    cont2 :: Computation (YieldEff a) (Return r) eff
-    cont2 = Computation $ \liftEff _ ->
-      Return $ liftEff $ cont1 ()
+copipe
+  :: forall a r eff
+   . (Effect eff)
+  => (a -> FreeT (AwaitCoOps a) eff r)
+  -> FreeT (YieldCoOps a) eff r
+  -> eff r
+copipe consumer producer = runFreeT producer >>= handleProducer
+ where
+  handleProducer
+    :: FreeF (YieldCoOps a) r (FreeT (YieldCoOps a) eff r)
+    -> eff r
+  handleProducer (Pure r) = return r
+  handleProducer
+    (Free (YieldOp x
+      (cont :: () -> (FreeT (YieldCoOps a) eff r))))
+    = pipe (cont ()) $ consumer x
 
 producerComp :: forall a . GenericReturn (YieldEff Int) a
 producerComp = genericReturn comp
@@ -134,6 +148,7 @@ producerComp = genericReturn comp
   comp
    = do
       yield 1
+      yield 2
       comp
 
 consumerComp :: GenericReturn (AwaitEff Int) Int
@@ -146,17 +161,18 @@ consumerComp = genericReturn $
 
 pipedComp :: forall eff . (Effect eff)
   => eff Int
-pipedComp = pipe producerComp consumerComp
+pipedComp = runPipe producerComp consumerComp
 
 pipeTest :: TestTree
 pipeTest = testCase
   "Mutually recursive pipe computation should run correctly" $
   assertEqual
-    "Pipe computation should return 3"
-    3 $
+    "Pipe computation should return 4"
+    4 $
     runIdentity pipedComp
 
 pipeTests :: TestTree
 pipeTests = testGroup "PipeEff Tests"
-  [ pipeTest
+  [
+    pipeTest
   ]

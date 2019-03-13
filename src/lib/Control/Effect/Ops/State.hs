@@ -52,7 +52,7 @@ instance FreeEff (StateEff s) where
   type Operation (StateEff s) = StateOps s
   type CoOperation (StateEff s) = StateModel s
 
-  freeMonad = freeStateOps
+  freeOps = freeStateOps
 
 instance EffOps (StateEff s) where
   type OpsConstraint (StateEff s) eff = StateConstraint s eff

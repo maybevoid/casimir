@@ -47,7 +47,7 @@ instance FreeEff IoEff where
   type Operation IoEff = IoOps
   type CoOperation IoEff = IoModel
 
-  freeMonad = freeIoOps
+  freeOps = freeIoOps
 
 instance EffOps IoEff where
   type OpsConstraint IoEff eff = (IoConstraint eff)

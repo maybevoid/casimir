@@ -30,7 +30,7 @@ instance FreeEff (DecideEff s) where
   type Operation (DecideEff s) = DecideOps s
   type CoOperation (DecideEff s) = DecideModel s
 
-  freeMonad = freeDecideOps
+  freeOps = freeDecideOps
 
 instance EffOps (DecideEff s) where
   type OpsConstraint (DecideEff s) eff = DecideConstraint s eff

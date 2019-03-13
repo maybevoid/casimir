@@ -46,7 +46,7 @@ instance (EffOps f, EffOps g) => FreeEff (Union f g) where
   type Operation (Union f g) = UnionOps (Operation f) (Operation g)
   type CoOperation (Union f g) = UnionModel (CoOperation f) (CoOperation g)
 
-  freeMonad = freeUnionOps
+  freeOps = freeUnionOps
 
 instance (EffOps f, EffOps g) => EffOps (Union f g) where
   -- reverse the order as the left most constraint
@@ -71,7 +71,7 @@ freeUnionOps
 freeUnionOps liftModel = UnionOps ops1 ops2
   where
     ops1 :: Operation ops1 (FreeT f eff)
-    ops1 = freeMonad (liftModel . LeftModel)
+    ops1 = freeOps (liftModel . LeftModel)
 
     ops2 :: Operation ops2 (FreeT f eff)
-    ops2 = freeMonad (liftModel . RightModel)
+    ops2 = freeOps (liftModel . RightModel)

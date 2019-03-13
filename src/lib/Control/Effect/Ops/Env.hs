@@ -49,7 +49,7 @@ instance FreeEff (EnvEff a) where
   type Operation (EnvEff a) = EnvOps a
   type CoOperation (EnvEff a) = EnvModel a
 
-  freeMonad = freeEnvOps
+  freeOps = freeEnvOps
 
 instance EffOps (EnvEff a) where
   type OpsConstraint (EnvEff a) eff = (EnvConstraint a eff)
