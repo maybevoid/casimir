@@ -6,6 +6,7 @@ module Control.Effect.Ops.Io
   , IoConstraint
   , liftIo
   , freeIoOps
+  , ioOps
   , ioHandler
   )
 where
@@ -39,8 +40,8 @@ instance Functor IoModel where
   fmap f (LiftIO io) = LiftIO $ fmap f io
 
 instance EffFunctor IoOps where
-  effmap liftEff ioOps = IoOps {
-    liftIoOp = liftEff . liftIoOp ioOps
+  effmap liftEff ops = IoOps {
+    liftIoOp = liftEff . liftIoOp ops
   }
 
 instance FreeEff IoEff where
@@ -52,7 +53,7 @@ instance FreeEff IoEff where
 instance EffOps IoEff where
   type OpsConstraint IoEff eff = (IoConstraint eff)
 
-  bindConstraint ioOps comp = let ?ioOps = ioOps in comp
+  bindConstraint ops comp = let ?ioOps = ops in comp
 
   captureOps = ?ioOps
 
@@ -71,6 +72,11 @@ freeIoOps
   -> IoOps (FreeT f eff)
 freeIoOps liftModel = IoOps {
   liftIoOp = \io -> liftF $ liftModel $ LiftIO io
+}
+
+ioOps :: IoOps IO
+ioOps = IoOps {
+  liftIoOp = id
 }
 
 ioHandler :: BaseHandler IoEff IO

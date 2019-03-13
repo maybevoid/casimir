@@ -9,11 +9,6 @@ import Control.Monad.Identity
 
 import Control.Effect
 
-mkEnvOps :: forall a eff . (Effect eff) => a -> EnvOps a eff
-mkEnvOps x = EnvOps {
-  askOp = return x
-}
-
 envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvEff Int) eff
 envHandler1 = mkEnvHandler 3
 
@@ -122,11 +117,6 @@ refStatePipeline
   => IORef a
   -> GenericPipeline IoEff (StateEff a) eff
 refStatePipeline ref = handlerToPipeline $ refStateHandler ref
-
-ioOps :: IoOps IO
-ioOps = IoOps {
-  liftIoOp = id
-}
 
 ioPipeline
   :: GenericPipeline NoEff IoEff IO

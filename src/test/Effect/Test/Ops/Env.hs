@@ -12,11 +12,6 @@ envTests = testGroup "EnvEff Tests"
   , envPipelineTest
   ]
 
-mkEnvOps :: forall a eff . (Effect eff) => a -> EnvOps a eff
-mkEnvOps x = EnvOps {
-  askOp = return x
-}
-
 envComp1
   :: forall eff a .
   (Effect eff, OpsConstraint (EnvEff a) eff, Show a)

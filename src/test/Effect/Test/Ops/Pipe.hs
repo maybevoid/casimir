@@ -5,7 +5,6 @@ module Effect.Test.Ops.Pipe where
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import Control.Monad.Identity
 import Control.Monad.Trans.Free
 import Control.Monad.Trans.Class
 
@@ -91,19 +90,28 @@ await :: forall a eff
   => eff a
 await = awaitOp ?awaitOps
 
-runPipe :: forall a r eff
-   . (Effect eff)
-  => Computation (YieldEff a) (Return r) eff
-  -> Computation (AwaitEff a) (Return r) eff
-  -> eff r
-runPipe producer1 consumer1
-  = pipe producer2 consumer2
+runPipe :: forall a r ops eff1
+   . (Effect eff1, EffOps ops)
+  => Computation (Union (YieldEff a) ops) (Return r) eff1
+  -> Computation (Union (AwaitEff a) ops) (Return r) eff1
+  -> Computation ops (Return r) eff1
+runPipe producer1 consumer1 = Computation comp
    where
-    producer2 :: FreeT (YieldCoOps a) eff r
-    producer2 = returnVal $ runComp producer1 lift (freeOps id)
+    comp :: forall eff2 . (Effect eff2)
+      => LiftEff eff1 eff2
+      -> Operation ops eff2
+      -> Return r eff2
+    comp liftEff ops = Return $ pipe producer2 consumer2
+     where
+      producer2 :: FreeT (YieldCoOps a) eff2 r
+      producer2 = returnVal $ runComp producer1
+        (lift . liftEff) $
+        UnionOps (freeOps id) (effmap lift ops)
 
-    consumer2 :: FreeT (AwaitCoOps a) eff r
-    consumer2 = returnVal $ runComp consumer1 lift (freeOps id)
+      consumer2 :: FreeT (AwaitCoOps a) eff2 r
+      consumer2 = returnVal $ runComp consumer1
+        (lift . liftEff) $
+        UnionOps (freeOps id) (effmap lift ops)
 
 pipe
   :: forall a r eff
@@ -139,19 +147,28 @@ copipe consumer producer = runFreeT producer >>= handleProducer
       (cont :: () -> (FreeT (YieldCoOps a) eff r))))
     = pipe (cont ()) $ consumer x
 
-producerComp :: forall a . GenericReturn (YieldEff Int) a
-producerComp = genericReturn comp
+producerComp
+  :: forall a .
+  GenericReturn (Union (YieldEff Int) (EnvEff Int)) a
+producerComp = genericReturn comp1
  where
-  comp :: forall eff
-   . (Effect eff, YieldConstraint Int eff)
+  comp1 :: forall eff
+    . ( Effect eff
+      , YieldConstraint Int eff
+      , EnvConstraint Int eff
+      )
    => eff a
-  comp
+  comp1
    = do
-      yield 1
-      yield 2
-      comp
+      seed <- ask
+      comp2 seed
+       where
+        comp2 acc = do
+          yield acc
+          comp2 $ acc + 1
 
-consumerComp :: GenericReturn (AwaitEff Int) Int
+consumerComp
+  :: GenericReturn (Union (AwaitEff Int) (EnvEff Int)) Int
 consumerComp = genericReturn $
  do
   x <- await
@@ -160,16 +177,17 @@ consumerComp = genericReturn $
   return $ x + y + z
 
 pipedComp :: forall eff . (Effect eff)
-  => eff Int
+  => Computation (EnvEff Int) (Return Int) eff
 pipedComp = runPipe producerComp consumerComp
 
 pipeTest :: TestTree
 pipeTest = testCase
   "Mutually recursive pipe computation should run correctly" $
-  assertEqual
-    "Pipe computation should return 4"
-    4 $
-    runIdentity pipedComp
+  do
+    res <- returnVal $ runComp pipedComp id (mkEnvOps 5)
+    assertEqual
+      "Pipe computation should return 18"
+      18 res
 
 pipeTests :: TestTree
 pipeTests = testGroup "PipeEff Tests"
