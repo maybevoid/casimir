@@ -7,7 +7,7 @@ import Control.Monad.Identity (Identity (..))
 import Control.Effect.Base
 import Control.Effect.Computation.Class
 
-newtype Pure a (eff :: * -> *) = Pure {
+newtype PureVal a (eff :: * -> *) = PureVal {
   pureVal :: a
 }
 
@@ -19,7 +19,7 @@ instance EffFunctor (Return a) where
   effmap liftEff (Return mx) = Return $ liftEff mx
 
 type PureComputation a =
-  forall eff . Computation NoEff (Pure a) eff
+  forall eff . Computation NoEff (PureVal a) eff
 
 type ReturnComputation ops a eff =
   Computation ops (Return a) eff
@@ -33,7 +33,7 @@ type GenericComputation ops comp =
 type IdentityComputation a = ReturnComputation NoEff a Identity
 
 pureComputation :: forall a . a -> PureComputation a
-pureComputation x = Computation $ \ _ _ -> Pure x
+pureComputation x = Computation $ \ _ _ -> PureVal x
 
 returnComputation
   :: forall ops a eff1 .

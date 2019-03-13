@@ -9,7 +9,6 @@ import Control.Monad.Trans.Free
 import Control.Monad.Trans.Class
 
 import Control.Effect
-  hiding (Pure)
 
 data YieldEff a where
 data AwaitEff a where

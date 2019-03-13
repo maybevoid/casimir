@@ -4,11 +4,6 @@ where
 
 import Control.Effect.Base
 
-data OpsHandler handler a b eff = OpsHandler {
-  handleReturn :: a -> eff b,
-  handleOps :: CoOperation handler (eff b) -> eff b
-}
-
 newtype GenericOpsHandler handler eff
   = GenericOpsHandler
     (forall a . OpsHandler handler a a eff)
