@@ -3,7 +3,7 @@
 module Control.Effect.Base.NoEff
   ( NoEff
   , NoOp (..)
-  , NoModel (..)
+  , NoCoOp (..)
   , NoConstraint
   )
 where
@@ -16,21 +16,21 @@ data NoEff where
 
 data NoOp (eff :: * -> *) = NoOp
 
-data NoModel a = NoModel
+data NoCoOp a = NoCoOp
 
 class NoConstraint (eff :: * -> *) where
 
 instance NoConstraint eff where
 
-instance Functor NoModel where
-  fmap _ _ = NoModel
+instance Functor NoCoOp where
+  fmap _ _ = NoCoOp
 
 instance EffFunctor NoOp where
   effmap _ _ = NoOp
 
 instance FreeOps NoEff where
   type Operation NoEff = NoOp
-  type CoOperation NoEff = NoModel
+  type CoOperation NoEff = NoCoOp
 
   mkFreeOps _ = NoOp
 

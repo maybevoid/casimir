@@ -3,7 +3,7 @@
 module Control.Effect.Ops.State
   ( StateEff
   , StateOps (..)
-  , StateModel (..)
+  , StateCoOps (..)
   , StateConstraint
   , get
   , put
@@ -25,13 +25,13 @@ data StateOps s eff = StateOps {
   putOp :: s -> eff ()
 }
 
-data StateModel s a =
+data StateCoOps s a =
     GetOp (s -> a)
   | PutOp s (() -> a)
 
 type StateConstraint s eff = (?stateOps :: StateOps s eff)
 
-instance Functor (StateModel s) where
+instance Functor (StateCoOps s) where
   fmap f (GetOp cont) = GetOp $ fmap f cont
   fmap f (PutOp s cont) = PutOp s $ fmap f cont
 
@@ -43,7 +43,7 @@ instance EffFunctor (StateOps a) where
 
 instance FreeOps (StateEff s) where
   type Operation (StateEff s) = StateOps s
-  type CoOperation (StateEff s) = StateModel s
+  type CoOperation (StateEff s) = StateCoOps s
 
   mkFreeOps liftCoOps = StateOps {
     getOp = liftCoOps $ GetOp id,

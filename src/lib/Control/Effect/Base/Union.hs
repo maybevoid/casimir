@@ -17,18 +17,18 @@ data UnionOps
   = (EffFunctor f, EffFunctor g)
   => UnionOps (f eff) (g eff)
 
-data UnionModel
+data UnionCoOps
   (f :: (* -> *))
   (g :: (* -> *))
   (a :: *)
-  = LeftModel (f a)
-  | RightModel (g a)
+  = LeftCoOps (f a)
+  | RightCoOps (g a)
 
 instance (Functor ops1, Functor ops2)
-  => Functor (UnionModel ops1 ops2)
+  => Functor (UnionCoOps ops1 ops2)
   where
-    fmap f (LeftModel x) = LeftModel $ fmap f x
-    fmap f (RightModel x) = RightModel $ fmap f x
+    fmap f (LeftCoOps x) = LeftCoOps $ fmap f x
+    fmap f (RightCoOps x) = RightCoOps $ fmap f x
 
 instance
   ( EffFunctor ops1
@@ -41,7 +41,7 @@ instance
 
 instance (EffOps f, EffOps g) => FreeOps (Union f g) where
   type Operation (Union f g) = UnionOps (Operation f) (Operation g)
-  type CoOperation (Union f g) = UnionModel (CoOperation f) (CoOperation g)
+  type CoOperation (Union f g) = UnionCoOps (CoOperation f) (CoOperation g)
 
   mkFreeOps = mkFreeUnionOps
 
@@ -64,13 +64,13 @@ mkFreeUnionOps
   , Effect (t eff)
   )
   => (forall a .
-      UnionModel (CoOperation ops1) (CoOperation ops2) a
+      UnionCoOps (CoOperation ops1) (CoOperation ops2) a
       -> t eff a)
   -> UnionOps (Operation ops1) (Operation ops2) (t eff)
 mkFreeUnionOps liftReturn = UnionOps ops1 ops2
   where
     ops1 :: Operation ops1 (t eff)
-    ops1 = mkFreeOps (liftReturn . LeftModel)
+    ops1 = mkFreeOps (liftReturn . LeftCoOps)
 
     ops2 :: Operation ops2 (t eff)
-    ops2 = mkFreeOps (liftReturn . RightModel)
+    ops2 = mkFreeOps (liftReturn . RightCoOps)

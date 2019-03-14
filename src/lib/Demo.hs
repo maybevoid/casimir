@@ -3,8 +3,6 @@
 module Demo where
 
 import Data.IORef
-
-import Control.Monad.Trans.Free
 import Control.Monad.Identity
 
 import Control.Effect
