@@ -34,13 +34,13 @@ opsHandlerToPipeline handler1 = Pipeline pipeline
       handler2 :: OpsHandler handler a b eff2
       handler2 = runComp handler1 lift12 ops1
 
-      comp3 :: DynamicEff handler eff2 a
+      comp3 :: DynamicMonad handler eff2 a
       comp3 = returnVal $ runComp comp1
-        (liftDynamicEff . lift12)
-        (UnionOps dynamicOps (effmap liftDynamicEff ops2))
+        (liftDynamicMonad . lift12)
+        (UnionOps dynamicOps (effmap liftDynamicMonad ops2))
 
       comp4 :: eff2 b
-      comp4 = runDynamicEff comp3 handler2
+      comp4 = runDynamicMonad comp3 handler2
 
 genericOpsHandlerToPipeline
   :: forall ops1 handler eff1 .
@@ -58,18 +58,18 @@ genericOpsHandlerToPipeline handler1
     (Effect eff2)
     => LiftEff eff1 eff2
     -> Operation ops1 eff2
-    -> TransformerHandler (DynamicEff handler) handler eff2
+    -> TransformerHandler (DynamicMonad handler) handler eff2
   handler2 lift12 ops1
-    = TransformerHandler dynamicOps liftDynamicEff unliftDynamic
+    = TransformerHandler dynamicOps liftDynamicMonad unliftDynamic
     where
       (GenericOpsHandler handler3) = runComp handler1 lift12 ops1
 
       unliftDynamic
         :: forall a .
-        DynamicEff handler eff2 a
+        DynamicMonad handler eff2 a
         -> eff2 a
       unliftDynamic eff = do
-        runDynamicEff eff handler3
+        runDynamicMonad eff handler3
 
 contextualHandlerToPipeline
   :: forall w ops1 handler eff1 .
@@ -87,16 +87,16 @@ contextualHandlerToPipeline handler1
     (Effect eff2)
     => LiftEff eff1 eff2
     -> Operation ops1 eff2
-    -> TransformerHandler (DynamicEff handler) handler eff2
+    -> TransformerHandler (DynamicMonad handler) handler eff2
   handler2 lift12 ops1
-    = TransformerHandler dynamicOps liftDynamicEff unliftDynamic
+    = TransformerHandler dynamicOps liftDynamicMonad unliftDynamic
    where
     (ContextualHandler handler3 extract) = runComp handler1 lift12 ops1
 
     unliftDynamic
       :: forall a .
-      DynamicEff handler eff2 a
+      DynamicMonad handler eff2 a
       -> eff2 a
     unliftDynamic eff = do
-      wx <- runDynamicEff eff handler3
+      wx <- runDynamicMonad eff handler3
       extract wx

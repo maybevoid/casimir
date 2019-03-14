@@ -11,8 +11,8 @@ liftOps
   , EffOps ops
   )
   => CoOperation ops (eff a)
-  -> DynamicEff ops eff a
-liftOps ops = DynamicEff $ cont
+  -> DynamicMonad ops eff a
+liftOps ops = DynamicMonad $ cont
  where
   cont :: forall r . OpsHandler ops a r eff -> eff r
   cont handler = handleOps handler $ fmap mapper ops

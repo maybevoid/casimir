@@ -37,7 +37,7 @@ readerComp2 = withHandler envHandler1 readerComp1
 envHandler4 :: FreeHandler (EnvEff Int)
 envHandler4 = freeHandler
 
-readerComp3 :: Free (EnvModel Int) Int
+readerComp3 :: FreeMonad (EnvEff Int) Identity Int
 readerComp3 = withHandler envHandler4 readerComp1
 
 readerComp4 :: GenericReturn (EnvEff Int) Int
@@ -248,7 +248,7 @@ decideComp3 = bindHandlerWithCast
 decideComp4 :: IO [Int]
 decideComp4 =
   withDynamicOpsHandler nonDetHandler1 $
-    returnVal $ runComp decideComp3 liftDynamicEff captureOps
+    returnVal $ runComp decideComp3 liftDynamicMonad captureOps
 
 decideComp5
   :: forall eff .

@@ -2,8 +2,6 @@
 module Control.Effect.Computation.Handler
 where
 
-import Control.Monad.Trans.Free (Free)
-
 import Control.Effect.Base
 import Control.Effect.Computation.Class
 
@@ -13,7 +11,9 @@ type BaseHandler handler eff = FlatHandler NoEff handler eff
 
 type GenericHandler ops handler = forall eff . FlatHandler ops handler eff
 
-type FreeHandler handler = BaseHandler handler (Free (CoOperation handler))
+type FreeHandler handler
+  = forall eff . (Effect eff)
+    => BaseHandler handler (FreeMonad handler eff)
 
 mkHandler
   :: forall ops handler eff1 eff2 .

@@ -4,18 +4,18 @@ where
 
 import Control.Effect.Base
 
-newtype DynamicEff ops eff a = DynamicEff {
-  runDynamicEff :: forall r . OpsHandler ops a r eff -> eff r
+newtype DynamicMonad ops eff a = DynamicMonad {
+  runDynamicMonad :: forall r . OpsHandler ops a r eff -> eff r
 }
 
-liftDynamicEff
+liftDynamicMonad
   :: forall ops eff a .
   ( Effect eff
   , FreeOps ops
   )
   => eff a
-  -> DynamicEff ops eff a
-liftDynamicEff mx = DynamicEff $ \handler -> do
+  -> DynamicMonad ops eff a
+liftDynamicMonad mx = DynamicMonad $ \handler -> do
   x <- mx
   handleReturn handler x
 
@@ -25,8 +25,8 @@ liftDynamicOps
   , FreeOps ops
   )
   => CoOperation ops a
-  -> DynamicEff ops eff a
-liftDynamicOps ops = DynamicEff $ cont
+  -> DynamicMonad ops eff a
+liftDynamicOps ops = DynamicMonad $ cont
  where
   cont :: forall r . OpsHandler ops a r eff -> eff r
   cont handler = handleOps handler $ fmap (handleReturn handler) ops
@@ -34,18 +34,18 @@ liftDynamicOps ops = DynamicEff $ cont
 dynamicOps
   :: forall ops eff .
   (EffOps ops, Effect eff)
-  => Operation ops (DynamicEff ops eff)
+  => Operation ops (DynamicMonad ops eff)
 dynamicOps = mkFreeOps liftDynamicOps
 
 instance
   (Monad eff, EffOps ops)
-  => Functor (DynamicEff ops eff)
+  => Functor (DynamicMonad ops eff)
   where
-    fmap = mapDynamicEff
+    fmap = mapDynamicMonad
 
 instance
   (Monad eff, EffOps ops)
-  => Applicative (DynamicEff ops eff)
+  => Applicative (DynamicMonad ops eff)
   where
     pure = liftPure
     mf <*> mx = do
@@ -55,19 +55,19 @@ instance
 
 instance
   (Monad eff, EffOps ops)
-  => Monad (DynamicEff ops eff)
+  => Monad (DynamicMonad ops eff)
   where
-    (>>=) = bindDynamicEff
+    (>>=) = bindDynamicMonad
 
-mapDynamicEff
+mapDynamicMonad
   :: forall ops eff a b .
   ( Effect eff
   , EffOps ops
   )
   => (a -> b)
-  -> DynamicEff ops eff a
-  -> DynamicEff ops eff b
-mapDynamicEff f (DynamicEff m1) = DynamicEff m2
+  -> DynamicMonad ops eff a
+  -> DynamicMonad ops eff b
+mapDynamicMonad f (DynamicMonad m1) = DynamicMonad m2
  where
   m2 :: forall r . OpsHandler ops b r eff -> eff r
   m2 handler = m1 $ OpsHandler {
@@ -75,22 +75,22 @@ mapDynamicEff f (DynamicEff m1) = DynamicEff m2
     handleOps = handleOps handler
   }
 
-bindDynamicEff
+bindDynamicMonad
   :: forall ops eff a b .
   ( Effect eff
   , EffOps ops
   )
-  => DynamicEff ops eff a
-  -> (a -> DynamicEff ops eff b)
-  -> DynamicEff ops eff b
-bindDynamicEff (DynamicEff m1) cont1 = DynamicEff m2
+  => DynamicMonad ops eff a
+  -> (a -> DynamicMonad ops eff b)
+  -> DynamicMonad ops eff b
+bindDynamicMonad (DynamicMonad m1) cont1 = DynamicMonad m2
  where
   m2 :: forall r . OpsHandler ops b r eff -> eff r
   m2 handler1 = m1 handler2
    where
     handler2 :: OpsHandler ops a r eff
     handler2 = OpsHandler {
-      handleReturn = \x -> runDynamicEff (cont1 x) handler1,
+      handleReturn = \x -> runDynamicMonad (cont1 x) handler1,
       handleOps = handleOps handler1
     }
 
@@ -100,5 +100,5 @@ liftPure
   , EffOps ops
   )
   => a
-  -> DynamicEff ops eff a
-liftPure x = DynamicEff $ \handler -> handleReturn handler x
+  -> DynamicMonad ops eff a
+liftPure x = DynamicMonad $ \handler -> handleReturn handler x

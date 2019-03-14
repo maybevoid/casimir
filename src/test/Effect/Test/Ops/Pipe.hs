@@ -97,12 +97,12 @@ runPipe producer1 consumer1 = Computation comp
       producer2 :: FreeT (YieldCoOps a) eff2 r
       producer2 = returnVal $ runComp producer1
         (lift . liftEff) $
-        UnionOps (freeOps) (effmap lift ops)
+        UnionOps (mkFreeOps liftF) (effmap lift ops)
 
       consumer2 :: FreeT (AwaitCoOps a) eff2 r
       consumer2 = returnVal $ runComp consumer1
         (lift . liftEff) $
-        UnionOps (freeOps) (effmap lift ops)
+        UnionOps (mkFreeOps liftF) (effmap lift ops)
 
 pipe
   :: forall a r eff

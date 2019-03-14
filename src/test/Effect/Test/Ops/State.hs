@@ -147,7 +147,7 @@ stateOpsHandler = OpsHandler handleReturn' handleOps'
 stateDynComp1
   :: forall eff .
   (Effect eff)
-  => DynamicEff (StateEff Int) eff StateCompRes
+  => DynamicMonad (StateEff Int) eff StateCompRes
 stateDynComp1 = bindConstraint @(StateEff Int) dynamicOps stateComp1
 
 stateDynComp2 :: forall eff . (Effect eff)

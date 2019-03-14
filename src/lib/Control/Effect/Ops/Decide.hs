@@ -48,7 +48,7 @@ decide = decideOp ?decideOps
 dynamicDecideOps
   :: forall s eff .
   (Effect eff)
-  => DecideOps s (DynamicEff (DecideEff s) eff)
+  => DecideOps s (DynamicMonad (DecideEff s) eff)
 dynamicDecideOps = DecideOps {
   decideOp = liftOps $ (DecideOp return)
 }

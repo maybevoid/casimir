@@ -11,13 +11,13 @@ withDynamicOpsHandler
   , EffOps ops
   )
   => OpsHandler ops a b eff
-  -> (OpsConstraint ops (DynamicEff ops eff)
-      => DynamicEff ops eff a)
+  -> (OpsConstraint ops (DynamicMonad ops eff)
+      => DynamicMonad ops eff a)
   -> eff b
-withDynamicOpsHandler handler comp1 = runDynamicEff comp2 handler
+withDynamicOpsHandler handler comp1 = runDynamicMonad comp2 handler
  where
-  ops :: Operation ops (DynamicEff ops eff)
+  ops :: Operation ops (DynamicMonad ops eff)
   ops = dynamicOps
 
-  comp2 :: DynamicEff ops eff a
+  comp2 :: DynamicMonad ops eff a
   comp2 = bindConstraint ops comp1
