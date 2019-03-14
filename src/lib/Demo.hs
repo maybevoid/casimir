@@ -214,7 +214,7 @@ nonDetPipeline
   :: forall eff .
   (Effect eff)
   => Pipeline NoEff (DecideEff Bool) eff eff (Return Int) (Return [Int])
-nonDetPipeline = opsHandlerToPipeline nonDetHandler2
+nonDetPipeline = opsHandlerToPipeline @DynamicMonad nonDetHandler2
 
 decideComp1
   :: forall eff .
@@ -245,7 +245,7 @@ decideComp3 = bindHandlerWithCast
 
 decideComp4 :: IO [Int]
 decideComp4 =
-  withDynamicOpsHandler nonDetHandler1 $
+  withOpsHandler @DynamicMonad nonDetHandler1 $
     returnVal $ runComp decideComp3 liftDynamicMonad captureOps
 
 decideComp5

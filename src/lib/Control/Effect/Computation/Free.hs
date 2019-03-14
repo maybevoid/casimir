@@ -1,57 +1,41 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Control.Effect.Computation.Free
 where
-
-import Control.Monad.Trans.Free
 
 import Control.Effect.Base
 import Control.Effect.Computation.Class
 import Control.Effect.Computation.Value
 import Control.Effect.Computation.Pipeline
 
-handleFree
-  :: forall ops eff a r
-   . (Effect eff, EffOps ops)
+withOpsHandler
+  :: forall free ops eff a r
+   . ( Effect eff
+     , EffOps ops
+     , FreeEff free
+     )
   => OpsHandler ops a r eff
-  -> FreeMonad ops eff a
+  -> ((OpsConstraint ops (free ops eff))
+      => free ops eff a)
   -> eff r
-handleFree handler (FreeMonad m) = handleFree' m
+withOpsHandler handler comp1 = handleFree handler comp2
  where
-  handleFree'
-   :: FreeT (CoOperation ops) eff a
-    -> eff r
-  handleFree' comp = runFreeT comp >>= handleComp
-
-  handleComp
-    :: FreeF (CoOperation ops) a (FreeT (CoOperation ops) eff a)
-    -> eff r
-  handleComp (Pure x) = handleReturn handler x
-  handleComp (Free ops) = handleOps handler $ fmap handleFree' ops
-
-withFreeOpsHandler
-  :: forall ops eff a r
-   . (Effect eff, EffOps ops)
-  => OpsHandler ops a r eff
-  -> ((OpsConstraint ops (FreeMonad ops eff))
-      => FreeMonad ops eff a)
-  -> eff r
-withFreeOpsHandler handler comp1 = handleFree handler comp2
- where
-  comp2 :: FreeMonad ops eff a
+  comp2 :: free ops eff a
   comp2 = bindConstraint ops comp1
 
-  ops :: Operation ops (FreeMonad ops eff)
+  ops :: Operation ops (free ops eff)
   ops = freeOps
 
-freeOpsHandlerToPipeline
-  :: forall ops1 handler eff1 a b .
+opsHandlerToPipeline
+  :: forall free ops1 handler eff1 a b .
   ( Effect eff1
   , EffOps ops1
   , EffOps handler
+  , FreeEff free
   )
   => Computation ops1 (OpsHandler handler a b) eff1
   -> Pipeline ops1 handler eff1 eff1 (Return a) (Return b)
-freeOpsHandlerToPipeline handler1 = Pipeline pipeline
+opsHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2 .
@@ -71,23 +55,24 @@ freeOpsHandlerToPipeline handler1 = Pipeline pipeline
       handler2 :: OpsHandler handler a b eff2
       handler2 = runComp handler1 lift12 ops1
 
-      comp3 :: FreeMonad handler eff2 a
+      comp3 :: free handler eff2 a
       comp3 = returnVal $ runComp comp1
         (liftFree . lift12)
-        (UnionOps (freeOps) (effmap liftFree ops2))
+        (UnionOps freeOps (effmap liftFree ops2))
 
       comp4 :: eff2 b
       comp4 = handleFree handler2 comp3
 
-freeGenericOpsHandlerToPipeline
-  :: forall ops1 handler eff1 .
+genericOpsHandlerToPipeline
+  :: forall free ops1 handler eff1 .
   ( Effect eff1
   , EffOps ops1
   , EffOps handler
+  , FreeEff free
   )
   => Computation ops1 (GenericOpsHandler handler) eff1
   -> GenericPipeline ops1 handler eff1
-freeGenericOpsHandlerToPipeline handler1
+genericOpsHandlerToPipeline handler1
   = transformerPipeline $ Computation handler2
  where
   handler2
@@ -95,7 +80,7 @@ freeGenericOpsHandlerToPipeline handler1
     (Effect eff2)
     => LiftEff eff1 eff2
     -> Operation ops1 eff2
-    -> TransformerHandler (FreeMonad handler) handler eff2
+    -> TransformerHandler (free handler) handler eff2
   handler2 lift12 ops1
     = TransformerHandler freeOps liftFree unliftFree
     where
@@ -103,19 +88,20 @@ freeGenericOpsHandlerToPipeline handler1
 
       unliftFree
         :: forall a .
-        FreeMonad handler eff2 a
+        free handler eff2 a
         -> eff2 a
       unliftFree = handleFree handler3
 
-freeContextualHandlerToPipeline
-  :: forall w ops1 handler eff1 .
+contextualHandlerToPipeline
+  :: forall free w ops1 handler eff1 .
   ( Effect eff1
   , EffOps ops1
   , EffOps handler
+  , FreeEff free
   )
   => Computation ops1 (ContextualHandler w handler) eff1
   -> GenericPipeline ops1 handler eff1
-freeContextualHandlerToPipeline handler1
+contextualHandlerToPipeline handler1
   = transformerPipeline $ Computation handler2
  where
   handler2
@@ -123,7 +109,7 @@ freeContextualHandlerToPipeline handler1
     (Effect eff2)
     => LiftEff eff1 eff2
     -> Operation ops1 eff2
-    -> TransformerHandler (FreeMonad handler) handler eff2
+    -> TransformerHandler (free handler) handler eff2
   handler2 lift12 ops1
     = TransformerHandler freeOps liftFree unliftFree
    where
@@ -131,7 +117,7 @@ freeContextualHandlerToPipeline handler1
 
     unliftFree
       :: forall a .
-      FreeMonad handler eff2 a
+      free handler eff2 a
       -> eff2 a
     unliftFree eff = do
       wx <- handleFree handler3 eff

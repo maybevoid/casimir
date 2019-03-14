@@ -152,7 +152,7 @@ stateDynComp1 = bindConstraint @(StateEff Int) dynamicOps stateComp1
 
 stateDynComp2 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
-stateDynComp2 = withDynamicOpsHandler stateOpsHandler stateDynComp1
+stateDynComp2 = withOpsHandler @DynamicMonad stateOpsHandler stateDynComp1
 
 stateDynComp3 :: Identity StateCompRes
 stateDynComp3 = stateDynComp2 >>= runCoState 5
@@ -167,7 +167,7 @@ statePipeline1
   :: forall s eff1 .
   (Effect eff1)
   => GenericPipeline (EnvEff s) (StateEff s) eff1
-statePipeline1 = contextualHandlerToPipeline $
+statePipeline1 = contextualHandlerToPipeline @DynamicMonad $
   Computation handler
    where
     handler
@@ -209,8 +209,8 @@ dynStateTest2 = testCase "Dynamic state test 2" $
 
 stateFreeComp1 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
-stateFreeComp1 = handleFree stateOpsHandler $
-  bindConstraint @(StateEff Int) (freeOps) $ stateComp1
+stateFreeComp1 = handleFree @FreeMonad stateOpsHandler $
+  bindConstraint @(StateEff Int) freeOps $ stateComp1
 
 stateFreeComp2 :: Identity StateCompRes
 stateFreeComp2 = stateDynComp2 >>= runCoState 7

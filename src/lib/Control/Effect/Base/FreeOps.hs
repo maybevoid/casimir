@@ -3,8 +3,6 @@
 module Control.Effect.Base.FreeOps
 where
 
-import Control.Monad.Trans.Free (FreeT, liftF)
-
 import Control.Effect.Base.Effect
 import Control.Effect.Base.EffFunctor
 

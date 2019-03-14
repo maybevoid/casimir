@@ -4,7 +4,6 @@ module Control.Effect.Ops.Decide
 where
 
 import Control.Effect.Base
-import Control.Effect.Dynamic
 
 data DecideEff s where
 
@@ -44,11 +43,3 @@ decide :: forall a eff .
   (DecideConstraint a eff)
   => eff a
 decide = decideOp ?decideOps
-
-dynamicDecideOps
-  :: forall s eff .
-  (Effect eff)
-  => DecideOps s (DynamicMonad (DecideEff s) eff)
-dynamicDecideOps = DecideOps {
-  decideOp = liftOps $ (DecideOp return)
-}

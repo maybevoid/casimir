@@ -1,5 +1,5 @@
 
-module Control.Effect.Dynamic.Class
+module Control.Effect.Free.Dynamic
 where
 
 import Control.Effect.Base
@@ -33,18 +33,18 @@ liftDynamicOps ops = DynamicMonad $ cont
 
 dynamicOps
   :: forall ops eff .
-  (EffOps ops, Effect eff)
+  (FreeOps ops, Effect eff)
   => Operation ops (DynamicMonad ops eff)
 dynamicOps = mkFreeOps liftDynamicOps
 
 instance
-  (Monad eff, EffOps ops)
+  (Monad eff, FreeOps ops)
   => Functor (DynamicMonad ops eff)
   where
     fmap = mapDynamicMonad
 
 instance
-  (Monad eff, EffOps ops)
+  (Monad eff, FreeOps ops)
   => Applicative (DynamicMonad ops eff)
   where
     pure = liftPure
@@ -54,15 +54,22 @@ instance
       return $ f x
 
 instance
-  (Monad eff, EffOps ops)
+  (Monad eff, FreeOps ops)
   => Monad (DynamicMonad ops eff)
   where
     (>>=) = bindDynamicMonad
 
+instance
+  FreeEff DynamicMonad
+  where
+    freeOps = dynamicOps
+    liftFree = liftDynamicMonad
+    handleFree handler eff = runDynamicMonad eff handler
+
 mapDynamicMonad
   :: forall ops eff a b .
   ( Effect eff
-  , EffOps ops
+  , FreeOps ops
   )
   => (a -> b)
   -> DynamicMonad ops eff a
@@ -78,7 +85,7 @@ mapDynamicMonad f (DynamicMonad m1) = DynamicMonad m2
 bindDynamicMonad
   :: forall ops eff a b .
   ( Effect eff
-  , EffOps ops
+  , FreeOps ops
   )
   => DynamicMonad ops eff a
   -> (a -> DynamicMonad ops eff b)
@@ -97,7 +104,7 @@ bindDynamicMonad (DynamicMonad m1) cont1 = DynamicMonad m2
 liftPure
   :: forall ops eff a .
   ( Effect eff
-  , EffOps ops
+  , FreeOps ops
   )
   => a
   -> DynamicMonad ops eff a

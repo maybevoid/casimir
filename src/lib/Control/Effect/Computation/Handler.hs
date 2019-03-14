@@ -3,6 +3,7 @@ module Control.Effect.Computation.Handler
 where
 
 import Control.Effect.Base
+import Control.Effect.Free
 import Control.Effect.Computation.Class
 
 type FlatHandler ops handler eff = Handler ops handler eff eff

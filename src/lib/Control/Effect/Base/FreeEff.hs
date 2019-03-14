@@ -1,24 +1,30 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Control.Effect.Base.FreeEff
 where
 
-import Control.Monad.Trans.Class (lift)
-import Control.Monad.Trans.Free (FreeT, liftF)
-
 import Control.Effect.Base.Effect
 import Control.Effect.Base.FreeOps
 
-newtype FreeMonad ops eff a = FreeMonad {
-  unFreeT ::FreeT (CoOperation ops) eff a
-}
+class
+  (forall ops eff . (FreeOps ops, Effect eff) => Monad (free ops eff))
+  => FreeEff free
+  where
+    freeOps :: forall ops eff .
+      (FreeOps ops, Effect eff)
+      => Operation ops (free ops eff)
 
-deriving instance (FreeOps ops, Monad eff) => Functor (FreeMonad ops eff)
-deriving instance (FreeOps ops, Monad eff) => Applicative (FreeMonad ops eff)
-deriving instance (FreeOps ops, Monad eff) => Monad (FreeMonad ops eff)
+    liftFree :: forall ops eff a .
+      (FreeOps ops, Effect eff)
+      => eff a -> free ops eff a
+
+    handleFree
+      :: forall ops eff a r
+      . (Effect eff, FreeOps ops)
+      => OpsHandler ops a r eff
+      -> free ops eff a
+      -> eff r
 
 data OpsHandler handler a r eff = OpsHandler {
   handleReturn :: a -> eff r,
@@ -35,16 +41,3 @@ data ContextualHandler w handler eff = ContextualHandler {
 
   extractResult :: forall a . w eff a -> eff a
 }
-
-liftFree
-  :: forall eff ops a
-   . (Effect eff, FreeOps ops)
-   => eff a
-   -> FreeMonad ops eff a
-liftFree = FreeMonad . lift
-
-freeOps
-  :: forall ops eff .
-  (FreeOps ops, Effect eff)
-  => Operation ops (FreeMonad ops eff)
-freeOps = mkFreeOps (FreeMonad . liftF)
