@@ -54,7 +54,7 @@ freeHandler
   :: forall handler .
   (EffOps handler)
   => FreeHandler handler
-freeHandler = baseHandler $ freeOps id
+freeHandler = baseHandler $ freeOps
 
 bindExactHandler
   :: forall ops handler eff1 eff2 comp .

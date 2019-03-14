@@ -32,7 +32,7 @@ instance FreeOps NoEff where
   type Operation NoEff = NoOp
   type CoOperation NoEff = NoModel
 
-  freeOps _ = NoOp
+  mkFreeOps _ = NoOp
 
 instance EffOps NoEff where
   type OpsConstraint NoEff eff = NoConstraint eff

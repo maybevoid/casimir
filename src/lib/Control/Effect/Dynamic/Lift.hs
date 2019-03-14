@@ -5,17 +5,6 @@ where
 import Control.Effect.Base
 import Control.Effect.Dynamic.Class
 
-liftDynamicEff
-  :: forall ops eff a .
-  ( Effect eff
-  , EffOps ops
-  )
-  => eff a
-  -> DynamicEff ops eff a
-liftDynamicEff mx = DynamicEff $ \handler -> do
-  x <- mx
-  handleReturn handler x
-
 liftOps
   :: forall ops eff a .
   ( Effect eff

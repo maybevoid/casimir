@@ -5,18 +5,13 @@ module Control.Effect.Ops.Io
   , IoModel (..)
   , IoConstraint
   , liftIo
-  , freeIoOps
   , ioOps
   , ioHandler
   )
 where
 
-import Control.Natural (type (~>))
-import Control.Monad.Trans.Free (FreeT, liftF)
-
 import Control.Effect.Base
-  ( Effect
-  , EffFunctor (..)
+  ( EffFunctor (..)
   , FreeOps (..)
   , EffOps (..)
   , UnionOps (..)
@@ -48,7 +43,9 @@ instance FreeOps IoEff where
   type Operation IoEff = IoOps
   type CoOperation IoEff = IoModel
 
-  freeOps = freeIoOps
+  mkFreeOps liftCoOps = IoOps {
+    liftIoOp = \io -> liftCoOps $ LiftIO io
+  }
 
 instance EffOps IoEff where
   type OpsConstraint IoEff eff = (IoConstraint eff)
@@ -64,15 +61,6 @@ liftIo :: forall a eff .
   (IoConstraint eff)
   => IO a -> eff a
 liftIo = liftIoOp ?ioOps
-
-freeIoOps
-  :: forall f eff .
-  (Functor f, Effect eff)
-  => IoModel ~> f
-  -> IoOps (FreeT f eff)
-freeIoOps liftModel = IoOps {
-  liftIoOp = \io -> liftF $ liftModel $ LiftIO io
-}
 
 ioOps :: IoOps IO
 ioOps = IoOps {

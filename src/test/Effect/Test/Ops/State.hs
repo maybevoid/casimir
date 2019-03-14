@@ -210,7 +210,7 @@ dynStateTest2 = testCase "Dynamic state test 2" $
 stateFreeComp1 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
 stateFreeComp1 = handleFree stateOpsHandler $
-  bindConstraint @(StateEff Int) (freeOps id) $ stateComp1
+  bindConstraint @(StateEff Int) (freeOps) $ stateComp1
 
 stateFreeComp2 :: Identity StateCompRes
 stateFreeComp2 = stateDynComp2 >>= runCoState 7

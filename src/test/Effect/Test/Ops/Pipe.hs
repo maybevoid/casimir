@@ -44,15 +44,15 @@ instance FreeOps (YieldEff a) where
   type Operation (YieldEff a) = YieldOps a
   type CoOperation (YieldEff a) = YieldCoOps a
 
-  freeOps liftCoOps = YieldOps $
-    \x -> liftF $ liftCoOps $ YieldOp x id
+  mkFreeOps liftCoOps = YieldOps $
+    \x -> liftCoOps $ YieldOp x id
 
 instance FreeOps (AwaitEff a) where
   type Operation (AwaitEff a) = AwaitOps a
   type CoOperation (AwaitEff a) = AwaitCoOps a
 
-  freeOps liftCoOps = AwaitOps $
-    liftF $ liftCoOps $ AwaitOp id
+  mkFreeOps liftCoOps = AwaitOps $
+    liftCoOps $ AwaitOp id
 
 instance EffOps (YieldEff a) where
   type OpsConstraint (YieldEff a) eff = YieldConstraint a eff
@@ -69,14 +69,6 @@ instance EffOps (AwaitEff a) where
     = let ?awaitOps = awaitOps in comp
 
   captureOps = ?awaitOps
-
-instance DynamicOps (YieldEff a) where
-  dynamicOps = YieldOps $
-    \x -> liftOps $ YieldOp x return
-
-instance DynamicOps (AwaitEff a) where
-  dynamicOps = AwaitOps $
-    liftOps $ AwaitOp return
 
 yield :: forall a eff
    . (Effect eff, YieldConstraint a eff)
@@ -105,12 +97,12 @@ runPipe producer1 consumer1 = Computation comp
       producer2 :: FreeT (YieldCoOps a) eff2 r
       producer2 = returnVal $ runComp producer1
         (lift . liftEff) $
-        UnionOps (freeOps id) (effmap lift ops)
+        UnionOps (freeOps) (effmap lift ops)
 
       consumer2 :: FreeT (AwaitCoOps a) eff2 r
       consumer2 = returnVal $ runComp consumer1
         (lift . liftEff) $
-        UnionOps (freeOps id) (effmap lift ops)
+        UnionOps (freeOps) (effmap lift ops)
 
 pipe
   :: forall a r eff

@@ -7,23 +7,16 @@ module Control.Effect.Ops.State
   , StateConstraint
   , get
   , put
-  , freeStateOps
   )
 where
 
-import Control.Natural (type (~>))
-import Control.Monad.Trans.Free (FreeT, liftF)
-
 import Control.Effect.Base
-  ( Effect
-  , EffFunctor (..)
+  ( EffFunctor (..)
   , FreeOps (..)
   , EffOps (..)
   , UnionOps (..)
   , Normalizable (..)
   )
-
-import Control.Effect.Dynamic
 
 data StateEff s where
 
@@ -52,7 +45,10 @@ instance FreeOps (StateEff s) where
   type Operation (StateEff s) = StateOps s
   type CoOperation (StateEff s) = StateModel s
 
-  freeOps = freeStateOps
+  mkFreeOps liftCoOps = StateOps {
+    getOp = liftCoOps $ GetOp id,
+    putOp = \x -> liftCoOps $ PutOp x id
+  }
 
 instance EffOps (StateEff s) where
   type OpsConstraint (StateEff s) eff = StateConstraint s eff
@@ -60,9 +56,6 @@ instance EffOps (StateEff s) where
   bindConstraint stateOps comp = let ?stateOps = stateOps in comp
 
   captureOps = ?stateOps
-
-instance DynamicOps (StateEff s) where
-  dynamicOps = dynamicStateOps
 
 instance Normalizable (StateEff s) where
   unionOps = UnionOps
@@ -77,22 +70,3 @@ put :: forall a eff .
   => a
   -> eff ()
 put = putOp ?stateOps
-
-freeStateOps
-  :: forall a f eff .
-  (Functor f, Effect eff)
-  => StateModel a ~> f
-  -> StateOps a (FreeT f eff)
-freeStateOps liftModel = StateOps {
-  getOp = liftF $ liftModel $ GetOp id,
-  putOp = \x -> liftF $ liftModel $ PutOp x id
-}
-
-dynamicStateOps
-  :: forall eff s .
-  (Effect eff)
-  => StateOps s (DynamicEff (StateEff s) eff)
-dynamicStateOps = StateOps {
-  getOp = liftOps $ GetOp return,
-  putOp = \x -> liftOps $ PutOp x return
-}

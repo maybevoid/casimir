@@ -9,7 +9,6 @@ withDynamicOpsHandler
   :: forall ops eff a b .
   ( Effect eff
   , EffOps ops
-  , DynamicOps ops
   )
   => OpsHandler ops a b eff
   -> (OpsConstraint ops (DynamicEff ops eff)

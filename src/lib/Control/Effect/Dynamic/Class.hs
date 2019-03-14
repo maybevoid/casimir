@@ -8,11 +8,34 @@ newtype DynamicEff ops eff a = DynamicEff {
   runDynamicEff :: forall r . OpsHandler ops a r eff -> eff r
 }
 
-class (EffOps ops) => DynamicOps ops where
-  dynamicOps
-    :: forall eff .
-    (Effect eff)
-    => Operation ops (DynamicEff ops eff)
+liftDynamicEff
+  :: forall ops eff a .
+  ( Effect eff
+  , FreeOps ops
+  )
+  => eff a
+  -> DynamicEff ops eff a
+liftDynamicEff mx = DynamicEff $ \handler -> do
+  x <- mx
+  handleReturn handler x
+
+liftDynamicOps
+  :: forall ops eff a .
+  ( Effect eff
+  , FreeOps ops
+  )
+  => CoOperation ops a
+  -> DynamicEff ops eff a
+liftDynamicOps ops = DynamicEff $ cont
+ where
+  cont :: forall r . OpsHandler ops a r eff -> eff r
+  cont handler = handleOps handler $ fmap (handleReturn handler) ops
+
+dynamicOps
+  :: forall ops eff .
+  (EffOps ops, Effect eff)
+  => Operation ops (DynamicEff ops eff)
+dynamicOps = mkFreeOps liftDynamicOps
 
 instance
   (Monad eff, EffOps ops)

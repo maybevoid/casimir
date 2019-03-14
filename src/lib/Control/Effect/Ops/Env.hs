@@ -6,14 +6,10 @@ module Control.Effect.Ops.Env
   , EnvModel (..)
   , EnvConstraint
   , ask
-  , freeEnvOps
   , mkEnvOps
   , mkEnvHandler
   )
 where
-
-import Control.Natural (type (~>))
-import Control.Monad.Trans.Free (FreeT, liftF)
 
 import Control.Effect.Base
   ( Effect
@@ -50,7 +46,9 @@ instance FreeOps (EnvEff a) where
   type Operation (EnvEff a) = EnvOps a
   type CoOperation (EnvEff a) = EnvModel a
 
-  freeOps = freeEnvOps
+  mkFreeOps liftCoOps = EnvOps {
+    askOp = liftCoOps $ AskOp id
+  }
 
 instance EffOps (EnvEff a) where
   type OpsConstraint (EnvEff a) eff = (EnvConstraint a eff)
@@ -64,15 +62,6 @@ instance Normalizable (EnvEff a) where
 
 ask :: forall a eff . (EnvConstraint a eff) => eff a
 ask = askOp ?envOps
-
-freeEnvOps
-  :: forall a f eff.
-  (Functor f, Effect eff)
-  => EnvModel a ~> f
-  -> EnvOps a (FreeT f eff)
-freeEnvOps liftModel = EnvOps {
-  askOp = liftF $ liftModel $ AskOp id
-}
 
 mkEnvOps :: forall a eff . (Effect eff) => a -> EnvOps a eff
 mkEnvOps x = EnvOps {

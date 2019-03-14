@@ -4,7 +4,6 @@ where
 
 import Control.Effect.Base
 import Control.Effect.Computation
-import Control.Effect.Dynamic.Lift
 import Control.Effect.Dynamic.Class
 
 opsHandlerToPipeline
@@ -12,7 +11,6 @@ opsHandlerToPipeline
   ( Effect eff1
   , EffOps ops1
   , EffOps handler
-  , DynamicOps handler
   )
   => Computation ops1 (OpsHandler handler a b) eff1
   -> Pipeline ops1 handler eff1 eff1 (Return a) (Return b)
@@ -49,7 +47,6 @@ genericOpsHandlerToPipeline
   ( Effect eff1
   , EffOps ops1
   , EffOps handler
-  , DynamicOps handler
   )
   => Computation ops1 (GenericOpsHandler handler) eff1
   -> GenericPipeline ops1 handler eff1
@@ -79,7 +76,6 @@ contextualHandlerToPipeline
   ( Effect eff1
   , EffOps ops1
   , EffOps handler
-  , DynamicOps handler
   )
   => Computation ops1 (ContextualHandler w handler) eff1
   -> GenericPipeline ops1 handler eff1

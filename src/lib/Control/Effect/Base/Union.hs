@@ -3,9 +3,6 @@ module Control.Effect.Base.Union
 
 where
 
-import Control.Natural (type (~>))
-import Control.Monad.Trans.Free (FreeT)
-
 import Control.Effect.Base.Effect
 import Control.Effect.Base.EffOps
 import Control.Effect.Base.FreeOps
@@ -46,7 +43,7 @@ instance (EffOps f, EffOps g) => FreeOps (Union f g) where
   type Operation (Union f g) = UnionOps (Operation f) (Operation g)
   type CoOperation (Union f g) = UnionModel (CoOperation f) (CoOperation g)
 
-  freeOps = freeUnionOps
+  mkFreeOps = mkFreeUnionOps
 
 instance (EffOps f, EffOps g) => EffOps (Union f g) where
   -- reverse the order as the left most constraint
@@ -59,19 +56,21 @@ instance (EffOps f, EffOps g) => EffOps (Union f g) where
 
   captureOps = UnionOps captureOps captureOps
 
-freeUnionOps
-  :: forall ops1 ops2 f eff.
+mkFreeUnionOps
+  :: forall ops1 ops2 t eff.
   ( EffOps ops1
   , EffOps ops2
-  , Functor f
   , Effect eff
+  , Effect (t eff)
   )
-  => UnionModel (CoOperation ops1) (CoOperation ops2) ~> f
-  -> UnionOps (Operation ops1) (Operation ops2) (FreeT f eff)
-freeUnionOps liftModel = UnionOps ops1 ops2
+  => (forall a .
+      UnionModel (CoOperation ops1) (CoOperation ops2) a
+      -> t eff a)
+  -> UnionOps (Operation ops1) (Operation ops2) (t eff)
+mkFreeUnionOps liftReturn = UnionOps ops1 ops2
   where
-    ops1 :: Operation ops1 (FreeT f eff)
-    ops1 = freeOps (liftModel . LeftModel)
+    ops1 :: Operation ops1 (t eff)
+    ops1 = mkFreeOps (liftReturn . LeftModel)
 
-    ops2 :: Operation ops2 (FreeT f eff)
-    ops2 = freeOps (liftModel . RightModel)
+    ops2 :: Operation ops2 (t eff)
+    ops2 = mkFreeOps (liftReturn . RightModel)

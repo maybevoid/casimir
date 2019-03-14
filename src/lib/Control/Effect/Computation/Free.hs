@@ -41,7 +41,7 @@ withFreeOpsHandler handler comp1 = handleFree handler comp2
   comp2 = bindConstraint ops comp1
 
   ops :: Operation ops (FreeT (CoOperation ops) eff)
-  ops = freeOps id
+  ops = freeOps
 
 freeOpsHandlerToPipeline
   :: forall ops1 handler eff1 a b .
@@ -74,7 +74,7 @@ freeOpsHandlerToPipeline handler1 = Pipeline pipeline
       comp3 :: FreeEff handler eff2 a
       comp3 = returnVal $ runComp comp1
         (liftFree . lift12)
-        (UnionOps (freeOps id) (effmap liftFree ops2))
+        (UnionOps (freeOps) (effmap liftFree ops2))
 
       comp4 :: eff2 b
       comp4 = handleFree handler2 comp3
@@ -97,7 +97,7 @@ freeGenericOpsHandlerToPipeline handler1
     -> Operation ops1 eff2
     -> TransformerHandler (FreeT (CoOperation handler)) handler eff2
   handler2 lift12 ops1
-    = TransformerHandler (freeOps id) liftFree unliftFree
+    = TransformerHandler (freeOps) liftFree unliftFree
     where
       (GenericOpsHandler handler3) = runComp handler1 lift12 ops1
 
@@ -125,7 +125,7 @@ freeContextualHandlerToPipeline handler1
     -> Operation ops1 eff2
     -> TransformerHandler (FreeT (CoOperation handler)) handler eff2
   handler2 lift12 ops1
-    = TransformerHandler (freeOps id) liftFree unliftFree
+    = TransformerHandler (freeOps) liftFree unliftFree
    where
     (ContextualHandler handler3 extract) = runComp handler1 lift12 ops1
 
