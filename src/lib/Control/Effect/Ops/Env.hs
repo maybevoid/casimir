@@ -23,54 +23,54 @@ import Control.Effect.Base
 import Control.Effect.Computation
   (BaseHandler, baseHandler)
 
-data EnvEff a where
+data EnvEff e where
 
-data EnvOps a eff = EnvOps {
-  askOp :: eff a
+data EnvOps e eff = EnvOps {
+  askOp :: eff e
 }
 
 data EnvCoOps env r =
   AskOp (env -> r)
 
-type EnvConstraint a eff = (?envOps :: EnvOps a eff)
+type EnvConstraint e eff = (?envOps :: EnvOps e eff)
 
-instance EffFunctor (EnvOps a) where
+instance EffFunctor (EnvOps e) where
   effmap liftEff envOps = EnvOps {
     askOp = liftEff $ askOp envOps
   }
 
-instance Functor (EnvCoOps r) where
+instance Functor (EnvCoOps e) where
   fmap f (AskOp cont) = AskOp $ fmap f cont
 
-instance FreeOps (EnvEff a) where
-  type Operation (EnvEff a) = EnvOps a
-  type CoOperation (EnvEff a) = EnvCoOps a
+instance FreeOps (EnvEff e) where
+  type Operation (EnvEff e) = EnvOps e
+  type CoOperation (EnvEff e) = EnvCoOps e
 
   mkFreeOps liftCoOps = EnvOps {
     askOp = liftCoOps $ AskOp id
   }
 
-instance EffOps (EnvEff a) where
-  type OpsConstraint (EnvEff a) eff = (EnvConstraint a eff)
+instance EffOps (EnvEff e) where
+  type OpsConstraint (EnvEff e) eff = (EnvConstraint e eff)
 
   bindConstraint envOps comp = let ?envOps = envOps in comp
 
   captureOps = ?envOps
 
-instance Normalizable (EnvEff a) where
+instance Normalizable (EnvEff e) where
   unionOps = UnionOps
 
-ask :: forall a eff . (EnvConstraint a eff) => eff a
+ask :: forall e eff . (EnvConstraint e eff) => eff e
 ask = askOp ?envOps
 
-mkEnvOps :: forall a eff . (Effect eff) => a -> EnvOps a eff
+mkEnvOps :: forall e eff . (Effect eff) => e -> EnvOps e eff
 mkEnvOps x = EnvOps {
   askOp = return x
 }
 
 mkEnvHandler
-  :: forall a eff .
+  :: forall e eff .
   (Effect eff)
-  => a
-  -> BaseHandler (EnvEff a) eff
+  => e
+  -> BaseHandler (EnvEff e) eff
 mkEnvHandler = baseHandler . mkEnvOps

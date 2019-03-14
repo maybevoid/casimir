@@ -27,12 +27,18 @@ data IoOps eff = IoOps {
   liftIoOp :: forall a . IO a -> eff a
 }
 
-data IoCoOps a = LiftIO (IO a)
+data IoCoOps a where
+  IoCoOps :: forall x a . IO x -> (x -> a) -> IoCoOps a
 
 type IoConstraint eff = (?ioOps :: IoOps eff)
 
 instance Functor IoCoOps where
-  fmap f (LiftIO io) = LiftIO $ fmap f io
+  fmap
+    :: forall a b
+     . (a -> b)
+    -> IoCoOps a
+    -> IoCoOps b
+  fmap f (IoCoOps io cont) = IoCoOps io (f . cont)
 
 instance EffFunctor IoOps where
   effmap liftEff ops = IoOps {
@@ -44,7 +50,7 @@ instance FreeOps IoEff where
   type CoOperation IoEff = IoCoOps
 
   mkFreeOps liftCoOps = IoOps {
-    liftIoOp = \io -> liftCoOps $ LiftIO io
+    liftIoOp = \io -> liftCoOps $ IoCoOps io id
   }
 
 instance EffOps IoEff where

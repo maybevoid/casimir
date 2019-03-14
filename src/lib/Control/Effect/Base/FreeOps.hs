@@ -22,5 +22,5 @@ class
       . ( Effect eff
         , Effect (t eff)
         )
-      => (forall a . CoOperation ops a -> t eff a)
+      => (forall a . (CoOperation ops a) -> t eff a)
       -> Operation ops (t eff)
