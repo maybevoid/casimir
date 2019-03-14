@@ -14,7 +14,7 @@ import Control.Effect.Base.Union
 import Control.Effect.Base.NoEff
 import Control.Effect.Base.EffOps
 import Control.Effect.Base.Effect
-import Control.Effect.Base.FreeEff
+import Control.Effect.Base.FreeOps
 
 type family UnionT ops1 ops2 where
   UnionT NoEff ops = ops

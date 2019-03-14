@@ -20,6 +20,7 @@ stateTests = testGroup "StateEff Tests"
   , ioStateTest
   , dynStateTest1
   , dynStateTest2
+  , freeStateTest1
   ]
 
 type StateCompRes = (Int, Int, Int)
@@ -115,12 +116,6 @@ ioStateTest = testCase "IO State Test" $
   assertEqual "IO State  computation should have 6 as final state"
     6 s
 
-stateDynComp1
-  :: forall eff .
-  (Effect eff)
-  => DynamicEff (StateEff Int) eff StateCompRes
-stateDynComp1 = bindConstraint @(StateEff Int) dynamicOps stateComp1
-
 newtype CoState s eff a = CoState (s -> eff a)
 
 runCoState :: forall s eff . (Effect eff)
@@ -149,9 +144,15 @@ stateOpsHandler = OpsHandler handleReturn' handleOps'
       (CoState cont2) <- cont1 ()
       cont2 s
 
+stateDynComp1
+  :: forall eff .
+  (Effect eff)
+  => DynamicEff (StateEff Int) eff StateCompRes
+stateDynComp1 = bindConstraint @(StateEff Int) dynamicOps stateComp1
+
 stateDynComp2 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
-stateDynComp2 = withOpsHandler stateOpsHandler stateDynComp1
+stateDynComp2 = withDynamicOpsHandler stateOpsHandler stateDynComp1
 
 stateDynComp3 :: Identity StateCompRes
 stateDynComp3 = stateDynComp2 >>= runCoState 5
@@ -162,11 +163,11 @@ dynStateTest1 = testCase "Dynamic state test 1" $
   (5, 7, 7) $
   runIdentity stateDynComp3
 
-statePipeline
+statePipeline1
   :: forall s eff1 .
   (Effect eff1)
   => GenericPipeline (EnvEff s) (StateEff s) eff1
-statePipeline = contextualHandlerToPipeline $
+statePipeline1 = contextualHandlerToPipeline $
   Computation handler
    where
     handler
@@ -190,7 +191,7 @@ statePipeline = contextualHandlerToPipeline $
 stateDynComp4 :: forall eff . (Effect eff)
   => Computation (EnvEff Int) (Return StateCompRes) eff
 stateDynComp4 = runPipelineWithCast
-  statePipeline stateComp2
+  statePipeline1 stateComp2
   cast cast
 
 stateDynComp5 :: forall eff . (Effect eff)
@@ -205,3 +206,18 @@ dynStateTest2 = testCase "Dynamic state test 2" $
   assertEqual "State ops pipeline should handle state correctly"
     (6, 8, 8) $
     runIdentityComp stateDynComp5
+
+stateFreeComp1 :: forall eff . (Effect eff)
+  => eff (CoState Int eff StateCompRes)
+stateFreeComp1 = handleFree stateOpsHandler $
+  bindConstraint @(StateEff Int) (freeOps id) $ stateComp1
+
+stateFreeComp2 :: Identity StateCompRes
+stateFreeComp2 = stateDynComp2 >>= runCoState 7
+
+freeStateTest1 :: TestTree
+freeStateTest1 = testCase "Free state test 1" $
+ assertEqual "State ops handler should handle state correctly"
+  (7, 9, 9) $
+  runIdentity stateFreeComp2
+

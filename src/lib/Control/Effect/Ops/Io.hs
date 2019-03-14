@@ -17,7 +17,7 @@ import Control.Monad.Trans.Free (FreeT, liftF)
 import Control.Effect.Base
   ( Effect
   , EffFunctor (..)
-  , FreeEff (..)
+  , FreeOps (..)
   , EffOps (..)
   , UnionOps (..)
   , Normalizable (..)
@@ -44,7 +44,7 @@ instance EffFunctor IoOps where
     liftIoOp = liftEff . liftIoOp ops
   }
 
-instance FreeEff IoEff where
+instance FreeOps IoEff where
   type Operation IoEff = IoOps
   type CoOperation IoEff = IoModel
 

@@ -18,7 +18,7 @@ import Control.Monad.Trans.Free (FreeT, liftF)
 import Control.Effect.Base
   ( Effect
   , EffFunctor (..)
-  , FreeEff (..)
+  , FreeOps (..)
   , EffOps (..)
   , UnionOps (..)
   , Normalizable (..)
@@ -46,7 +46,7 @@ instance EffFunctor (EnvOps a) where
 instance Functor (EnvModel r) where
   fmap f (AskOp cont) = AskOp $ fmap f cont
 
-instance FreeEff (EnvEff a) where
+instance FreeOps (EnvEff a) where
   type Operation (EnvEff a) = EnvOps a
   type CoOperation (EnvEff a) = EnvModel a
 

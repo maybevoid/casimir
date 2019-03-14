@@ -8,7 +8,7 @@ import Control.Monad.Trans.Free (FreeT)
 
 import Control.Effect.Base.Effect
 import Control.Effect.Base.EffOps
-import Control.Effect.Base.FreeEff
+import Control.Effect.Base.FreeOps
 import Control.Effect.Base.EffFunctor
 
 data Union f g where
@@ -42,7 +42,7 @@ instance
     effmap f (UnionOps x y)
       = UnionOps (effmap f x) (effmap f y)
 
-instance (EffOps f, EffOps g) => FreeEff (Union f g) where
+instance (EffOps f, EffOps g) => FreeOps (Union f g) where
   type Operation (Union f g) = UnionOps (Operation f) (Operation g)
   type CoOperation (Union f g) = UnionModel (CoOperation f) (CoOperation g)
 

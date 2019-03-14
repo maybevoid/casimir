@@ -40,14 +40,14 @@ instance EffFunctor (AwaitOps a) where
   effmap liftEff ops = AwaitOps $
     liftEff $ awaitOp ops
 
-instance FreeEff (YieldEff a) where
+instance FreeOps (YieldEff a) where
   type Operation (YieldEff a) = YieldOps a
   type CoOperation (YieldEff a) = YieldCoOps a
 
   freeOps liftCoOps = YieldOps $
     \x -> liftF $ liftCoOps $ YieldOp x id
 
-instance FreeEff (AwaitEff a) where
+instance FreeOps (AwaitEff a) where
   type Operation (AwaitEff a) = AwaitOps a
   type CoOperation (AwaitEff a) = AwaitCoOps a
 

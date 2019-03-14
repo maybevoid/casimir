@@ -26,7 +26,7 @@ instance EffFunctor (DecideOps s) where
     decideOp = liftEff $ decideOp decideOps
   }
 
-instance FreeEff (DecideEff s) where
+instance FreeOps (DecideEff s) where
   type Operation (DecideEff s) = DecideOps s
   type CoOperation (DecideEff s) = DecideModel s
 

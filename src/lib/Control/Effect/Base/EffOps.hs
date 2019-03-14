@@ -6,11 +6,11 @@ where
 import GHC.Exts (Constraint)
 
 import Control.Effect.Base.Effect
-import Control.Effect.Base.FreeEff
+import Control.Effect.Base.FreeOps
 import Control.Effect.Base.EffFunctor
 
 class
-  ( FreeEff ops
+  ( FreeOps ops
   , Functor (CoOperation ops)
   , EffFunctor (Operation ops)
   )

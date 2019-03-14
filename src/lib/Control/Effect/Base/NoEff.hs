@@ -9,7 +9,7 @@ module Control.Effect.Base.NoEff
 where
 
 import Control.Effect.Base.EffOps
-import Control.Effect.Base.FreeEff
+import Control.Effect.Base.FreeOps
 import Control.Effect.Base.EffFunctor
 
 data NoEff where
@@ -28,7 +28,7 @@ instance Functor NoModel where
 instance EffFunctor NoOp where
   effmap _ _ = NoOp
 
-instance FreeEff NoEff where
+instance FreeOps NoEff where
   type Operation NoEff = NoOp
   type CoOperation NoEff = NoModel
 

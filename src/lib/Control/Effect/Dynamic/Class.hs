@@ -4,19 +4,8 @@ where
 
 import Control.Effect.Base
 
-newtype GenericOpsHandler handler eff
-  = GenericOpsHandler
-    (forall a . OpsHandler handler a a eff)
-
 newtype DynamicEff ops eff a = DynamicEff {
   runDynamicEff :: forall r . OpsHandler ops a r eff -> eff r
-}
-
-data ContextualHandler w handler eff = ContextualHandler {
-  runContextualHandler
-    :: forall a . OpsHandler handler a (w eff a) eff,
-
-  extractResult :: forall a . w eff a -> eff a
 }
 
 class (EffOps ops) => DynamicOps ops where
