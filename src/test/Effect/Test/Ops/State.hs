@@ -18,8 +18,8 @@ stateTests = testGroup "StateEff Tests"
   [ stateTHandlerTest
   , stateTPipelineTest
   , ioStateTest
-  , dynStateTest1
-  , dynStateTest2
+  , churchStateTest1
+  , churchStateTest2
   , freeStateTest1
   ]
 
@@ -147,18 +147,18 @@ stateOpsHandler = OpsHandler handleReturn' handleOps'
 stateDynComp1
   :: forall eff .
   (Effect eff)
-  => DynamicMonad (StateEff Int) eff StateCompRes
-stateDynComp1 = bindConstraint @(StateEff Int) dynamicOps stateComp1
+  => ChurchMonad (StateEff Int) eff StateCompRes
+stateDynComp1 = bindConstraint @(StateEff Int) churchOps stateComp1
 
 stateDynComp2 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
-stateDynComp2 = withOpsHandler @DynamicMonad stateOpsHandler stateDynComp1
+stateDynComp2 = withOpsHandler @ChurchMonad stateOpsHandler stateDynComp1
 
 stateDynComp3 :: Identity StateCompRes
 stateDynComp3 = stateDynComp2 >>= runCoState 5
 
-dynStateTest1 :: TestTree
-dynStateTest1 = testCase "Dynamic state test 1" $
+churchStateTest1 :: TestTree
+churchStateTest1 = testCase "Church state test 1" $
  assertEqual "State ops handler should handle state correctly"
   (5, 7, 7) $
   runIdentity stateDynComp3
@@ -167,7 +167,7 @@ statePipeline1
   :: forall s eff1 .
   (Effect eff1)
   => GenericPipeline (EnvEff s) (StateEff s) eff1
-statePipeline1 = contextualHandlerToPipeline @DynamicMonad $
+statePipeline1 = contextualHandlerToPipeline @ChurchMonad $
   Computation handler
    where
     handler
@@ -201,8 +201,8 @@ stateDynComp5 = bindHandlerWithCast
   stateDynComp4
   cast cast
 
-dynStateTest2 :: TestTree
-dynStateTest2 = testCase "Dynamic state test 2" $
+churchStateTest2 :: TestTree
+churchStateTest2 = testCase "Church state test 2" $
   assertEqual "State ops pipeline should handle state correctly"
     (6, 8, 8) $
     runIdentityComp stateDynComp5
