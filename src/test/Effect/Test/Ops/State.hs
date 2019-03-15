@@ -6,8 +6,6 @@ import Test.Tasty.HUnit
 
 import Data.IORef
 import Control.Monad.Identity
--- import Control.Comonad.Store
--- import Control.Comonad.Cofree
 import Control.Monad.Trans.State.Strict
   (StateT, runStateT)
 
@@ -148,7 +146,7 @@ stateDynComp1
   :: forall eff .
   (Effect eff)
   => ChurchMonad (StateEff Int) eff StateCompRes
-stateDynComp1 = bindConstraint @(StateEff Int) churchOps stateComp1
+stateDynComp1 = bindConstraint @(StateEff Int) freeOps stateComp1
 
 stateDynComp2 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
