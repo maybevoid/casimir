@@ -1,34 +1,31 @@
 
 module Control.Effect.Base.Union
-
 where
 
-import Control.Effect.Base.Effect
 import Control.Effect.Base.EffOps
 import Control.Effect.Base.FreeOps
 import Control.Effect.Base.EffFunctor
 
-data Union f g where
+data Union ops1 ops2 where
 
 data UnionOps
-  (f :: (* -> *) -> *)
-  (g :: (* -> *) -> *)
+  (ops1 :: (* -> *) -> *)
+  (ops2 :: (* -> *) -> *)
   (eff :: * -> *)
-  = (EffFunctor f, EffFunctor g)
-  => UnionOps (f eff) (g eff)
+  = UnionOps (ops1 eff) (ops2 eff)
 
-data UnionCoOps
-  (f :: (* -> *))
-  (g :: (* -> *))
+data UnionCoOp
+  (ops1 :: (* -> *))
+  (ops2 :: (* -> *))
   (a :: *)
-  = LeftCoOps (f a)
-  | RightCoOps (g a)
+  = LeftCoOp (ops1 a)
+  | RightCoOp (ops2 a)
 
 instance (Functor ops1, Functor ops2)
-  => Functor (UnionCoOps ops1 ops2)
+  => Functor (UnionCoOp ops1 ops2)
   where
-    fmap f (LeftCoOps x) = LeftCoOps $ fmap f x
-    fmap f (RightCoOps x) = RightCoOps $ fmap f x
+    fmap f (LeftCoOp x) = LeftCoOp $ fmap f x
+    fmap f (RightCoOp x) = RightCoOp $ fmap f x
 
 instance
   ( EffFunctor ops1
@@ -39,38 +36,22 @@ instance
     effmap f (UnionOps x y)
       = UnionOps (effmap f x) (effmap f y)
 
-instance (EffOps f, EffOps g) => FreeOps (Union f g) where
-  type Operation (Union f g) = UnionOps (Operation f) (Operation g)
-  type CoOperation (Union f g) = UnionCoOps (CoOperation f) (CoOperation g)
+instance (FreeOps ops1, FreeOps ops2) => FreeOps (Union ops1 ops2) where
+  type Operation (Union ops1 ops2) = UnionOps (Operation ops1) (Operation ops2)
+  type CoOperation (Union ops1 ops2) = UnionCoOp (CoOperation ops1) (CoOperation ops2)
 
-  mkFreeOps = mkFreeUnionOps
+  mkFreeOps liftReturn = UnionOps ops1 ops2
+   where
+    ops1 = mkFreeOps (liftReturn . LeftCoOp)
+    ops2 = mkFreeOps (liftReturn . RightCoOp)
 
-instance (EffOps f, EffOps g) => EffOps (Union f g) where
+instance (EffOps ops1, EffOps ops2) => EffOps (Union ops1 ops2) where
   -- reverse the order as the left most constraint
   -- gets precedence if there is an overlap
-  type OpsConstraint (Union f g) eff =
-    (OpsConstraint g eff, OpsConstraint f eff)
+  type OpsConstraint (Union ops1 ops2) eff =
+    (OpsConstraint ops2 eff, OpsConstraint ops1 eff)
 
-  bindConstraint (UnionOps x y) comp =
-    bindConstraint x $ bindConstraint y comp
+  bindConstraint (UnionOps ops1 ops2) comp =
+    bindConstraint ops1 $ bindConstraint ops2 comp
 
   captureOps = UnionOps captureOps captureOps
-
-mkFreeUnionOps
-  :: forall ops1 ops2 t eff.
-  ( EffOps ops1
-  , EffOps ops2
-  , Effect eff
-  , Effect (t eff)
-  )
-  => (forall a .
-      UnionCoOps (CoOperation ops1) (CoOperation ops2) a
-      -> t eff a)
-  -> UnionOps (Operation ops1) (Operation ops2) (t eff)
-mkFreeUnionOps liftReturn = UnionOps ops1 ops2
-  where
-    ops1 :: Operation ops1 (t eff)
-    ops1 = mkFreeOps (liftReturn . LeftCoOps)
-
-    ops2 :: Operation ops2 (t eff)
-    ops2 = mkFreeOps (liftReturn . RightCoOps)

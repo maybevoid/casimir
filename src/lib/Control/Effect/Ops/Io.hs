@@ -2,7 +2,7 @@
 module Control.Effect.Ops.Io
   ( IoEff
   , IoOps (..)
-  , IoCoOps (..)
+  , IoCoOp (..)
   , IoConstraint
   , liftIo
   , ioOps
@@ -27,18 +27,18 @@ data IoOps eff = IoOps {
   liftIoOp :: forall a . IO a -> eff a
 }
 
-data IoCoOps a where
-  IoCoOps :: forall x a . IO x -> (x -> a) -> IoCoOps a
+data IoCoOp a where
+  IoCoOp :: forall x a . IO x -> (x -> a) -> IoCoOp a
 
 type IoConstraint eff = (?ioOps :: IoOps eff)
 
-instance Functor IoCoOps where
+instance Functor IoCoOp where
   fmap
     :: forall a b
      . (a -> b)
-    -> IoCoOps a
-    -> IoCoOps b
-  fmap f (IoCoOps io cont) = IoCoOps io (f . cont)
+    -> IoCoOp a
+    -> IoCoOp b
+  fmap f (IoCoOp io cont) = IoCoOp io (f . cont)
 
 instance EffFunctor IoOps where
   effmap liftEff ops = IoOps {
@@ -47,10 +47,10 @@ instance EffFunctor IoOps where
 
 instance FreeOps IoEff where
   type Operation IoEff = IoOps
-  type CoOperation IoEff = IoCoOps
+  type CoOperation IoEff = IoCoOp
 
-  mkFreeOps liftCoOps = IoOps {
-    liftIoOp = \io -> liftCoOps $ IoCoOps io id
+  mkFreeOps liftCoOp = IoOps {
+    liftIoOp = \io -> liftCoOp $ IoCoOp io id
   }
 
 instance EffOps IoEff where

@@ -11,7 +11,7 @@ data DecideOps s eff = DecideOps {
   decideOp :: eff s
 }
 
-data DecideCoOps s a = DecideOp (s -> a)
+data DecideCoOp s a = DecideOp (s -> a)
   deriving (Functor)
 
 type DecideConstraint s eff = (?decideOps :: DecideOps s eff)
@@ -23,10 +23,10 @@ instance EffFunctor (DecideOps s) where
 
 instance FreeOps (DecideEff s) where
   type Operation (DecideEff s) = DecideOps s
-  type CoOperation (DecideEff s) = DecideCoOps s
+  type CoOperation (DecideEff s) = DecideCoOp s
 
-  mkFreeOps liftCoOps = DecideOps {
-    decideOp = liftCoOps $ DecideOp id
+  mkFreeOps liftCoOp = DecideOps {
+    decideOp = liftCoOp $ DecideOp id
   }
 
 instance EffOps (DecideEff s) where

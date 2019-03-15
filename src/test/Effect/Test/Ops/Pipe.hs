@@ -21,11 +21,11 @@ data AwaitOps a eff = AwaitOps {
   awaitOp :: eff a
 }
 
-data YieldCoOps a r =
+data YieldCoOp a r =
   YieldOp a (() -> r)
   deriving (Functor)
 
-data AwaitCoOps a r =
+data AwaitCoOp a r =
   AwaitOp (a -> r)
   deriving (Functor)
 
@@ -42,17 +42,17 @@ instance EffFunctor (AwaitOps a) where
 
 instance FreeOps (YieldEff a) where
   type Operation (YieldEff a) = YieldOps a
-  type CoOperation (YieldEff a) = YieldCoOps a
+  type CoOperation (YieldEff a) = YieldCoOp a
 
-  mkFreeOps liftCoOps = YieldOps $
-    \x -> liftCoOps $ YieldOp x id
+  mkFreeOps liftCoOp = YieldOps $
+    \x -> liftCoOp $ YieldOp x id
 
 instance FreeOps (AwaitEff a) where
   type Operation (AwaitEff a) = AwaitOps a
-  type CoOperation (AwaitEff a) = AwaitCoOps a
+  type CoOperation (AwaitEff a) = AwaitCoOp a
 
-  mkFreeOps liftCoOps = AwaitOps $
-    liftCoOps $ AwaitOp id
+  mkFreeOps liftCoOp = AwaitOps $
+    liftCoOp $ AwaitOp id
 
 instance EffOps (YieldEff a) where
   type OpsConstraint (YieldEff a) eff = YieldConstraint a eff
@@ -94,12 +94,12 @@ runPipe producer1 consumer1 = Computation comp
       -> Return r eff2
     comp liftEff ops = Return $ pipe producer2 consumer2
      where
-      producer2 :: FreeT (YieldCoOps a) eff2 r
+      producer2 :: FreeT (YieldCoOp a) eff2 r
       producer2 = returnVal $ runComp producer1
         (lift . liftEff) $
         UnionOps (mkFreeOps liftF) (effmap lift ops)
 
-      consumer2 :: FreeT (AwaitCoOps a) eff2 r
+      consumer2 :: FreeT (AwaitCoOp a) eff2 r
       consumer2 = returnVal $ runComp consumer1
         (lift . liftEff) $
         UnionOps (mkFreeOps liftF) (effmap lift ops)
@@ -107,35 +107,35 @@ runPipe producer1 consumer1 = Computation comp
 pipe
   :: forall a r eff
    . (Effect eff)
-  => FreeT (YieldCoOps a) eff r
-  -> FreeT (AwaitCoOps a) eff r
+  => FreeT (YieldCoOp a) eff r
+  -> FreeT (AwaitCoOp a) eff r
   -> eff r
 pipe producer consumer = runFreeT consumer >>= handleConsumer
  where
   handleConsumer
-    :: FreeF (AwaitCoOps a) r (FreeT (AwaitCoOps a) eff r)
+    :: FreeF (AwaitCoOp a) r (FreeT (AwaitCoOp a) eff r)
     -> eff r
   handleConsumer (Pure r) = return r
   handleConsumer
     (Free (AwaitOp
-      (cont :: a -> (FreeT (AwaitCoOps a) eff r))))
+      (cont :: a -> (FreeT (AwaitCoOp a) eff r))))
     = copipe cont producer
 
 copipe
   :: forall a r eff
    . (Effect eff)
-  => (a -> FreeT (AwaitCoOps a) eff r)
-  -> FreeT (YieldCoOps a) eff r
+  => (a -> FreeT (AwaitCoOp a) eff r)
+  -> FreeT (YieldCoOp a) eff r
   -> eff r
 copipe consumer producer = runFreeT producer >>= handleProducer
  where
   handleProducer
-    :: FreeF (YieldCoOps a) r (FreeT (YieldCoOps a) eff r)
+    :: FreeF (YieldCoOp a) r (FreeT (YieldCoOp a) eff r)
     -> eff r
   handleProducer (Pure r) = return r
   handleProducer
     (Free (YieldOp x
-      (cont :: () -> (FreeT (YieldCoOps a) eff r))))
+      (cont :: () -> (FreeT (YieldCoOp a) eff r))))
     = pipe (cont ()) $ consumer x
 
 producerComp

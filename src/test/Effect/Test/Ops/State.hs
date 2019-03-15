@@ -132,7 +132,7 @@ stateOpsHandler = OpsHandler handleReturn' handleOps'
   handleReturn' :: a -> eff (CoState s eff a)
   handleReturn' x = return $ CoState $ \_ -> return x
 
-  handleOps' :: StateCoOps s (eff (CoState s eff a)) -> eff (CoState s eff a)
+  handleOps' :: StateCoOp s (eff (CoState s eff a)) -> eff (CoState s eff a)
   handleOps' (GetOp cont1) = return $ CoState $
     \s ->
      do

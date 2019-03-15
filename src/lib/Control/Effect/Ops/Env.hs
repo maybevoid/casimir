@@ -3,7 +3,7 @@
 module Control.Effect.Ops.Env
   ( EnvEff
   , EnvOps (..)
-  , EnvCoOps (..)
+  , EnvCoOp (..)
   , EnvConstraint
   , ask
   , mkEnvOps
@@ -29,7 +29,7 @@ data EnvOps e eff = EnvOps {
   askOp :: eff e
 }
 
-data EnvCoOps env r =
+data EnvCoOp env r =
   AskOp (env -> r)
 
 type EnvConstraint e eff = (?envOps :: EnvOps e eff)
@@ -39,15 +39,15 @@ instance EffFunctor (EnvOps e) where
     askOp = liftEff $ askOp envOps
   }
 
-instance Functor (EnvCoOps e) where
+instance Functor (EnvCoOp e) where
   fmap f (AskOp cont) = AskOp $ fmap f cont
 
 instance FreeOps (EnvEff e) where
   type Operation (EnvEff e) = EnvOps e
-  type CoOperation (EnvEff e) = EnvCoOps e
+  type CoOperation (EnvEff e) = EnvCoOp e
 
-  mkFreeOps liftCoOps = EnvOps {
-    askOp = liftCoOps $ AskOp id
+  mkFreeOps liftCoOp = EnvOps {
+    askOp = liftCoOp $ AskOp id
   }
 
 instance EffOps (EnvEff e) where
