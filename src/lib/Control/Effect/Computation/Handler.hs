@@ -23,10 +23,10 @@ mkHandler
   , Effect eff1
   , Effect eff2
   )
-  => LiftEff eff2 eff1
+  => eff2 ~> eff1
   -> (forall eff3 .
       (Effect eff3)
-      => LiftEff eff1 eff3
+      => eff1 ~> eff3
       -> ((OpsConstraint ops eff3) => Operation handler eff3)
       )
   -> Handler ops handler eff1 eff2
@@ -73,7 +73,7 @@ bindExactHandler (Handler lift21 handler1) comp1
     comp2
       :: forall eff3 .
       (Effect eff3)
-      => LiftEff eff1 eff3
+      => eff1 ~> eff3
       -> Operation ops eff3
       -> comp eff3
     comp2 liftEff ops
@@ -102,7 +102,7 @@ composeExactHandlers
     comp1
       :: forall eff4 .
       (Effect eff4)
-      => LiftEff eff1 eff4
+      => eff1 ~> eff4
       -> Operation ops eff4
       -> Operation (Union handler1 handler2) eff4
     comp1 lift14 ops

@@ -171,7 +171,7 @@ statePipeline1 = contextualHandlerToPipeline @ChurchMonad $
     handler
       :: forall eff2 .
       (Effect eff2)
-      => LiftEff eff1 eff2
+      => eff1 ~> eff2
       -> Operation (EnvEff s) eff2
       -> ContextualHandler (CoState s) (StateEff s) eff2
     handler _ envOps = ContextualHandler opsHandler extract

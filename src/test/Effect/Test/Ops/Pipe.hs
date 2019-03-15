@@ -89,7 +89,7 @@ runPipe :: forall a r ops eff1
 runPipe producer1 consumer1 = Computation comp
    where
     comp :: forall eff2 . (Effect eff2)
-      => LiftEff eff1 eff2
+      => eff1 ~> eff2
       -> Operation ops eff2
       -> Return r eff2
     comp liftEff ops = Return $ pipe producer2 consumer2

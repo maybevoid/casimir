@@ -42,7 +42,7 @@ returnComputation
   )
   => (forall eff2 .
       (Effect eff2, OpsConstraint ops eff2)
-      => LiftEff eff1 eff2
+      => eff1 ~> eff2
       -> eff2 a)
   -> ReturnComputation ops a eff1
 returnComputation comp1 = Computation $
