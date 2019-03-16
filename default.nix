@@ -1,4 +1,4 @@
-{ mkDerivation, base, comonad, free, hpack, mtl
+{ mkDerivation, base, comonad, criterion, free, hpack, mtl
 , natural-transformation, QuickCheck, stdenv, stm, tasty
 , tasty-hunit, tasty-quickcheck, transformers
 }:
@@ -13,7 +13,8 @@ mkDerivation {
   ];
   libraryToolDepends = [ hpack ];
   executableHaskellDepends = [
-    base comonad free mtl natural-transformation stm transformers
+    base comonad criterion free mtl natural-transformation stm
+    transformers
   ];
   testHaskellDepends = [
     base comonad free mtl natural-transformation QuickCheck stm tasty

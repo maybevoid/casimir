@@ -1,6 +1,7 @@
 dist/
 dist-newstyle/
 .stack-work/
+benchmarks/
 .ghc*
 result
 *.cabal

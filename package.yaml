@@ -33,8 +33,8 @@ default-extensions:
   - ConstraintKinds
   - TypeApplications
   - FlexibleContexts
-  - OverloadedStrings
   - FlexibleInstances
+  - OverloadedStrings
   - DerivingStrategies
   - ScopedTypeVariables
   - MultiParamTypeClasses
@@ -49,6 +49,13 @@ executables:
     source-dirs:   src/main
     dependencies:
       - implicit-effects
+
+  implicit-effects-benchmark:
+    main:          Main.hs
+    source-dirs:   src/benchmark
+    dependencies:
+      - implicit-effects
+      - criterion
 
 tests:
   implicit-effects-test:
