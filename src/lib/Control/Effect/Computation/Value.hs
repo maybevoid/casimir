@@ -2,12 +2,13 @@
 module Control.Effect.Computation.Value
 where
 
+import Data.Kind
 import Control.Monad.Identity (Identity (..))
 
 import Control.Effect.Base
 import Control.Effect.Computation.Class
 
-newtype PureVal a (eff :: * -> *) = PureVal {
+newtype PureVal a (eff :: Type -> Type) = PureVal {
   pureVal :: a
 }
 

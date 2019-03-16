@@ -1,27 +1,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Control.Effect.Ops.Env
-  ( EnvEff
-  , EnvOps (..)
-  , EnvCoOp (..)
-  , EnvConstraint
-  , ask
-  , mkEnvOps
-  , mkEnvHandler
-  )
 where
 
 import Control.Effect.Base
-  ( Effect
-  , EffFunctor (..)
-  , FreeOps (..)
-  , EffOps (..)
-  , UnionOps (..)
-  , Normalizable (..)
-  )
-
 import Control.Effect.Computation
-  (BaseHandler, baseHandler)
 
 data EnvEff e where
 

@@ -8,17 +8,18 @@ module Control.Effect.Base.NoEff
   )
 where
 
+import Data.Kind
 import Control.Effect.Base.EffOps
 import Control.Effect.Base.FreeOps
 import Control.Effect.Base.EffFunctor
 
 data NoEff where
 
-data NoOp (eff :: * -> *) = NoOp
+data NoOp (eff :: Type -> Type) = NoOp
 
 data NoCoOp a = NoCoOp
 
-class NoConstraint (eff :: * -> *) where
+class NoConstraint (eff :: Type -> Type) where
 
 instance NoConstraint eff where
 

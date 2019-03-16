@@ -2,6 +2,7 @@
 module Control.Effect.Base.Union
 where
 
+import Data.Kind
 import Control.Effect.Base.EffOps
 import Control.Effect.Base.FreeOps
 import Control.Effect.Base.EffFunctor
@@ -9,15 +10,15 @@ import Control.Effect.Base.EffFunctor
 data Union ops1 ops2 where
 
 data UnionOps
-  (ops1 :: (* -> *) -> *)
-  (ops2 :: (* -> *) -> *)
-  (eff :: * -> *)
+  (ops1 :: (Type -> Type) -> Type)
+  (ops2 :: (Type -> Type) -> Type)
+  (eff :: Type -> Type)
   = UnionOps (ops1 eff) (ops2 eff)
 
 data UnionCoOp
-  (ops1 :: (* -> *))
-  (ops2 :: (* -> *))
-  (a :: *)
+  (ops1 :: (Type -> Type))
+  (ops2 :: (Type -> Type))
+  (a :: Type)
   = LeftCoOp (ops1 a)
   | RightCoOp (ops2 a)
 

@@ -36,6 +36,7 @@ default-extensions:
   - FlexibleInstances
   - OverloadedStrings
   - DerivingStrategies
+  - AllowAmbiguousTypes
   - ScopedTypeVariables
   - MultiParamTypeClasses
   - GeneralizedNewtypeDeriving

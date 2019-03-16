@@ -26,7 +26,7 @@ stateComp1 = forM_ [0..500] $ \i ->
   let s' = s + i
   put s'
 
-stateComp2 :: GenericReturn (StateEff Int) ()
+stateComp2 :: GenericReturn (Union (StateEff Int) NoEff) ()
 stateComp2 = genericReturn stateComp1
 
 stateOpsHandler
@@ -76,16 +76,26 @@ statePipeline1 s = contextualHandlerToPipeline @free $
 stateTComp1 :: StateT Int Identity ()
 stateTComp1 = withHandler stateTHandler stateComp1
 
-stateTComp2 :: IdentityComputation ()
-stateTComp2 = runPipelineWithCast
-  (stateTPipeline 5) stateComp2
-  cast cast
+stateTComp2 :: forall eff . (Effect eff)
+  => Int
+  -> Computation (Union NoEff NoEff) (Return ()) eff
+stateTComp2 s = runPipeline
+  (stateTPipeline s) stateComp2
+
+stateTComp3 :: forall eff . (Effect eff) => Int -> eff ()
+stateTComp3 s = returnVal $ runComp (stateTComp2 s) id (UnionOps NoOp NoOp)
 
 stateFreeComp :: forall free . (FreeEff free)
-  => IdentityComputation ()
-stateFreeComp = runPipelineWithCast
-  (statePipeline1 @free 5) stateComp2
-  cast cast
+  => Int
+  -> Computation (Union NoEff NoEff) (Return ()) Identity
+stateFreeComp s = runPipeline
+  (statePipeline1 @free s) stateComp2
+
+runStateComp
+  :: (Int -> Computation (Union NoEff NoEff) (Return a) Identity)
+  -> a
+runStateComp comp = runIdentity $ returnVal $
+  runComp (comp 5) id (UnionOps NoOp NoOp)
 
 main :: IO ()
 main = defaultMain [
@@ -93,12 +103,14 @@ main = defaultMain [
     [ bench "StateT Handler"  $
         nf (\m -> runIdentity $ evalStateT m 5) stateTComp1
     , bench "StateT Pipeline"  $
-        nf runIdentityComp stateTComp2
+        nf runStateComp stateTComp2
+    , bench "StateT Pipeline 2"  $
+        nf (\comp -> runIdentity $ comp 5) stateTComp3
     , bench "FreeMonad"  $
-        nf runIdentityComp (stateFreeComp @FreeMonad)
+        nf runStateComp (stateFreeComp @FreeMonad)
     , bench "FreerMonad"  $
-        nf runIdentityComp (stateFreeComp @FreerMonad)
+        nf runStateComp (stateFreeComp @FreerMonad)
     , bench "ChurchMonad"  $
-        nf runIdentityComp (stateFreeComp @ChurchMonad)
+        nf runStateComp (stateFreeComp @ChurchMonad)
     ]
   ]

@@ -3,6 +3,7 @@
 module Control.Effect.Base.FreeOps
 where
 
+import Data.Kind
 import Control.Effect.Base.Effect
 import Control.Effect.Base.EffFunctor
 
@@ -10,12 +11,12 @@ class
   ( Functor (CoOperation ops)
   , EffFunctor (Operation ops)
   )
-  => FreeOps (ops :: *) where
+  => FreeOps (ops :: Type) where
     type family Operation ops
-      = (f :: (* -> *) -> *) | f -> ops
+      = (f :: (Type -> Type) -> Type) | f -> ops
 
     type family CoOperation ops
-      = (f :: (* -> *)) | f -> ops
+      = (f :: (Type -> Type)) | f -> ops
 
     mkFreeOps
       :: forall t eff
