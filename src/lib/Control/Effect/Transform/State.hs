@@ -39,12 +39,14 @@ stateTHandler = mkHandler liftStateT $
     putOp = \x -> liftEff lifter $ put x
   }
 
+{-# INLINE stateTPipeline #-}
 stateTPipeline
   :: forall s eff1 comp .
   (Effect eff1, EffFunctor comp)
   => SimplePipeline (EnvEff s) (StateEff s) eff1 comp
 stateTPipeline = transformerPipeline $ genericComputation handler
  where
+  {-# INLINE handler #-}
   handler :: forall eff
    . (Effect eff, OpsConstraint (EnvEff s) eff)
     => TransformerHandler (StateT s) (StateEff s) eff
