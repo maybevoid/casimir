@@ -50,6 +50,7 @@ returnComputation comp1 = Computation $
   \ lift12 ops ->
     bindConstraint ops $ Return $ comp1 lift12
 
+{-# INLINE genericComputation #-}
 genericComputation
   :: forall ops comp .
   (EffOps ops)
@@ -60,6 +61,7 @@ genericComputation
 genericComputation comp = Computation $
   \ _ ops -> bindConstraint ops comp
 
+{-# INLINE genericReturn #-}
 genericReturn
   :: forall ops a .
   (EffOps ops)

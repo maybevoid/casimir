@@ -82,6 +82,7 @@ statePipeline1 = contextualHandlerToPipeline @free $
         OpsHandler (StateEff s) a (CoState s eff2 a) eff2
       opsHandler = stateOpsHandler
 
+      {-# INLINE extract #-}
       extract :: forall a . CoState s eff2 a -> eff2 a
       extract (CoState cont) = bindConstraint envOps $
        do
@@ -140,14 +141,12 @@ statePipeline2 comp1 = Computation comp2
       res <- evalStateT comp4 s
       return res
 
-{-# INLINE stateFreeComp1 #-}
 stateFreeComp1 :: forall free . (FreeEff free)
   => Computation (EnvEff Int) (Return ()) Identity
 stateFreeComp1 = runPipelineWithCast
   (statePipeline1 @free) stateComp2
   cast cast
 
-{-# INLINE stateFreeComp2 #-}
 stateFreeComp2 :: forall free . (FreeEff free)
   => Computation NoEff (Return ()) (ReaderT Int Identity)
 stateFreeComp2 = bindHandlerWithCast
@@ -155,16 +154,23 @@ stateFreeComp2 = bindHandlerWithCast
   (stateFreeComp1 @free)
   cast cast
 
-{-# INLINE stateFreeComp3 #-}
 stateFreeComp3 :: forall free . (FreeEff free)
   => ReaderT Int Identity ()
 stateFreeComp3 = returnVal $ runComp (stateFreeComp2 @free) idLift NoOp
 
--- runStateComp
---   :: (Int -> Computation NoEff (Return a) Identity)
---   -> a
--- runStateComp comp = runIdentity $ returnVal $
---   runComp (comp 5) id NoOp
+stateFreeComp4:: forall free . (FreeEff free)
+  => Int
+  -> Computation NoEff (Return ()) Identity
+stateFreeComp4 s = bindHandlerWithCast
+  (mkEnvHandler s)
+  (stateFreeComp1 @free)
+  cast cast
+
+runStateComp
+  :: (Int -> Computation NoEff (Return a) Identity)
+  -> a
+runStateComp comp = runIdentity $ returnVal $
+  runComp (comp 5) idLift NoOp
 
 statePComp1 :: Computation (EnvEff Int) (Return ()) Identity
 statePComp1 = statePipeline2 stateComp2
@@ -217,27 +223,29 @@ main = defaultMain [
   bgroup "state benchmark"
     [ bench "StateT Handler"  $
         nf (\m -> runIdentity $ evalStateT m 5) stateTComp1
-    , bench "StateT Computation"  $
-        nf (\m -> runIdentity $ evalStateT m 5) stateHComp2
-    , bench "ReaderT StateT Handler" $
-        nf (\m -> runIdentity $ runReaderT m 5) stateTComp12
-    , bench "Direct ReaderT StateT Handler"  $
-        nf (\m -> runIdentity $ runReaderT m 5) statePComp3
-    , bench "Fused ReaderT StateT Handler"  $
-        nf (\m -> runIdentity $ runReaderT m 5) statePComp5
-    , bench "StateT Pipeline" $
-        nf (\m -> runIdentity $ runReaderT m 5) stateTComp4
+    -- , bench "StateT Computation"  $
+    --     nf (\m -> runIdentity $ evalStateT m 5) stateHComp2
+    -- , bench "ReaderT StateT Handler" $
+    --     nf (\m -> runIdentity $ runReaderT m 5) stateTComp12
+    -- , bench "Direct ReaderT StateT Handler"  $
+    --     nf (\m -> runIdentity $ runReaderT m 5) statePComp3
+    -- , bench "Fused ReaderT StateT Handler"  $
+    --     nf (\m -> runIdentity $ runReaderT m 5) statePComp5
+    -- , bench "StateT Pipeline" $
+    --     nf (\m -> runIdentity $ runReaderT m 5) stateTComp4
     -- , bench "StateT Pipeline 2"  $
     --     nf (\comp -> runIdentity $ comp 5) stateTComp3
-    , bench "FreeMonad"  $
+    , bench "ReaderT FreeMonad"  $
         nf (\m -> runIdentity $ runReaderT m 5) (stateFreeComp3 @FreeMonad)
-    , bench "FreerMonad"  $
+    , bench "ReaderT FreerMonad"  $
         nf (\m -> runIdentity $ runReaderT m 5) (stateFreeComp3 @FreerMonad)
-    , bench "ChurchMonad"  $
+    , bench "ReaderT ChurchMonad"  $
         nf (\m -> runIdentity $ runReaderT m 5) (stateFreeComp3 @ChurchMonad)
-    -- , bench "FreerMonad"  $
-    --     nf runStateComp (stateFreeComp @FreerMonad)
-    -- , bench "ChurchMonad"  $
-    --     nf runStateComp (stateFreeComp @ChurchMonad)
+    , bench "Curried FreeMonad"  $
+        nf runStateComp (stateFreeComp4 @FreeMonad)
+    , bench "Curried FreerMonad"  $
+        nf runStateComp (stateFreeComp4 @FreerMonad)
+    , bench "Curried ChurchMonad"  $
+        nf runStateComp (stateFreeComp4 @ChurchMonad)
     ]
   ]
