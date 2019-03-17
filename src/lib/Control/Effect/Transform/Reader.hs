@@ -1,7 +1,5 @@
 
 module Control.Effect.Transform.Reader
-  ( readerTHandler
-  )
 where
 
 import Control.Monad.Reader

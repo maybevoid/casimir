@@ -33,6 +33,14 @@ stateComp1 = forM_ [0..500] $ \i ->
 stateComp2 :: GenericReturn (StateEff Int) ()
 stateComp2 = genericReturn stateComp1
 
+stateHComp1 :: Computation NoEff (Return ()) (StateT Int Identity)
+stateHComp1 = bindHandlerWithCast
+  stateTHandler stateComp2
+  cast cast
+
+stateHComp2 :: StateT Int Identity ()
+stateHComp2 = returnVal $ runComp stateHComp1 idLift NoOp
+
 stateOpsHandler
   :: forall eff s a .
   (Effect eff)
@@ -115,38 +123,92 @@ stateTComp4 = returnVal $ runComp stateTComp3 idLift NoOp
 -- runStateComp comp = runIdentity $ returnVal $
 --   runComp (comp 5) id NoOp
 
--- statePipeline2
---   :: forall s a eff1
---    . (Effect eff1)
---   => Computation (StateEff s) (Return a) eff1
---   -> Computation (EnvEff s) (Return a) eff1
--- statePipeline2 comp1 = Computation comp2
---  where
---   comp2 :: forall eff2 . (Effect eff2)
---     => eff1 ~> eff2
---     -> Operation (EnvEff s) eff2
---     -> Return a eff2
---   comp2 liftEff ops = bindConstraint ops $ do
---     s <- RT.ask
---     res <- evalStateT returnVal $ comp4
---     return $ Return res
+statePipeline2
+  :: forall s a eff1
+   . (Effect eff1)
+  => Computation (StateEff s) (Return a) eff1
+  -> Computation (EnvEff s) (Return a) eff1
+statePipeline2 comp1 = Computation comp2
+ where
+  comp2 :: forall eff2 . (Effect eff2)
+    => LiftEff eff1 eff2
+    -> Operation (EnvEff s) eff2
+    -> Return a eff2
+  comp2 lift12 ops = bindConstraint ops $ Return comp5
+   where
+    comp3 :: Computation NoEff (Return a) (StateT s eff2)
+    comp3 = bindHandlerWithCast
+      stateTHandler
+      (liftComputation lift12 comp1)
+      cast cast
 
---    where
---     comp4 :: Return a (StateT s eff2)
---     comp4 = runComp comp3 liftEff NoOp
+    comp4 :: StateT s eff2 a
+    comp4 = returnVal $ runComp comp3 idLift NoOp
 
---   comp3 :: Computation NoEff (Return a) (StateT s eff1)
---   comp3 = bindHandlerWithCast
---     stateTHandler comp1
---     cast cast
+    comp5 :: (OpsConstraint (EnvEff s) eff2) => eff2 a
+    comp5 = do
+      s <- ask
+      res <- evalStateT comp4 s
+      return res
+
+statePComp1 :: Computation (EnvEff Int) (Return ()) Identity
+statePComp1 = statePipeline2 stateComp2
+
+statePComp2 :: Computation NoEff (Return ()) (ReaderT Int Identity)
+statePComp2 = bindHandlerWithCast
+  readerTHandler statePComp1
+  cast cast
+
+statePComp3 :: ReaderT Int Identity ()
+statePComp3 = returnVal $ runComp statePComp2 idLift NoOp
+
+statePipeline3
+  :: forall s a eff1
+   . (Effect eff1)
+  => Computation (StateEff s) (Return a) eff1
+  -> Computation NoEff (Return a) (ReaderT s eff1)
+statePipeline3 comp1 = Computation comp2
+ where
+  comp2 :: forall eff2 . (Effect eff2)
+    => LiftEff (ReaderT s eff1) eff2
+    -> Operation NoEff eff2
+    -> Return a eff2
+  comp2 lift12 _ = Return $ liftEff lift12 comp5
+
+  comp3 :: Computation NoEff (Return a) (StateT s eff1)
+  comp3 = bindHandlerWithCast
+    stateTHandler
+    comp1
+    cast cast
+
+  comp4 :: StateT s eff1 a
+  comp4 = returnVal $ runComp comp3 idLift NoOp
+
+  comp5 :: ReaderT s eff1 a
+  comp5 = do
+    s <- RT.ask
+    res <- lift $ evalStateT comp4 s
+    return res
+
+statePComp4 :: Computation NoEff (Return ()) (ReaderT Int Identity)
+statePComp4 = statePipeline3 stateComp2
+
+statePComp5 :: ReaderT Int Identity ()
+statePComp5 = returnVal $ runComp statePComp4 idLift NoOp
 
 main :: IO ()
 main = defaultMain [
   bgroup "state benchmark"
     [ bench "StateT Handler"  $
         nf (\m -> runIdentity $ evalStateT m 5) stateTComp1
-    , bench "ReaderT StateT Handler"  $
+    , bench "StateT Computation"  $
+        nf (\m -> runIdentity $ evalStateT m 5) stateHComp2
+    , bench "ReaderT StateT Handler" $
         nf (\m -> runIdentity $ runReaderT m 5) stateTComp12
+    , bench "Direct ReaderT StateT Handler"  $
+        nf (\m -> runIdentity $ runReaderT m 5) statePComp3
+    , bench "Fused ReaderT StateT Handler"  $
+        nf (\m -> runIdentity $ runReaderT m 5) statePComp5
     , bench "StateT Pipeline" $
         nf (\m -> runIdentity $ runReaderT m 5) stateTComp4
     -- , bench "StateT Pipeline 2"  $
