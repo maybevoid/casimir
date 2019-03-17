@@ -52,6 +52,7 @@ handlerToPipeline handler1 = Pipeline pipeline
     cast
     cast
 
+{-# INLINE transformerPipeline #-}
 transformerPipeline
   :: forall t ops1 handler eff1 .
   ( Effect eff1
@@ -63,6 +64,7 @@ transformerPipeline
   -> GenericPipeline ops1 handler eff1
 transformerPipeline handler1 = Pipeline pipeline
  where
+  {-# INLINE pipeline #-}
   pipeline :: forall ops2 comp .
     (EffOps ops2, EffFunctor comp)
     => Computation (Union handler ops2) comp eff1
@@ -82,6 +84,35 @@ transformerPipeline handler1 = Pipeline pipeline
       comp3 :: comp (t eff2)
       comp3 = runComp comp1 (joinLift lift12 liftT) $
         UnionOps opsHandler $ applyLift liftT ops2
+
+-- transformerPipeline'
+--   :: forall t handler eff1 .
+--   ( Effect eff1
+--   , EffOps handler
+--   , (forall eff . (Effect eff) => Effect (t eff))
+--   )
+--   => TransformerHandler t handler eff1
+--   -> GenericPipeline NoEff handler eff1
+-- transformerPipeline'
+--   (TransformerHandler opsHandler liftT unliftT)
+--   = Pipeline pipeline
+--    where
+--     pipeline :: forall ops2 comp .
+--       (EffOps ops2, EffFunctor comp)
+--       => Computation (Union handler ops2) comp eff1
+--       -> Computation (Union NoEff ops2) comp eff1
+--     pipeline comp1 = Computation comp2
+--      where
+--       comp2
+--         :: forall eff2 . (Effect eff2)
+--         => LiftEff eff1 eff2
+--         -> Operation (Union NoEff ops2) eff2
+--         -> comp eff2
+--       comp2 lift12 (UnionOps NoOp ops2) = applyLift unliftT comp3
+--        where
+--         comp3 :: comp (t eff2)
+--         comp3 = runComp comp1 liftT $
+--           UnionOps opsHandler $ applyLift (joinLift lift12 liftT) ops2
 
 castPipeline
   :: forall ops1 ops2 handler eff1 eff2 comp1 comp2 .

@@ -92,6 +92,7 @@ genericOpsHandlerToPipeline handler1
         -> eff2 a
       unliftFree = handleFree handler3
 
+{-# INLINE contextualHandlerToPipeline #-}
 contextualHandlerToPipeline
   :: forall free w ops1 handler eff1 .
   ( Effect eff1

@@ -62,11 +62,12 @@ stateOpsHandler = OpsHandler handleReturn' handleOps'
       (CoState cont2) <- cont1 ()
       cont2 s
 
+{-# INLINE statePipeline1 #-}
 statePipeline1
-  :: forall s eff1 .
-  (Effect eff1)
+  :: forall free s eff1 .
+  (Effect eff1, FreeEff free)
   => GenericPipeline (EnvEff s) (StateEff s) eff1
-statePipeline1 = contextualHandlerToPipeline @ChurchMonad $
+statePipeline1 = contextualHandlerToPipeline @free $
   Computation handler
    where
     handler
@@ -110,19 +111,7 @@ stateTComp3 = bindHandlerWithCast
 stateTComp4 :: ReaderT Int Identity ()
 stateTComp4 = returnVal $ runComp stateTComp3 idLift NoOp
 
--- stateFreeComp :: forall free . (FreeEff free)
---   => Int
---   -> Computation NoEff (Return ()) Identity
--- stateFreeComp s = runPipelineWithCast
---   (statePipeline1 @free s) stateComp2
---   cast cast
-
--- runStateComp
---   :: (Int -> Computation NoEff (Return a) Identity)
---   -> a
--- runStateComp comp = runIdentity $ returnVal $
---   runComp (comp 5) id NoOp
-
+{-# INLINE statePipeline2 #-}
 statePipeline2
   :: forall s a eff1
    . (Effect eff1)
@@ -151,6 +140,32 @@ statePipeline2 comp1 = Computation comp2
       res <- evalStateT comp4 s
       return res
 
+{-# INLINE stateFreeComp1 #-}
+stateFreeComp1 :: forall free . (FreeEff free)
+  => Computation (EnvEff Int) (Return ()) Identity
+stateFreeComp1 = runPipelineWithCast
+  (statePipeline1 @free) stateComp2
+  cast cast
+
+{-# INLINE stateFreeComp2 #-}
+stateFreeComp2 :: forall free . (FreeEff free)
+  => Computation NoEff (Return ()) (ReaderT Int Identity)
+stateFreeComp2 = bindHandlerWithCast
+  readerTHandler
+  (stateFreeComp1 @free)
+  cast cast
+
+{-# INLINE stateFreeComp3 #-}
+stateFreeComp3 :: forall free . (FreeEff free)
+  => ReaderT Int Identity ()
+stateFreeComp3 = returnVal $ runComp (stateFreeComp2 @free) idLift NoOp
+
+-- runStateComp
+--   :: (Int -> Computation NoEff (Return a) Identity)
+--   -> a
+-- runStateComp comp = runIdentity $ returnVal $
+--   runComp (comp 5) id NoOp
+
 statePComp1 :: Computation (EnvEff Int) (Return ()) Identity
 statePComp1 = statePipeline2 stateComp2
 
@@ -162,6 +177,7 @@ statePComp2 = bindHandlerWithCast
 statePComp3 :: ReaderT Int Identity ()
 statePComp3 = returnVal $ runComp statePComp2 idLift NoOp
 
+{-# INLINE statePipeline3 #-}
 statePipeline3
   :: forall s a eff1
    . (Effect eff1)
@@ -213,8 +229,12 @@ main = defaultMain [
         nf (\m -> runIdentity $ runReaderT m 5) stateTComp4
     -- , bench "StateT Pipeline 2"  $
     --     nf (\comp -> runIdentity $ comp 5) stateTComp3
-    -- , bench "FreeMonad"  $
-    --     nf runStateComp (stateFreeComp @FreeMonad)
+    , bench "FreeMonad"  $
+        nf (\m -> runIdentity $ runReaderT m 5) (stateFreeComp3 @FreeMonad)
+    , bench "FreerMonad"  $
+        nf (\m -> runIdentity $ runReaderT m 5) (stateFreeComp3 @FreerMonad)
+    , bench "ChurchMonad"  $
+        nf (\m -> runIdentity $ runReaderT m 5) (stateFreeComp3 @ChurchMonad)
     -- , bench "FreerMonad"  $
     --     nf runStateComp (stateFreeComp @FreerMonad)
     -- , bench "ChurchMonad"  $
