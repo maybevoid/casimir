@@ -14,15 +14,18 @@ import Control.Effect.Computation
 import Control.Effect.Ops.Env (EnvEff, EnvOps (..))
 
 import Control.Effect.Base
-  ( Effect
-  , NoEff
-  )
+
+liftReaderT
+  :: forall a eff
+   . (Effect eff)
+  => LiftEff eff (ReaderT a eff)
+liftReaderT = mkLiftEff lift
 
 readerTHandler
   :: forall a eff .
   (Effect eff)
   => Handler NoEff (EnvEff a) (ReaderT a eff) eff
-readerTHandler = mkHandler lift $
-  \liftEff -> EnvOps {
-    askOp = liftEff ask
+readerTHandler = mkHandler liftReaderT $
+  \lifter -> EnvOps {
+    askOp = liftEff lifter ask
   }

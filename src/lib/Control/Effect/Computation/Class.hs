@@ -10,12 +10,12 @@ newtype Computation ops comp eff1 = Computation {
     , Effect eff1
     , Effect eff2
     )
-    => eff1 ~> eff2
+    => LiftEff eff1 eff2
     -> Operation ops eff2
     -> comp eff2
 }
 
 data Handler ops handler eff1 eff2
   = Handler
-    (eff2 ~> eff1)
+    (LiftEff eff2 eff1)
     (Computation ops (Operation handler) eff1)

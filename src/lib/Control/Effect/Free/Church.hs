@@ -48,6 +48,14 @@ liftChurchMonad mx = ChurchMonad $ \handler -> do
   x <- mx
   handleReturn handler x
 
+churchLiftEff
+  :: forall ops eff
+   . ( Effect eff
+     , FreeOps ops
+     )
+  => LiftEff eff (ChurchMonad ops eff)
+churchLiftEff = mkLiftEff liftChurchMonad
+
 liftChurchOps
   :: forall ops eff a .
   ( Effect eff

@@ -60,17 +60,22 @@ stateTHandlerTest = testCase "StateT handler test" $
   assertEqual "StateT computation should have 5 as final state"
     5 s
 
-stateComp3 :: IdentityComputation StateCompRes
+stateComp3 :: Computation (EnvEff Int) (Return StateCompRes) Identity
 stateComp3
   = runPipelineWithCast
-    (stateTPipeline 4)
+    stateTPipeline
     stateComp2
     cast cast
+
+stateComp4 :: IdentityComputation StateCompRes
+stateComp4 = bindHandlerWithCast
+  (mkEnvHandler 4) stateComp3
+  cast cast
 
 stateTPipelineTest :: TestTree
 stateTPipelineTest = testCase "StateT pipeline test" $
   assertEqual "StateT pipeline should get/put the correct states"
-    (4, 6, 6) $ runIdentityComp stateComp3
+    (4, 6, 6) $ runIdentityComp stateComp4
 
 ioStateHandler
   :: forall eff s .

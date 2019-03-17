@@ -10,8 +10,15 @@ import Control.Monad.Trans.Class
 import Control.Effect.Base
 import Control.Effect.Computation
 
+import Control.Effect.Ops.Env
 import Control.Effect.Ops.State
   (StateEff, StateOps(..))
+
+liftStateT
+  :: forall s eff
+   . (Effect eff)
+  => LiftEff eff (StateT s eff)
+liftStateT = mkLiftEff lift
 
 stateTOps
   :: forall eff s .
@@ -26,20 +33,22 @@ stateTHandler
   :: forall eff s .
   (Effect eff)
   => Handler NoEff (StateEff s) (StateT s eff) eff
-stateTHandler = mkHandler lift $
-  \liftEff -> StateOps {
-    getOp = liftEff get,
-    putOp = \x -> liftEff $ put x
+stateTHandler = mkHandler liftStateT $
+  \lifter -> StateOps {
+    getOp = liftEff lifter get,
+    putOp = \x -> liftEff lifter $ put x
   }
 
 stateTPipeline
   :: forall s eff1 comp .
   (Effect eff1, EffFunctor comp)
-  => s
-  -> SimplePipeline NoEff (StateEff s) eff1 comp
-stateTPipeline i = transformerPipeline $ genericComputation handler
+  => SimplePipeline (EnvEff s) (StateEff s) eff1 comp
+stateTPipeline = transformerPipeline $ genericComputation handler
  where
-  handler :: forall eff . (Effect eff)
+  handler :: forall eff
+   . (Effect eff, OpsConstraint (EnvEff s) eff)
     => TransformerHandler (StateT s) (StateEff s) eff
-  handler = TransformerHandler stateTOps lift $
-    \eff -> evalStateT eff i
+  handler = TransformerHandler stateTOps liftStateT $ mkLiftEff $
+    \eff -> do
+      i <- ask
+      evalStateT eff i

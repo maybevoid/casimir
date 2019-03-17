@@ -18,8 +18,8 @@ data EnvCoOp env r =
 type EnvConstraint e eff = (?envOps :: EnvOps e eff)
 
 instance EffFunctor (EnvOps e) where
-  effmap liftEff envOps = EnvOps {
-    askOp = liftEff $ askOp envOps
+  effmap lifter envOps = EnvOps {
+    askOp = lifter $ askOp envOps
   }
 
 instance Functor (EnvCoOp e) where

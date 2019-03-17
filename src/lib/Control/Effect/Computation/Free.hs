@@ -47,7 +47,7 @@ opsHandlerToPipeline handler1 = Pipeline pipeline
     comp2
       :: forall eff2 .
       (Effect eff2)
-      => eff1 ~> eff2
+      => LiftEff eff1 eff2
       -> Operation (Union ops1 ops2) eff2
       -> Return b eff2
     comp2 lift12 (UnionOps ops1 ops2) = Return comp4
@@ -57,7 +57,7 @@ opsHandlerToPipeline handler1 = Pipeline pipeline
 
       comp3 :: free handler eff2 a
       comp3 = returnVal $ runComp comp1
-        (liftFree . lift12)
+        (joinLift lift12 freeLiftEff)
         (UnionOps freeOps (effmap liftFree ops2))
 
       comp4 :: eff2 b
@@ -78,11 +78,11 @@ genericOpsHandlerToPipeline handler1
   handler2
     :: forall eff2 .
     (Effect eff2)
-    => eff1 ~> eff2
+    => LiftEff eff1 eff2
     -> Operation ops1 eff2
     -> TransformerHandler (free handler) handler eff2
   handler2 lift12 ops1
-    = TransformerHandler freeOps liftFree unliftFree
+    = TransformerHandler freeOps freeLiftEff (mkLiftEff unliftFree)
     where
       (GenericOpsHandler handler3) = runComp handler1 lift12 ops1
 
@@ -107,11 +107,11 @@ contextualHandlerToPipeline handler1
   handler2
     :: forall eff2 .
     (Effect eff2)
-    => eff1 ~> eff2
+    => LiftEff eff1 eff2
     -> Operation ops1 eff2
     -> TransformerHandler (free handler) handler eff2
   handler2 lift12 ops1
-    = TransformerHandler freeOps liftFree unliftFree
+    = TransformerHandler freeOps freeLiftEff (mkLiftEff unliftFree)
    where
     (ContextualHandler handler3 extract) = runComp handler1 lift12 ops1
 

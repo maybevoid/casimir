@@ -17,8 +17,8 @@ data DecideCoOp s a = DecideOp (s -> a)
 type DecideConstraint s eff = (?decideOps :: DecideOps s eff)
 
 instance EffFunctor (DecideOps s) where
-  effmap liftEff decideOps = DecideOps {
-    decideOp = liftEff $ decideOp decideOps
+  effmap lifter decideOps = DecideOps {
+    decideOp = lifter $ decideOp decideOps
   }
 
 instance FreeOps (DecideEff s) where

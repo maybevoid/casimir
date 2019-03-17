@@ -5,6 +5,7 @@ module Control.Effect.Base.FreeEff
 where
 
 import Control.Effect.Base.Effect
+import Control.Effect.Base.LiftEff
 import Control.Effect.Base.FreeOps
 
 class
@@ -41,3 +42,9 @@ data ContextualHandler w handler eff = ContextualHandler {
 
   extractResult :: forall a . w eff a -> eff a
 }
+
+freeLiftEff
+  :: forall ops free eff
+   . (FreeEff free, FreeOps ops, Effect eff)
+  => LiftEff eff (free ops eff)
+freeLiftEff = mkLiftEff liftFree

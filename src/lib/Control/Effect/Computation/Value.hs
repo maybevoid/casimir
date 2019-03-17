@@ -17,7 +17,7 @@ newtype Return a eff = Return {
 }
 
 instance EffFunctor (Return a) where
-  effmap liftEff (Return mx) = Return $ liftEff mx
+  effmap lifter (Return mx) = Return $ lifter mx
 
 type PureComputation a =
   forall eff . Computation NoEff (PureVal a) eff
@@ -43,12 +43,12 @@ returnComputation
   )
   => (forall eff2 .
       (Effect eff2, OpsConstraint ops eff2)
-      => eff1 ~> eff2
+      => LiftEff eff1 eff2
       -> eff2 a)
   -> ReturnComputation ops a eff1
 returnComputation comp1 = Computation $
-  \ liftEff ops ->
-    bindConstraint ops $ Return $ comp1 liftEff
+  \ lift12 ops ->
+    bindConstraint ops $ Return $ comp1 lift12
 
 genericComputation
   :: forall ops comp .
@@ -71,7 +71,7 @@ genericReturn comp = Computation $
   \ _ ops -> Return $ bindConstraint ops comp
 
 runIdentityComp :: forall a . IdentityComputation a -> a
-runIdentityComp comp = runIdentity $ returnVal $ runComp comp id NoOp
+runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
 
 execComp
   :: forall ops eff a .
@@ -81,4 +81,4 @@ execComp
   )
   => Computation ops (Return a) eff
   -> eff a
-execComp comp = returnVal $ runComp comp id captureOps
+execComp comp = returnVal $ runComp comp idLift captureOps

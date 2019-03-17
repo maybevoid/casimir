@@ -84,8 +84,8 @@ castComputation
   -> Computation ops2 comp eff
   -> Computation ops1 comp eff
 castComputation caster comp = Computation $
-  \ liftEff ops ->
-    runComp comp liftEff $ castOps caster ops
+  \ lift12 ops ->
+    runComp comp lift12 $ castOps caster ops
 
 castHandler
   :: forall ops1 ops2 handler eff1 eff2 .
@@ -97,8 +97,8 @@ castHandler
   => OpsCast ops1 ops2
   -> Handler ops2 handler eff1 eff2
   -> Handler ops1 handler eff1 eff2
-castHandler caster (Handler liftEff handler)
-  = Handler liftEff $ castComputation caster handler
+castHandler caster (Handler lift12 handler)
+  = Handler lift12 $ castComputation caster handler
 
 composeHandlersWithCast
   :: forall

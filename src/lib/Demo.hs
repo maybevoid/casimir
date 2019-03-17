@@ -246,7 +246,7 @@ decideComp3 = bindHandlerWithCast
 decideComp4 :: IO [Int]
 decideComp4 =
   withOpsHandler @ChurchMonad nonDetHandler1 $
-    returnVal $ runComp decideComp3 liftChurchMonad captureOps
+    returnVal $ runComp decideComp3 churchLiftEff captureOps
 
 decideComp5
   :: forall eff .
@@ -264,7 +264,7 @@ decideComp6 = runPipelineWithCast
   cast
 
 decideComp7 :: IO [Int]
-decideComp7 = returnVal $ runComp decideComp6 id NoOp
+decideComp7 = returnVal $ runComp decideComp6 idLift NoOp
 
 pipeline1
   :: Pipeline
@@ -281,7 +281,7 @@ pipeline1 = composePipelinesWithCast
   cast
 
 decideComp8 :: IO [Int]
-decideComp8 = returnVal $ runComp comp id NoOp
+decideComp8 = returnVal $ runComp comp idLift NoOp
  where
   comp :: Computation NoEff (Return [Int]) IO
   comp = runPipelineWithCast
@@ -327,19 +327,19 @@ readComp6 :: GenericReturn (Union (EnvEff Int) IoEff) Int
 readComp6 = genericComputation $ Return readComp1
 
 readComp7 :: IO Int
-readComp7 = returnVal $ runComp readComp6 id ops1
+readComp7 = returnVal $ runComp readComp6 idLift ops1
 
 readComp9 :: IO Int
-readComp8 = returnVal $ runComp readComp6 id (castOps cast ops3)
+readComp8 = returnVal $ runComp readComp6 idLift (castOps cast ops3)
 
 readComp8 :: IO Int
-readComp9 = returnVal $ runComp readComp6 id (castOps cast ops4)
+readComp9 = returnVal $ runComp readComp6 idLift (castOps cast ops4)
 
 readComp10 :: GenericReturn (Union IoEff (EnvEff Int)) Int
 readComp10 = genericComputation $ Return readComp2
 
 readComp11 :: IO Int
-readComp11 = returnVal $ runComp readComp10 id (castOps cast ops3)
+readComp11 = returnVal $ runComp readComp10 idLift (castOps cast ops3)
 
 readComp12 :: IO Int
-readComp12 = returnVal $ runComp readComp10 id (castOps cast ops4)
+readComp12 = returnVal $ runComp readComp10 idLift (castOps cast ops4)
