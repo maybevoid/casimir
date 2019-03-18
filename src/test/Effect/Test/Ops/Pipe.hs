@@ -33,12 +33,12 @@ type YieldConstraint a eff = (?yieldOps :: YieldOps a eff)
 type AwaitConstraint a eff = (?awaitOps :: AwaitOps a eff)
 
 instance EffFunctor (YieldOps a) where
-  effmap liftEff ops = YieldOps $
-    \x -> liftEff $ yieldOp ops x
+  effmap lifter ops = YieldOps $
+    \x -> lifter $ yieldOp ops x
 
 instance EffFunctor (AwaitOps a) where
-  effmap liftEff ops = AwaitOps $
-    liftEff $ awaitOp ops
+  effmap lifter ops = AwaitOps $
+    lifter $ awaitOp ops
 
 instance FreeOps (YieldEff a) where
   type Operation (YieldEff a) = YieldOps a
@@ -89,19 +89,19 @@ runPipe :: forall a r ops eff1
 runPipe producer1 consumer1 = Computation comp
    where
     comp :: forall eff2 . (Effect eff2)
-      => eff1 ~> eff2
+      => LiftEff eff1 eff2
       -> Operation ops eff2
       -> Return r eff2
-    comp liftEff ops = Return $ pipe producer2 consumer2
+    comp lifter ops = Return $ pipe producer2 consumer2
      where
       producer2 :: FreeT (YieldCoOp a) eff2 r
       producer2 = returnVal $ runComp producer1
-        (lift . liftEff) $
+        (joinLift lifter (mkLiftEff lift)) $
         UnionOps (mkFreeOps liftF) (effmap lift ops)
 
       consumer2 :: FreeT (AwaitCoOp a) eff2 r
       consumer2 = returnVal $ runComp consumer1
-        (lift . liftEff) $
+        (joinLift lifter (mkLiftEff lift)) $
         UnionOps (mkFreeOps liftF) (effmap lift ops)
 
 pipe
@@ -175,7 +175,7 @@ pipeTest :: TestTree
 pipeTest = testCase
   "Mutually recursive pipe computation should run correctly" $
   do
-    res <- returnVal $ runComp pipedComp id (mkEnvOps 5)
+    res <- returnVal $ runComp pipedComp idLift (mkEnvOps 5)
     assertEqual
       "Pipe computation should return 18"
       18 res

@@ -12,8 +12,8 @@ data EnvOps e eff = EnvOps {
   askOp :: eff e
 }
 
-data EnvCoOp env r =
-  AskOp (env -> r)
+data EnvCoOp e r =
+  AskOp (e -> r)
 
 type EnvConstraint e eff = (?envOps :: EnvOps e eff)
 

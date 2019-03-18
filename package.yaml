@@ -26,6 +26,7 @@ default-extensions:
   - RankNTypes
   - TypeFamilies
   - InstanceSigs
+  - DeriveFunctor
   - TypeOperators
   - ImplicitParams
   - ExplicitForAll
