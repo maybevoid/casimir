@@ -1,8 +1,14 @@
 
 module Benchmark.State.StateTPipeline
-  (stateToReaderComp)
+  ( stateToReaderComp
+
+  -- The simple action of exporting a specialized
+  -- Identity base monad improves performance by ~25%
+  , stateToReaderIdentityComp
+  )
 where
 
+import Control.Monad.Identity
 import Control.Monad.Trans.Reader (ReaderT)
 
 import Control.Effect
@@ -23,3 +29,6 @@ stateTComp2 = bindHandlerWithCast
 stateToReaderComp :: forall eff . (Effect eff)
   => ReaderT Int eff ()
 stateToReaderComp = returnVal $ runComp stateTComp2 idLift NoOp
+
+stateToReaderIdentityComp :: ReaderT Int Identity ()
+stateToReaderIdentityComp = stateToReaderComp
