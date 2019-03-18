@@ -189,7 +189,7 @@ trueHandler
   => CoOpHandler (DecideEff Bool) Int String eff
 trueHandler = CoOpHandler {
   handleReturn = return . show,
-  handleOps = \(DecideOp cont) -> cont True
+  handleCoOp = \(DecideOp cont) -> cont True
 }
 
 nonDetHandler1
@@ -198,7 +198,7 @@ nonDetHandler1
   => CoOpHandler (DecideEff Bool) Int [Int] eff
 nonDetHandler1 = CoOpHandler {
   handleReturn = \x -> return [x],
-  handleOps = \(DecideOp cont) -> do
+  handleCoOp = \(DecideOp cont) -> do
     res1 <- cont True
     res2 <- cont False
     return $ res1 ++ res2

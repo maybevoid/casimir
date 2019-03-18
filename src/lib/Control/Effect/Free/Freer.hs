@@ -88,7 +88,7 @@ handleFreer handler m = handleFree' m
     :: FreerF ops a (FreerMonad ops eff a)
     -> eff r
   handleComp (PureF x) = handleReturn handler x
-  handleComp (FreeF ops cont) = handleOps handler $
+  handleComp (FreeF ops cont) = handleCoOp handler $
     fmap (\x -> handleFree' $ cont x) ops
 
 liftFreer

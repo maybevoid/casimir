@@ -29,7 +29,7 @@ class
 
 data CoOpHandler handler a r eff = CoOpHandler {
   handleReturn :: a -> eff r,
-  handleOps :: CoOperation handler (eff r) -> eff r
+  handleCoOp :: CoOperation handler (eff r) -> eff r
 }
 
 newtype GenericCoOpHandler handler eff

@@ -66,7 +66,7 @@ liftChurchOps
 liftChurchOps ops = ChurchMonad $ cont
  where
   cont :: forall r . CoOpHandler ops a r eff -> eff r
-  cont handler = handleOps handler $ fmap (handleReturn handler) ops
+  cont handler = handleCoOp handler $ fmap (handleReturn handler) ops
 
 churchOps
   :: forall ops eff .
@@ -87,7 +87,7 @@ mapChurchMonad f (ChurchMonad m1) = ChurchMonad m2
   m2 :: forall r . CoOpHandler ops b r eff -> eff r
   m2 handler = m1 $ CoOpHandler {
     handleReturn = \x -> handleReturn handler (f x),
-    handleOps = handleOps handler
+    handleCoOp = handleCoOp handler
   }
 
 bindChurchMonad
@@ -106,7 +106,7 @@ bindChurchMonad (ChurchMonad m1) cont1 = ChurchMonad m2
     handler2 :: CoOpHandler ops a r eff
     handler2 = CoOpHandler {
       handleReturn = \x -> runChurchMonad (cont1 x) handler1,
-      handleOps = handleOps handler1
+      handleCoOp = handleCoOp handler1
     }
 
 liftPure
