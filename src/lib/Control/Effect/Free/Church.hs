@@ -1,7 +1,11 @@
 
 module Control.Effect.Free.Church
+  ( ChurchMonad (..)
+  , churchLiftEff
+  )
 where
 
+import Control.Monad (ap)
 import Control.Effect.Base
 
 newtype ChurchMonad ops eff a = ChurchMonad {
@@ -13,22 +17,21 @@ instance
   => Functor (ChurchMonad ops eff)
   where
     fmap = mapChurchMonad
+    {-# INLINE fmap #-}
 
 instance
   (Monad eff, FreeOps ops)
   => Applicative (ChurchMonad ops eff)
   where
     pure = liftPure
-    mf <*> mx = do
-      f <- mf
-      x <- mx
-      return $ f x
+    (<*>) = ap
 
 instance
   (Monad eff, FreeOps ops)
   => Monad (ChurchMonad ops eff)
   where
     (>>=) = bindChurchMonad
+    {-# INLINE (>>=) #-}
 
 instance
   FreeEff ChurchMonad
@@ -47,6 +50,7 @@ liftChurchMonad
 liftChurchMonad mx = ChurchMonad $ \handler -> do
   x <- mx
   handleReturn handler x
+{-# INLINE liftChurchMonad #-}
 
 churchLiftEff
   :: forall ops eff
@@ -55,6 +59,7 @@ churchLiftEff
      )
   => LiftEff eff (ChurchMonad ops eff)
 churchLiftEff = mkLiftEff liftChurchMonad
+{-# INLINE churchLiftEff #-}
 
 liftChurchOps
   :: forall ops eff a .
@@ -67,12 +72,14 @@ liftChurchOps ops = ChurchMonad $ cont
  where
   cont :: forall r . CoOpHandler ops a r eff -> eff r
   cont handler = handleCoOp handler $ fmap (handleReturn handler) ops
+{-# INLINE liftChurchOps #-}
 
 churchOps
   :: forall ops eff .
   (FreeOps ops, Effect eff)
   => Operation ops (ChurchMonad ops eff)
 churchOps = mkFreeOps liftChurchOps
+{-# INLINE churchOps #-}
 
 mapChurchMonad
   :: forall ops eff a b .
@@ -89,6 +96,7 @@ mapChurchMonad f (ChurchMonad m1) = ChurchMonad m2
     handleReturn = \x -> handleReturn handler (f x),
     handleCoOp = handleCoOp handler
   }
+{-# INLINE mapChurchMonad #-}
 
 bindChurchMonad
   :: forall ops eff a b .
@@ -108,6 +116,7 @@ bindChurchMonad (ChurchMonad m1) cont1 = ChurchMonad m2
       handleReturn = \x -> runChurchMonad (cont1 x) handler1,
       handleCoOp = handleCoOp handler1
     }
+{-# INLINE bindChurchMonad #-}
 
 liftPure
   :: forall ops eff a .
@@ -117,3 +126,4 @@ liftPure
   => a
   -> ChurchMonad ops eff a
 liftPure x = ChurchMonad $ \handler -> handleReturn handler x
+{-# INLINE liftPure #-}

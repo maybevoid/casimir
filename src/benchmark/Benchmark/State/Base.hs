@@ -2,8 +2,6 @@
 module Benchmark.State.Base
 where
 
-import Control.Monad
-
 import Control.Effect
 
 newtype CoState s eff a = CoState (s -> eff a)
@@ -12,11 +10,14 @@ stateBaseFunc
   :: forall eff
    . (Effect eff, OpsConstraint (StateEff Int) eff)
   => eff ()
-stateBaseFunc = forM_ [0..500] $ \i ->
+stateBaseFunc =
  do
   s <- get
-  let s' = s + i
-  put s'
+  if s <= 0
+    then return ()
+    else do
+      put $ s - 1
+      stateBaseFunc
 
 stateBaseComp :: GenericReturn (StateEff Int) ()
 stateBaseComp = genericReturn stateBaseFunc

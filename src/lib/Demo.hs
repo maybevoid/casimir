@@ -183,24 +183,15 @@ stateIoComp4 = do
   ref <- newIORef 3
   execComp $ stateIoComp3 ref
 
-trueHandler
-  :: forall eff .
-  (Effect eff)
-  => CoOpHandler (DecideEff Bool) Int String eff
-trueHandler = CoOpHandler {
-  handleReturn = return . show,
-  handleCoOp = \(DecideOp cont) -> cont True
-}
-
 nonDetHandler1
   :: forall eff .
   (Effect eff)
   => CoOpHandler (DecideEff Bool) Int [Int] eff
 nonDetHandler1 = CoOpHandler {
   handleReturn = \x -> return [x],
-  handleCoOp = \(DecideOp cont) -> do
-    res1 <- cont True
-    res2 <- cont False
+  handleCoOp = \(DecideOp x y cont) -> do
+    res1 <- cont x
+    res2 <- cont y
     return $ res1 ++ res2
 }
 
@@ -223,9 +214,9 @@ decideComp1
   , IoConstraint eff
   ) => eff Int
 decideComp1 = do
-  a <- decide
+  a <- decide True False
   liftIo $ putStrLn $ "a: " ++ (show a)
-  b <- decide
+  b <- decide False True
   liftIo $ putStrLn $ "b: " ++ (show b)
   return $ if a
     then if b then 1 else 2

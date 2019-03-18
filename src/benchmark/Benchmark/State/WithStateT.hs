@@ -11,12 +11,16 @@ import qualified Control.Monad.Trans.Reader as RT
 import Control.Effect
 import Benchmark.State.Base
 
-stateTComp1 :: forall eff . (Effect eff)
+withStateOpsComp :: forall eff . (Effect eff)
   => StateT Int eff ()
-stateTComp1 = withHandler stateTHandler stateBaseFunc
+withStateOpsComp = withOps stateTOps stateBaseFunc
+
+withStateTHandlerComp :: forall eff . (Effect eff)
+  => StateT Int eff ()
+withStateTHandlerComp = withHandler stateTHandler stateBaseFunc
 
 withStateTReaderTComp :: forall eff . (Effect eff)
   => ReaderT Int eff ()
 withStateTReaderTComp = do
   s <- RT.ask
-  lift $ evalStateT stateTComp1 s
+  lift $ evalStateT withStateTHandlerComp s
