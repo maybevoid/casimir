@@ -7,6 +7,7 @@ module Benchmark.State
   , module Benchmark.State.StateEffToEnvEff
   , module Benchmark.State.StateEffToReaderT
   , module Benchmark.State.FreePipeline
+  , module Benchmark.State.HandleFree
   )
 where
 
@@ -17,3 +18,4 @@ import Benchmark.State.StateTPipeline
 import Benchmark.State.StateEffToEnvEff
 import Benchmark.State.StateEffToReaderT
 import Benchmark.State.FreePipeline
+import Benchmark.State.HandleFree

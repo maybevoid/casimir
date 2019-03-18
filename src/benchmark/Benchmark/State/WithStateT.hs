@@ -15,8 +15,8 @@ stateTComp1 :: forall eff . (Effect eff)
   => StateT Int eff ()
 stateTComp1 = withHandler stateTHandler stateBaseFunc
 
-withStateTComp :: forall eff . (Effect eff)
+withStateTReaderTComp :: forall eff . (Effect eff)
   => ReaderT Int eff ()
-withStateTComp = do
+withStateTReaderTComp = do
   s <- RT.ask
   lift $ evalStateT stateTComp1 s

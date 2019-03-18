@@ -22,36 +22,63 @@ runReaderTComp
   -> ()
 runReaderTComp m = runIdentity $ runReaderT m 5
 
+evalStateTComp
+  :: StateT Int Identity ()
+  -> ()
+evalStateTComp m = runIdentity $ evalStateT m 5
+
 main :: IO ()
 main = defaultMain [
   bgroup "State Benchmark"
     [ bench "With StateT Handler"  $
-        nf (\m -> runIdentity $ evalStateT m 5) stateTComp1
-    , bench "With StateT Computation" $
-        nf runReaderTComp withStateTComp
+        nf evalStateTComp
+        stateTComp1
+    , bench "With StateT ReaderT Computation" $
+        nf runReaderTComp
+        withStateTReaderTComp
     , bench "Bind StateT Handler Computation"  $
-        nf (\m -> runIdentity $ evalStateT m 5) stateTHandlerComp
+        nf evalStateTComp
+        stateTHandlerComp
+
+    , bench "with CoOp Handler on CurchMonad"  $
+        nf (\comp -> runIdentity $ comp 5)
+        (handleFreeComp @ChurchMonad)
+    , bench "with CoOp Handler on FreeMonad"  $
+        nf (\comp -> runIdentity $ comp 5)
+        (handleFreeComp @FreeMonad)
+    , bench "with CoOp Handler on FreerMonad"  $
+        nf (\comp -> runIdentity $ comp 5)
+        (handleFreeComp @FreerMonad)
+
     , bench "Transformer StateEff to EnvEff to ReaderT Pipeline" $
-        nf runReaderTComp stateToReaderComp
+        nf runReaderTComp
+        stateToReaderComp
     , bench "Manual StateEff to EnvEff to ReaderT Pipeline"  $
-        nf runReaderTComp stateEffToEnvEffToReaderTComp
+        nf runReaderTComp
+        stateEffToEnvEffToReaderTComp
     , bench "Manual StateEff to ReaderT Pipeline"  $
-        nf runReaderTComp stateEffToReaderTComp
-    , bench "ReaderT FreeMonad"  $
-        nf runReaderTComp (readerTFreeComp @FreeMonad)
-    , bench "ReaderT FreerMonad"  $
-        nf runReaderTComp (readerTFreeComp @FreerMonad)
-    , bench "ReaderT ChurchMonad"  $
-        nf
-        runReaderTComp
-        (readerTFreeComp @ChurchMonad)
+        nf runReaderTComp
+        stateEffToReaderTComp
+
+    , bench "Curried ChurchMonad"  $
+        nf applyCurriedComp
+        (curriedFreeComp @ChurchMonad)
     , bench "Curried FreeMonad"  $
-        nf
-        applyCurriedComp
+        nf applyCurriedComp
         (curriedFreeComp @FreeMonad)
     , bench "Curried FreerMonad"  $
-        nf applyCurriedComp (curriedFreeComp @FreerMonad)
-    , bench "Curried ChurchMonad"  $
-        nf applyCurriedComp (curriedFreeComp @ChurchMonad)
+        nf applyCurriedComp
+        (curriedFreeComp @FreerMonad)
+
+    , bench "ReaderT ChurchMonad"  $
+        nf runReaderTComp
+        (readerTFreeComp @ChurchMonad)
+    , bench "ReaderT FreeMonad"  $
+        nf runReaderTComp
+        (readerTFreeComp @FreeMonad)
+    , bench "ReaderT FreerMonad"  $
+        nf runReaderTComp
+        (readerTFreeComp @FreerMonad)
+
     ]
   ]
