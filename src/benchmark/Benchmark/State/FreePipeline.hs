@@ -34,33 +34,48 @@ statePipeline1 = contextualHandlerToPipeline @free $
         s <- ask
         cont s
 
-stateFreeComp1 :: forall free . (FreeEff free)
-  => Computation (EnvEff Int) (Return ()) Identity
+stateFreeComp1
+  :: forall free eff .
+  (FreeEff free, Effect eff)
+  => Computation (EnvEff Int) (Return ()) eff
 stateFreeComp1 = runPipelineWithCast
   (statePipeline1 @free) stateBaseComp
   cast cast
 
-stateFreeComp2 :: forall free . (FreeEff free)
-  => Computation NoEff (Return ()) (ReaderT Int Identity)
+stateFreeComp2
+  :: forall free eff .
+  (FreeEff free, Effect eff)
+  => Computation NoEff (Return ()) (ReaderT Int eff)
 stateFreeComp2 = bindHandlerWithCast
   readerTHandler
   (stateFreeComp1 @free)
   cast cast
 
-readerTFreeComp :: forall free . (FreeEff free)
-  => ReaderT Int Identity ()
+readerTFreeComp
+  :: forall free eff .
+  (FreeEff free, Effect eff)
+  => ReaderT Int eff ()
 readerTFreeComp = returnVal $ runComp (stateFreeComp2 @free) idLift NoOp
 
-curriedFreeComp:: forall free . (FreeEff free)
+curriedFreeComp
+  :: forall free eff .
+  (FreeEff free, Effect eff)
   => Int
-  -> Computation NoEff (Return ()) Identity
+  -> Computation NoEff (Return ()) eff
 curriedFreeComp s = bindHandlerWithCast
   (mkEnvHandler s)
   (stateFreeComp1 @free)
   cast cast
 
-applyCurriedComp
-  :: (Int -> Computation NoEff (Return a) Identity)
-  -> a
-applyCurriedComp comp = runIdentity $ returnVal $
-  runComp (comp 5) idLift NoOp
+readerTFreeIdentityComp
+  :: forall free .
+  (FreeEff free)
+  => ReaderT Int Identity ()
+readerTFreeIdentityComp = readerTFreeComp @free
+
+curriedFreeIdentityComp
+  :: forall free .
+  (FreeEff free)
+  => Int
+  -> Computation NoEff (Return ()) Identity
+curriedFreeIdentityComp = curriedFreeComp @free
