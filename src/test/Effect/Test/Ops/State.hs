@@ -126,11 +126,11 @@ runCoState :: forall s eff . (Effect eff)
   -> (forall a . CoState s eff a -> eff a)
 runCoState i (CoState cont) = cont i
 
-stateOpsHandler
+stateCoOpHandler
   :: forall eff s a .
   (Effect eff)
-  => OpsHandler (StateEff s) a (CoState s eff a) eff
-stateOpsHandler = OpsHandler handleReturn' handleOps'
+  => CoOpHandler (StateEff s) a (CoState s eff a) eff
+stateCoOpHandler = CoOpHandler handleReturn' handleOps'
  where
   handleReturn' :: a -> eff (CoState s eff a)
   handleReturn' x = return $ CoState $ \_ -> return x
@@ -151,11 +151,11 @@ stateDynComp1
   :: forall eff .
   (Effect eff)
   => ChurchMonad (StateEff Int) eff StateCompRes
-stateDynComp1 = bindConstraint @(StateEff Int) freeOps stateComp1
+stateDynComp1 = withOps @(StateEff Int) freeOps stateComp1
 
 stateDynComp2 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
-stateDynComp2 = withOpsHandler @ChurchMonad stateOpsHandler stateDynComp1
+stateDynComp2 = withCoOpHandler @ChurchMonad stateCoOpHandler stateDynComp1
 
 stateDynComp3 :: Identity StateCompRes
 stateDynComp3 = stateDynComp2 >>= runCoState 5
@@ -179,14 +179,14 @@ statePipeline1 = contextualHandlerToPipeline @ChurchMonad $
       => eff1 ~> eff2
       -> Operation (EnvEff s) eff2
       -> ContextualHandler (CoState s) (StateEff s) eff2
-    handler _ envOps = ContextualHandler opsHandler extract
+    handler _ envOps = ContextualHandler coopHandler extract
      where
-      opsHandler :: forall a .
-        OpsHandler (StateEff s) a (CoState s eff2 a) eff2
-      opsHandler = stateOpsHandler
+      coopHandler :: forall a .
+        CoOpHandler (StateEff s) a (CoState s eff2 a) eff2
+      coopHandler = stateCoOpHandler
 
       extract :: forall a . CoState s eff2 a -> eff2 a
-      extract (CoState cont) = bindConstraint envOps $
+      extract (CoState cont) = withOps envOps $
        do
         s <- ask
         cont s
@@ -212,8 +212,8 @@ churchStateTest2 = testCase "Church state test 2" $
 
 stateFreeComp1 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
-stateFreeComp1 = handleFree @FreeMonad stateOpsHandler $
-  bindConstraint @(StateEff Int) freeOps $ stateComp1
+stateFreeComp1 = handleFree @FreeMonad stateCoOpHandler $
+  withOps @(StateEff Int) freeOps $ stateComp1
 
 stateFreeComp2 :: Identity StateCompRes
 stateFreeComp2 = stateDynComp2 >>= runCoState 7

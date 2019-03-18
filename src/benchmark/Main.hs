@@ -20,23 +20,23 @@ applyCurriedComp comp = runIdentity $ returnVal $
 runReaderTComp
   :: ReaderT Int Identity ()
   -> ()
-runReaderTComp m =runIdentity $ runReaderT m 5
+runReaderTComp m = runIdentity $ runReaderT m 5
 
 main :: IO ()
 main = defaultMain [
   bgroup "State Benchmark"
     [ bench "With StateT Handler"  $
         nf (\m -> runIdentity $ evalStateT m 5) stateTComp1
-    -- , bench "With StateT Computation" $
-    --     nf runReaderTComp withStateTComp
-    -- , bench "Bind StateT Handler Computation"  $
-    --     nf (\m -> runIdentity $ evalStateT m 5) stateTHandlerComp
-    -- , bench "Transformer StateEff to EnvEff to ReaderT Pipeline" $
-    --     nf runReaderTComp stateToReaderComp
-    -- , bench "Manual StateEff to EnvEff to ReaderT Pipeline"  $
-    --     nf runReaderTComp stateEffToEnvEffToReaderTComp
-    -- , bench "Manual StateEff to ReaderT Pipeline"  $
-    --     nf runReaderTComp stateEffToReaderTComp
+    , bench "With StateT Computation" $
+        nf runReaderTComp withStateTComp
+    , bench "Bind StateT Handler Computation"  $
+        nf (\m -> runIdentity $ evalStateT m 5) stateTHandlerComp
+    , bench "Transformer StateEff to EnvEff to ReaderT Pipeline" $
+        nf runReaderTComp stateToReaderComp
+    , bench "Manual StateEff to EnvEff to ReaderT Pipeline"  $
+        nf runReaderTComp stateEffToEnvEffToReaderTComp
+    , bench "Manual StateEff to ReaderT Pipeline"  $
+        nf runReaderTComp stateEffToReaderTComp
     , bench "ReaderT FreeMonad"  $
         nf runReaderTComp (readerTFreeComp @FreeMonad)
     , bench "ReaderT FreerMonad"  $

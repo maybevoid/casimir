@@ -48,7 +48,7 @@ returnComputation
   -> ReturnComputation ops a eff1
 returnComputation comp1 = Computation $
   \ lift12 ops ->
-    bindConstraint ops $ Return $ comp1 lift12
+    withOps ops $ Return $ comp1 lift12
 
 {-# INLINE genericComputation #-}
 genericComputation
@@ -59,7 +59,7 @@ genericComputation
       => comp eff)
   -> (forall eff .Computation ops comp eff)
 genericComputation comp = Computation $
-  \ _ ops -> bindConstraint ops comp
+  \ _ ops -> withOps ops comp
 
 {-# INLINE genericReturn #-}
 genericReturn
@@ -70,7 +70,7 @@ genericReturn
       => eff a)
   -> GenericReturn ops a
 genericReturn comp = Computation $
-  \ _ ops -> Return $ bindConstraint ops comp
+  \ _ ops -> Return $ withOps ops comp
 
 runIdentityComp :: forall a . IdentityComputation a -> a
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp

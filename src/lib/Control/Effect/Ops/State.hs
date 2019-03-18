@@ -53,7 +53,7 @@ instance FreeOps (StateEff s) where
 instance EffOps (StateEff s) where
   type OpsConstraint (StateEff s) eff = StateConstraint s eff
 
-  bindConstraint stateOps comp = let ?stateOps = stateOps in comp
+  withOps stateOps comp = let ?stateOps = stateOps in comp
 
   captureOps = ?stateOps
 

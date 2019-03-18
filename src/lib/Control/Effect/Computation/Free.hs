@@ -8,34 +8,34 @@ import Control.Effect.Computation.Class
 import Control.Effect.Computation.Value
 import Control.Effect.Computation.Pipeline
 
-withOpsHandler
+withCoOpHandler
   :: forall free ops eff a r
    . ( Effect eff
      , EffOps ops
      , FreeEff free
      )
-  => OpsHandler ops a r eff
+  => CoOpHandler ops a r eff
   -> ((OpsConstraint ops (free ops eff))
       => free ops eff a)
   -> eff r
-withOpsHandler handler comp1 = handleFree handler comp2
+withCoOpHandler handler comp1 = handleFree handler comp2
  where
   comp2 :: free ops eff a
-  comp2 = bindConstraint ops comp1
+  comp2 = withOps ops comp1
 
   ops :: Operation ops (free ops eff)
   ops = freeOps
 
-opsHandlerToPipeline
+coopHandlerToPipeline
   :: forall free ops1 handler eff1 a b .
   ( Effect eff1
   , EffOps ops1
   , EffOps handler
   , FreeEff free
   )
-  => Computation ops1 (OpsHandler handler a b) eff1
+  => Computation ops1 (CoOpHandler handler a b) eff1
   -> Pipeline ops1 handler eff1 eff1 (Return a) (Return b)
-opsHandlerToPipeline handler1 = Pipeline pipeline
+coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2 .
@@ -52,7 +52,7 @@ opsHandlerToPipeline handler1 = Pipeline pipeline
       -> Return b eff2
     comp2 lift12 (UnionOps ops1 ops2) = Return comp4
      where
-      handler2 :: OpsHandler handler a b eff2
+      handler2 :: CoOpHandler handler a b eff2
       handler2 = runComp handler1 lift12 ops1
 
       comp3 :: free handler eff2 a
@@ -63,16 +63,16 @@ opsHandlerToPipeline handler1 = Pipeline pipeline
       comp4 :: eff2 b
       comp4 = handleFree handler2 comp3
 
-genericOpsHandlerToPipeline
+genericCoOpHandlerToPipeline
   :: forall free ops1 handler eff1 .
   ( Effect eff1
   , EffOps ops1
   , EffOps handler
   , FreeEff free
   )
-  => Computation ops1 (GenericOpsHandler handler) eff1
+  => Computation ops1 (GenericCoOpHandler handler) eff1
   -> GenericPipeline ops1 handler eff1
-genericOpsHandlerToPipeline handler1
+genericCoOpHandlerToPipeline handler1
   = transformerPipeline $ Computation handler2
  where
   handler2
@@ -84,7 +84,7 @@ genericOpsHandlerToPipeline handler1
   handler2 lift12 ops1
     = TransformerHandler freeOps freeLiftEff (mkLiftEff unliftFree)
     where
-      (GenericOpsHandler handler3) = runComp handler1 lift12 ops1
+      (GenericCoOpHandler handler3) = runComp handler1 lift12 ops1
 
       unliftFree
         :: forall a .

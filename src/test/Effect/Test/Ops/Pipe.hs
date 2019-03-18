@@ -57,7 +57,7 @@ instance FreeOps (AwaitEff a) where
 instance EffOps (YieldEff a) where
   type OpsConstraint (YieldEff a) eff = YieldConstraint a eff
 
-  bindConstraint yieldOps comp
+  withOps yieldOps comp
     = let ?yieldOps = yieldOps in comp
 
   captureOps = ?yieldOps
@@ -65,7 +65,7 @@ instance EffOps (YieldEff a) where
 instance EffOps (AwaitEff a) where
   type OpsConstraint (AwaitEff a) eff = AwaitConstraint a eff
 
-  bindConstraint awaitOps comp
+  withOps awaitOps comp
     = let ?awaitOps = awaitOps in comp
 
   captureOps = ?awaitOps

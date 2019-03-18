@@ -186,8 +186,8 @@ stateIoComp4 = do
 trueHandler
   :: forall eff .
   (Effect eff)
-  => OpsHandler (DecideEff Bool) Int String eff
-trueHandler = OpsHandler {
+  => CoOpHandler (DecideEff Bool) Int String eff
+trueHandler = CoOpHandler {
   handleReturn = return . show,
   handleOps = \(DecideOp cont) -> cont True
 }
@@ -195,8 +195,8 @@ trueHandler = OpsHandler {
 nonDetHandler1
   :: forall eff .
   (Effect eff)
-  => OpsHandler (DecideEff Bool) Int [Int] eff
-nonDetHandler1 = OpsHandler {
+  => CoOpHandler (DecideEff Bool) Int [Int] eff
+nonDetHandler1 = CoOpHandler {
   handleReturn = \x -> return [x],
   handleOps = \(DecideOp cont) -> do
     res1 <- cont True
@@ -207,14 +207,14 @@ nonDetHandler1 = OpsHandler {
 nonDetHandler2
   :: forall eff .
   (Effect eff)
-  => Computation NoEff (OpsHandler (DecideEff Bool) Int [Int]) eff
+  => Computation NoEff (CoOpHandler (DecideEff Bool) Int [Int]) eff
 nonDetHandler2 = Computation $ \ _ _ -> nonDetHandler1
 
 nonDetPipeline
   :: forall eff .
   (Effect eff)
   => Pipeline NoEff (DecideEff Bool) eff eff (Return Int) (Return [Int])
-nonDetPipeline = opsHandlerToPipeline @ChurchMonad nonDetHandler2
+nonDetPipeline = coopHandlerToPipeline @ChurchMonad nonDetHandler2
 
 decideComp1
   :: forall eff .
@@ -245,7 +245,7 @@ decideComp3 = bindHandlerWithCast
 
 decideComp4 :: IO [Int]
 decideComp4 =
-  withOpsHandler @ChurchMonad nonDetHandler1 $
+  withCoOpHandler @ChurchMonad nonDetHandler1 $
     returnVal $ runComp decideComp3 churchLiftEff captureOps
 
 decideComp5
@@ -315,13 +315,13 @@ readComp2 :: forall eff . (IoConstraint eff, EnvConstraint Int eff) => eff Int
 readComp2 = ask
 
 readComp3 :: IO Int
-readComp3 = bindConstraint ops2 readComp1
+readComp3 = withOps ops2 readComp1
 
 readComp4 :: IO Int
-readComp4 = bindConstraint ops3 readComp2
+readComp4 = withOps ops3 readComp2
 
 readComp5 :: IO Int
-readComp5 = bindConstraint ops4 readComp2
+readComp5 = withOps ops4 readComp2
 
 readComp6 :: GenericReturn (Union (EnvEff Int) IoEff) Int
 readComp6 = genericComputation $ Return readComp1

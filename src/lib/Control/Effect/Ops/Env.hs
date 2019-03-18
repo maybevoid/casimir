@@ -36,7 +36,7 @@ instance FreeOps (EnvEff e) where
 instance EffOps (EnvEff e) where
   type OpsConstraint (EnvEff e) eff = (EnvConstraint e eff)
 
-  bindConstraint envOps comp = let ?envOps = envOps in comp
+  withOps envOps comp = let ?envOps = envOps in comp
 
   captureOps = ?envOps
 

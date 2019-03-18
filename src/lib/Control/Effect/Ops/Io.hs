@@ -56,7 +56,7 @@ instance FreeOps IoEff where
 instance EffOps IoEff where
   type OpsConstraint IoEff eff = (IoConstraint eff)
 
-  bindConstraint ops comp = let ?ioOps = ops in comp
+  withOps ops comp = let ?ioOps = ops in comp
 
   captureOps = ?ioOps
 

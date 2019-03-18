@@ -23,22 +23,22 @@ class
     handleFree
       :: forall ops eff a r
       . (Effect eff, FreeOps ops)
-      => OpsHandler ops a r eff
+      => CoOpHandler ops a r eff
       -> free ops eff a
       -> eff r
 
-data OpsHandler handler a r eff = OpsHandler {
+data CoOpHandler handler a r eff = CoOpHandler {
   handleReturn :: a -> eff r,
   handleOps :: CoOperation handler (eff r) -> eff r
 }
 
-newtype GenericOpsHandler handler eff
-  = GenericOpsHandler
-    (forall a . OpsHandler handler a a eff)
+newtype GenericCoOpHandler handler eff
+  = GenericCoOpHandler
+    (forall a . CoOpHandler handler a a eff)
 
 data ContextualHandler w handler eff = ContextualHandler {
   runContextualHandler
-    :: forall a . OpsHandler handler a (w eff a) eff,
+    :: forall a . CoOpHandler handler a (w eff a) eff,
 
   extractResult :: forall a . w eff a -> eff a
 }

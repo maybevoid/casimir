@@ -5,7 +5,7 @@ where
 import Control.Effect.Base
 
 newtype ChurchMonad ops eff a = ChurchMonad {
-  runChurchMonad :: forall r . OpsHandler ops a r eff -> eff r
+  runChurchMonad :: forall r . CoOpHandler ops a r eff -> eff r
 }
 
 instance
@@ -65,7 +65,7 @@ liftChurchOps
   -> ChurchMonad ops eff a
 liftChurchOps ops = ChurchMonad $ cont
  where
-  cont :: forall r . OpsHandler ops a r eff -> eff r
+  cont :: forall r . CoOpHandler ops a r eff -> eff r
   cont handler = handleOps handler $ fmap (handleReturn handler) ops
 
 churchOps
@@ -84,8 +84,8 @@ mapChurchMonad
   -> ChurchMonad ops eff b
 mapChurchMonad f (ChurchMonad m1) = ChurchMonad m2
  where
-  m2 :: forall r . OpsHandler ops b r eff -> eff r
-  m2 handler = m1 $ OpsHandler {
+  m2 :: forall r . CoOpHandler ops b r eff -> eff r
+  m2 handler = m1 $ CoOpHandler {
     handleReturn = \x -> handleReturn handler (f x),
     handleOps = handleOps handler
   }
@@ -100,11 +100,11 @@ bindChurchMonad
   -> ChurchMonad ops eff b
 bindChurchMonad (ChurchMonad m1) cont1 = ChurchMonad m2
  where
-  m2 :: forall r . OpsHandler ops b r eff -> eff r
+  m2 :: forall r . CoOpHandler ops b r eff -> eff r
   m2 handler1 = m1 handler2
    where
-    handler2 :: OpsHandler ops a r eff
-    handler2 = OpsHandler {
+    handler2 :: CoOpHandler ops a r eff
+    handler2 = CoOpHandler {
       handleReturn = \x -> runChurchMonad (cont1 x) handler1,
       handleOps = handleOps handler1
     }

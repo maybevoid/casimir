@@ -14,7 +14,7 @@ class
     type family OpsConstraint ops (eff :: Type -> Type)
       = (c :: Constraint) | c -> ops eff
 
-    bindConstraint :: forall eff r .
+    withOps :: forall eff r .
       (Effect eff)
       => Operation ops eff
       -> (OpsConstraint ops eff => r)

@@ -22,14 +22,14 @@ statePipeline1 = contextualHandlerToPipeline @free $
       => LiftEff eff1 eff2
       -> Operation (EnvEff s) eff2
       -> ContextualHandler (CoState s) (StateEff s) eff2
-    handler _ envOps = ContextualHandler opsHandler extract
+    handler _ envOps = ContextualHandler coopHandler extract
      where
-      opsHandler :: forall a .
-        OpsHandler (StateEff s) a (CoState s eff2 a) eff2
-      opsHandler = stateCoOpHandler
+      coopHandler :: forall a .
+        CoOpHandler (StateEff s) a (CoState s eff2 a) eff2
+      coopHandler = stateCoOpHandler
 
       extract :: forall a . CoState s eff2 a -> eff2 a
-      extract (CoState cont) = bindConstraint envOps $
+      extract (CoState cont) = withOps envOps $
        do
         s <- ask
         cont s

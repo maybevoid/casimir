@@ -52,7 +52,7 @@ castOps
   => OpsCast ops1 ops2
   -> Operation ops1 eff
   -> Operation ops2 eff
-castOps caster ops = bindConstraint ops $
+castOps caster ops = withOps ops $
   runCast @eff @ops1 @ops2
     caster captureOps
 

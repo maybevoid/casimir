@@ -32,7 +32,7 @@ mkHandler
       )
   -> Handler ops handler eff1 eff2
 mkHandler lift21 comp = Handler lift21 $ Computation $
-  \ lift13 ops -> bindConstraint ops $ comp lift13
+  \ lift13 ops -> withOps ops $ comp lift13
 
 baseHandler
   :: forall handler eff .
@@ -50,7 +50,7 @@ genericHandler
       => Operation handler eff)
   -> GenericHandler ops handler
 genericHandler handler = Handler idLift $ Computation $
-  \ _ ops -> bindConstraint ops $ handler
+  \ _ ops -> withOps ops $ handler
 
 freeHandler
   :: forall handler .
@@ -127,4 +127,4 @@ withHandler
   -> (OpsConstraint handler eff1 => r)
   -> r
 withHandler (Handler _ handler) comp =
-  bindConstraint (runComp handler idLift captureOps) comp
+  withOps (runComp handler idLift captureOps) comp

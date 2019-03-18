@@ -30,7 +30,7 @@ envOpsTest :: TestTree
 envOpsTest = testCase "Env ops test" $
  do
   let envOps = mkEnvOps @Int @IO 3
-  res <- bindConstraint envOps envComp1
+  res <- withOps envOps envComp1
   assertEqual
     "Computation should read and format '3' from environment"
     res "Env: 3"

@@ -74,7 +74,7 @@ instance FreeEff FreerMonad where
 handleFreer
   :: forall ops eff a r
    . (Effect eff, FreeOps ops)
-  => OpsHandler ops a r eff
+  => CoOpHandler ops a r eff
   -> FreerMonad ops eff a
   -> eff r
 handleFreer handler m = handleFree' m

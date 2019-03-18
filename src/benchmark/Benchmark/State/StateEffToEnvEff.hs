@@ -26,7 +26,7 @@ stateEffToEnvEffPipeline comp1 = Computation comp2
     => LiftEff eff1 eff2
     -> Operation (EnvEff s) eff2
     -> Return a eff2
-  comp2 lift12 ops = bindConstraint ops $ Return comp5
+  comp2 lift12 ops = withOps ops $ Return comp5
    where
     comp3 :: Computation NoEff (Return a) (StateT s eff2)
     comp3 = bindHandlerWithCast

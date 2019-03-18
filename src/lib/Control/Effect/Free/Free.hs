@@ -43,7 +43,7 @@ freeMonadOps = mkFreeOps (FreeMonad . liftF)
 handleFreeMonad
   :: forall ops eff a r
    . (Effect eff, FreeOps ops)
-  => OpsHandler ops a r eff
+  => CoOpHandler ops a r eff
   -> FreeMonad ops eff a
   -> eff r
 handleFreeMonad handler (FreeMonad m) = handleFree' m

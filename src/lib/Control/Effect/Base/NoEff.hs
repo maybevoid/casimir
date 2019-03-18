@@ -38,6 +38,6 @@ instance FreeOps NoEff where
 instance EffOps NoEff where
   type OpsConstraint NoEff eff = NoConstraint eff
 
-  bindConstraint _ = id
+  withOps _ = id
 
   captureOps = NoOp

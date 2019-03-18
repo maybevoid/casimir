@@ -30,8 +30,8 @@ runCoState i (CoState cont) = cont i
 stateCoOpHandler
   :: forall eff s a .
   (Effect eff)
-  => OpsHandler (StateEff s) a (CoState s eff a) eff
-stateCoOpHandler = OpsHandler handleReturn' handleOps'
+  => CoOpHandler (StateEff s) a (CoState s eff a) eff
+stateCoOpHandler = CoOpHandler handleReturn' handleOps'
  where
   {-# INLINE handleReturn' #-}
   handleReturn' :: a -> eff (CoState s eff a)

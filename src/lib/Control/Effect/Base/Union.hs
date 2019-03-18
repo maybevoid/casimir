@@ -52,7 +52,7 @@ instance (EffOps ops1, EffOps ops2) => EffOps (Union ops1 ops2) where
   type OpsConstraint (Union ops1 ops2) eff =
     (OpsConstraint ops2 eff, OpsConstraint ops1 eff)
 
-  bindConstraint (UnionOps ops1 ops2) comp =
-    bindConstraint ops1 $ bindConstraint ops2 comp
+  withOps (UnionOps ops1 ops2) comp =
+    withOps ops1 $ withOps ops2 comp
 
   captureOps = UnionOps captureOps captureOps
