@@ -6,6 +6,7 @@ import Effect.Test.Ops.Env
 import Effect.Test.Ops.State
 import Effect.Test.Ops.Pipe
 import Effect.Test.Ops.Exception
+import Effect.Test.Ops.Ambivalent
 
 opsTests :: TestTree
 opsTests = testGroup "Ops Tests"
@@ -13,4 +14,5 @@ opsTests = testGroup "Ops Tests"
   , stateTests
   , pipeTests
   , exceptionTests
+  , ambivalentTests
   ]
