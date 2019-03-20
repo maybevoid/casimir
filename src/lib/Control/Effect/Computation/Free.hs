@@ -8,6 +8,7 @@ import Control.Effect.Computation.Class
 import Control.Effect.Computation.Value
 import Control.Effect.Computation.Pipeline
 
+{-# INLINE withCoOpHandler #-}
 withCoOpHandler
   :: forall free ops eff a r
    . ( Effect eff
@@ -18,14 +19,26 @@ withCoOpHandler
   -> ((OpsConstraint ops (free ops eff))
       => free ops eff a)
   -> eff r
-withCoOpHandler handler comp1 = handleFree handler comp2
- where
-  comp2 :: free ops eff a
-  comp2 = withOps ops comp1
+withCoOpHandler handler comp1
+  = handleFree @free handler
+      $ withOps (freeOps @free @ops @eff) comp1
 
-  ops :: Operation ops (free ops eff)
-  ops = freeOps
+{-# INLINE withFreerCoOpHandler #-}
+withFreerCoOpHandler
+  :: forall free ops eff a r
+   . ( Effect eff
+     , EffOps ops
+     , FreerEff free
+     )
+  => FreerCoOpHandler ops a r eff
+  -> ((OpsConstraint ops (free ops eff))
+      => free ops eff a)
+  -> eff r
+withFreerCoOpHandler handler comp1
+  = handleFreer @free handler $
+      withOps (freeOps @free @ops @eff) comp1
 
+{-# INLINE coopHandlerToPipeline #-}
 coopHandlerToPipeline
   :: forall free ops1 handler eff1 a b .
   ( Effect eff1
@@ -63,6 +76,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
       comp4 :: eff2 b
       comp4 = handleFree handler2 comp3
 
+{-# INLINE genericCoOpHandlerToPipeline #-}
 genericCoOpHandlerToPipeline
   :: forall free ops1 handler eff1 .
   ( Effect eff1

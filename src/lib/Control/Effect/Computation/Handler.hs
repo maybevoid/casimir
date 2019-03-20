@@ -82,6 +82,8 @@ bindExactHandler (Handler lift21 handler1) comp1
        where
         handler2 :: Operation handler eff3
         handler2 = runComp handler1 lift13 ops
+    {-# INLINE comp2 #-}
+{-# INLINE bindExactHandler #-}
 
 composeExactHandlers
   :: forall ops handler1 handler2 eff1 eff2 eff3 .
@@ -128,3 +130,4 @@ withHandler
   -> r
 withHandler (Handler _ handler) comp =
   withOps (runComp handler idLift captureOps) comp
+{-# INLINE withHandler #-}

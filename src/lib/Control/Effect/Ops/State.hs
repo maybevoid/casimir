@@ -53,18 +53,22 @@ instance FreeOps (StateEff s) where
 instance EffOps (StateEff s) where
   type OpsConstraint (StateEff s) eff = StateConstraint s eff
 
+  {-# INLINE withOps #-}
   withOps stateOps comp = let ?stateOps = stateOps in comp
 
+  {-# INLINE captureOps #-}
   captureOps = ?stateOps
 
 instance Normalizable (StateEff s) where
   unionOps = UnionOps
 
+{-# INLINE get #-}
 get :: forall a eff .
   (StateConstraint a eff)
   => eff a
 get = getOp ?stateOps
 
+{-# INLINE put #-}
 put :: forall a eff .
   (StateConstraint a eff)
   => a

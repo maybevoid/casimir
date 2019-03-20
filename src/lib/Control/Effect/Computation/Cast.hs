@@ -142,3 +142,4 @@ bindHandlerWithCast handler comp cast31 cast32 =
   bindExactHandler
     (castHandler cast31 handler) $
     castComputation cast32 comp
+{-# INLINE bindHandlerWithCast #-}

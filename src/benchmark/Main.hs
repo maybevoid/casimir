@@ -12,7 +12,7 @@ import Control.Effect
 import Benchmark.State
 
 rounds :: Int
-rounds = 10000
+rounds = 5000
 
 applyCurriedComp
   :: (Int -> Computation NoEff (Return a) Identity)
@@ -62,6 +62,10 @@ main = defaultMain [
     , bench "with CoOp Handler on FreerMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @FreerMonad)
+
+    , bench "with Freer CoOp Handler on FreerMonad"  $
+        whnf (\comp -> runIdentity $ comp rounds)
+        (handleFreerComp @FreerMonad)
 
     , bench "Transformer StateEff to EnvEff to ReaderT Pipeline" $
         whnf runReaderTComp

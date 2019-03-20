@@ -11,6 +11,14 @@ handleFreeComp
   => Int
   -> eff ()
 handleFreeComp s = do
-  let comp = withOps (freeOps @free @(StateEff Int)) stateBaseFunc
-  coState <- handleFree @free stateCoOpHandler comp
+  coState <- withCoOpHandler @free stateCoOpHandler stateBaseFunc
+  runCoState s coState
+
+handleFreerComp
+  :: forall free eff
+   . (FreerEff free, Effect eff)
+  => Int
+  -> eff ()
+handleFreerComp s = do
+  coState <- withFreerCoOpHandler @free stateFreerCoOpHandler stateBaseFunc
   runCoState s coState

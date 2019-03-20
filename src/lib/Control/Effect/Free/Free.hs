@@ -2,6 +2,8 @@
 {-# LANGUAGE StandaloneDeriving #-}
 
 module Control.Effect.Free.Free
+  ( FreeMonad (..)
+  )
 where
 
 import Control.Monad.Trans.Free
@@ -33,12 +35,14 @@ liftFreeMonad
    => eff a
    -> FreeMonad ops eff a
 liftFreeMonad = FreeMonad . lift
+{-# INLINE liftFreeMonad #-}
 
 freeMonadOps
   :: forall ops eff .
   (FreeOps ops, Effect eff)
   => Operation ops (FreeMonad ops eff)
 freeMonadOps = mkFreeOps (FreeMonad . liftF)
+{-# INLINE freeMonadOps #-}
 
 handleFreeMonad
   :: forall ops eff a r
@@ -58,3 +62,4 @@ handleFreeMonad handler (FreeMonad m) = handleFree' m
     -> eff r
   handleComp (Pure x) = handleReturn handler x
   handleComp (Free ops) = handleCoOp handler $ fmap handleFree' ops
+{-# INLINE handleFreeMonad #-}

@@ -8,6 +8,20 @@ import Control.Effect.Base.Effect
 import Control.Effect.Base.LiftEff
 import Control.Effect.Base.FreeOps
 
+data CoOpHandler handler a r eff = CoOpHandler {
+  handleReturn :: a -> eff r,
+  handleCoOp :: CoOperation handler (eff r) -> eff r
+}
+
+data FreerCoOpHandler handler a r eff = FreerCoOpHandler {
+  handleFreerReturn :: a -> eff r,
+  handleFreerCoOp
+    :: forall x
+     . CoOperation handler x
+     -> (x -> eff r)
+     -> eff r
+}
+
 class
   (forall ops eff . (FreeOps ops, Effect eff) => Monad (free ops eff))
   => FreeEff free
@@ -27,10 +41,15 @@ class
       -> free ops eff a
       -> eff r
 
-data CoOpHandler handler a r eff = CoOpHandler {
-  handleReturn :: a -> eff r,
-  handleCoOp :: CoOperation handler (eff r) -> eff r
-}
+class (FreeEff free)
+  => FreerEff free
+  where
+   handleFreer
+      :: forall ops eff a r
+      . (Effect eff, FreeOps ops)
+      => FreerCoOpHandler ops a r eff
+      -> free ops eff a
+      -> eff r
 
 newtype GenericCoOpHandler handler eff
   = GenericCoOpHandler
