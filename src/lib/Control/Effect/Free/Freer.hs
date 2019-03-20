@@ -20,7 +20,7 @@ data FreerF ops a b where
     -> (x -> b)
     -> FreerF ops a b
 
-data FreerMonad ops eff a = FreerMonad {
+newtype FreerMonad ops eff a = FreerMonad {
   runFreerMonad :: eff (FreerF ops a (FreerMonad ops eff a))
 }
 
@@ -69,8 +69,9 @@ instance
         :: FreerF ops a (FreerMonad ops eff a)
         -> eff (FreerF ops b (FreerMonad ops eff b))
       cont2 (PureF x) = runFreerMonad (cont1 x)
-      cont2 (FreeF ops cont3) = return $ FreeF ops $
-        \x -> cont3 x >>= cont1
+      cont2 (FreeF ops cont3)
+        = return $ FreeF ops $
+            cont3 >=> cont1
       {-# INLINE cont2 #-}
     {-# INLINE (>>=) #-}
 

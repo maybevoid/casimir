@@ -10,15 +10,19 @@ handleFreeComp
    . (FreeEff free, Effect eff)
   => Int
   -> eff ()
-handleFreeComp s = do
-  coState <- withCoOpHandler @free stateCoOpHandler stateBaseFunc
-  runCoState s coState
+handleFreeComp s
+  = withContextualCoOpHandler @free
+    stateCoOpHandler
+    (runCoState s)
+    stateBaseFunc
 
 handleFreerComp
   :: forall free eff
    . (FreerEff free, Effect eff)
   => Int
   -> eff ()
-handleFreerComp s = do
-  coState <- withFreerCoOpHandler @free stateFreerCoOpHandler stateBaseFunc
-  runCoState s coState
+handleFreerComp s =
+  withFreerCoOpHandler @free
+    stateFreerCoOpHandler
+    stateBaseFunc
+  >>= runCoState s

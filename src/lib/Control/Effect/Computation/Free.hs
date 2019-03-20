@@ -38,6 +38,21 @@ withFreerCoOpHandler handler comp1
   = handleFreer @free handler $
       withOps (freeOps @free @ops @eff) comp1
 
+{-# INLINE withContextualCoOpHandler #-}
+withContextualCoOpHandler
+  :: forall free ops eff a r
+   . ( Effect eff
+     , EffOps ops
+     , FreeEff free
+     )
+  => CoOpHandler ops a r eff
+  -> (r -> eff a)
+  -> ((OpsConstraint ops (free ops eff))
+      => free ops eff a)
+  -> eff a
+withContextualCoOpHandler handler extract comp
+  = withCoOpHandler @free handler comp >>= extract
+
 {-# INLINE coopHandlerToPipeline #-}
 coopHandlerToPipeline
   :: forall free ops1 handler eff1 a b .
