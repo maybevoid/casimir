@@ -299,10 +299,15 @@ ops4 :: UnionOps (EnvOps Int)
   IO
 ops4 = normalizeOps ops3
 
-readComp1 :: forall eff . (EnvConstraint Int eff, IoConstraint eff) => eff Int
+readComp1 :: forall eff
+   . (Effect eff, EnvConstraint Int eff, IoConstraint eff)
+   => eff Int
 readComp1 = ask
 
-readComp2 :: forall eff . (IoConstraint eff, EnvConstraint Int eff) => eff Int
+readComp2
+  :: forall eff
+   . (Effect eff, IoConstraint eff, EnvConstraint Int eff)
+   => eff Int
 readComp2 = ask
 
 readComp3 :: IO Int

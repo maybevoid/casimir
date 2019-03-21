@@ -9,7 +9,8 @@ import Control.Monad.Trans.Class
   (MonadTrans (..))
 
 import Control.Effect.Computation
-import Control.Effect.Ops.Env (EnvEff, EnvOps (..))
+import Control.Effect.Ops.Env (EnvEff)
+import Control.Effect.Ops.LabeledEnv (LabeledEnvOps (..))
 
 import Control.Effect.Base
 
@@ -24,6 +25,6 @@ readerTHandler
   (Effect eff)
   => Handler NoEff (EnvEff a) (ReaderT a eff) eff
 readerTHandler = mkHandler liftReaderT $
-  \lifter -> EnvOps {
+  \lifter -> LabeledEnvOps {
     askOp = liftEff lifter ask
   }

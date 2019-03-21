@@ -22,6 +22,7 @@ dependencies:
 default-extensions:
   - GADTs
   - Strict
+  - DataKinds
   - StrictData
   - RankNTypes
   - TypeFamilies
