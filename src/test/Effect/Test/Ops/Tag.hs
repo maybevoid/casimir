@@ -1,5 +1,5 @@
 
-module Effect.Test.Ops.Labeled
+module Effect.Test.Ops.Tag
 where
 
 import Test.Tasty
@@ -8,17 +8,17 @@ import Control.Monad.Identity
 
 import Control.Effect
 
-labeledTests :: TestTree
-labeledTests = testGroup "LabeledEff Tests"
+taggedTests :: TestTree
+taggedTests = testGroup "TaggedEff Tests"
   [ test1
   ]
 
 data Foo where
 data Bar where
 
-type FooEnvEff e = LabeledEff Foo (EnvEff e)
-type FooEnvOps e eff = LabeledOps Foo (EnvOps e) eff
-type FooEnvCoOp e r = LabeledCoOp Foo (EnvCoOp e) r
+type FooEnvEff e = TaggedEff Foo (EnvEff e)
+type FooEnvOps e eff = TaggedOps Foo (EnvOps e) eff
+type FooEnvCoOp e r = TaggedCoOp Foo (EnvCoOp e) r
 type FooEnvConstraint e eff = (?fooEnvOps :: FooEnvOps e eff)
 
 instance EffOps (FooEnvEff e) where
@@ -27,9 +27,9 @@ instance EffOps (FooEnvEff e) where
   withOps ops comp = let ?fooEnvOps = ops in comp
   captureOps = ?fooEnvOps
 
-type BarEnvEff e = LabeledEff Bar (EnvEff e)
-type BarEnvOps e eff = LabeledOps Bar (EnvOps e) eff
-type BarEnvCoOp e r = LabeledCoOp Bar (EnvCoOp e) r
+type BarEnvEff e = TaggedEff Bar (EnvEff e)
+type BarEnvOps e eff = TaggedOps Bar (EnvOps e) eff
+type BarEnvCoOp e r = TaggedCoOp Bar (EnvCoOp e) r
 type BarEnvConstraint e eff = (?barEnvOps :: BarEnvOps e eff)
 
 instance EffOps (BarEnvEff e) where
@@ -44,7 +44,7 @@ askFoo
      , FooEnvConstraint e eff
      )
   => eff e
-askFoo = withLabel @Foo @(EnvEff e) $ ask
+askFoo = withTag @Foo @(EnvEff e) $ ask
 
 askBar
   :: forall eff e
@@ -52,7 +52,7 @@ askBar
      , BarEnvConstraint e eff
      )
   => eff e
-askBar = withLabel @Bar @(EnvEff e) $ ask
+askBar = withTag @Bar @(EnvEff e) $ ask
 
 comp1
   :: forall eff
@@ -69,12 +69,12 @@ comp1 = do
 fooOps
   :: forall eff . (Effect eff)
   => FooEnvOps String eff
-fooOps = LabeledOps $ mkEnvOps "foo"
+fooOps = TaggedOps $ mkEnvOps "foo"
 
 barOps
   :: forall eff . (Effect eff)
   => BarEnvOps String eff
-barOps = LabeledOps $ mkEnvOps "bar"
+barOps = TaggedOps $ mkEnvOps "bar"
 
 fooBarOps
   :: forall eff . (Effect eff)
@@ -85,9 +85,9 @@ res1 :: String
 res1 = runIdentity $ withOps fooBarOps comp1
 
 test1 :: TestTree
-test1 = testCase "Labeled EnvEff test" $
+test1 = testCase "Tagged EnvEff test" $
   assertEqual
-    "computation should be able to read correctly from two differently labeled env effs"
+    "computation should be able to read correctly from two differently tagged env effs"
     "foo bar"
     res1
 
