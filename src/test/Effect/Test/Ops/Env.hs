@@ -5,14 +5,6 @@ import Test.Tasty.HUnit
 
 import Control.Effect
 
-data Foo where
-
-instance EffOps (LabeledEnvEff Foo e) where
-  type OpsConstraint (LabeledEnvEff Foo e) eff = (?labeledEnvOps :: LabeledEnvOps Foo e eff)
-
-  withOps envOps comp = let ?labeledEnvOps = envOps in comp
-  captureOps = ?labeledEnvOps
-
 envTests :: TestTree
 envTests = testGroup "EnvEff Tests"
   [ envOpsTest
