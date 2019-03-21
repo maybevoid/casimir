@@ -16,70 +16,57 @@ taggedTests = testGroup "TaggedEff Tests"
 data Foo where
 data Bar where
 
-type FooEnvEff e = TaggedEff Foo (EnvEff e)
-type FooEnvOps e eff = TaggedOps Foo (EnvOps e) eff
-type FooEnvCoOp e r = TaggedCoOp Foo (EnvCoOp e) r
-type FooEnvConstraint e eff = (?fooEnvOps :: FooEnvOps e eff)
+instance EffOps (TaggedEnvEff Foo e) where
+  type OpsConstraint (TaggedEnvEff Foo e) eff
+    = (?fooEnvOps :: TaggedEnvOps Foo e eff)
 
-instance EffOps (FooEnvEff e) where
-  type OpsConstraint (FooEnvEff e) eff = FooEnvConstraint e eff
+  withOps ops comp
+    = let ?fooEnvOps = ops in comp
 
-  withOps ops comp = let ?fooEnvOps = ops in comp
   captureOps = ?fooEnvOps
 
-type BarEnvEff e = TaggedEff Bar (EnvEff e)
-type BarEnvOps e eff = TaggedOps Bar (EnvOps e) eff
-type BarEnvCoOp e r = TaggedCoOp Bar (EnvCoOp e) r
-type BarEnvConstraint e eff = (?barEnvOps :: BarEnvOps e eff)
+instance EffOps (TaggedEnvEff Bar e) where
+  type OpsConstraint (TaggedEnvEff Bar e) eff
+    = (?barEnvOps :: TaggedEnvOps Bar e eff)
 
-instance EffOps (BarEnvEff e) where
-  type OpsConstraint (BarEnvEff e) eff = BarEnvConstraint e eff
+  withOps ops comp
+    = let ?barEnvOps = ops in comp
 
-  withOps ops comp = let ?barEnvOps = ops in comp
   captureOps = ?barEnvOps
-
-askFoo
-  :: forall eff e
-   . ( Effect eff
-     , FooEnvConstraint e eff
-     )
-  => eff e
-askFoo = withTag @Foo @(EnvEff e) $ ask
-
-askBar
-  :: forall eff e
-   . ( Effect eff
-     , BarEnvConstraint e eff
-     )
-  => eff e
-askBar = withTag @Bar @(EnvEff e) $ ask
 
 comp1
   :: forall eff
    . ( Effect eff
-     , FooEnvConstraint String eff
-     , BarEnvConstraint String eff
+     , OpsConstraint (TaggedEnvEff Foo String) eff
+     , OpsConstraint (TaggedEnvEff Bar String) eff
      )
   => eff String
 comp1 = do
-  fooVal <- askFoo
-  barVal <- askBar
+  fooVal <- askTag @Foo
+  barVal <- askTag @Bar
   return $ fooVal ++ " " ++ barVal
 
 fooOps
   :: forall eff . (Effect eff)
-  => FooEnvOps String eff
-fooOps = TaggedOps $ mkEnvOps "foo"
+  => TaggedEnvOps Foo String eff
+fooOps = mkTaggedEnvOps "foo"
 
 barOps
   :: forall eff . (Effect eff)
-  => BarEnvOps String eff
-barOps = TaggedOps $ mkEnvOps "bar"
+  => TaggedEnvOps Bar String eff
+barOps = mkTaggedEnvOps "bar"
 
 fooBarOps
   :: forall eff . (Effect eff)
-  => Operation (Union (FooEnvEff String) (BarEnvEff String)) eff
-fooBarOps = UnionOps fooOps barOps
+  => Operation
+      (Union
+        (TaggedEnvEff Foo String)
+        (Union
+          (EnvEff String)
+          (TaggedEnvEff Bar String)))
+      eff
+fooBarOps = UnionOps fooOps $
+  UnionOps (mkEnvOps "default") barOps
 
 res1 :: String
 res1 = runIdentity $ withOps fooBarOps comp1
