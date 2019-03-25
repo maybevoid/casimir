@@ -5,6 +5,8 @@ module Control.Effect.Ops
   , module Control.Effect.Ops.State
   , module Control.Effect.Ops.Decide
   , module Control.Effect.Ops.Exception
+  , module Control.Effect.Ops.Log
+  , module Control.Effect.Ops.Async
   )
 where
   import Control.Effect.Ops.Env
@@ -12,3 +14,5 @@ where
   import Control.Effect.Ops.State
   import Control.Effect.Ops.Decide
   import Control.Effect.Ops.Exception
+  import Control.Effect.Ops.Log
+  import Control.Effect.Ops.Async

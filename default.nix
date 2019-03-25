@@ -1,4 +1,4 @@
-{ mkDerivation, base, comonad, criterion, free, hpack, mtl
+{ mkDerivation, async, base, comonad, criterion, free, hpack, mtl
 , natural-transformation, QuickCheck, stdenv, stm, tasty
 , tasty-hunit, tasty-quickcheck, transformers
 }:
@@ -9,16 +9,16 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base comonad free mtl natural-transformation stm transformers
+    async base comonad free mtl natural-transformation stm transformers
   ];
   libraryToolDepends = [ hpack ];
   executableHaskellDepends = [
-    base comonad criterion free mtl natural-transformation stm
+    async base comonad criterion free mtl natural-transformation stm
     transformers
   ];
   testHaskellDepends = [
-    base comonad free mtl natural-transformation QuickCheck stm tasty
-    tasty-hunit tasty-quickcheck transformers
+    async base comonad free mtl natural-transformation QuickCheck stm
+    tasty tasty-hunit tasty-quickcheck transformers
   ];
   preConfigure = "hpack";
   description = "Demo effects";

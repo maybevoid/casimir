@@ -83,6 +83,14 @@ tryIo m = do
     Left err -> raise err
     Right val -> return val
 
+tryIoHandler
+  :: forall e eff
+   . (Effect eff, Ex.Exception e)
+  => Handler (Union (ExceptionEff e) IoEff) IoEff eff eff
+tryIoHandler = genericHandler $ IoOps {
+  liftIoOp = tryIo
+}
+
 try
   :: forall free eff e a
    . ( Effect eff

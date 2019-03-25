@@ -15,6 +15,7 @@ dependencies:
   - mtl
   - stm
   - free
+  - async
   - comonad
   - transformers
   - natural-transformation
