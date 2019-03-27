@@ -21,6 +21,6 @@ mkDerivation {
     tasty tasty-hunit tasty-quickcheck transformers
   ];
   preConfigure = "hpack";
-  description = "Demo effects";
+  description = "Algebraic Effects in Haskell using Implicit Parameters";
   license = stdenv.lib.licenses.bsd3;
 }

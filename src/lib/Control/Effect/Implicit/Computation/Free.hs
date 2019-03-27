@@ -1,4 +1,3 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Control.Effect.Implicit.Computation.Free
 where
@@ -7,6 +6,8 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation.Class
 import Control.Effect.Implicit.Computation.Value
 import Control.Effect.Implicit.Computation.Pipeline
+
+import Control.Effect.Implicit.Free.FreeEff
 
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler

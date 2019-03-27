@@ -1,6 +1,7 @@
-{-# LANGUAGE TypeFamilyDependencies #-}
 
 module Control.Effect.Implicit.Base.FreeOps
+  ( FreeOps (..)
+  )
 where
 
 import Data.Kind

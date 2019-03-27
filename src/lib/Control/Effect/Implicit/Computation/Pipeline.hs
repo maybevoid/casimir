@@ -1,4 +1,3 @@
-{-# LANGUAGE QuantifiedConstraints #-}
 
 module Control.Effect.Implicit.Computation.Pipeline
 where

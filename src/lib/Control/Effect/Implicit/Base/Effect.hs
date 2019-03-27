@@ -1,11 +1,9 @@
 
 module Control.Effect.Implicit.Base.Effect
-  ( type (~>)
-  , Effect
+  ( Effect
   )
 where
 
-import Control.Natural (type (~>))
-
+-- | Type alias to `Monad`
 type Effect eff = Monad eff
 

@@ -1,8 +1,14 @@
 
 module Control.Effect.Implicit.Base.LiftEff
+  ( LiftEff (..)
+  , mkLiftEff
+  , idLift
+  , joinLift
+  )
 where
 
 import Data.Kind
+import Control.Natural (type (~>))
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor

@@ -1,9 +1,12 @@
-{-# LANGUAGE TypeFamilyDependencies #-}
 
 module Control.Effect.Implicit.Base.EffFunctor
+  ( EffFunctor (..)
+  )
 where
 
 import Data.Kind
+import Control.Natural (type (~>))
+
 import Control.Effect.Implicit.Base.Effect
 
 class EffFunctor (comp :: (Type -> Type) -> Type) where

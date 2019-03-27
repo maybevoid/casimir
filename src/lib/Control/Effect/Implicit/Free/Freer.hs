@@ -1,14 +1,14 @@
 
 module Control.Effect.Implicit.Free.Freer
-  ( FreerMonad
-  , FreerF
-  , liftFreerOps
+  ( FreerMonad (..)
+  , FreerF (..)
   )
 where
 
 import Control.Monad
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free.FreeEff
 
 data FreerF ops a b where
   PureF

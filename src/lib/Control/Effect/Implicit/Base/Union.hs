@@ -1,5 +1,13 @@
 
 module Control.Effect.Implicit.Base.Union
+  ( Union
+  , UnionOps (..)
+  , UnionCoOp (..)
+  , (∪)
+  , type (∪)
+  , leftOps
+  , rightOps
+  )
 where
 
 import Data.Kind

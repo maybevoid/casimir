@@ -1,7 +1,13 @@
-{-# LANGUAGE QuantifiedConstraints #-}
-{-# LANGUAGE TypeFamilyDependencies #-}
 
-module Control.Effect.Implicit.Base.FreeEff
+module Control.Effect.Implicit.Free.FreeEff
+  ( FreeEff (..)
+  , FreerEff (..)
+  , CoOpHandler (..)
+  , FreerCoOpHandler (..)
+  , GenericCoOpHandler (..)
+  , ContextualHandler (..)
+  , freeLiftEff
+  )
 where
 
 import Control.Effect.Implicit.Base.Effect

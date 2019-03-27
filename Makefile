@@ -8,6 +8,10 @@ repl:
 	nix-shell --pure shell.nix --run \
 		"cabal new-repl --write-ghc-environment-files never lib:implicit-effects"
 
+doc:
+	nix-shell --pure shell.nix --run \
+		"cabal new-haddock"
+
 benchmark:
 	nix-shell --pure shell.nix --run \
 		"cabal new-run --write-ghc-environment-files never exe:implicit-effects-benchmark \

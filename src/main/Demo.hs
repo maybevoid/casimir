@@ -237,7 +237,7 @@ decideComp3 = bindHandlerWithCast
 decideComp4 :: IO [Int]
 decideComp4 =
   withCoOpHandler @ChurchMonad nonDetHandler1 $
-    returnVal $ runComp decideComp3 churchLiftEff captureOps
+    returnVal $ runComp decideComp3 freeLiftEff captureOps
 
 decideComp5
   :: forall eff .

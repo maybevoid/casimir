@@ -1,12 +1,14 @@
+{-# OPTIONS_HADDOCK hide #-}
 
 module Control.Effect.Implicit.Free.Church
   ( ChurchMonad (..)
-  , churchLiftEff
   )
 where
 
 import Control.Monad (ap)
+
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free.FreeEff
 
 newtype ChurchMonad ops eff a = ChurchMonad {
   runChurchMonad :: forall r . CoOpHandler ops a r eff -> eff r
@@ -51,15 +53,6 @@ liftChurchMonad mx = ChurchMonad $ \handler -> do
   x <- mx
   handleReturn handler x
 {-# INLINE liftChurchMonad #-}
-
-churchLiftEff
-  :: forall ops eff
-   . ( Effect eff
-     , FreeOps ops
-     )
-  => LiftEff eff (ChurchMonad ops eff)
-churchLiftEff = mkLiftEff liftChurchMonad
-{-# INLINE churchLiftEff #-}
 
 liftChurchOps
   :: forall ops eff a .

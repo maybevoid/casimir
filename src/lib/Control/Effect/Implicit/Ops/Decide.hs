@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
 
 module Control.Effect.Implicit.Ops.Decide
 where

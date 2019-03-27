@@ -1,6 +1,7 @@
-{-# LANGUAGE TypeFamilyDependencies #-}
 
 module Control.Effect.Implicit.Base.EffOps
+  ( EffOps (..)
+  )
 where
 
 import Data.Kind

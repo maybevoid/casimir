@@ -1,4 +1,3 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Control.Effect.Implicit.Computation.Cast
 

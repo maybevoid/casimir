@@ -1,6 +1,6 @@
 name:                implicit-effects
 version:             0.1.0.0
-synopsis:            Demo effects
+synopsis:            Algebraic Effects in Haskell using Implicit Parameters
 
 license:             BSD-3-Clause
 license-file:        LICENSE
@@ -42,7 +42,9 @@ default-extensions:
   - DerivingStrategies
   - AllowAmbiguousTypes
   - ScopedTypeVariables
+  - QuantifiedConstraints
   - MultiParamTypeClasses
+  - TypeFamilyDependencies
   - GeneralizedNewtypeDeriving
 
 library:

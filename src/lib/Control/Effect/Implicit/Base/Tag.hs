@@ -1,6 +1,13 @@
 {-# LANGUAGE PolyKinds #-}
 
 module Control.Effect.Implicit.Base.Tag
+  ( TaggedEff
+  , TaggedOps (..)
+  , TaggedCoOp (..)
+  , untagOps
+  , untagCoOp
+  , withTag
+  )
 where
 
 import Data.Kind
@@ -10,7 +17,7 @@ import Control.Effect.Implicit.Base.EffFunctor
 import Control.Effect.Implicit.Base.FreeOps
 import Control.Effect.Implicit.Base.EffOps
 
-data TaggedEff l ops where
+data TaggedEff l ops
 
 data TaggedOps
   :: forall k

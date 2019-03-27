@@ -5,8 +5,10 @@ import Data.Void
 import qualified Control.Exception as Ex
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Ops.Io
+import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Computation
+
+import Control.Effect.Implicit.Ops.Io
 
 data ExceptionEff e
 

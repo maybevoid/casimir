@@ -10,6 +10,7 @@ import Control.Monad.Trans.Free
 import Control.Monad.Trans.Class (lift)
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free.FreeEff
 
 newtype FreeMonad ops eff a = FreeMonad {
   unFreeT ::FreeT (CoOperation ops) eff a
