@@ -6,7 +6,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Control.Monad.Identity
 
-import Control.Effect
+import Control.Effect.Implicit
 
 taggedTests :: TestTree
 taggedTests = testGroup "TaggedEff Tests"

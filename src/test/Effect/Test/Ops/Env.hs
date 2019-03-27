@@ -3,7 +3,7 @@ module Effect.Test.Ops.Env where
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import Control.Effect
+import Control.Effect.Implicit
 
 envTests :: TestTree
 envTests = testGroup "EnvEff Tests"

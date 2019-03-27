@@ -2,7 +2,7 @@
 module Benchmark.State.HandleFree
 where
 
-import Control.Effect
+import Control.Effect.Implicit
 import Benchmark.State.Base
 
 handleFreeComp

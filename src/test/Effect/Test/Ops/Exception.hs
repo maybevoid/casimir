@@ -5,7 +5,7 @@ where
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import Control.Effect
+import Control.Effect.Implicit
 
 exceptionTests :: TestTree
 exceptionTests = testGroup "Exception Tests"

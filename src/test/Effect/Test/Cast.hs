@@ -8,7 +8,7 @@ import Control.Monad.Identity
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import Control.Effect
+import Control.Effect.Implicit
 
 castTests :: TestTree
 castTests = testGroup "Cast Tests"

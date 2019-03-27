@@ -8,7 +8,7 @@ import Test.Tasty.HUnit
 import Control.Monad.Trans.Free
 import Control.Monad.Trans.Class
 
-import Control.Effect
+import Control.Effect.Implicit
   hiding (awaitOp, AwaitOp, await)
 
 data YieldEff a where

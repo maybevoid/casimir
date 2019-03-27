@@ -9,7 +9,7 @@ import Control.Monad.Identity
 import Control.Monad.Trans.State.Strict
   (StateT, runStateT)
 
-import Control.Effect
+import Control.Effect.Implicit
 
 stateTests :: TestTree
 stateTests = testGroup "StateEff Tests"

@@ -5,7 +5,7 @@ module Demo where
 import Data.IORef
 import Control.Monad.Identity
 
-import Control.Effect
+import Control.Effect.Implicit
 
 envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvEff Int) eff
 envHandler1 = mkEnvHandler 3

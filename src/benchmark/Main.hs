@@ -7,7 +7,7 @@ import Control.Monad.Identity
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict
 
-import Control.Effect
+import Control.Effect.Implicit
 
 import Benchmark.State
 
@@ -53,7 +53,7 @@ main = defaultMain [
         whnf evalStateTComp
         stateTHandlerComp
 
-    , bench "with CoOp Handler on CurchMonad"  $
+    , bench "with CoOp Handler on ChurchMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @ChurchMonad)
     , bench "with CoOp Handler on FreeMonad"  $

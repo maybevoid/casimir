@@ -4,7 +4,7 @@ where
 
 import Control.Monad.Trans.State.Strict (StateT)
 
-import Control.Effect
+import Control.Effect.Implicit
 import Benchmark.State.Base
 
 stateHComp1

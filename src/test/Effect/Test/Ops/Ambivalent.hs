@@ -7,7 +7,7 @@ import Control.Monad.Identity
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import Control.Effect
+import Control.Effect.Implicit
 
 ambivalentTests :: TestTree
 ambivalentTests = testGroup "Ambivalent Tests"

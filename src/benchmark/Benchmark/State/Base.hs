@@ -2,7 +2,7 @@
 module Benchmark.State.Base
 where
 
-import Control.Effect
+import Control.Effect.Implicit
 
 newtype CoState s eff a = CoState (s -> eff a)
 

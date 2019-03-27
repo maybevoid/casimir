@@ -11,7 +11,7 @@ where
 import Control.Monad.Identity
 import Control.Monad.Trans.Reader (ReaderT)
 
-import Control.Effect
+import Control.Effect.Implicit
 import Benchmark.State.Base
 
 stateTComp1 :: forall eff . (Effect eff)
