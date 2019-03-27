@@ -1,16 +1,21 @@
 
 module Control.Effect.Implicit.Computation.Value
+  ( Return (..)
+  , GenericReturn
+  , GenericComputation
+  , IdentityComputation
+  , returnComputation
+  , genericComputation
+  , genericReturn
+  , runIdentityComp
+  , execComp
+  )
 where
 
-import Data.Kind
 import Control.Monad.Identity (Identity (..))
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation.Class
-
-newtype PureVal a (eff :: Type -> Type) = PureVal {
-  pureVal :: a
-}
 
 newtype Return a eff = Return {
   returnVal :: eff a
@@ -19,22 +24,13 @@ newtype Return a eff = Return {
 instance EffFunctor (Return a) where
   effmap lifter (Return mx) = Return $ lifter mx
 
-type PureComputation a =
-  forall eff . Computation NoEff (PureVal a) eff
-
-type ReturnComputation ops a eff =
-  Computation ops (Return a) eff
-
 type GenericReturn ops a =
-  forall eff . (Effect eff) => ReturnComputation ops a eff
+  forall eff . (Effect eff) => Computation ops (Return a) eff
 
 type GenericComputation ops comp =
   forall eff . (Effect eff) => Computation ops comp eff
 
-type IdentityComputation a = ReturnComputation NoEff a Identity
-
-pureComputation :: forall a . a -> PureComputation a
-pureComputation x = Computation $ \ _ _ -> PureVal x
+type IdentityComputation a = Computation NoEff (Return a) Identity
 
 returnComputation
   :: forall ops a eff1 .
@@ -45,7 +41,7 @@ returnComputation
       (Effect eff2, OpsConstraint ops eff2)
       => LiftEff eff1 eff2
       -> eff2 a)
-  -> ReturnComputation ops a eff1
+  -> Computation ops (Return a) eff1
 returnComputation comp1 = Computation $
   \ lift12 ops ->
     withOps ops $ Return $ comp1 lift12
@@ -57,7 +53,7 @@ genericComputation
   => (forall eff .
       (Effect eff, OpsConstraint ops eff)
       => comp eff)
-  -> (forall eff .Computation ops comp eff)
+  -> (forall eff . (Effect eff) => Computation ops comp eff)
 genericComputation comp = Computation $
   \ _ ops -> withOps ops comp
 

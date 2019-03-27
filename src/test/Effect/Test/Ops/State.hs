@@ -80,7 +80,7 @@ stateTPipelineTest = testCase "StateT pipeline test" $
 ioStateHandler
   :: forall eff s .
   (Effect eff)
-  => FlatHandler (IoEff ∪ (EnvEff (IORef s))) (StateEff s) eff
+  => Handler (IoEff ∪ (EnvEff (IORef s))) (StateEff s) eff eff
 ioStateHandler = genericHandler StateOps {
   getOp =
    do
@@ -130,10 +130,10 @@ stateCoOpHandler
   :: forall eff s a .
   (Effect eff)
   => CoOpHandler (StateEff s) a (CoState s eff a) eff
-stateCoOpHandler = CoOpHandler handleReturn' handleOps'
+stateCoOpHandler = CoOpHandler handleReturn handleOps'
  where
-  handleReturn' :: a -> eff (CoState s eff a)
-  handleReturn' x = return $ CoState $ \_ -> return x
+  handleReturn :: a -> eff (CoState s eff a)
+  handleReturn x = return $ CoState $ \_ -> return x
 
   handleOps' :: StateCoOp s (eff (CoState s eff a)) -> eff (CoState s eff a)
   handleOps' (GetOp cont1) = return $ CoState $

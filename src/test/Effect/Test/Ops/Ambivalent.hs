@@ -83,11 +83,11 @@ dfsHandler
   :: forall a r eff
    . (Effect eff)
   => CoOpHandler (AmbEff a) r (Maybe r) eff
-dfsHandler = CoOpHandler handleReturn' handleCoOp'
+dfsHandler = CoOpHandler handleReturn handleCoOp
  where
-  handleReturn' x = return $ Just x
+  handleReturn x = return $ Just x
 
-  handleCoOp' (SelectOp choices cont) = tryChoices choices cont
+  handleCoOp (SelectOp choices cont) = tryChoices choices cont
 
   tryChoices [] _ = return Nothing
   tryChoices (x:xs) cont = do

@@ -5,11 +5,17 @@ module Control.Effect.Implicit.Free
   , FreeMonad (..)
   , GenericCoOpHandler (..)
   , ContextualHandler (..)
-  , freeLiftEff
   , FreerCoOpHandler (..)
   , FreerEff (..)
   , FreerMonad (..)
   , FreerF (..)
+  , freeLiftEff
+  , withCoOpHandler
+  , withFreerCoOpHandler
+  , withContextualCoOpHandler
+  , coopHandlerToPipeline
+  , genericCoOpHandlerToPipeline
+  , contextualHandlerToPipeline
   )
 where
 
@@ -17,3 +23,4 @@ import Control.Effect.Implicit.Free.FreeEff
 import Control.Effect.Implicit.Free.Church
 import Control.Effect.Implicit.Free.Free
 import Control.Effect.Implicit.Free.Freer
+import Control.Effect.Implicit.Free.Handler

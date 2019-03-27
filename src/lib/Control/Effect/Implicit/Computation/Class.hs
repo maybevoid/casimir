@@ -1,5 +1,8 @@
 
 module Control.Effect.Implicit.Computation.Class
+  ( Computation (..)
+  , Handler (..)
+  )
 where
 
 import Control.Effect.Implicit.Base

@@ -51,7 +51,7 @@ handleFreeMonad
   => CoOpHandler ops a r eff
   -> FreeMonad ops eff a
   -> eff r
-handleFreeMonad handler (FreeMonad m) = handleFree' m
+handleFreeMonad (CoOpHandler handleReturn handleCoOp) (FreeMonad m) = handleFree' m
  where
   handleFree'
    :: FreeT (CoOperation ops) eff a
@@ -61,6 +61,6 @@ handleFreeMonad handler (FreeMonad m) = handleFree' m
   handleComp
     :: FreeF (CoOperation ops) a (FreeT (CoOperation ops) eff a)
     -> eff r
-  handleComp (Pure x) = handleReturn handler x
-  handleComp (Free ops) = handleCoOp handler $ fmap handleFree' ops
+  handleComp (Pure x) = handleReturn x
+  handleComp (Free ops) = handleCoOp $ fmap handleFree' ops
 {-# INLINE handleFreeMonad #-}

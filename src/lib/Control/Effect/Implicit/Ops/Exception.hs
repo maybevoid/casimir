@@ -56,19 +56,19 @@ mkExceptionCoOpHandler
    . (Effect eff)
   => (e -> eff a)
   -> CoOpHandler (ExceptionEff e) a a eff
-mkExceptionCoOpHandler handleException = CoOpHandler {
-  handleReturn = return,
-  handleCoOp = \(RaiseOp e) -> handleException e
-}
+mkExceptionCoOpHandler handleException =
+  CoOpHandler return $
+    \(RaiseOp e) -> handleException e
 
 exceptionToEitherHandler
   :: forall eff e a
    . (Effect eff)
   => CoOpHandler (ExceptionEff e) a (Either e a) eff
-exceptionToEitherHandler = CoOpHandler {
-  handleReturn = \x -> return $ Right x,
-  handleCoOp = \(RaiseOp e) -> return $ Left e
-}
+exceptionToEitherHandler =
+  CoOpHandler handleReturn handleCoOp
+   where
+    handleReturn x = return $ Right x
+    handleCoOp (RaiseOp e) = return $ Left e
 
 tryIo
   :: forall eff e a .

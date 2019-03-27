@@ -1,5 +1,7 @@
 
 module Control.Effect.Implicit.Computation.Lift
+  ( liftComputation
+  )
 where
 
 import Control.Effect.Implicit.Base

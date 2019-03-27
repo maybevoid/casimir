@@ -15,8 +15,8 @@ import Control.Effect.Implicit.Base.LiftEff
 import Control.Effect.Implicit.Base.FreeOps
 
 data CoOpHandler handler a r eff = CoOpHandler {
-  handleReturn :: a -> eff r,
-  handleCoOp :: CoOperation handler (eff r) -> eff r
+  handleFreeReturn :: a -> eff r,
+  handleFreeCoOp :: CoOperation handler (eff r) -> eff r
 }
 
 data FreerCoOpHandler handler a r eff = FreerCoOpHandler {

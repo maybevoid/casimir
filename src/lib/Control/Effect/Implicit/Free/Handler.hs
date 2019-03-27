@@ -1,11 +1,16 @@
 
-module Control.Effect.Implicit.Computation.Free
+module Control.Effect.Implicit.Free.Handler
+  ( withCoOpHandler
+  , withFreerCoOpHandler
+  , withContextualCoOpHandler
+  , coopHandlerToPipeline
+  , genericCoOpHandlerToPipeline
+  , contextualHandlerToPipeline
+  )
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation.Class
-import Control.Effect.Implicit.Computation.Value
-import Control.Effect.Implicit.Computation.Pipeline
+import Control.Effect.Implicit.Computation
 
 import Control.Effect.Implicit.Free.FreeEff
 

@@ -1,21 +1,27 @@
 
 module Control.Effect.Implicit.Computation.Handler
+  ( BaseHandler
+  , GenericHandler
+  , mkHandler
+  , withHandler
+  , baseHandler
+  , genericHandler
+  , bindExactHandler
+  , composeExactHandlers
+  , castHandler
+  , composeHandlersWithCast
+  , bindHandlerWithCast
+  )
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Computation.Class
+import Control.Effect.Implicit.Computation.Cast
 
-type FlatHandler ops handler eff = Handler ops handler eff eff
-
-type BaseHandler handler eff = FlatHandler NoEff handler eff
+type BaseHandler handler eff = Handler NoEff handler eff eff
 
 type GenericHandler ops handler
-  = forall eff . (Effect eff) => FlatHandler ops handler eff
-
-type FreeHandler handler
-  = forall eff . (Effect eff)
-    => BaseHandler handler (FreeMonad handler eff)
+  = forall eff . (Effect eff) => Handler ops handler eff eff
 
 mkHandler
   :: forall ops handler eff1 eff2 .
@@ -51,12 +57,6 @@ genericHandler
   -> GenericHandler ops handler
 genericHandler handler = Handler idLift $ Computation $
   \ _ ops -> withOps ops $ handler
-
-freeHandler
-  :: forall handler .
-  (EffOps handler)
-  => FreeHandler handler
-freeHandler = baseHandler $ freeOps
 
 bindExactHandler
   :: forall ops handler eff1 eff2 comp .
@@ -131,3 +131,60 @@ withHandler
 withHandler (Handler _ handler) comp =
   withOps (runComp handler idLift captureOps) comp
 {-# INLINE withHandler #-}
+
+castHandler
+  :: forall ops1 ops2 handler eff1 eff2 .
+  ( Effect eff1
+  , Effect eff2
+  , EffOps ops1
+  , EffOps ops2
+  )
+  => ops1 ⊇ ops2
+  -> Handler ops2 handler eff1 eff2
+  -> Handler ops1 handler eff1 eff2
+castHandler caster (Handler lift12 handler)
+  = Handler lift12 $ castComputation caster handler
+
+composeHandlersWithCast
+  :: forall
+    ops1 ops2 ops3
+    handler1 handler2
+    eff1 eff2 eff3 .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps handler1
+  , EffOps handler2
+  , Effect eff1
+  , Effect eff2
+  , Effect eff3
+  )
+  => Handler ops1 handler1 eff1 eff2
+  -> Handler ops2 handler2 eff2 eff3
+  -> ops3 ⊇ ops1
+  -> (handler1 ∪ ops3) ⊇ ops2
+  -> Handler ops3 (handler1 ∪ handler2) eff1 eff3
+composeHandlersWithCast handler1 handler2 cast31 cast32 =
+  composeExactHandlers
+    (castHandler cast31 handler1) $
+    castHandler cast32 handler2
+
+bindHandlerWithCast
+  :: forall ops3 ops1 ops2 handler eff1 eff2 r .
+  ( EffOps ops1
+  , EffOps ops2
+  , EffOps ops3
+  , EffOps handler
+  , Effect eff1
+  , Effect eff2
+  )
+  => Handler ops1 handler eff1 eff2
+  -> Computation ops2 r eff2
+  -> ops3 ⊇ ops1
+  -> (handler ∪ ops3) ⊇ ops2
+  -> Computation ops3 r eff1
+bindHandlerWithCast handler comp cast31 cast32 =
+  bindExactHandler
+    (castHandler cast31 handler) $
+    castComputation cast32 comp
+{-# INLINE bindHandlerWithCast #-}

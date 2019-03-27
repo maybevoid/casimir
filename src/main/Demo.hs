@@ -32,8 +32,11 @@ readerComp1 = do
 readerComp2 :: Identity Int
 readerComp2 = withHandler envHandler1 readerComp1
 
-envHandler4 :: FreeHandler (EnvEff Int)
-envHandler4 = freeHandler
+envHandler4
+  :: forall free eff
+   . (Effect eff, FreeEff free)
+  => BaseHandler (EnvEff Int) (free (EnvEff Int) eff)
+envHandler4 = baseHandler $ freeOps @free
 
 readerComp3 :: FreeMonad (EnvEff Int) Identity Int
 readerComp3 = withHandler envHandler4 readerComp1
@@ -52,9 +55,9 @@ readerComp6 = runIdentityComp readerComp5
 
 readerComp7 :: forall eff .
   (Effect eff)
-  => ReturnComputation
+  => Computation
     (Union NoEff (Union (EnvEff Int) NoEff))
-    Int
+    (Return Int)
     eff
 readerComp7 = castComputation cast readerComp4
 
@@ -81,13 +84,13 @@ readerComp11 = runIdentityComp $
     cast
     cast
 
-readerComp12 :: forall eff . (Effect eff) => ReturnComputation NoEff Int eff
+readerComp12 :: forall eff . (Effect eff) => Computation NoEff (Return Int) eff
 readerComp12 = bindHandlerWithCast
   envHandler2 readerComp4
   cast
   cast
 
-readerComp13 :: forall eff . (Effect eff) => ReturnComputation NoEff Int eff
+readerComp13 :: forall eff . (Effect eff) => Computation NoEff (Return Int) eff
 readerComp13 = bindHandlerWithCast
   envHandler1 readerComp12
   cast
@@ -187,13 +190,13 @@ nonDetHandler1
   :: forall eff .
   (Effect eff)
   => CoOpHandler (DecideEff Bool) Int [Int] eff
-nonDetHandler1 = CoOpHandler {
-  handleReturn = \x -> return [x],
-  handleCoOp = \(DecideOp x y cont) -> do
+nonDetHandler1 = CoOpHandler handleReturn handleCoOp
+ where
+  handleReturn x = return [x]
+  handleCoOp (DecideOp x y cont) = do
     res1 <- cont x
     res2 <- cont y
     return $ res1 ++ res2
-}
 
 nonDetHandler2
   :: forall eff .
@@ -228,7 +231,7 @@ decideComp2
   => Computation (Union IoEff (DecideEff Bool)) (Return Int) eff
 decideComp2 = genericComputation $ Return decideComp1
 
-decideComp3 :: ReturnComputation (DecideEff Bool) Int IO
+decideComp3 :: Computation (DecideEff Bool) (Return Int) IO
 decideComp3 = bindHandlerWithCast
   ioHandler decideComp2
   cast

@@ -49,9 +49,11 @@ liftChurchMonad
   )
   => eff a
   -> ChurchMonad ops eff a
-liftChurchMonad mx = ChurchMonad $ \handler -> do
-  x <- mx
-  handleReturn handler x
+liftChurchMonad mx = ChurchMonad $
+  \(CoOpHandler handleReturn _) ->
+   do
+    x <- mx
+    handleReturn x
 {-# INLINE liftChurchMonad #-}
 
 liftChurchOps
@@ -64,7 +66,8 @@ liftChurchOps
 liftChurchOps ops = ChurchMonad $ cont
  where
   cont :: forall r . CoOpHandler ops a r eff -> eff r
-  cont handler = handleCoOp handler $ fmap (handleReturn handler) ops
+  cont (CoOpHandler handleReturn handleCoOp) =
+    handleCoOp $ fmap handleReturn ops
 {-# INLINE liftChurchOps #-}
 
 churchOps
@@ -85,10 +88,10 @@ mapChurchMonad
 mapChurchMonad f (ChurchMonad m1) = ChurchMonad m2
  where
   m2 :: forall r . CoOpHandler ops b r eff -> eff r
-  m2 handler = m1 $ CoOpHandler {
-    handleReturn = \x -> handleReturn handler (f x),
-    handleCoOp = handleCoOp handler
-  }
+  m2 (CoOpHandler handleReturn handleCoOp) =
+    m1 $ CoOpHandler
+      (\x -> handleReturn (f x))
+      handleCoOp
 {-# INLINE mapChurchMonad #-}
 
 bindChurchMonad
@@ -102,13 +105,13 @@ bindChurchMonad
 bindChurchMonad (ChurchMonad m1) cont1 = ChurchMonad m2
  where
   m2 :: forall r . CoOpHandler ops b r eff -> eff r
-  m2 handler1 = m1 handler2
-   where
-    handler2 :: CoOpHandler ops a r eff
-    handler2 = CoOpHandler {
-      handleReturn = \x -> runChurchMonad (cont1 x) handler1,
-      handleCoOp = handleCoOp handler1
-    }
+  m2 handler1@(CoOpHandler _ handleCoOp) =
+    m1 handler2
+     where
+      handler2 :: CoOpHandler ops a r eff
+      handler2 = CoOpHandler
+        (\x -> runChurchMonad (cont1 x) handler1)
+        handleCoOp
 {-# INLINE bindChurchMonad #-}
 
 liftPure
@@ -118,5 +121,7 @@ liftPure
   )
   => a
   -> ChurchMonad ops eff a
-liftPure x = ChurchMonad $ \handler -> handleReturn handler x
+liftPure x = ChurchMonad $
+  \(CoOpHandler handleReturn _) ->
+    handleReturn x
 {-# INLINE liftPure #-}

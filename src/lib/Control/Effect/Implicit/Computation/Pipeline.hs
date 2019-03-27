@@ -1,10 +1,23 @@
 
 module Control.Effect.Implicit.Computation.Pipeline
+  ( Pipeline (..)
+  , TransformerHandler (..)
+  , SimplePipeline
+  , GenericPipeline
+  , handlerToPipeline
+  , transformerPipeline
+  , castPipelineOps
+  , castPipelineHandler
+  , composePipelines
+  , runPipelineWithCast
+  , composePipelinesWithCast
+  )
 where
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation.Class
 import Control.Effect.Implicit.Computation.Cast
+import Control.Effect.Implicit.Computation.Handler
 
 newtype Pipeline ops1 handler eff1 eff2 comp1 comp2
   = Pipeline {
@@ -84,7 +97,7 @@ transformerPipeline handler1 = Pipeline pipeline
       comp3 = runComp comp1 (joinLift lift12 liftT) $
         UnionOps coopHandler $ applyLift liftT ops2
 
-castPipeline
+castPipelineOps
   :: forall ops1 ops2 handler eff1 eff2 comp1 comp2 .
   ( Effect eff1
   , Effect eff2
@@ -95,7 +108,7 @@ castPipeline
   => ops2 ⊇ ops1
   -> Pipeline ops1 handler eff1 eff2 comp1 comp2
   -> Pipeline ops2 handler eff1 eff2 comp1 comp2
-castPipeline cast21 pipeline1 = Pipeline pipeline2
+castPipelineOps cast21 pipeline1 = Pipeline pipeline2
  where
   pipeline2 :: forall ops3 .
     (EffOps ops3)
@@ -189,7 +202,7 @@ runPipelineWithCast pipeline1 comp1 cast1 cast2
   = castComputation cast $ runPipeline pipeline2 comp2
   where
    pipeline2 :: Pipeline ops3 handler eff1 eff2 comp1 comp2
-   pipeline2 = castPipeline cast1 pipeline1
+   pipeline2 = castPipelineOps cast1 pipeline1
 
    comp2 :: Computation (handler ∪ ops3) comp1 eff1
    comp2 = castComputation cast2 comp1
@@ -214,11 +227,11 @@ composePipelinesWithCast
   -> Pipeline ops3 handler3 eff1 eff3 comp1 comp3
 composePipelinesWithCast pipeline1 pipeline2 cast1 cast2 cast3
   = castPipelineHandler cast3 $
-    castPipeline cast $
+    castPipelineOps cast $
     composePipelines pipeline1' pipeline2'
   where
     pipeline1' :: Pipeline (handler2 ∪ ops3) handler1 eff1 eff2 comp1 comp2
-    pipeline1' = castPipeline cast1 pipeline1
+    pipeline1' = castPipelineOps cast1 pipeline1
 
     pipeline2' :: Pipeline ops3 handler2 eff2 eff3 comp2 comp3
-    pipeline2' = castPipeline cast2 pipeline2
+    pipeline2' = castPipelineOps cast2 pipeline2
