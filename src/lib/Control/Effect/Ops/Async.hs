@@ -3,13 +3,11 @@ module Control.Effect.Ops.Async
 where
 
 import Data.Kind
-import Control.Monad
-import Control.Monad.Trans.Free
 import Control.Concurrent.Async
 
 import Control.Effect.Base
-import Control.Effect.Free
 import Control.Effect.Computation
+
 import Control.Effect.Ops.Io
 
 data AsyncEff (t :: Type -> Type)
@@ -65,52 +63,43 @@ awaitAll
 awaitAll = awaitAllOp captureOps
 
 handleAsync
-  :: forall free eff1 eff2 a t
-   . ( Effect eff1
-     , Effect eff2
+  :: forall free eff a t
+   . ( Effect eff
      , FreeEff free
-     , OpsConstraint IoEff eff2
+     , OpsConstraint IoEff eff
      )
-  => (forall x . eff1 x -> IO x)
-  -> (forall x
-      . (AsyncConstraint t (FreeMonad (AsyncEff t) eff1))
+  => (forall x
+      . (AsyncConstraint t (free (AsyncEff t) IO))
      => t x
-     -> FreeMonad (AsyncEff t) eff1 x)
-  -> ((AsyncConstraint t (free (AsyncEff t) eff2))
-      => free (AsyncEff t) eff2 a)
-  -> eff2 a
-handleAsync toIo taskRunner comp1 = withCoOpHandler @free handler2 comp1
- where
-  handler2 :: CoOpHandler (AsyncEff t) a a eff2
-  handler2 = CoOpHandler return handler3
+     -> free (AsyncEff t) IO x)
+  -> ((AsyncConstraint t (free (AsyncEff t) eff))
+      => free (AsyncEff t) eff a)
+  -> eff a
+handleAsync taskRunner comp1 =
+  withCoOpHandler @free handler2 comp1
    where
-    handler3 :: AsyncCoOp t (eff2 a) -> eff2 a
-    handler3 (AwaitOp task cont) = do
-      x <- liftIo $ handleTask task
-      cont x
-    handler3 (AwaitAllOp tasks cont) = do
-      xs <- liftIo $ mapConcurrently handleTask tasks
-      cont xs
+    handler2 :: CoOpHandler (AsyncEff t) a a eff
+    handler2 = CoOpHandler return handler3
+     where
+      handler3 :: AsyncCoOp t (eff a) -> eff a
+      handler3 (AwaitOp task cont) = do
+        x <- liftIo $ handleTask task
+        cont x
+      handler3 (AwaitAllOp tasks cont) = do
+        xs <- liftIo $ mapConcurrently handleTask tasks
+        cont xs
 
-  handleTask :: forall b . t b -> IO b
-  handleTask task = handleFreeT comp2
-   where
-    comp2 :: FreeT (AsyncCoOp t) eff1 b
-    comp2 = unFreeT $ withOps @(AsyncEff t) freeOps $ taskRunner task
+    handleTask :: forall b . t b -> IO b
+    handleTask task =
+      withCoOpHandler @free handler4 $ taskRunner task
+       where
+        handler4 :: CoOpHandler (AsyncEff t) b b IO
+        handler4 = CoOpHandler return handleAwait
 
-  handleFreeT :: forall b . FreeT (AsyncCoOp t) eff1 b -> IO b
-  handleFreeT m = join $ toIo $ do
-    f <- runFreeT m
-    return $ handleFreeF f
-   where
-    handleFreeF :: FreeF (AsyncCoOp t) b (FreeT (AsyncCoOp t) eff1 b) -> IO b
-    handleFreeF (Pure x) = toIo $ return x
-    handleFreeF (Free coop) = handleAwait coop
-
-    handleAwait :: AsyncCoOp t (FreeT (AsyncCoOp t) eff1 b) -> IO b
-    handleAwait (AwaitOp task cont) = do
-      x <- handleTask task
-      handleFreeT $ cont x
-    handleAwait (AwaitAllOp tasks cont) = do
-      xs <- mapConcurrently handleTask tasks
-      handleFreeT $ cont xs
+        handleAwait :: AsyncCoOp t (IO b) -> IO b
+        handleAwait (AwaitOp task' cont) = do
+          x <- handleTask task'
+          cont x
+        handleAwait (AwaitAllOp tasks cont) = do
+          xs <- mapConcurrently handleTask tasks
+          cont xs

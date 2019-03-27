@@ -68,15 +68,15 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
   pipeline
     :: forall ops2 .
     (EffOps ops2)
-    => Computation (Union handler ops2) (Return a) eff1
-    -> Computation (Union ops1 ops2) (Return b) eff1
+    => Computation (handler ∪ ops2) (Return a) eff1
+    -> Computation (ops1 ∪ ops2) (Return b) eff1
   pipeline comp1 = Computation comp2
    where
     comp2
       :: forall eff2 .
       (Effect eff2)
       => LiftEff eff1 eff2
-      -> Operation (Union ops1 ops2) eff2
+      -> Operation (ops1 ∪ ops2) eff2
       -> Return b eff2
     comp2 lift12 (UnionOps ops1 ops2) = Return comp4
      where
@@ -86,7 +86,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
       comp3 :: free handler eff2 a
       comp3 = returnVal $ runComp comp1
         (joinLift lift12 freeLiftEff)
-        (UnionOps freeOps (effmap liftFree ops2))
+        (freeOps ∪ (effmap liftFree ops2))
 
       comp4 :: eff2 b
       comp4 = handleFree handler2 comp3

@@ -66,7 +66,7 @@ bindExactHandler
   , Effect eff2
   )
   => Handler ops handler eff1 eff2
-  -> Computation (Union handler ops) comp eff2
+  -> Computation (handler ∪ ops) comp eff2
   -> Computation ops comp eff1
 bindExactHandler (Handler lift21 handler1) comp1
   = Computation comp2
@@ -78,7 +78,7 @@ bindExactHandler (Handler lift21 handler1) comp1
       -> Operation ops eff3
       -> comp eff3
     comp2 lift13 ops
-      = runComp comp1 (joinLift lift21 lift13) (UnionOps handler2 ops)
+      = runComp comp1 (joinLift lift21 lift13) (handler2 ∪ ops)
        where
         handler2 :: Operation handler eff3
         handler2 = runComp handler1 lift13 ops
@@ -95,8 +95,8 @@ composeExactHandlers
   , Effect eff3
   )
   => Handler ops handler1 eff1 eff2
-  -> Handler (Union handler1 ops) handler2 eff2 eff3
-  -> Handler ops (Union handler1 handler2) eff1 eff3
+  -> Handler (handler1 ∪ ops) handler2 eff2 eff3
+  -> Handler ops (handler1 ∪ handler2) eff1 eff3
 composeExactHandlers
   (Handler lift21 handler1)
   (Handler lift32 handler2)
@@ -107,15 +107,15 @@ composeExactHandlers
       (Effect eff4)
       => LiftEff eff1 eff4
       -> Operation ops eff4
-      -> Operation (Union handler1 handler2) eff4
+      -> Operation (handler1 ∪ handler2) eff4
     comp1 lift14 ops
-      = (UnionOps handler3 handler4)
+      = handler3 ∪ handler4
        where
         handler3 :: Operation handler1 eff4
         handler3 = runComp handler1 lift14 ops
 
         handler4 :: Operation handler2 eff4
-        handler4 = runComp handler2 (joinLift lift21 lift14) (UnionOps handler3 ops)
+        handler4 = runComp handler2 (joinLift lift21 lift14) (handler3 ∪ ops)
 
 withHandler
   :: forall ops handler eff1 eff2 r .

@@ -80,7 +80,7 @@ stateTPipelineTest = testCase "StateT pipeline test" $
 ioStateHandler
   :: forall eff s .
   (Effect eff)
-  => FlatHandler (Union IoEff (EnvEff (IORef s))) (StateEff s) eff
+  => FlatHandler (IoEff ∪ (EnvEff (IORef s))) (StateEff s) eff
 ioStateHandler = genericHandler StateOps {
   getOp =
    do
@@ -98,7 +98,7 @@ ioStateComp ref =
   bindHandlerWithCast @NoEff ioHandler
     (bindHandlerWithCast @IoEff (mkEnvHandler ref)
       (bindHandlerWithCast
-        @(Union IoEff (EnvEff (IORef Int)))
+        @(IoEff ∪ (EnvEff (IORef Int)))
         ioStateHandler
         stateComp2
         cast cast

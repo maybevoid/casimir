@@ -86,7 +86,7 @@ tryIo m = do
 tryIoHandler
   :: forall e eff
    . (Effect eff, Ex.Exception e)
-  => Handler (Union (ExceptionEff e) IoEff) IoEff eff eff
+  => Handler ((ExceptionEff e) ∪ IoEff) IoEff eff eff
 tryIoHandler = genericHandler $ IoOps {
   liftIoOp = tryIo
 }
@@ -138,7 +138,7 @@ tryComp
      , EffOps ops
      , OpsConstraint ops eff
      )
-  => Computation (Union (ExceptionEff e) ops) (Return a) eff
+  => Computation ((ExceptionEff e) ∪ ops) (Return a) eff
   -> (e -> eff a)
   -> eff a
 tryComp comp1 handler1 = handleFree handler2 comp2
@@ -158,17 +158,17 @@ bracketComp
      , EffOps ops
      , OpsConstraint ops eff
      )
-  => Computation (Union (ExceptionEff e) ops) (Return a) eff          -- init
-  -> (a -> Computation (Union (ExceptionEff e) ops) (Return ()) eff)  -- cleanup
-  -> (a -> Computation (Union (ExceptionEff e) ops) (Return b) eff)   -- between
-  -> Computation (Union (ExceptionEff e) ops) (Return b) eff
+  => Computation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init
+  -> (a -> Computation ((ExceptionEff e) ∪ ops) (Return ()) eff)  -- cleanup
+  -> (a -> Computation ((ExceptionEff e) ∪ ops) (Return b) eff)   -- between
+  -> Computation ((ExceptionEff e) ∪ ops) (Return b) eff
 bracketComp initComp cleanupComp betweenComp = Computation comp1
  where
   comp1
     :: forall eff2
      . (Effect eff2)
     => LiftEff eff eff2
-    -> Operation (Union (ExceptionEff e) ops) eff2
+    -> Operation ((ExceptionEff e) ∪ ops) eff2
     -> Return b eff2
   comp1 lift12 ops@(UnionOps eOps ops1) = Return comp5
    where

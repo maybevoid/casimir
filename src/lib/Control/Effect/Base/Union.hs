@@ -7,13 +7,18 @@ import Control.Effect.Base.EffOps
 import Control.Effect.Base.FreeOps
 import Control.Effect.Base.EffFunctor
 
-data Union ops1 ops2 where
+data Union ops1 ops2
 
 data UnionOps
   (ops1 :: (Type -> Type) -> Type)
   (ops2 :: (Type -> Type) -> Type)
   (eff :: Type -> Type)
   = UnionOps (ops1 eff) (ops2 eff)
+
+infixr 7 ∪
+type (∪) = Union
+(∪) :: forall ops1 ops2 eff . ops1 eff -> ops2 eff -> UnionOps ops1 ops2 eff
+(∪) = UnionOps
 
 data UnionCoOp
   (ops1 :: (Type -> Type))
@@ -56,3 +61,13 @@ instance (EffOps ops1, EffOps ops2) => EffOps (Union ops1 ops2) where
     withOps ops1 $ withOps ops2 comp
 
   captureOps = UnionOps captureOps captureOps
+
+leftOps :: forall ops1 ops2 eff
+   . UnionOps ops1 ops2 eff
+   -> ops1 eff
+leftOps (UnionOps ops _) = ops
+
+rightOps :: forall ops1 ops2 eff
+   . UnionOps ops1 ops2 eff
+   -> ops2 eff
+rightOps (UnionOps _ ops) = ops

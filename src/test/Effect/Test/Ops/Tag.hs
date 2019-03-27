@@ -59,14 +59,12 @@ barOps = mkTaggedEnvOps "bar"
 fooBarOps
   :: forall eff . (Effect eff)
   => Operation
-      (Union
-        (TaggedEnvEff Foo String)
-        (Union
-          (EnvEff String)
-          (TaggedEnvEff Bar String)))
+      ( (TaggedEnvEff Foo String)
+      ∪ (EnvEff String)
+      ∪ (TaggedEnvEff Bar String)
+      )
       eff
-fooBarOps = UnionOps fooOps $
-  UnionOps (mkEnvOps "default") barOps
+fooBarOps = fooOps ∪ (mkEnvOps "default") ∪ barOps
 
 res1 :: String
 res1 = runIdentity $ withOps fooBarOps comp1

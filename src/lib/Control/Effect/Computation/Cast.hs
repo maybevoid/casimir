@@ -13,13 +13,16 @@ data Cast p = p => Cast
 type OpsCast ops1 ops2 =
   forall eff . (Effect eff, OpsConstraint ops1 eff) => Cast (OpsConstraint ops2 eff)
 
+infixl 6 ⊇
+type ops1 ⊇ ops2 = OpsCast ops1 ops2
+
 cast :: forall p . p => Cast p
 cast = Cast
 
 runCast
   :: forall eff ops1 ops2 r .
   ( Effect eff, OpsConstraint ops1 eff )
-  => OpsCast ops1 ops2
+  => ops1 ⊇ ops2
   -> (OpsConstraint ops2 eff => r)
   -> r
 runCast caster res =
@@ -32,14 +35,14 @@ extendCast
   , EffOps ops2
   , EffOps ops3
   )
-  => OpsCast ops1 ops2
-  -> OpsCast (Union ops1 ops3) (Union ops2 ops3)
+  => ops1 ⊇ ops2
+  -> (ops1 ∪ ops3) ⊇ (ops2 ∪ ops3)
 extendCast caster1 = caster2
  where
   caster2
     :: forall eff .
-    (Effect eff, OpsConstraint (Union ops1 ops3) eff)
-    => Cast (OpsConstraint (Union ops2 ops3) eff)
+    (Effect eff, OpsConstraint (ops1 ∪ ops3) eff)
+    => Cast (OpsConstraint (ops2 ∪ ops3) eff)
   caster2 = case caster1 @eff of
     Cast -> Cast
 
@@ -49,7 +52,7 @@ castOps
   , EffOps ops1
   , EffOps ops2
   )
-  => OpsCast ops1 ops2
+  => ops1 ⊇ ops2
   -> Operation ops1 eff
   -> Operation ops2 eff
 castOps caster ops = withOps ops $
@@ -62,9 +65,9 @@ composeCast
   , EffOps ops2
   , EffOps ops3
   )
-  => OpsCast ops1 ops2
-  -> OpsCast ops2 ops3
-  -> OpsCast ops1 ops3
+  => ops1 ⊇ ops2
+  -> ops2 ⊇ ops3
+  -> ops1 ⊇ ops3
 composeCast cast1 cast2 = cast3
   where
     cast3
@@ -80,7 +83,7 @@ castComputation
   , EffOps ops1
   , EffOps ops2
   )
-  => OpsCast ops1 ops2
+  => ops1 ⊇ ops2
   -> Computation ops2 comp eff
   -> Computation ops1 comp eff
 castComputation caster comp = Computation $
@@ -94,7 +97,7 @@ castHandler
   , EffOps ops1
   , EffOps ops2
   )
-  => OpsCast ops1 ops2
+  => ops1 ⊇ ops2
   -> Handler ops2 handler eff1 eff2
   -> Handler ops1 handler eff1 eff2
 castHandler caster (Handler lift12 handler)
@@ -116,9 +119,9 @@ composeHandlersWithCast
   )
   => Handler ops1 handler1 eff1 eff2
   -> Handler ops2 handler2 eff2 eff3
-  -> OpsCast ops3 ops1
-  -> OpsCast (Union handler1 ops3) ops2
-  -> Handler ops3 (Union handler1 handler2) eff1 eff3
+  -> ops3 ⊇ ops1
+  -> (handler1 ∪ ops3) ⊇ ops2
+  -> Handler ops3 (handler1 ∪ handler2) eff1 eff3
 composeHandlersWithCast handler1 handler2 cast31 cast32 =
   composeExactHandlers
     (castHandler cast31 handler1) $
@@ -135,8 +138,8 @@ bindHandlerWithCast
   )
   => Handler ops1 handler eff1 eff2
   -> Computation ops2 r eff2
-  -> OpsCast ops3 ops1
-  -> OpsCast (Union handler ops3) ops2
+  -> ops3 ⊇ ops1
+  -> (handler ∪ ops3) ⊇ ops2
   -> Computation ops3 r eff1
 bindHandlerWithCast handler comp cast31 cast32 =
   bindExactHandler

@@ -84,8 +84,8 @@ await = awaitOp ?awaitOps
 
 runPipe :: forall a r ops eff1
    . (Effect eff1, EffOps ops)
-  => Computation (Union (YieldEff a) ops) (Return r) eff1
-  -> Computation (Union (AwaitEff a) ops) (Return r) eff1
+  => Computation ((YieldEff a) ∪ ops) (Return r) eff1
+  -> Computation ((AwaitEff a) ∪ ops) (Return r) eff1
   -> Computation ops (Return r) eff1
 runPipe producer1 consumer1 = Computation comp
    where
@@ -98,12 +98,12 @@ runPipe producer1 consumer1 = Computation comp
       producer2 :: FreeT (YieldCoOp a) eff2 r
       producer2 = returnVal $ runComp producer1
         (joinLift lifter (mkLiftEff lift)) $
-        UnionOps (mkFreeOps liftF) (effmap lift ops)
+        (mkFreeOps liftF) ∪ (effmap lift ops)
 
       consumer2 :: FreeT (AwaitCoOp a) eff2 r
       consumer2 = returnVal $ runComp consumer1
         (joinLift lifter (mkLiftEff lift)) $
-        UnionOps (mkFreeOps liftF) (effmap lift ops)
+        (mkFreeOps liftF) ∪ (effmap lift ops)
 
 pipe
   :: forall a r eff
@@ -141,7 +141,7 @@ copipe consumer producer = runFreeT producer >>= handleProducer
 
 producerComp
   :: forall a .
-  GenericReturn (Union (YieldEff Int) (EnvEff Int)) a
+  GenericReturn ((YieldEff Int) ∪ (EnvEff Int)) a
 producerComp = genericReturn comp1
  where
   comp1 :: forall eff
@@ -160,7 +160,7 @@ producerComp = genericReturn comp1
           comp2 $ acc + 1
 
 consumerComp
-  :: GenericReturn (Union (AwaitEff Int) (EnvEff Int)) Int
+  :: GenericReturn ((AwaitEff Int) ∪ (EnvEff Int)) Int
 consumerComp = genericReturn $
  do
   x <- await

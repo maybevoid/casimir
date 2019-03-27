@@ -60,6 +60,16 @@ instance
 
     mkFreeOps liftCoOp = TaggedOps $ mkFreeOps (liftCoOp . TaggedCoOp)
 
+untagOps :: forall l ops eff .
+  TaggedOps l ops eff
+  -> ops eff
+untagOps (TaggedOps ops) = ops
+
+untagCoOp :: forall l coop r .
+  TaggedCoOp l coop r
+  -> coop r
+untagCoOp (TaggedCoOp coop) = coop
+
 withTag
   :: forall l ops eff r
    . ( Effect eff
