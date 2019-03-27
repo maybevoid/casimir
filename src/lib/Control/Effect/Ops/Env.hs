@@ -39,9 +39,6 @@ instance EffOps (EnvEff e) where
 
   captureOps = ?envOps
 
-instance Normalizable (EnvEff e) where
-  unionOps = UnionOps
-
 ask :: forall e eff . (EnvConstraint e eff) => eff e
 ask = askOp ?envOps
 

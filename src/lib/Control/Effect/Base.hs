@@ -9,7 +9,6 @@ module Control.Effect.Base
   , module Control.Effect.Base.FreeEff
   , module Control.Effect.Base.Union
   , module Control.Effect.Base.NoEff
-  , module Control.Effect.Base.Normalize
   )
 where
 
@@ -23,4 +22,3 @@ import Control.Effect.Base.Tag
 import Control.Effect.Base.FreeEff
 import Control.Effect.Base.Union
 import Control.Effect.Base.NoEff
-import Control.Effect.Base.Normalize

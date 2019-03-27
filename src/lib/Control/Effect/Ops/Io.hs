@@ -14,8 +14,6 @@ import Control.Effect.Base
   ( EffFunctor (..)
   , FreeOps (..)
   , EffOps (..)
-  , UnionOps (..)
-  , Normalizable (..)
   )
 
 import Control.Effect.Computation
@@ -59,9 +57,6 @@ instance EffOps IoEff where
   withOps ops comp = let ?ioOps = ops in comp
 
   captureOps = ?ioOps
-
-instance Normalizable IoEff where
-  unionOps = UnionOps
 
 liftIo :: forall a eff .
   (IoConstraint eff)

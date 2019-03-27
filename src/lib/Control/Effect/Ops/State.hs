@@ -14,8 +14,6 @@ import Control.Effect.Base
   ( EffFunctor (..)
   , FreeOps (..)
   , EffOps (..)
-  , UnionOps (..)
-  , Normalizable (..)
   )
 
 data StateEff s where
@@ -58,9 +56,6 @@ instance EffOps (StateEff s) where
 
   {-# INLINE captureOps #-}
   captureOps = ?stateOps
-
-instance Normalizable (StateEff s) where
-  unionOps = UnionOps
 
 {-# INLINE get #-}
 get :: forall a eff .

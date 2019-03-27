@@ -36,9 +36,6 @@ instance EffOps (DecideEff s) where
 
   captureOps = ?decideOps
 
-instance Normalizable (DecideEff s) where
-  unionOps = UnionOps
-
 decide :: forall a eff .
   (DecideConstraint a eff)
   => a
