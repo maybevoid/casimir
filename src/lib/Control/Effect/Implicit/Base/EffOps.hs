@@ -1,6 +1,7 @@
 
 module Control.Effect.Implicit.Base.EffOps
   ( EffOps (..)
+  , EffConstraint
   )
 where
 
@@ -24,3 +25,5 @@ class
     captureOps :: forall eff .
       (Effect eff, OpsConstraint ops eff)
       => Operation ops eff
+
+type EffConstraint ops eff = (Effect eff, OpsConstraint ops eff)

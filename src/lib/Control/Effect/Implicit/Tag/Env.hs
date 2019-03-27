@@ -10,9 +10,8 @@ type TaggedEnvCoOp tag e r = TaggedCoOp tag (EnvCoOp e) r
 
 askTag
   :: forall tag e eff
-   . ( Effect eff
-     , EffOps (TaggedEnvEff tag e)
-     , OpsConstraint (TaggedEnvEff tag e) eff
+   . ( EffOps (TaggedEnvEff tag e)
+     , EffConstraint (TaggedEnvEff tag e) eff
      )
   => eff e
 askTag = withTag @tag @(EnvEff e) $ ask

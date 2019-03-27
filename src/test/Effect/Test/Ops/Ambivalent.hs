@@ -49,7 +49,7 @@ instance EffOps (AmbEff a) where
 
 select
   :: forall a eff
-   . (Effect eff, OpsConstraint (AmbEff a) eff)
+   . (EffConstraint (AmbEff a) eff)
   => [a]
   -> eff a
 select = selectOp captureOps
@@ -65,7 +65,7 @@ availableMoves x qs =
 
 solveQueen
   :: forall eff
-   . (Effect eff, OpsConstraint (AmbEff Int) eff)
+   . (EffConstraint (AmbEff Int) eff)
   => eff [(Int, Int)]
 solveQueen = solveQueen' 1 []
  where

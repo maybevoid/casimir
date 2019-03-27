@@ -23,7 +23,7 @@ envHandler3 = composeHandlersWithCast
   cast
 
 readerComp1 :: forall eff .
-  (Effect eff, OpsConstraint (EnvEff Int) eff)
+  (EffConstraint (EnvEff Int) eff)
   => eff Int
 readerComp1 = do
   val <- ask
@@ -148,7 +148,7 @@ stateIoPipeline ref = composePipelinesWithCast
 
 stateIoComp1
   :: forall eff .
-  (Effect eff, OpsConstraint IoEff eff)
+  (EffConstraint IoEff eff)
   => eff Int
 stateIoComp1 = do
   ref <- liftIo $ newIORef 3
@@ -163,7 +163,7 @@ stateIoComp2 = withHandler ioHandler stateIoComp1
 
 stateComp1
   :: forall eff .
-  (Effect eff, OpsConstraint (StateEff Int) eff)
+  (EffConstraint (StateEff Int) eff)
   => eff Int
 stateComp1 = do
   state1 <- get

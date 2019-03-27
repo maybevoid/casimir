@@ -72,10 +72,8 @@ exceptionToEitherHandler =
 
 tryIo
   :: forall eff e a .
-  ( Effect eff
-  , Ex.Exception e
-  , OpsConstraint IoEff eff
-  , OpsConstraint (ExceptionEff e) eff
+  ( Ex.Exception e
+  , EffConstraint (IoEff ∪ (ExceptionEff e)) eff
   )
   => IO a
   -> eff a
@@ -110,9 +108,8 @@ try comp handler1 = withCoOpHandler @free handler2 comp
 
 tryFinally
   :: forall free eff e a
-   . ( Effect eff
-     , FreeEff free
-     , OpsConstraint (ExceptionEff e) eff
+   . ( FreeEff free
+     , EffConstraint (ExceptionEff e) eff
      )
   => ((OpsConstraint (ExceptionEff e) (free (ExceptionEff e) eff))
       => free (ExceptionEff e) eff a)
@@ -135,10 +132,9 @@ tryFinally comp handler1 =
 
 tryComp
   :: forall free eff ops e a
-   . ( Effect eff
-     , FreeEff free
+   . ( FreeEff free
      , EffOps ops
-     , OpsConstraint ops eff
+     , EffConstraint ops eff
      )
   => Computation ((ExceptionEff e) ∪ ops) (Return a) eff
   -> (e -> eff a)
@@ -155,10 +151,9 @@ tryComp comp1 handler1 = handleFree handler2 comp2
 
 bracketComp
   :: forall free eff ops e a b
-   . ( Effect eff
-     , FreeEff free
+   . ( FreeEff free
      , EffOps ops
-     , OpsConstraint ops eff
+     , EffConstraint ops eff
      )
   => Computation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init
   -> (a -> Computation ((ExceptionEff e) ∪ ops) (Return ()) eff)  -- cleanup

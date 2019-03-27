@@ -36,9 +36,11 @@ instance EffOps (TaggedEnvEff Bar e) where
 
 comp1
   :: forall eff
-   . ( Effect eff
-     , OpsConstraint (TaggedEnvEff Foo String) eff
-     , OpsConstraint (TaggedEnvEff Bar String) eff
+   . ( EffConstraint
+         ( TaggedEnvEff Foo String
+         ∪ TaggedEnvEff Bar String
+         )
+       eff
      )
   => eff String
 comp1 = do

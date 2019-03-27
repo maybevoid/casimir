@@ -8,7 +8,7 @@ newtype CoState s eff a = CoState (s -> eff a)
 
 stateBaseFunc
   :: forall eff
-   . (Effect eff, OpsConstraint (StateEff Int) eff)
+   . (EffConstraint (StateEff Int) eff)
   => eff ()
 stateBaseFunc =
  do

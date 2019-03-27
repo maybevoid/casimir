@@ -25,7 +25,7 @@ type StateCompRes = (Int, Int, Int)
 
 stateComp1
   :: forall eff .
-  (Effect eff, OpsConstraint (StateEff Int) eff)
+  (EffConstraint (StateEff Int) eff)
   => eff StateCompRes
 stateComp1 = do
   s1 <- get

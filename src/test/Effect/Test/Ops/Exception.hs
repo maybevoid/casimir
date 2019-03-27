@@ -20,7 +20,7 @@ data Error = Error String
 
 divideComp1
   :: forall eff
-   . (Effect eff, OpsConstraint (ExceptionEff Error) eff)
+   . (EffConstraint (ExceptionEff Error) eff)
   => Int
   -> Int
   -> eff Int

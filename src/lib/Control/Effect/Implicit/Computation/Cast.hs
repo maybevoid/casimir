@@ -18,7 +18,7 @@ import Control.Effect.Implicit.Computation.Class
 data Cast p = p => Cast
 
 type OpsCast ops1 ops2 =
-  forall eff . (Effect eff, OpsConstraint ops1 eff) => Cast (OpsConstraint ops2 eff)
+  forall eff . (EffConstraint ops1 eff) => Cast (OpsConstraint ops2 eff)
 
 infixl 6 ⊇
 type ops1 ⊇ ops2 = OpsCast ops1 ops2
@@ -28,7 +28,7 @@ cast = Cast
 
 runCast
   :: forall eff ops1 ops2 r .
-  ( Effect eff, OpsConstraint ops1 eff )
+  ( EffConstraint ops1 eff )
   => ops1 ⊇ ops2
   -> (OpsConstraint ops2 eff => r)
   -> r
@@ -61,7 +61,7 @@ extendCast caster1 = caster2
  where
   caster2
     :: forall eff .
-    (Effect eff, OpsConstraint (ops1 ∪ ops3) eff)
+    (EffConstraint (ops1 ∪ ops3) eff)
     => Cast (OpsConstraint (ops2 ∪ ops3) eff)
   caster2 = case caster1 @eff of
     Cast -> Cast
@@ -79,7 +79,7 @@ composeCast cast1 cast2 = cast3
   where
     cast3
       :: forall eff .
-      (Effect eff, OpsConstraint ops1 eff)
+      (EffConstraint ops1 eff)
       => Cast (OpsConstraint ops3 eff)
     cast3 = runCast @eff @ops1 @ops2 cast1 $
       runCast @eff @ops2 @ops3 cast2 Cast

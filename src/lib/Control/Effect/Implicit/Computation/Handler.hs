@@ -52,7 +52,7 @@ genericHandler
   :: forall ops handler .
   (EffOps ops, EffOps handler)
   => (forall eff .
-      (Effect eff, OpsConstraint ops eff)
+      (EffConstraint ops eff)
       => Operation handler eff)
   -> GenericHandler ops handler
 genericHandler handler = Handler idLift $ Computation $
@@ -119,11 +119,10 @@ composeExactHandlers
 
 withHandler
   :: forall ops handler eff1 eff2 r .
-  ( Effect eff1
-  , Effect eff2
+  ( Effect eff2
   , EffOps ops
   , EffOps handler
-  , OpsConstraint ops eff1
+  , EffConstraint ops eff1
   )
   => Handler ops handler eff1 eff2
   -> (OpsConstraint handler eff1 => r)

@@ -14,7 +14,7 @@ envTests = testGroup "EnvEff Tests"
 
 envComp1
   :: forall eff a .
-  (Effect eff, OpsConstraint (EnvEff a) eff, Show a)
+  (EffConstraint (EnvEff a) eff, Show a)
   => eff String
 envComp1 = do
   env <- ask

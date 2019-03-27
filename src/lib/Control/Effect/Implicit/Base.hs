@@ -4,6 +4,7 @@ module Control.Effect.Implicit.Base
   , EffFunctor (..)
   , FreeOps (..)
   , EffOps (..)
+  , EffConstraint
   , NoEff
   , Union
   , type (∪)

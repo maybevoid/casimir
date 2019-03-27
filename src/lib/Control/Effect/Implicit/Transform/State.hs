@@ -48,7 +48,7 @@ stateTPipeline = transformerPipeline $ genericComputation handler
  where
   {-# INLINE handler #-}
   handler :: forall eff
-   . (Effect eff, OpsConstraint (EnvEff s) eff)
+   . (EffConstraint (EnvEff s) eff)
     => TransformerHandler (StateT s) (StateEff s) eff
   handler = TransformerHandler stateTOps liftStateT $ mkLiftEff $
     \eff -> do

@@ -12,7 +12,6 @@ where
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
 import Control.Effect.Implicit.Base.FreeOps
 import Control.Effect.Implicit.Base.EffOps
@@ -79,10 +78,9 @@ untagCoOp (TaggedCoOp coop) = coop
 
 withTag
   :: forall l ops eff r
-   . ( Effect eff
-     , EffOps ops
+   . ( EffOps ops
      , EffOps (TaggedEff l ops)
-     , OpsConstraint (TaggedEff l ops) eff
+     , EffConstraint (TaggedEff l ops) eff
      )
   => ((OpsConstraint ops eff) => r)
   -> r

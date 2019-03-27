@@ -38,7 +38,7 @@ returnComputation
   , EffOps ops
   )
   => (forall eff2 .
-      (Effect eff2, OpsConstraint ops eff2)
+      (EffConstraint ops eff2)
       => LiftEff eff1 eff2
       -> eff2 a)
   -> Computation ops (Return a) eff1
@@ -51,7 +51,7 @@ genericComputation
   :: forall ops comp .
   (EffOps ops)
   => (forall eff .
-      (Effect eff, OpsConstraint ops eff)
+      (EffConstraint ops eff)
       => comp eff)
   -> (forall eff . (Effect eff) => Computation ops comp eff)
 genericComputation comp = Computation $
@@ -62,7 +62,7 @@ genericReturn
   :: forall ops a .
   (EffOps ops)
   => (forall eff .
-      (Effect eff, OpsConstraint ops eff)
+      (EffConstraint ops eff)
       => eff a)
   -> GenericReturn ops a
 genericReturn comp = Computation $
@@ -74,8 +74,7 @@ runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
 execComp
   :: forall ops eff a .
   ( EffOps ops
-  , Effect eff
-  , OpsConstraint ops eff
+  , EffConstraint ops eff
   )
   => Computation ops (Return a) eff
   -> eff a
