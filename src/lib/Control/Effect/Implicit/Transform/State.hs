@@ -34,10 +34,7 @@ stateTHandler
   (Effect eff)
   => Handler NoEff (StateEff s) (StateT s eff)
 stateTHandler = mkHandler $
-  \lifter -> StateOps {
-    getOp = liftEff lifter get,
-    putOp = \x -> liftEff lifter $ put x
-  }
+  \lifter -> applyEffmap lifter stateTOps
 
 {-# INLINE stateTPipeline #-}
 stateTPipeline

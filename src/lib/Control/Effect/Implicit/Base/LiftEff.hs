@@ -17,19 +17,19 @@ data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
   = LiftEff {
     liftEff :: eff1 ~> eff2,
 
-    applyLift
+    applyEffmap
       :: forall comp
       . (EffFunctor comp)
       => comp eff1
       -> comp eff2,
 
-    leftJoin
+    leftJoinLift
       :: forall eff3
       . (Effect eff3)
       => LiftEff eff2 eff3
       -> LiftEff eff1 eff3,
 
-    rightJoin
+    rightJoinLift
       :: forall eff0
       . (Effect eff0)
       => LiftEff eff0 eff1
@@ -46,12 +46,12 @@ mkLiftEff lifter1 = lifter2
   lifter2 = LiftEff {
     liftEff = lifter1,
 
-    applyLift = effmap lifter1,
+    applyEffmap = effmap lifter1,
 
-    leftJoin = \lifter3 ->
-      rightJoin lifter3 lifter2,
+    leftJoinLift = \lifter3 ->
+      rightJoinLift lifter3 lifter2,
 
-    rightJoin = \lifter3 ->
+    rightJoinLift = \lifter3 ->
       mkLiftEff (lifter1 . liftEff lifter3)
   }
 
@@ -61,11 +61,11 @@ idLift
 idLift = LiftEff {
   liftEff = id,
 
-  applyLift = id,
+  applyEffmap = id,
 
-  leftJoin = id,
+  leftJoinLift = id,
 
-  rightJoin = id
+  rightJoinLift = id
 }
 
 joinLift
@@ -74,4 +74,4 @@ joinLift
   => LiftEff eff1 eff2
   -> LiftEff eff2 eff3
   -> LiftEff eff1 eff3
-joinLift = leftJoin
+joinLift = leftJoinLift

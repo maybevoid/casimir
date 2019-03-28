@@ -86,14 +86,14 @@ transformerPipeline handler1 = Pipeline pipeline
       => LiftEff eff1 eff2
       -> Operation (ops1 ∪ ops2) eff2
       -> comp eff2
-    comp2 lift12 (UnionOps ops1 ops2) = applyLift unliftT comp3
+    comp2 lift12 (UnionOps ops1 ops2) = applyEffmap unliftT comp3
      where
       TransformerHandler coopHandler liftT unliftT
         = runComp handler1 lift12 ops1
 
       comp3 :: comp (t eff2)
       comp3 = runComp comp1 (joinLift lift12 liftT) $
-        UnionOps coopHandler $ applyLift liftT ops2
+        UnionOps coopHandler $ applyEffmap liftT ops2
 
 castPipelineOps
   :: forall ops1 ops2 handler comp1 comp2 eff1 eff2  .

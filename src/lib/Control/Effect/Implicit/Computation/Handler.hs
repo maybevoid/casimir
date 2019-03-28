@@ -44,7 +44,7 @@ baseHandler
   => Operation handler eff
   -> BaseHandler handler eff
 baseHandler handler = Computation $
-  \ lift12 _ -> applyLift lift12 handler
+  \ lift12 _ -> applyEffmap lift12 handler
 
 genericHandler
   :: forall ops handler .

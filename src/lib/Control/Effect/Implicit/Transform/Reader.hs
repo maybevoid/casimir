@@ -19,11 +19,15 @@ liftReaderT
   => LiftEff eff (ReaderT a eff)
 liftReaderT = mkLiftEff lift
 
+readerTOps :: forall a eff . (Effect eff)
+  => EnvOps a (ReaderT a eff)
+readerTOps = EnvOps {
+  askOp = ask
+}
+
 readerTHandler
   :: forall a eff .
   (Effect eff)
   => Handler NoEff (EnvEff a) (ReaderT a eff)
 readerTHandler = mkHandler $
-  \lifter -> EnvOps {
-    askOp = liftEff lifter ask
-  }
+  \lifter -> applyEffmap lifter $ readerTOps
