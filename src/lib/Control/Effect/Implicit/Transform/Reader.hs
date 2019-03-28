@@ -30,4 +30,4 @@ readerTHandler
   (Effect eff)
   => Handler NoEff (EnvEff a) (ReaderT a eff)
 readerTHandler = mkHandler $
-  \lifter -> applyEffmap lifter $ readerTOps
+  \lifter -> applyEffmap lifter readerTOps

@@ -12,7 +12,7 @@ import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops
 
 overlapTests :: TestTree
-overlapTests = testGroup "Implicit parameters overlap Tests"
+overlapTests = testGroup "Constraint overlap Tests"
   [ test1
   , test2
   , test3

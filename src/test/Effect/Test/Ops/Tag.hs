@@ -14,8 +14,8 @@ taggedTests = testGroup "TaggedEff Tests"
   [ test1
   ]
 
-data Foo where
-data Bar where
+data Foo
+data Bar
 
 instance EffOps (TaggedEnvEff Foo e) where
   type OpsConstraint (TaggedEnvEff Foo e) eff

@@ -101,7 +101,7 @@ refStateOps
   -> StateOps a eff
 refStateOps ref = StateOps {
   getOp = liftIo $ readIORef ref,
-  putOp = liftIo . (writeIORef ref)
+  putOp = liftIo . writeIORef ref
 }
 
 refStateHandler :: forall a . IORef a -> GenericHandler IoEff (StateEff a)
@@ -147,8 +147,7 @@ stateIoComp1 = do
   withHandler (refStateHandler ref) $ do
     state <- get
     put $ state + 1
-  finalVal <- liftIo $ readIORef ref
-  return finalVal
+  liftIo $ readIORef ref
 
 stateIoComp2 :: IO Int
 stateIoComp2 = withHandler ioHandler stateIoComp1
@@ -209,9 +208,9 @@ decideComp1
   ) => eff Int
 decideComp1 = do
   a <- decide
-  liftIo $ putStrLn $ "a: " ++ (show a)
+  liftIo $ putStrLn $ "a: " ++ show a
   b <- decide
-  liftIo $ putStrLn $ "b: " ++ (show b)
+  liftIo $ putStrLn $ "b: " ++ show b
   return $ if a
     then if b then 1 else 2
     else if b then 3 else 4

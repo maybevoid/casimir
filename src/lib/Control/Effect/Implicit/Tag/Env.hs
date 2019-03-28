@@ -14,7 +14,7 @@ askTag
      , EffConstraint (TaggedEnvEff tag e) eff
      )
   => eff e
-askTag = withTag @tag @(EnvEff e) $ ask
+askTag = withTag @tag @(EnvEff e) ask
 
 mkTaggedEnvOps
   :: forall tag e eff

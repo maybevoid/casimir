@@ -43,8 +43,7 @@ stateEffToEnvEffPipeline comp1 = Computation comp2
     comp5 :: (OpsConstraint (EnvEff s) eff2) => eff2 a
     comp5 = do
       s <- ask
-      res <- evalStateT comp4 s
-      return res
+      evalStateT comp4 s
 
 statePComp1
   :: forall eff . (Effect eff)

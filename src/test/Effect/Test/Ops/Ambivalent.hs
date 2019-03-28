@@ -14,7 +14,7 @@ ambivalentTests = testGroup "Ambivalent Tests"
   [ test1
   ]
 
-data AmbEff a where
+data AmbEff a
 
 data AmbOps a eff = AmbOps {
   selectOp :: [a] -> eff a

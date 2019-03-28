@@ -16,7 +16,7 @@ exceptionTests = testGroup "Exception Tests"
   , test4
   ]
 
-data Error = Error String
+newtype Error = Error String
   deriving (Eq, Show)
 
 divideComp1

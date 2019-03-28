@@ -11,8 +11,8 @@ import Control.Monad.Trans.Class
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops.Env
 
-data YieldEff a where
-data AwaitEff a where
+data YieldEff a
+data AwaitEff a
 
 data YieldOps a eff = YieldOps {
   yieldOp :: a -> eff ()

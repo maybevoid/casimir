@@ -5,7 +5,7 @@ where
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
 
-data EnvEff e where
+data EnvEff e
 
 data EnvOps e eff = EnvOps {
   askOp :: eff e

@@ -39,8 +39,7 @@ stateEffToReaderTPipeline comp1 = Computation comp2
   comp5 :: ReaderT s eff1 a
   comp5 = do
     s <- RT.ask
-    res <- lift $ evalStateT comp4 s
-    return res
+    lift $ evalStateT comp4 s
 
 stateComp1
   :: forall eff . (Effect eff)

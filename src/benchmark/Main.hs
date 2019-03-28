@@ -31,8 +31,8 @@ evalStateTComp
 evalStateTComp m = runIdentity $ evalStateT m rounds
 
 main :: IO ()
-main = defaultMain [
-  bgroup "State Benchmark"
+main = defaultMain
+  [ bgroup "State Benchmark"
     [ bench "MTL Baseline" $
         whnf evalStateTComp
         stateMTLFunc

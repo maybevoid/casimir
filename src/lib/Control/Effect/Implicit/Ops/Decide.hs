@@ -4,7 +4,7 @@ where
 
 import Control.Effect.Implicit.Base
 
-data DecideEff s where
+data DecideEff s
 
 data DecideOps s eff = DecideOps {
   decideOp :: eff s

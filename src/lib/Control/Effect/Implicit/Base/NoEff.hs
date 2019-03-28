@@ -12,7 +12,7 @@ import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.FreeOps
 import Control.Effect.Implicit.Base.EffFunctor
 
-data NoEff where
+data NoEff
 
 data NoOp (eff :: Type -> Type) = NoOp
 

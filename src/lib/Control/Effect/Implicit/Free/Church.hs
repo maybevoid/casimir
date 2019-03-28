@@ -63,7 +63,7 @@ liftChurchOps
   )
   => CoOperation ops a
   -> ChurchMonad ops eff a
-liftChurchOps ops = ChurchMonad $ cont
+liftChurchOps ops = ChurchMonad cont
  where
   cont :: forall r . CoOpHandler ops a r eff -> eff r
   cont (CoOpHandler handleReturn handleCoOp) =
@@ -90,7 +90,7 @@ mapChurchMonad f (ChurchMonad m1) = ChurchMonad m2
   m2 :: forall r . CoOpHandler ops b r eff -> eff r
   m2 (CoOpHandler handleReturn handleCoOp) =
     m1 $ CoOpHandler
-      (\x -> handleReturn (f x))
+      (handleReturn . f)
       handleCoOp
 {-# INLINE mapChurchMonad #-}
 

@@ -19,7 +19,7 @@ envComp1
   => eff String
 envComp1 = do
   env <- ask
-  return $ "Env: " ++ (show env)
+  return $ "Env: " ++ show env
 
 envComp2 ::
   forall a .

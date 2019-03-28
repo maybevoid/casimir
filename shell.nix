@@ -11,6 +11,7 @@ pkgs.stdenv.mkDerivation {
   buildInputs = project.env.nativeBuildInputs ++ [
     pkgs.glibcLocales
     haskellPackages.hpack
+    haskellPackages.hlint
     haskellPackages.cabal-install
   ];
 }

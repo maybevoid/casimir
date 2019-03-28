@@ -19,7 +19,7 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
   (BaseHandler, baseHandler)
 
-data IoEff where
+data IoEff
 
 data IoOps eff = IoOps {
   liftIoOp :: forall a . IO a -> eff a

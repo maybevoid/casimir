@@ -54,7 +54,7 @@ genericHandler
       => Operation handler eff)
   -> GenericHandler ops handler
 genericHandler handler = Computation $
-  \ _ ops -> withOps ops $ handler
+  \ _ ops -> withOps ops handler
 
 bindExactHandler
   :: forall ops handler eff1 comp .
@@ -119,8 +119,8 @@ withHandler
   => Handler ops handler eff
   -> (OpsConstraint handler eff => r)
   -> r
-withHandler handler comp =
-  withOps (runComp handler idLift captureOps) comp
+withHandler handler =
+  withOps (runComp handler idLift captureOps)
 {-# INLINE withHandler #-}
 
 castHandler

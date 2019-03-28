@@ -83,7 +83,7 @@ stateTPipelineTest = testCase "StateT pipeline test" $
 ioStateHandler
   :: forall eff s .
   (Effect eff)
-  => Handler (IoEff ∪ (EnvEff (IORef s))) (StateEff s) eff
+  => Handler (IoEff ∪ EnvEff (IORef s)) (StateEff s) eff
 ioStateHandler = genericHandler StateOps {
   getOp =
    do
@@ -105,7 +105,7 @@ ioStateComp ref =
       cast cast
       (mkEnvHandler ref)
       (bindHandlerWithCast
-        @(IoEff ∪ (EnvEff (IORef Int)))
+        @(IoEff ∪ EnvEff (IORef Int))
         cast cast
         ioStateHandler
         stateComp2
@@ -135,18 +135,18 @@ stateCoOpHandler
   :: forall eff s a .
   (Effect eff)
   => CoOpHandler (StateEff s) a (CoState s eff a) eff
-stateCoOpHandler = CoOpHandler handleReturn handleOps'
+stateCoOpHandler = CoOpHandler handleReturn handleOps
  where
   handleReturn :: a -> eff (CoState s eff a)
   handleReturn x = return $ CoState $ \_ -> return x
 
-  handleOps' :: StateCoOp s (eff (CoState s eff a)) -> eff (CoState s eff a)
-  handleOps' (GetOp cont1) = return $ CoState $
+  handleOps :: StateCoOp s (eff (CoState s eff a)) -> eff (CoState s eff a)
+  handleOps (GetOp cont1) = return $ CoState $
     \s ->
      do
       (CoState cont2) <- cont1 s
       cont2 s
-  handleOps' (PutOp s cont1) = return $ CoState $
+  handleOps (PutOp s cont1) = return $ CoState $
     \_ ->
      do
       (CoState cont2) <- cont1 ()
@@ -218,7 +218,7 @@ churchStateTest2 = testCase "Church state test 2" $
 stateFreeComp1 :: forall eff . (Effect eff)
   => eff (CoState Int eff StateCompRes)
 stateFreeComp1 = handleFree @FreeMonad stateCoOpHandler $
-  withOps @(StateEff Int) freeOps $ stateComp1
+  withOps @(StateEff Int) freeOps stateComp1
 
 stateFreeComp2 :: Identity StateCompRes
 stateFreeComp2 = stateDynComp2 >>= runCoState 7
