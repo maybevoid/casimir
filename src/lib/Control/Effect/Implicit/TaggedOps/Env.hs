@@ -1,8 +1,9 @@
-module Control.Effect.Implicit.Tag.Env
+module Control.Effect.Implicit.TaggedOps.Env
 where
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Ops.Env
+import Control.Effect.Implicit.TaggedOps.TaggedEff
 
 type TaggedEnvEff tag e = TaggedEff tag (EnvEff e)
 type TaggedEnvOps tag e eff = TaggedOps tag (EnvOps e) eff

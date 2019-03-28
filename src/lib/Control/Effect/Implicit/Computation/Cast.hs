@@ -13,7 +13,7 @@ module Control.Effect.Implicit.Computation.Cast
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation.Class
+import Control.Effect.Implicit.Computation.Computation
 
 data Cast p = p => Cast
 

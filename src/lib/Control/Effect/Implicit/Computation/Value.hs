@@ -15,7 +15,7 @@ where
 import Control.Monad.Identity (Identity (..))
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation.Class
+import Control.Effect.Implicit.Computation.Computation
 
 newtype Return a eff = Return {
   returnVal :: eff a

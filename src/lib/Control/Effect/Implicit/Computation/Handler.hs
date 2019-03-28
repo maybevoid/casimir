@@ -15,8 +15,8 @@ module Control.Effect.Implicit.Computation.Handler
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation.Class
 import Control.Effect.Implicit.Computation.Cast
+import Control.Effect.Implicit.Computation.Computation
 
 type BaseHandler handler eff = Handler NoEff handler eff
 

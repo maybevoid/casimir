@@ -1,4 +1,8 @@
+{-|
+  Module      : Control.Effect.Implicit.Base
 
+  Base module that defines the basic datatypes for implicit-effects.
+-}
 module Control.Effect.Implicit.Base
   ( Effect
   , EffFunctor (..)
@@ -7,33 +11,28 @@ module Control.Effect.Implicit.Base
   , EffConstraint
   , NoEff
   , Union
+  , LiftEff
   , type (∪)
-  , TaggedEff
-  , LiftEff (..)
   , NoOp (..)
   , NoCoOp (..)
   , NoConstraint
   , UnionOps (..)
   , (∪)
   , UnionCoOp (..)
-  , TaggedOps (..)
-  , TaggedCoOp (..)
-  , idLift
-  , joinLift
-  , mkLiftEff
   , leftOps
   , rightOps
-  , untagOps
-  , untagCoOp
-  , withTag
+  , idLift
+  , mkLiftEff
+  , liftEff
+  , applyEffmap
+  , joinLift
   )
 where
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
-import Control.Effect.Implicit.Base.LiftEff
 import Control.Effect.Implicit.Base.FreeOps
 import Control.Effect.Implicit.Base.EffOps
-import Control.Effect.Implicit.Base.Tag
 import Control.Effect.Implicit.Base.Union
 import Control.Effect.Implicit.Base.NoEff
+import Control.Effect.Implicit.Base.LiftEff

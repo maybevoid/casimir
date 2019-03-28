@@ -2,41 +2,47 @@
 hpack:
 	nix-shell --pure shell.nix --run hpack
 
-release:
+clean-env:
 	rm -f .ghc.environment*
-	nix-build release.nix
 
-repl:
-	nix-shell --pure shell.nix --run \
-		"make -f nix.mk repl"
+release: clean-env
+	nix-build nix/release.nix
 
-doc:
-	nix-shell --pure shell.nix --run \
-		"make -f nix.mk doc"
-
-benchmark:
-	nix-shell --pure shell.nix --run \
-		"make -f nix.mk benchmark"
+release-doc: clean-env
+	nix-build -A doc nix/release.nix
 
 shell:
-	nix-shell shell.nix
-
-shell-pure:
-	nix-shell --pure shell.nix
+	nix-shell nix/shell.nix
 
 external-shell:
-	nix-shell external.nix
+	nix-shell nix/external.nix
+
+hoogle:
+	nix-shell --pure nix/external.nix --run \
+		"hoogle server --local --host 0.0.0.0 -p 8333"
+
+repl:
+	nix-shell --pure nix/shell.nix --run \
+		"make -f make/nix.mk repl"
+
+doc:
+	nix-shell --pure nix/shell.nix --run \
+		"make -f make/nix.mk doc"
+
+benchmark:
+	nix-shell --pure nix/shell.nix --run \
+		"make -f make/nix.mk benchmark"
 
 test:
-	nix-shell --pure shell.nix --run \
-		"make -f nix.mk test"
+	nix-shell --pure nix/shell.nix --run \
+		"make -f make/nix.mk test"
 
 test-repl:
-	nix-shell --pure shell.nix --run \
-		"make -f nix.mk test-repl"
+	nix-shell --pure nix/shell.nix --run \
+		"make -f make/nix.mk test-repl"
 
 sync:
-	nix-shell --pure shell.nix --run \
-		"make -f nix.mk sync"
+	nix-shell --pure nix/shell.nix --run \
+		"make -f make/nix.mk sync"
 
-.PHONY: build run dev-server repl shell shell-pure external-shell sync
+.PHONY: hpack clean-env release release-doc shell external-shell hoogle repl benchmark test test-repl sync

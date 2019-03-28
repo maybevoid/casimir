@@ -4,20 +4,20 @@ let
 
   haskellPackages = pkgs.haskellPackages.override {
     overrides = self: super: {
-      haskell-nix-demo = self.callPackage ./default.nix {};
+      currentProject = self.callPackage ../default.nix {};
     };
   };
 
   haskellDeps = ps: with ps; [
     base
-    haskell-nix-demo
+    currentProject
   ];
 
-  ghc = haskellPackages.ghcWithPackages haskellDeps;
+  ghc = haskellPackages.ghcWithHoogle haskellDeps;
 
   nixPackages = [
     ghc
-    haskellPackages.haskell-nix-demo
+    haskellPackages.currentProject
     haskellPackages.cabal-install
   ];
 in

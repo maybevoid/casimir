@@ -1,5 +1,5 @@
 name:                 implicit-effects
-version:              0.1.0.0
+version:              0.1.0
 synopsis:             Algebraic Effects in Haskell using Implicit Parameters
 
 license:              BSD-3-Clause
@@ -84,5 +84,5 @@ tests:
       - tasty-quickcheck
 
 description: >
-  `implicit-effects` is a experimental effect library to support algebraic
+  implicit-effects is a experimental effect library to support algebraic
   effects in Haskell.

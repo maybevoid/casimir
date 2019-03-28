@@ -15,9 +15,9 @@ module Control.Effect.Implicit.Computation.Pipeline
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation.Class
 import Control.Effect.Implicit.Computation.Cast
 import Control.Effect.Implicit.Computation.Handler
+import Control.Effect.Implicit.Computation.Computation
 
 newtype Pipeline ops1 handler comp1 comp2 eff1 eff2
   = Pipeline {

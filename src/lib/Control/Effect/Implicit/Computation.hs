@@ -45,8 +45,7 @@ module Control.Effect.Implicit.Computation
   )
 where
 
-import Control.Effect.Implicit.Computation.Class
-import Control.Effect.Implicit.Computation.Lift
+import Control.Effect.Implicit.Computation.Computation
 import Control.Effect.Implicit.Computation.Value
 import Control.Effect.Implicit.Computation.Handler
 import Control.Effect.Implicit.Computation.Cast
