@@ -43,7 +43,7 @@ stateTHandler = mkHandler $
 stateTPipeline
   :: forall s eff1 comp .
   (Effect eff1, EffFunctor comp)
-  => SimplePipeline (EnvEff s) (StateEff s) eff1 comp
+  => SimplePipeline (EnvEff s) (StateEff s) comp eff1
 stateTPipeline = transformerPipeline $ genericComputation handler
  where
   {-# INLINE handler #-}

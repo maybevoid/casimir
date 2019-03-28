@@ -68,7 +68,7 @@ coopHandlerToPipeline
   , FreeEff free
   )
   => Computation ops1 (CoOpHandler handler a b) eff1
-  -> Pipeline ops1 handler eff1 eff1 (Return a) (Return b)
+  -> Pipeline ops1 handler (Return a) (Return b) eff1 eff1
 coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
