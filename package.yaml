@@ -1,24 +1,30 @@
-name:                implicit-effects
-version:             0.1.0.0
-synopsis:            Algebraic Effects in Haskell using Implicit Parameters
+name:                 implicit-effects
+version:              0.1.0.0
+synopsis:             Algebraic Effects in Haskell using Implicit Parameters
 
-license:             BSD-3-Clause
-license-file:        LICENSE
-author:              Soares Chen
-maintainer:          soares.chen@maybevoid.com
+license:              BSD-3-Clause
+license-file:         LICENSE
+author:               Soares Chen
+maintainer:           Soares Chen <soares.chen@maybevoid.com>
+copyright:            Copyright (C) Soares Ruofei Chen
+
+homepage:             https://github.com/maybevoid/implicit-effects
+bug-reports:          https://github.com/maybevoid/implicit-effects/issues
+
+github:               maybevoid/implicit-effects
+
+category:             Effect
+stability:            experimental
 
 ghc-options:
-  -Wall -O2
+  -Wall
 
 dependencies:
-  - base ^>=4.12.0.0 && < 5
-  - mtl
-  - stm
-  - free
-  - async
-  - comonad
-  - transformers
-  - natural-transformation
+  - base >=4.9.0 && < 5
+  - mtl >=2.2 && < 2.3
+  - free >=5.0 && < 5.2
+  - async >=2.1 && < 2.3
+  - transformers >=0.5.5 && < 0.6
 
 default-extensions:
   - GADTs
@@ -49,6 +55,8 @@ default-extensions:
 
 library:
   source-dirs:  src/lib
+  generated-exposed-modules:
+    - Paths_implicit_effects
 
 executables:
   implicit-effects-demo:
@@ -74,3 +82,7 @@ tests:
       - QuickCheck
       - tasty-hunit
       - tasty-quickcheck
+
+description: >
+  `implicit-effects` is a experimental effect library to support algebraic
+  effects in Haskell.

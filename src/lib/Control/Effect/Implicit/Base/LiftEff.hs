@@ -8,14 +8,13 @@ module Control.Effect.Implicit.Base.LiftEff
 where
 
 import Data.Kind
-import Control.Natural (type (~>))
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
 
 data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
   = LiftEff {
-    liftEff :: eff1 ~> eff2,
+    liftEff :: forall x . eff1 x -> eff2 x,
 
     applyEffmap
       :: forall comp
@@ -39,7 +38,7 @@ data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
 mkLiftEff
   :: forall eff1 eff2
    . (Effect eff1, Effect eff2)
-  => eff1 ~> eff2
+  => (forall x . eff1 x -> eff2 x)
   -> LiftEff eff1 eff2
 mkLiftEff lifter1 = lifter2
  where

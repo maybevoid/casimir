@@ -6,16 +6,15 @@ release: hpack
 
 repl:
 	nix-shell --pure shell.nix --run \
-		"cabal new-repl --write-ghc-environment-files never lib:implicit-effects"
+		"make -f nix.mk repl"
 
 doc:
 	nix-shell --pure shell.nix --run \
-		"cabal new-haddock"
+		"make -f nix.mk doc"
 
 benchmark:
 	nix-shell --pure shell.nix --run \
-		"cabal new-run --write-ghc-environment-files never exe:implicit-effects-benchmark \
-			-- --output 'benchmarks/$(shell date).html'"
+		"make -f nix.mk benchmark"
 
 shell:
 	nix-shell shell.nix
@@ -28,13 +27,14 @@ external-shell:
 
 test:
 	nix-shell --pure shell.nix --run \
-		"cabal new-test --write-ghc-environment-files never"
+		"make -f nix.mk test"
 
 test-repl:
 	nix-shell --pure shell.nix --run \
-		"cabal new-repl --write-ghc-environment-files never test:implicit-effects-test"
+		"make -f nix.mk test-repl"
 
-sync: hpack
-	nix-shell --pure -p cabal2nix --run "cabal2nix ." > default.nix
+sync:
+	nix-shell --pure shell.nix --run \
+		"make -f nix.mk sync"
 
 .PHONY: build run dev-server repl shell shell-pure external-shell sync

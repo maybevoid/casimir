@@ -1,3 +1,16 @@
+{-|
+  Module      : Control.Effect.Implicit
+  Description : Algebraic Effects in Haskell using Implicit Parameters
+  Copyright   : (c) Soares Ruofei Chen, 2013
+  License     : BSD-3
+  Maintainer  : soares.chen@maybevoid.com
+  Stability   : experimental
+  Portability : POSIX
+
+  `implicit-effects` is a experimental effect library to support algebraic
+  effects in Haskell.
+-}
+
 module Control.Effect.Implicit
   ( module Control.Effect.Implicit.Base
   , module Control.Effect.Implicit.Computation
