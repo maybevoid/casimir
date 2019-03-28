@@ -1,7 +1,9 @@
+
 hpack:
 	nix-shell --pure shell.nix --run hpack
 
-release: hpack
+release:
+	rm -f .ghc.environment*
 	nix-build release.nix
 
 repl:
