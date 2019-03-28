@@ -11,8 +11,8 @@ stateHComp1
   :: forall eff . (Effect eff)
   => Computation NoEff (Return ()) (StateT Int eff)
 stateHComp1 = bindHandlerWithCast
-  stateTHandler stateBaseComp
   cast cast
+  stateTHandler stateBaseComp
 
 stateTHandlerComp
   :: forall eff . (Effect eff)

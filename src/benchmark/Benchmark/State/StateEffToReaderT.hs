@@ -27,9 +27,9 @@ stateEffToReaderTPipeline comp1 = Computation comp2
 
   comp3 :: Computation NoEff (Return a) (StateT s eff1)
   comp3 = bindHandlerWithCast
+    cast cast
     stateTHandler
     (liftComputation liftStateT comp1)
-    cast cast
 
   comp4 :: StateT s eff1 a
   comp4 = returnVal $ runComp comp3 idLift NoOp

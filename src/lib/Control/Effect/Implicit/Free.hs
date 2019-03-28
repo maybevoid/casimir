@@ -24,3 +24,4 @@ import Control.Effect.Implicit.Free.Church
 import Control.Effect.Implicit.Free.Free
 import Control.Effect.Implicit.Free.Freer
 import Control.Effect.Implicit.Free.Handler
+import Control.Effect.Implicit.Free.Pipeline

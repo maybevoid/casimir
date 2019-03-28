@@ -30,9 +30,9 @@ stateEffToEnvEffPipeline comp1 = Computation comp2
    where
     comp3 :: Computation NoEff (Return a) (StateT s eff2)
     comp3 = bindHandlerWithCast
+      cast cast
       stateTHandler
       (liftComputation (joinLift lift12 liftStateT) comp1)
-      cast cast
 
     comp4 :: StateT s eff2 a
     comp4 = returnVal $ runComp comp3 idLift NoOp
@@ -52,8 +52,8 @@ statePComp2
   :: forall eff . (Effect eff)
   => Computation NoEff (Return ()) (ReaderT Int eff)
 statePComp2 = bindHandlerWithCast
-  readerTHandler statePComp1
   cast cast
+  readerTHandler statePComp1
 
 stateEffToEnvEffToReaderTComp
   :: forall eff . (Effect eff)

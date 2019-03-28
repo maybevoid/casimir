@@ -59,9 +59,8 @@ handlerToPipeline handler1 = Pipeline pipeline
     => Computation (handler ∪ ops2) comp eff
     -> Computation (ops1 ∪ ops2) comp eff
   pipeline comp1 = bindHandlerWithCast @(ops1 ∪ ops2)
+    cast cast
     handler1 comp1
-    cast
-    cast
 
 {-# INLINE transformerPipeline #-}
 transformerPipeline
@@ -192,12 +191,12 @@ runPipelineWithCast
   , EffOps ops3
   , EffOps handler
   )
-  => Pipeline ops1 handler comp1 comp2 eff1 eff2
-  -> Computation ops2 comp1 eff1
-  -> ops3 ⊇ ops1
+  => ops3 ⊇ ops1
   -> (handler ∪ ops3) ⊇ ops2
+  -> Pipeline ops1 handler comp1 comp2 eff1 eff2
+  -> Computation ops2 comp1 eff1
   -> Computation ops3 comp2 eff2
-runPipelineWithCast pipeline1 comp1 cast1 cast2
+runPipelineWithCast cast1 cast2 pipeline1 comp1
   = castComputation cast $ runPipeline pipeline2 comp2
   where
    pipeline2 :: Pipeline ops3 handler comp1 comp2 eff1 eff2
@@ -218,13 +217,13 @@ composePipelinesWithCast
   , EffOps handler2
   , EffOps handler3
   )
-  => Pipeline ops1 handler1 comp1 comp2 eff1 eff2
-  -> Pipeline ops2 handler2 comp2 comp3 eff2 eff3
-  -> (handler2 ∪ ops3) ⊇ ops1
+  => (handler2 ∪ ops3) ⊇ ops1
   -> ops3 ⊇ ops2
   -> (handler1 ∪ handler2) ⊇ handler3
+  -> Pipeline ops1 handler1 comp1 comp2 eff1 eff2
+  -> Pipeline ops2 handler2 comp2 comp3 eff2 eff3
   -> Pipeline ops3 handler3 comp1 comp3 eff1 eff3
-composePipelinesWithCast pipeline1 pipeline2 cast1 cast2 cast3
+composePipelinesWithCast cast1 cast2 cast3 pipeline1 pipeline2
   = castPipelineHandler cast3 $
     castPipelineOps cast $
     composePipelines pipeline1' pipeline2'

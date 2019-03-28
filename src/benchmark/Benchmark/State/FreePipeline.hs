@@ -39,17 +39,17 @@ stateFreeComp1
   (FreeEff free, Effect eff)
   => Computation (EnvEff Int) (Return ()) eff
 stateFreeComp1 = runPipelineWithCast
-  (statePipeline1 @free) stateBaseComp
   cast cast
+  (statePipeline1 @free) stateBaseComp
 
 stateFreeComp2
   :: forall free eff .
   (FreeEff free, Effect eff)
   => Computation NoEff (Return ()) (ReaderT Int eff)
 stateFreeComp2 = bindHandlerWithCast
+  cast cast
   readerTHandler
   (stateFreeComp1 @free)
-  cast cast
 
 readerTFreeComp
   :: forall free eff .
@@ -63,9 +63,9 @@ curriedFreeComp
   => Int
   -> Computation NoEff (Return ()) eff
 curriedFreeComp s = bindHandlerWithCast
+  cast cast
   (mkEnvHandler s)
   (stateFreeComp1 @free)
-  cast cast
 
 readerTFreeIdentityComp
   :: forall free .

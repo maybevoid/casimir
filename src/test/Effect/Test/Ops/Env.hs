@@ -42,8 +42,8 @@ envHandlerTest = testCase "Env handler test" $
     envHandler = mkEnvHandler @Int @IO 4
     envComp3 =
       bindHandlerWithCast @NoEff
-        envHandler envComp2
         cast cast
+        envHandler envComp2
   res <- execComp envComp3
   assertEqual
     "Computation should read and format '4' from environment"
@@ -58,7 +58,8 @@ envPipelineTest = testCase "Env pipeline test" $
       = handlerToPipeline envHandler @(Return String)
     envComp3
       = runPipelineWithCast @NoEff
-        envPipeline envComp2 cast cast
+        cast cast
+        envPipeline envComp2
   res <- execComp @NoEff envComp3
   assertEqual
     "Computation should read and format '5' from environment"

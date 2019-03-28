@@ -146,12 +146,12 @@ composeHandlersWithCast
   , EffOps handler2
   , Effect eff
   )
-  => Handler ops1 handler1 eff
-  -> Handler ops2 handler2 eff
-  -> ops3 ⊇ ops1
+  => ops3 ⊇ ops1
   -> (handler1 ∪ ops3) ⊇ ops2
+  -> Handler ops1 handler1 eff
+  -> Handler ops2 handler2 eff
   -> Handler ops3 (handler1 ∪ handler2) eff
-composeHandlersWithCast handler1 handler2 cast31 cast32 =
+composeHandlersWithCast cast31 cast32 handler1 handler2 =
   composeExactHandlers
     (castHandler cast31 handler1)
     (castHandler cast32 handler2)
@@ -164,12 +164,12 @@ bindHandlerWithCast
   , EffOps handler
   , Effect eff
   )
-  => Handler ops1 handler eff
-  -> Computation ops2 r eff
-  -> ops3 ⊇ ops1
+  => ops3 ⊇ ops1
   -> (handler ∪ ops3) ⊇ ops2
+  -> Handler ops1 handler eff
+  -> Computation ops2 r eff
   -> Computation ops3 r eff
-bindHandlerWithCast handler comp cast31 cast32 =
+bindHandlerWithCast cast31 cast32 handler comp =
   bindExactHandler
     (castHandler cast31 handler)
     (castComputation cast32 comp)
