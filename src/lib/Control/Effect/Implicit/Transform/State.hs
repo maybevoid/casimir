@@ -32,8 +32,8 @@ stateTOps = StateOps {
 stateTHandler
   :: forall eff s .
   (Effect eff)
-  => Handler NoEff (StateEff s) (StateT s eff) eff
-stateTHandler = mkHandler liftStateT $
+  => Handler NoEff (StateEff s) (StateT s eff)
+stateTHandler = mkHandler $
   \lifter -> StateOps {
     getOp = liftEff lifter get,
     putOp = \x -> liftEff lifter $ put x

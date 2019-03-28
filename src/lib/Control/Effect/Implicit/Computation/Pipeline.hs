@@ -43,22 +43,21 @@ type GenericPipeline ops handler eff
     => SimplePipeline ops handler eff comp
 
 handlerToPipeline
-  :: forall ops1 handler eff1 eff2 .
-  ( Effect eff1
-  , Effect eff2
+  :: forall ops1 handler eff .
+  ( Effect eff
   , EffOps ops1
   , EffOps handler
   )
-  => Handler ops1 handler eff1 eff2
+  => Handler ops1 handler eff
   -> (forall comp .
       (EffFunctor comp)
-      => Pipeline ops1 handler eff2 eff1 comp comp)
+      => SimplePipeline ops1 handler eff comp)
 handlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline :: forall ops2 comp .
     (EffOps ops2, EffFunctor comp)
-    => Computation (handler ∪ ops2) comp eff2
-    -> Computation (ops1 ∪ ops2) comp eff1
+    => Computation (handler ∪ ops2) comp eff
+    -> Computation (ops1 ∪ ops2) comp eff
   pipeline comp1 = bindHandlerWithCast @(ops1 ∪ ops2)
     handler1 comp1
     cast

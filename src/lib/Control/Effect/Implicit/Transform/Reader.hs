@@ -22,8 +22,8 @@ liftReaderT = mkLiftEff lift
 readerTHandler
   :: forall a eff .
   (Effect eff)
-  => Handler NoEff (EnvEff a) (ReaderT a eff) eff
-readerTHandler = mkHandler liftReaderT $
+  => Handler NoEff (EnvEff a) (ReaderT a eff)
+readerTHandler = mkHandler $
   \lifter -> EnvOps {
     askOp = liftEff lifter ask
   }

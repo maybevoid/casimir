@@ -80,7 +80,7 @@ stateTPipelineTest = testCase "StateT pipeline test" $
 ioStateHandler
   :: forall eff s .
   (Effect eff)
-  => Handler (IoEff ∪ (EnvEff (IORef s))) (StateEff s) eff eff
+  => Handler (IoEff ∪ (EnvEff (IORef s))) (StateEff s) eff
 ioStateHandler = genericHandler StateOps {
   getOp =
    do

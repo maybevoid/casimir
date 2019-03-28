@@ -1,7 +1,7 @@
 module Control.Effect.Implicit.Computation
   ( Computation (..)
+  , Handler
   , Return (..)
-  , Handler (..)
   , Pipeline (..)
   , TransformerHandler (..)
   , Cast (..)

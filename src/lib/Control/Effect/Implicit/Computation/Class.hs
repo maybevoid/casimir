@@ -1,7 +1,7 @@
 
 module Control.Effect.Implicit.Computation.Class
   ( Computation (..)
-  , Handler (..)
+  , Handler
   )
 where
 
@@ -18,7 +18,5 @@ newtype Computation ops comp eff1 = Computation {
     -> comp eff2
 }
 
-data Handler ops handler eff1 eff2
-  = Handler
-    (LiftEff eff2 eff1)
-    (Computation ops (Operation handler) eff1)
+type Handler ops handler eff
+  = Computation ops (Operation handler) eff

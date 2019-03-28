@@ -46,7 +46,7 @@ log l = logOp captureOps l
 stateLoggerHandler
   :: forall l eff
    . (Effect eff)
-  => Handler (StateEff [l]) (LogEff l) eff eff
+  => Handler (StateEff [l]) (LogEff l) eff
 stateLoggerHandler = genericHandler $ LogOps $
   \l -> do
     logs <- get
@@ -55,6 +55,6 @@ stateLoggerHandler = genericHandler $ LogOps $
 printLoggerHandler
   :: forall a eff
    . (Effect eff, Show a)
-  => Handler IoEff (LogEff a) eff eff
+  => Handler IoEff (LogEff a) eff
 printLoggerHandler = genericHandler $ LogOps $
   liftIo . print
