@@ -1,5 +1,5 @@
 
-module Effect.Test.Cast
+module Effect.Test.Overlap
 where
 
 import Data.Proxy
@@ -11,11 +11,13 @@ import Test.Tasty.HUnit
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops
 
-castTests :: TestTree
-castTests = testGroup "Cast Tests"
+overlapTests :: TestTree
+overlapTests = testGroup "Implicit parameters overlap Tests"
   [ test1
   , test2
   , test3
+  , test4
+  , test5
   ]
 
 data Foo
@@ -66,7 +68,10 @@ barOps2 :: Operation BarEff Identity
 barOps2 = mkTaggedEnvOps "bar2"
 
 bazOps :: Operation BazEff Identity
-bazOps = mkTaggedEnvOps "bar"
+bazOps = mkTaggedEnvOps "baz"
+
+-- Proxies are static tests to confirm the type family
+-- transformations are as we expected
 
 proxy1 :: forall ops1 ops2 . Proxy (Union ops1 ops2)
 proxy1 = Proxy @ (ops1 ∪ ops2)
@@ -152,6 +157,20 @@ test2 = testCase "Nested ops cast" $ do
   assertEqual "cast should get second element (foo1)" "foo1" $
     askOp $ untagOps $ leftOps castedOps2
 
+castedOps3 :: Operation (FooEff ∪ BarEff ∪ BazEff) Identity
+castedOps3 = castOps cast combinedOps1
+
+castedOps4 :: Operation (FooEff ∪ BarEff ∪ BazEff) Identity
+castedOps4 = castOps cast combinedOps2
+
+test3 :: TestTree
+test3 = testCase "Nested ops cast 2" $ do
+  assertEqual "cast should get second element (foo2)" "foo2" $
+    askOp $ untagOps $ leftOps castedOps3
+
+  assertEqual "cast should get second element (foo1)" "foo1" $
+    askOp $ untagOps $ leftOps castedOps4
+
 proxy8 :: Proxy (
   OpsConstraint
     ( (FooEff ∪ BarEff)
@@ -189,10 +208,31 @@ comp1 ::
   => String
 comp1 = runIdentity $ askTag @Foo
 
-test3 :: TestTree
-test3 = testCase "Nested constraints" $ do
+test4 :: TestTree
+test4 = testCase "Nested constraints" $ do
   assertEqual "ask should get second element (foo2)" "foo2" $
     withOps combinedOps1 comp1
 
   assertEqual "ask should get second element (foo1)" "foo1" $
     withOps combinedOps2 comp1
+
+comp2 ::
+  ( ( OpsConstraint BazEff Identity
+    , OpsConstraint BarEff Identity
+    )
+  , OpsConstraint FooEff Identity
+  )
+  => [String]
+comp2 = runIdentity $ do
+  foo <- askTag @Foo
+  bar <- askTag @Bar
+  baz <- askTag @Baz
+  return $ [foo, bar, baz]
+
+test5 :: TestTree
+test5 = testCase "Nested constraints 2" $ do
+  assertEqual "ask should get second element (foo2, bar2, baz)" ["foo2", "bar2", "baz"] $
+    withOps combinedOps1 comp2
+
+  assertEqual "ask should get second element (foo1, bar1, baz)" ["foo1", "bar1", "baz"] $
+    withOps combinedOps2 comp2
