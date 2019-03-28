@@ -7,17 +7,17 @@ import Control.Effect.Implicit.Base
 data DecideEff s where
 
 data DecideOps s eff = DecideOps {
-  decideOp :: s -> s -> eff s
+  decideOp :: eff s
 }
 
-data DecideCoOp s a = DecideOp s s (s -> a)
+data DecideCoOp s a = DecideOp (s -> a)
   deriving (Functor)
 
 type DecideConstraint s eff = (?decideOps :: DecideOps s eff)
 
 instance EffFunctor (DecideOps s) where
-  effmap lifter decideOps = DecideOps {
-    decideOp = \x y -> lifter $ decideOp decideOps x y
+  effmap lifter ops = DecideOps {
+    decideOp = lifter $ decideOp ops
   }
 
 instance FreeOps (DecideEff s) where
@@ -25,7 +25,7 @@ instance FreeOps (DecideEff s) where
   type CoOperation (DecideEff s) = DecideCoOp s
 
   mkFreeOps liftCoOp = DecideOps {
-    decideOp = \x y -> liftCoOp $ DecideOp x y id
+    decideOp = liftCoOp $ DecideOp id
   }
 
 instance EffOps (DecideEff s) where
@@ -37,7 +37,5 @@ instance EffOps (DecideEff s) where
 
 decide :: forall a eff .
   (DecideConstraint a eff)
-  => a
-  -> a
-  -> eff a
+  => eff a
 decide = decideOp ?decideOps

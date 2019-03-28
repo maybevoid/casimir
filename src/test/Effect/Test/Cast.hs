@@ -9,6 +9,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops
 
 castTests :: TestTree
 castTests = testGroup "Cast Tests"

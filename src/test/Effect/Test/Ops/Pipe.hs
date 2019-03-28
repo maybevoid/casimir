@@ -9,7 +9,7 @@ import Control.Monad.Trans.Free
 import Control.Monad.Trans.Class
 
 import Control.Effect.Implicit
-  hiding (awaitOp, AwaitOp, await)
+import Control.Effect.Implicit.Ops.Env
 
 data YieldEff a where
 data AwaitEff a where

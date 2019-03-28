@@ -4,6 +4,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops.Env
 
 envTests :: TestTree
 envTests = testGroup "EnvEff Tests"

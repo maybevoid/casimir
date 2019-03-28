@@ -10,6 +10,8 @@ import Control.Monad.Trans.State.Strict (StateT, evalStateT)
 import qualified Control.Monad.Trans.Reader as RT
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops.State
+
 import Benchmark.State.Base
 
 stateEffToReaderTPipeline

@@ -12,6 +12,8 @@ import Control.Monad.Identity
 import Control.Monad.Trans.Reader (ReaderT)
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops.Env
+
 import Benchmark.State.Base
 
 stateTComp1 :: forall eff . (Effect eff)

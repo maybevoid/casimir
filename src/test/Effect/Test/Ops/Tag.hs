@@ -7,6 +7,7 @@ import Test.Tasty.HUnit
 import Control.Monad.Identity
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops.Env
 
 taggedTests :: TestTree
 taggedTests = testGroup "TaggedEff Tests"

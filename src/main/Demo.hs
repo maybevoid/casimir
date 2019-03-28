@@ -6,6 +6,7 @@ import Data.IORef
 import Control.Monad.Identity
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops
 
 envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvEff Int) eff
 envHandler1 = mkEnvHandler 3
@@ -183,9 +184,9 @@ nonDetHandler1
 nonDetHandler1 = CoOpHandler handleReturn handleCoOp
  where
   handleReturn x = return [x]
-  handleCoOp (DecideOp x y cont) = do
-    res1 <- cont x
-    res2 <- cont y
+  handleCoOp (DecideOp cont) = do
+    res1 <- cont True
+    res2 <- cont False
     return $ res1 ++ res2
 
 nonDetHandler2
@@ -207,9 +208,9 @@ decideComp1
   , IoConstraint eff
   ) => eff Int
 decideComp1 = do
-  a <- decide True False
+  a <- decide
   liftIo $ putStrLn $ "a: " ++ (show a)
-  b <- decide False True
+  b <- decide
   liftIo $ putStrLn $ "b: " ++ (show b)
   return $ if a
     then if b then 1 else 2

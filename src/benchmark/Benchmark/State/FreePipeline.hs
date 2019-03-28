@@ -6,6 +6,9 @@ import Control.Monad.Identity
 import Control.Monad.Trans.Reader (ReaderT)
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops.Env
+import Control.Effect.Implicit.Ops.State
+
 import Benchmark.State.Base
 
 {-# INLINE statePipeline1 #-}

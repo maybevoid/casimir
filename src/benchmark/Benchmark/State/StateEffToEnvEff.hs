@@ -13,6 +13,9 @@ import Control.Monad.Trans.Reader (ReaderT)
 import Control.Monad.Trans.State.Strict (StateT, evalStateT)
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops.Env
+import Control.Effect.Implicit.Ops.State
+
 import Benchmark.State.Base
 
 stateEffToEnvEffPipeline
