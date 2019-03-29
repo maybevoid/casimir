@@ -116,7 +116,7 @@ instance ImplicitOps TimeEff where
     => TimeOps eff
     -> ((OpsConstraint TimeEff eff) => r)
     -> r
-  withOps ops comp = let ?timeOps = comp in cont
+  withOps ops comp = let ?timeOps = ops in comp
 
   captureOps :: forall eff
      . (Effect eff, OpsConstraint TimeEff eff)
@@ -196,11 +196,11 @@ it we could otherwise write
 
 `(∪)` is the union type operator that we can use to combine multiple effect
 operations. It is the type alias to `Union`, so if you can't figure how to
-type "∪", you can write `TimeEff ``Union`` IoEff` or `Union TimeEff IoEff`
+type "∪", you can write ``TimeEff `Union` IoEff`` or `Union TimeEff IoEff`
 instead.
 
 `IoEff` is one of the built in effects offered by `implicit-effects`. It
-is the operation equivalent to the `MonadIO` typeclass, with a `liftIo`.
+is the operation equivalent to the `MonadIO` typeclass, with a `liftIo`
 operation. `ioOps` is the trivial instance for `IoOps`
 (a.k.a. `Operation IoEff`) that offers `liftIo` under `IO`.
 
