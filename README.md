@@ -1,6 +1,8 @@
 ## Implicit Effects: Algebraic Effects in Haskell using Implicit Parameters
 
-[![Build Status](https://travis-ci.org/maybevoid/implicit-effects)](https://travis-ci.org/maybevoid/implicit-effects.svg?branch=master)
+[![Build Status](https://travis-ci.org/maybevoid/implicit-effects.svg?branch=master)](https://travis-ci.org/maybevoid/implicit-effects)
+
+  - [Haddock documentation](https://maybevoid.com/implicit-effects-haddock/)
 
 ### Introduction
 
@@ -238,5 +240,6 @@ more complex applications.
 
 I am still working on writing the documentation and tutorial for
 `implicit-effects`. Thank you for taking the time to read until here.
-In the meanwhile, you can refer to the Haddock documentation for
-`implicit-effects` to learn more.
+In the meanwhile, you can refer to the
+[Haddock documentation](https://maybevoid.com/implicit-effects-haddock/)
+for `implicit-effects` to learn more.
