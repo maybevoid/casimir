@@ -11,6 +11,7 @@ module Control.Effect.Implicit.Free
   , FreerF (..)
   , freeLiftEff
   , withCoOpHandler
+  , withCoOpHandlerAndOps
   , withFreerCoOpHandler
   , withContextualCoOpHandler
   , coopHandlerToPipeline

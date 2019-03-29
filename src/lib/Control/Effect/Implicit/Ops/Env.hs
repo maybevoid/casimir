@@ -43,6 +43,14 @@ instance ImplicitOps (EnvEff e) where
 ask :: forall e eff . (EnvConstraint e eff) => eff e
 ask = askOp ?envOps
 
+withEnv
+  :: forall r e eff
+   . (Effect eff)
+  => e
+  -> ((EnvConstraint e eff) => eff r)
+  -> eff r
+withEnv x cont = withOps (mkEnvOps x) cont
+
 mkEnvOps :: forall e eff . (Effect eff) => e -> EnvOps e eff
 mkEnvOps x = EnvOps {
   askOp = return x

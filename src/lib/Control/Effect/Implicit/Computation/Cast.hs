@@ -39,8 +39,8 @@ runCast caster res =
 castOps
   :: forall eff ops1 ops2 .
   ( Effect eff
-  , EffOps ops1
-  , EffOps ops2
+  , ImplicitOps ops1
+  , ImplicitOps ops2
   )
   => ops1 ⊇ ops2
   -> Operation ops1 eff
@@ -51,9 +51,9 @@ castOps caster ops = withOps ops $
 
 extendCast
   :: forall ops1 ops2 ops3 .
-  ( EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
+  ( ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps ops3
   )
   => ops1 ⊇ ops2
   -> (ops1 ∪ ops3) ⊇ (ops2 ∪ ops3)
@@ -68,9 +68,9 @@ extendCast caster1 = caster2
 
 composeCast
   :: forall ops1 ops2 ops3.
-  ( EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
+  ( ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps ops3
   )
   => ops1 ⊇ ops2
   -> ops2 ⊇ ops3
