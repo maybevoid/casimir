@@ -30,7 +30,7 @@ type FooEff = TaggedEnvEff Foo String
 type BarEff = TaggedEnvEff Bar String
 type BazEff = TaggedEnvEff Baz String
 
-instance EffOps (TaggedEnvEff Foo e) where
+instance ImplicitOps (TaggedEnvEff Foo e) where
   type OpsConstraint (TaggedEnvEff Foo e) eff
     = (?fooEnvOps :: TaggedEnvOps Foo e eff)
 
@@ -39,7 +39,7 @@ instance EffOps (TaggedEnvEff Foo e) where
 
   captureOps = ?fooEnvOps
 
-instance EffOps (TaggedEnvEff Bar e) where
+instance ImplicitOps (TaggedEnvEff Bar e) where
   type OpsConstraint (TaggedEnvEff Bar e) eff
     = (?barEnvOps :: TaggedEnvOps Bar e eff)
 
@@ -48,7 +48,7 @@ instance EffOps (TaggedEnvEff Bar e) where
 
   captureOps = ?barEnvOps
 
-instance EffOps (TaggedEnvEff Baz e) where
+instance ImplicitOps (TaggedEnvEff Baz e) where
   type OpsConstraint (TaggedEnvEff Baz e) eff
     = (?bazEnvOps :: TaggedEnvOps Baz e eff)
 

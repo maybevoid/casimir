@@ -10,9 +10,7 @@ module Control.Effect.Implicit.Free.FreeEff
   )
 where
 
-import Control.Effect.Implicit.Base.Effect
-import Control.Effect.Implicit.Base.LiftEff
-import Control.Effect.Implicit.Base.FreeOps
+import Control.Effect.Implicit.Base
 
 data CoOpHandler handler a r eff = CoOpHandler {
   handleFreeReturn :: a -> eff r,

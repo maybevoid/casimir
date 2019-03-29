@@ -23,6 +23,10 @@ data AmbOps a eff = AmbOps {
 data AmbCoOp a r
   = SelectOp [a] (a -> r)
 
+instance EffSpec (AmbEff a) where
+  type Operation (AmbEff a) = AmbOps a
+  type CoOperation (AmbEff a) = AmbCoOp a
+
 type AmbConstraint a eff = (?ambOps :: AmbOps a eff)
 
 instance Functor (AmbCoOp a) where
@@ -34,14 +38,11 @@ instance EffFunctor (AmbOps a) where
   }
 
 instance FreeOps (AmbEff a) where
-  type Operation (AmbEff a) = AmbOps a
-  type CoOperation (AmbEff a) = AmbCoOp a
-
   mkFreeOps liftCoOp = AmbOps {
     selectOp = \choice -> liftCoOp $ SelectOp choice id
   }
 
-instance EffOps (AmbEff a) where
+instance ImplicitOps (AmbEff a) where
   type OpsConstraint (AmbEff a) eff = AmbConstraint a eff
 
   withOps ops comp = let ?ambOps = ops in comp

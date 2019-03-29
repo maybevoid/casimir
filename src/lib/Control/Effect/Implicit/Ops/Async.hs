@@ -21,6 +21,10 @@ data AsyncCoOp t r where
   AwaitOp :: forall t r a . t a -> (a -> r) -> AsyncCoOp t r
   AwaitAllOp :: forall t r a . [t a] -> ([a] -> r) -> AsyncCoOp t r
 
+instance EffSpec (AsyncEff t) where
+  type Operation (AsyncEff t) = AsyncOps t
+  type CoOperation (AsyncEff t) = AsyncCoOp t
+
 type AsyncConstraint t eff = (?asyncOps :: AsyncOps t eff)
 
 instance Functor (AsyncCoOp t) where
@@ -34,15 +38,12 @@ instance EffFunctor (AsyncOps t) where
   }
 
 instance FreeOps (AsyncEff t) where
-  type Operation (AsyncEff t) = AsyncOps t
-  type CoOperation (AsyncEff t) = AsyncCoOp t
-
   mkFreeOps liftCoOp = AsyncOps {
     awaitOp = \task -> liftCoOp $ AwaitOp task id,
     awaitAllOp = \tasks -> liftCoOp $ AwaitAllOp tasks id
   }
 
-instance EffOps (AsyncEff t) where
+instance ImplicitOps (AsyncEff t) where
   type OpsConstraint (AsyncEff t) eff = AsyncConstraint t eff
 
   captureOps = ?asyncOps

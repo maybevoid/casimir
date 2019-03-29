@@ -14,6 +14,10 @@ data EnvOps e eff = EnvOps {
 data EnvCoOp e r =
   AskOp (e -> r)
 
+instance EffSpec (EnvEff e) where
+  type Operation (EnvEff e) = EnvOps e
+  type CoOperation (EnvEff e) = EnvCoOp e
+
 type EnvConstraint e eff = (?envOps :: EnvOps e eff)
 
 instance EffFunctor (EnvOps e) where
@@ -25,14 +29,11 @@ instance Functor (EnvCoOp e) where
   fmap f (AskOp cont) = AskOp $ fmap f cont
 
 instance FreeOps (EnvEff e) where
-  type Operation (EnvEff e) = EnvOps e
-  type CoOperation (EnvEff e) = EnvCoOp e
-
   mkFreeOps liftCoOp = EnvOps {
     askOp = liftCoOp $ AskOp id
   }
 
-instance EffOps (EnvEff e) where
+instance ImplicitOps (EnvEff e) where
   type OpsConstraint (EnvEff e) eff = (EnvConstraint e eff)
 
   withOps envOps comp = let ?envOps = envOps in comp

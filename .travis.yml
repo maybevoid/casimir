@@ -5,7 +5,7 @@ cache:
   - $HOME/nix.store
 
 script:
-  - nix-build release.nix
+  - nix-build nix/release.nix
 
 before_install:
   - sudo mkdir -p /etc/nix

@@ -18,7 +18,7 @@ taggedTests = testGroup "TaggedEff Tests"
 data Foo
 data Bar
 
-instance EffOps (TaggedEnvEff Foo e) where
+instance ImplicitOps (TaggedEnvEff Foo e) where
   type OpsConstraint (TaggedEnvEff Foo e) eff
     = (?fooEnvOps :: TaggedEnvOps Foo e eff)
 
@@ -27,7 +27,7 @@ instance EffOps (TaggedEnvEff Foo e) where
 
   captureOps = ?fooEnvOps
 
-instance EffOps (TaggedEnvEff Bar e) where
+instance ImplicitOps (TaggedEnvEff Bar e) where
   type OpsConstraint (TaggedEnvEff Bar e) eff
     = (?barEnvOps :: TaggedEnvOps Bar e eff)
 

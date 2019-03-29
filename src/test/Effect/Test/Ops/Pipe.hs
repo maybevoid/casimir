@@ -30,6 +30,14 @@ data AwaitCoOp a r =
   AwaitOp (a -> r)
   deriving (Functor)
 
+instance EffSpec (YieldEff a) where
+  type Operation (YieldEff a) = YieldOps a
+  type CoOperation (YieldEff a) = YieldCoOp a
+
+instance EffSpec (AwaitEff a) where
+  type Operation (AwaitEff a) = AwaitOps a
+  type CoOperation (AwaitEff a) = AwaitCoOp a
+
 type YieldConstraint a eff = (?yieldOps :: YieldOps a eff)
 type AwaitConstraint a eff = (?awaitOps :: AwaitOps a eff)
 
@@ -42,20 +50,14 @@ instance EffFunctor (AwaitOps a) where
     lifter $ awaitOp ops
 
 instance FreeOps (YieldEff a) where
-  type Operation (YieldEff a) = YieldOps a
-  type CoOperation (YieldEff a) = YieldCoOp a
-
   mkFreeOps liftCoOp = YieldOps $
     \x -> liftCoOp $ YieldOp x id
 
 instance FreeOps (AwaitEff a) where
-  type Operation (AwaitEff a) = AwaitOps a
-  type CoOperation (AwaitEff a) = AwaitCoOp a
-
   mkFreeOps liftCoOp = AwaitOps $
     liftCoOp $ AwaitOp id
 
-instance EffOps (YieldEff a) where
+instance ImplicitOps (YieldEff a) where
   type OpsConstraint (YieldEff a) eff = YieldConstraint a eff
 
   withOps yieldOps comp
@@ -63,7 +65,7 @@ instance EffOps (YieldEff a) where
 
   captureOps = ?yieldOps
 
-instance EffOps (AwaitEff a) where
+instance ImplicitOps (AwaitEff a) where
   type OpsConstraint (AwaitEff a) eff = AwaitConstraint a eff
 
   withOps awaitOps comp

@@ -19,6 +19,10 @@ data ExceptionOps e eff = ExceptionOps {
 data ExceptionCoOp e r =
   RaiseOp e
 
+instance EffSpec (ExceptionEff e) where
+  type Operation (ExceptionEff e) = ExceptionOps e
+  type CoOperation (ExceptionEff e) = ExceptionCoOp e
+
 type ExceptionConstraint e eff = (?exceptionOps :: ExceptionOps e eff)
 
 instance EffFunctor (ExceptionOps e) where
@@ -30,14 +34,11 @@ instance Functor (ExceptionCoOp e) where
   fmap _ (RaiseOp e) = RaiseOp e
 
 instance FreeOps (ExceptionEff e) where
-  type Operation (ExceptionEff e) = ExceptionOps e
-  type CoOperation (ExceptionEff e) = ExceptionCoOp e
-
   mkFreeOps liftCoOp = ExceptionOps {
     raiseOp = \e -> liftCoOp $ RaiseOp e
   }
 
-instance EffOps (ExceptionEff e) where
+instance ImplicitOps (ExceptionEff e) where
   type OpsConstraint (ExceptionEff e) eff = ExceptionConstraint e eff
 
   withOps ops comp = let ?exceptionOps = ops in comp

@@ -6,8 +6,10 @@
 module Control.Effect.Implicit.Base
   ( Effect
   , EffFunctor (..)
+  , EffSpec (..)
+  , ImplicitOps (..)
   , FreeOps (..)
-  , EffOps (..)
+  , EffOps
   , EffConstraint
   , NoEff
   , Union
@@ -31,6 +33,8 @@ where
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
+import Control.Effect.Implicit.Base.EffSpec
+import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.FreeOps
 import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.Union

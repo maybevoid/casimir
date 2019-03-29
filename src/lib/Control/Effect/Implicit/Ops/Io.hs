@@ -11,13 +11,7 @@ module Control.Effect.Implicit.Ops.Io
 where
 
 import Control.Effect.Implicit.Base
-  ( EffFunctor (..)
-  , FreeOps (..)
-  , EffOps (..)
-  )
-
 import Control.Effect.Implicit.Computation
-  (BaseHandler, baseHandler)
 
 data IoEff
 
@@ -28,7 +22,9 @@ data IoOps eff = IoOps {
 data IoCoOp a where
   IoCoOp :: forall x a . IO x -> (x -> a) -> IoCoOp a
 
-type IoConstraint eff = (?ioOps :: IoOps eff)
+instance EffSpec IoEff where
+  type Operation IoEff = IoOps
+  type CoOperation IoEff = IoCoOp
 
 instance Functor IoCoOp where
   fmap
@@ -39,19 +35,18 @@ instance Functor IoCoOp where
   fmap f (IoCoOp io cont) = IoCoOp io (f . cont)
 
 instance EffFunctor IoOps where
-  effmap liftEff ops = IoOps {
-    liftIoOp = liftEff . liftIoOp ops
+  effmap lifter ops = IoOps {
+    liftIoOp = lifter . liftIoOp ops
   }
 
 instance FreeOps IoEff where
-  type Operation IoEff = IoOps
-  type CoOperation IoEff = IoCoOp
-
   mkFreeOps liftCoOp = IoOps {
     liftIoOp = \io -> liftCoOp $ IoCoOp io id
   }
 
-instance EffOps IoEff where
+type IoConstraint eff = (?ioOps :: IoOps eff)
+
+instance ImplicitOps IoEff where
   type OpsConstraint IoEff eff = (IoConstraint eff)
 
   withOps ops comp = let ?ioOps = ops in comp

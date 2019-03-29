@@ -13,6 +13,10 @@ data DecideOps s eff = DecideOps {
 data DecideCoOp s a = DecideOp (s -> a)
   deriving (Functor)
 
+instance EffSpec (DecideEff s) where
+  type Operation (DecideEff s) = DecideOps s
+  type CoOperation (DecideEff s) = DecideCoOp s
+
 type DecideConstraint s eff = (?decideOps :: DecideOps s eff)
 
 instance EffFunctor (DecideOps s) where
@@ -21,14 +25,11 @@ instance EffFunctor (DecideOps s) where
   }
 
 instance FreeOps (DecideEff s) where
-  type Operation (DecideEff s) = DecideOps s
-  type CoOperation (DecideEff s) = DecideCoOp s
-
   mkFreeOps liftCoOp = DecideOps {
     decideOp = liftCoOp $ DecideOp id
   }
 
-instance EffOps (DecideEff s) where
+instance ImplicitOps (DecideEff s) where
   type OpsConstraint (DecideEff s) eff = DecideConstraint s eff
 
   withOps decideOps comp = let ?decideOps = decideOps in comp

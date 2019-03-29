@@ -10,10 +10,6 @@ module Control.Effect.Implicit.Ops.State
 where
 
 import Control.Effect.Implicit.Base
-  ( EffFunctor (..)
-  , FreeOps (..)
-  , EffOps (..)
-  )
 
 data StateEff s where
 
@@ -26,6 +22,10 @@ data StateCoOp s a =
     GetOp (s -> a)
   | PutOp s (() -> a)
 
+instance EffSpec (StateEff s) where
+  type Operation (StateEff s) = StateOps s
+  type CoOperation (StateEff s) = StateCoOp s
+
 type StateConstraint s eff = (?stateOps :: StateOps s eff)
 
 instance Functor (StateCoOp s) where
@@ -33,21 +33,18 @@ instance Functor (StateCoOp s) where
   fmap f (PutOp s cont) = PutOp s $ fmap f cont
 
 instance EffFunctor (StateOps a) where
-  effmap liftEff stateOps = StateOps {
-    getOp = liftEff $ getOp stateOps,
-    putOp = liftEff . putOp stateOps
+  effmap lifter stateOps = StateOps {
+    getOp = lifter $ getOp stateOps,
+    putOp = lifter . putOp stateOps
   }
 
 instance FreeOps (StateEff s) where
-  type Operation (StateEff s) = StateOps s
-  type CoOperation (StateEff s) = StateCoOp s
-
   mkFreeOps liftCoOp = StateOps {
     getOp = liftCoOp $ GetOp id,
     putOp = \x -> liftCoOp $ PutOp x id
   }
 
-instance EffOps (StateEff s) where
+instance ImplicitOps (StateEff s) where
   type OpsConstraint (StateEff s) eff = StateConstraint s eff
 
   {-# INLINE withOps #-}

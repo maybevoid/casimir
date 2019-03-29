@@ -12,9 +12,7 @@ where
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base.EffFunctor
-import Control.Effect.Implicit.Base.FreeOps
-import Control.Effect.Implicit.Base.EffOps
+import Control.Effect.Implicit.Base
 
 data TaggedEff l ops
 
@@ -43,6 +41,16 @@ data TaggedCoOp
     -> TaggedCoOp l coop r
 
 instance
+  (EffSpec ops)
+  => EffSpec (TaggedEff l ops)
+   where
+    type Operation (TaggedEff l ops)
+      = TaggedOps l (Operation ops)
+
+    type CoOperation (TaggedEff l ops)
+      = TaggedCoOp l (CoOperation ops)
+
+instance
   (EffFunctor ops)
   => EffFunctor (TaggedOps l ops)
   where
@@ -58,12 +66,6 @@ instance
   (FreeOps ops)
   => FreeOps (TaggedEff l ops)
   where
-    type Operation (TaggedEff l ops)
-      = TaggedOps l (Operation ops)
-
-    type CoOperation (TaggedEff l ops)
-      = TaggedCoOp l (CoOperation ops)
-
     mkFreeOps liftCoOp = TaggedOps $ mkFreeOps (liftCoOp . TaggedCoOp)
 
 untagOps :: forall l ops eff .

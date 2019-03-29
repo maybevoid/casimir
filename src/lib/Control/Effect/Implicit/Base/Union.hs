@@ -11,8 +11,9 @@ module Control.Effect.Implicit.Base.Union
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.FreeOps
+import Control.Effect.Implicit.Base.EffSpec
+import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
 
 -- | Combines two effect operations into a new effect operation. Union can
@@ -54,6 +55,13 @@ data UnionCoOp ops1 ops2 r
   = LeftCoOp (ops1 r)
   | RightCoOp (ops2 r)
 
+instance EffSpec (Union ops1 ops2) where
+  type Operation (Union ops1 ops2) =
+    UnionOps (Operation ops1) (Operation ops2)
+
+  type CoOperation (Union ops1 ops2) =
+    UnionCoOp (CoOperation ops1) (CoOperation ops2)
+
 instance (Functor ops1, Functor ops2)
   => Functor (UnionCoOp ops1 ops2)
   where
@@ -77,12 +85,6 @@ instance
   (FreeOps ops1, FreeOps ops2) =>
   FreeOps (Union ops1 ops2)
    where
-    type Operation (Union ops1 ops2) =
-      UnionOps (Operation ops1) (Operation ops2)
-
-    type CoOperation (Union ops1 ops2) =
-      UnionCoOp (CoOperation ops1) (CoOperation ops2)
-
     mkFreeOps liftReturn = UnionOps ops1 ops2
      where
       ops1 = mkFreeOps (liftReturn . LeftCoOp)
@@ -97,8 +99,8 @@ instance
 -- when there is an overlap, the left most implicit parameter is used,
 -- and hence the reason the constraint order have to be reversed.
 instance
-  (EffOps ops1, EffOps ops2) =>
-  EffOps (Union ops1 ops2)
+  (ImplicitOps ops1, ImplicitOps ops2)
+  => ImplicitOps (Union ops1 ops2)
    where
     -- | Reverse the order as the left most constraint
     -- gets precedence if there is an overlap
