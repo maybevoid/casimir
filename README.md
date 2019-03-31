@@ -272,18 +272,24 @@ already a well tested and high performance implementation for the state
 effect, which is the `StateT` monad transformer provided by `mtl`, so why
 not use that instead?
 
-In fact `implicit-effects` provides the `StateOps` instance for any
-`StateT eff` in `Control.Effect.Implicit.Transform.State`:
+In fact `implicit-effects` provides the `stateTOps` instance for any
+`StateT eff`:
 
 ```haskell
+-- module Control.Effect.Implicit.Transform.State
+
 stateTOps
-  :: forall eff s . (Effect eff)
-  => StateOps s (StateT s eff)
+  :: forall eff s
+   . (Effect eff, MonadState s eff)
+  => StateOps s eff
 stateTOps = StateOps {
   getOp = get,
   putOp = put
 }
 ```
+
+`stateTOps` can provide state operation on any `MonadState` instance by just
+delegating to `mtl`.
 
 ...
 
@@ -294,3 +300,6 @@ I am still working on writing the documentation and tutorial for
 In the meanwhile, you can refer to the
 [Haddock documentation](https://maybevoid.com/implicit-effects-haddock/)
 for `implicit-effects` to learn more.
+
+You can also look at the [effect operation unit tests](src/test/Effect/Test/Ops)
+which has some example use of `implicit-effects`.

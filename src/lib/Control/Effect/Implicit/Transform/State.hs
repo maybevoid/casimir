@@ -2,7 +2,8 @@
 module Control.Effect.Implicit.Transform.State
 where
 
-import Control.Monad.Trans.State.Strict
+import Control.Monad.State.Class (MonadState  (..))
+import Control.Monad.Trans.State.Strict (StateT, evalStateT)
 
 import Control.Monad.Trans.Class
   (MonadTrans (..))
@@ -20,8 +21,9 @@ liftStateT
 liftStateT = mkLiftEff lift
 
 stateTOps
-  :: forall eff s . (Effect eff)
-  => StateOps s (StateT s eff)
+  :: forall eff s
+   . (Effect eff, MonadState s eff)
+  => StateOps s eff
 stateTOps = StateOps {
   getOp = get,
   putOp = put
@@ -29,8 +31,8 @@ stateTOps = StateOps {
 
 stateTHandler
   :: forall eff s .
-  (Effect eff)
-  => Handler NoEff (StateEff s) (StateT s eff)
+  (Effect eff, MonadState s eff)
+  => Handler NoEff (StateEff s) eff
 stateTHandler = mkHandler $
   \lifter -> applyEffmap lifter stateTOps
 

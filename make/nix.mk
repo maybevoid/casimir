@@ -4,6 +4,9 @@ hpack:
 sync: hpack
 	cabal2nix . > default.nix
 
+clean:
+	cabal new-clean
+
 repl: hpack
 	cabal new-repl --write-ghc-environment-files never lib:implicit-effects
 

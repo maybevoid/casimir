@@ -17,6 +17,10 @@ shell:
 external-shell:
 	nix-shell nix/external.nix
 
+clean:
+	nix-shell --pure nix/shell.nix --run \
+		"make -f make/nix.mk clean"
+
 hoogle:
 	nix-shell --pure nix/external.nix --run \
 		"hoogle server --local --host 0.0.0.0 -p 8333"

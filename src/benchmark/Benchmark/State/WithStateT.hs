@@ -9,6 +9,8 @@ import Control.Monad.Trans.State.Strict (StateT, evalStateT)
 import qualified Control.Monad.Trans.Reader as RT
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Transform.State
+
 import Benchmark.State.Base
 
 withStateOpsComp :: forall eff . (Effect eff)
