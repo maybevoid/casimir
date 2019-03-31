@@ -68,7 +68,7 @@ class Monad m => MonadTime m where
   currentTime :: m UTCTime
 ```
 
-In `implicit-effects`, we'd instead define the time effect as follow:
+In `implicit-effects`, we define the time effect instead as follow:
 
 ```haskell
 data TimeEff
@@ -78,13 +78,8 @@ data TimeOps eff = TimeOps {
   currentTimeOp :: eff UTCTime
 }
 
-data TimeCoOp r =
-  CurrentTimeOp (UTCTime -> r)
-  deriving (Functor)
-
-instance EffSpec TimeEff where
+instance EffOps TimeEff where
   type Operation TimeEff = TimeOps
-  type CoOperation TimeEff = TimeCoOp
 ```
 
 We define a dummy `TimeEff` datatype with empty body for identifying the time
@@ -92,23 +87,22 @@ effect. We then define the operation type `TimeOps`, parameterized by a Monad
 `eff`. (To make effect programming more friendly to beginners, in
 `implicit-effects` we define `Effect` as a less scary type alias to `Monad` and
 we name monadic type variables as `eff` instead of `m`) `TimeOps` will be bound
-to implicit parameters later for used in computations. We also define the
-co-operation `TimeCoOp` as the _dual_ to `TimeOps`.
+to implicit parameters later for used in computations.
 
-`TimeCoOp` is just like the traditional payload functor for free monad, and can
-be used for effect interpretation with a `CoOpHandler`. We will talk more about
-co-operations in later sections on algebraic effects. For now we will first
-focus on how `TimeOps` is used.
-
-We then declare `TimeEff` as an instance of `EffSpec`. There are two type
-families in `EffSpec` that defines what the operation and co-operation types
-for an effect is, so we just put in `TimeOps` and `TimeCoOp` respectively.
+We then declare `TimeEff` as an instance of `EffOps`. The typeclass requires us
+to declare an `Operation` type for our effect `TimeEff`. Here we just put
+`TimeOps` as the effect operation type.
 
 We then have to define how `implicit-effects` can bind `TimeOps` to a specific
 implicit parameter. This is done by implementing the `ImplicitOps` instance for
 `TimeEff`:
 
 ```haskell
+instance EffFunctor TimeEff where
+  -- Required by ImplicitOps. We leave this undefined for now and will
+  -- explain in the next section.
+  effmap = undefined
+
 instance ImplicitOps TimeEff where
   type OpsConstraint TimeEff eff = (?timeOps :: TimeOps eff)
 
@@ -188,27 +182,40 @@ app' :: IO ()
 app' = withOps (ioTimeOps ∪ ioOps) app
 ```
 
-Above we can see a few new things introduced by `implicit-effects`. The
+There are a few new more things introduced in the example above.
 `EffConstraint` is a type alias that include both `Effect eff` and
 `OpsConstraint` in a single constraint to reduce boilerplate. Without
-it we could otherwise write
+it we would otherwise write
 `(Effect eff, OpsConstraint (TimeEff ∪ IoEff) eff)`.
-
-`(∪)` is the union type operator that we can use to combine multiple effect
-operations. It is the type alias to `Union`, so if you can't figure how to
-type "∪", you can write ``TimeEff `Union` IoEff`` or `Union TimeEff IoEff`
-instead.
 
 `IoEff` is one of the built in effects offered by `implicit-effects`. It
 is the operation equivalent to the `MonadIO` typeclass, with a `liftIo`
 operation. `ioOps` is the trivial instance for `IoOps IO`
 (`Operation IoEff IO`) that offers `liftIo` under `IO`.
 
+```haskell
+-- module Control.Effect.Implicit.Ops.Io
+
+data IoOps eff = IoOps {
+  liftIoOp :: forall a . IO a -> eff a
+}
+
+ioOps :: IoOps IO
+ioOps = IoOps {
+  liftIoOp = id
+}
+```
+
 Our example application `app` is a generic computation that works under all
 monad/effect `eff`. It has the constraint that requires both `TimeEff` and
 `IoEff` be supported to run on the effect `eff`. By defining `app` generically,
 we can run `app` on different effects later on, such as on a monad transformer
 stack as the application grows, or use it with mock effects for testing.
+
+`(∪)` is the union type operator that we can use to combine multiple effect
+operations. It is the type alias to `Union`, so if you can't figure how to
+type "∪", you can write ``TimeEff `Union` IoEff`` or `Union TimeEff IoEff`
+instead.
 
 We can bind the effect operations with `app` using `withOps` and get `app'`,
 which works under `IO` as both `ioTimeOps` and `ioOps` works under `IO`. The
@@ -235,6 +242,50 @@ optimization in GHC if enough people use implicit parameters.
 We will also see later on more abstractions provided by `implicit-effects`,
 and how the performance tradeoff may worth it when we use them to structure
 more complex applications.
+
+### EffFunctor
+
+Following the previous example, let's say we want to add a state effect to
+store or update the fetched time. We can use `StateEff` provided by
+`Control.Effect.Implicit.Ops.State`, which have the same interface as
+`MonadState`.
+
+```haskell
+app :: forall eff
+   . (EffConstraint (TimeEff ∪ IoEff  ∪ StateEff UTCTime) eff)
+  => eff ()
+app = do
+  time1 <- get
+  liftIo $ putStrLn $ "the previous recorded time is " ++ show time1
+
+  time2 <- currentTime
+  put time2
+  liftIo $ putStrLn $ "the current time is " ++ show time2
+```
+
+With our updated app, we have to find a concrete monad for `eff` that
+supports all three effect operations we need. For instance we may try to
+implement `StateOps UTCTime IO` since we have already have `IO` instance
+for the other two operations. Or we can use the algebraic effects approach
+that we'll introduce in later section to implement state. But there is
+already a well tested and high performance implementation for the state
+effect, which is the `StateT` monad transformer provided by `mtl`, so why
+not use that instead?
+
+In fact `implicit-effects` provides the `StateOps` instance for any
+`StateT eff` in `Control.Effect.Implicit.Transform.State`:
+
+```haskell
+stateTOps
+  :: forall eff s . (Effect eff)
+  => StateOps s (StateT s eff)
+stateTOps = StateOps {
+  getOp = get,
+  putOp = put
+}
+```
+
+...
 
 ## To Be Continued..
 

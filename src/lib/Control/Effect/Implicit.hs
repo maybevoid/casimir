@@ -8,8 +8,18 @@
   Portability : POSIX
 
   This is the main module for implicit-effects. It re-exports the
-  majority of the submodules offered by this package, other than
-  "Control.Effect.Implicit.Ops".* and  "Control.Effect.Implicit.TaggedOps".*.
+  following submodules for convenience:
+
+    - "Control.Effect.Implicit.Base"
+    - "Control.Effect.Implicit.Computation"
+    - "Control.Effect.Implicit.Free"
+
+  The following submodules and their descendents require manual import:
+
+    - "Control.Effect.Implicit.Ops".*
+    - "Control.Effect.Implicit.TaggedOps".*
+    - "Control.Effect.Implicit.Transform".*
+
   Refer the submodules for complete documentation.
 -}
 
@@ -17,11 +27,9 @@ module Control.Effect.Implicit
   ( module Control.Effect.Implicit.Base
   , module Control.Effect.Implicit.Computation
   , module Control.Effect.Implicit.Free
-  , module Control.Effect.Implicit.Transform
   )
 where
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
 import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Transform
