@@ -87,8 +87,8 @@ composeCast cast1 cast2 = cast3
 castComputation
   :: forall ops1 ops2 comp eff .
   ( Effect eff
-  , EffOps ops1
-  , EffOps ops2
+  , ImplicitOps ops1
+  , ImplicitOps ops2
   )
   => ops1 ⊇ ops2
   -> Computation ops2 comp eff

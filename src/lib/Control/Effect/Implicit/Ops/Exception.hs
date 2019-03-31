@@ -134,7 +134,7 @@ tryFinally comp handler1 =
 tryComp
   :: forall free eff ops e a
    . ( FreeEff free
-     , EffOps ops
+     , ImplicitOps ops
      , EffConstraint ops eff
      )
   => Computation ((ExceptionEff e) ∪ ops) (Return a) eff
@@ -153,7 +153,7 @@ tryComp comp1 handler1 = handleFree handler2 comp2
 bracketComp
   :: forall free eff ops e a b
    . ( FreeEff free
-     , EffOps ops
+     , ImplicitOps ops
      , EffConstraint ops eff
      )
   => Computation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init

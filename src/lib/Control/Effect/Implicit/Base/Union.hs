@@ -90,8 +90,8 @@ instance
       ops1 = mkFreeOps (liftReturn . LeftCoOp)
       ops2 = mkFreeOps (liftReturn . RightCoOp)
 
--- | @ops1 '∪' ops2@ is a 'EffOps' if both @ops1@ and @ops2@ are instance of
--- 'EffOps', with @'OpsConstraint' (ops1 '∪' ops2)@ being the **reversed**
+-- | @ops1 '∪' ops2@ is a 'ImplicitOps' if both @ops1@ and @ops2@ are instance of
+-- 'ImplicitOps', with @'OpsConstraint' (ops1 '∪' ops2)@ being the **reversed**
 -- order of @'OpsConstraint' ops2@, followed by @'OpsConstraint' ops1@.
 -- This means that if there is an overlap of two effect operations with
 -- the same implicit parameter label, the one defined at the right side

@@ -201,8 +201,8 @@ instead.
 
 `IoEff` is one of the built in effects offered by `implicit-effects`. It
 is the operation equivalent to the `MonadIO` typeclass, with a `liftIo`
-operation. `ioOps` is the trivial instance for `IoOps`
-(a.k.a. `Operation IoEff`) that offers `liftIo` under `IO`.
+operation. `ioOps` is the trivial instance for `IoOps IO`
+(`Operation IoEff IO`) that offers `liftIo` under `IO`.
 
 Our example application `app` is a generic computation that works under all
 monad/effect `eff`. It has the constraint that requires both `TimeEff` and

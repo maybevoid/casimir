@@ -10,7 +10,7 @@ import Control.Effect.Implicit.Base
 
 newtype Computation ops comp eff1 = Computation {
   runComp :: forall eff2 .
-    ( EffOps ops
+    ( ImplicitOps ops
     , Effect eff1
     , Effect eff2
     )
@@ -23,7 +23,7 @@ type Handler ops handler eff
   = Computation ops (Operation handler) eff
 
 liftComputation :: forall ops comp eff1 eff2 .
-  (EffOps ops, Effect eff1, Effect eff2)
+  (ImplicitOps ops, Effect eff1, Effect eff2)
   => LiftEff eff1 eff2
   -> Computation ops comp eff1
   -> Computation ops comp eff2

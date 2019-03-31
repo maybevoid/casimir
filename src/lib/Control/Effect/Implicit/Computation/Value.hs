@@ -35,7 +35,7 @@ type IdentityComputation a = Computation NoEff (Return a) Identity
 returnComputation
   :: forall ops a eff1 .
   ( Effect eff1
-  , EffOps ops
+  , ImplicitOps ops
   )
   => (forall eff2 .
       (EffConstraint ops eff2)
@@ -49,7 +49,7 @@ returnComputation comp1 = Computation $
 {-# INLINE genericComputation #-}
 genericComputation
   :: forall ops comp .
-  (EffOps ops)
+  (ImplicitOps ops)
   => (forall eff .
       (EffConstraint ops eff)
       => comp eff)
@@ -60,7 +60,7 @@ genericComputation comp = Computation $
 {-# INLINE genericReturn #-}
 genericReturn
   :: forall ops a .
-  (EffOps ops)
+  (ImplicitOps ops)
   => (forall eff .
       (EffConstraint ops eff)
       => eff a)
@@ -73,7 +73,7 @@ runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
 
 execComp
   :: forall ops eff a .
-  ( EffOps ops
+  ( ImplicitOps ops
   , EffConstraint ops eff
   )
   => Computation ops (Return a) eff

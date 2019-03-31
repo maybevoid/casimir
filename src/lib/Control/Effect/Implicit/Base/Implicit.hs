@@ -9,25 +9,26 @@ import Data.Kind
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffSpec
+import Control.Effect.Implicit.Base.EffFunctor
 
--- | An effect operation must also be an instance of 'EffOps' to give
+-- | An effect operation must also be an instance of 'ImplicitOps' to give
 -- computations access to @'Operation' ops@ through implicit parameter
 -- constraints. The 'FreeOps' class hides the machinery of implicit
 -- parameters and make them appear like regular constraints with local
--- scope. The definition for 'EffOps' for most effect operations can
+-- scope. The definition for 'ImplicitOps' for most effect operations can
 -- typically be derived mechanically. We may look into using template
--- Haskell to generate instances for 'EffOps' in future to reduce the
+-- Haskell to generate instances for 'ImplicitOps' in future to reduce the
 -- boilerplate.
 --
--- The law for 'EffOps' is
+-- The law for 'ImplicitOps' is
 --
 -- @
 -- forall ops . 'withOps' ops 'captureOps' === ops
 -- @
 --
--- This means any non-trivial instance for 'EffOps' must somehow make use of
+-- This means any non-trivial instance for 'ImplicitOps' must somehow make use of
 -- implicit parameters for the law to hold.
-class (EffSpec ops) => ImplicitOps ops where
+class (EffSpec ops, EffFunctor (Operation ops)) => ImplicitOps ops where
 
   -- | The constraint kind for the effect operation under 'Effect' @eff@.
   -- This is typically an implicit parameter with a unique name, e.g.

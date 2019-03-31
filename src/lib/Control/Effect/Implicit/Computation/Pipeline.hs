@@ -23,7 +23,7 @@ newtype Pipeline ops1 handler comp1 comp2 eff1 eff2
   = Pipeline {
       runPipeline
         :: forall ops2 .
-        (EffOps ops2)
+        (ImplicitOps ops2)
         => Computation (handler ∪ ops2) comp1 eff1
         -> Computation (ops1 ∪ ops2) comp2 eff2
   }
@@ -45,8 +45,8 @@ type GenericPipeline ops handler eff
 handlerToPipeline
   :: forall ops1 handler eff .
   ( Effect eff
-  , EffOps ops1
-  , EffOps handler
+  , ImplicitOps ops1
+  , ImplicitOps handler
   )
   => Handler ops1 handler eff
   -> (forall comp .
@@ -55,7 +55,7 @@ handlerToPipeline
 handlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline :: forall ops2 comp .
-    (EffOps ops2, EffFunctor comp)
+    (ImplicitOps ops2, EffFunctor comp)
     => Computation (handler ∪ ops2) comp eff
     -> Computation (ops1 ∪ ops2) comp eff
   pipeline comp1 = bindHandlerWithCast @(ops1 ∪ ops2)
@@ -66,8 +66,8 @@ handlerToPipeline handler1 = Pipeline pipeline
 transformerPipeline
   :: forall t ops1 handler eff1 .
   ( Effect eff1
-  , EffOps ops1
-  , EffOps handler
+  , ImplicitOps ops1
+  , ImplicitOps handler
   , (forall eff . (Effect eff) => Effect (t eff))
   )
   => Computation ops1 (TransformerHandler t handler) eff1
@@ -76,7 +76,7 @@ transformerPipeline handler1 = Pipeline pipeline
  where
   {-# INLINE pipeline #-}
   pipeline :: forall ops2 comp .
-    (EffOps ops2, EffFunctor comp)
+    (ImplicitOps ops2, EffFunctor comp)
     => Computation (handler ∪ ops2) comp eff1
     -> Computation (ops1 ∪ ops2) comp eff1
   pipeline comp1 = Computation comp2
@@ -99,9 +99,9 @@ castPipelineOps
   :: forall ops1 ops2 handler comp1 comp2 eff1 eff2  .
   ( Effect eff1
   , Effect eff2
-  , EffOps ops1
-  , EffOps ops2
-  , EffOps handler
+  , ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps handler
   )
   => ops2 ⊇ ops1
   -> Pipeline ops1 handler comp1 comp2 eff1 eff2
@@ -109,7 +109,7 @@ castPipelineOps
 castPipelineOps cast21 pipeline1 = Pipeline pipeline2
  where
   pipeline2 :: forall ops3 .
-    (EffOps ops3)
+    (ImplicitOps ops3)
     => Computation (handler ∪ ops3) comp1 eff1
     -> Computation (ops2 ∪ ops3) comp2 eff2
   pipeline2 comp1 = comp2
@@ -127,9 +127,9 @@ castPipelineHandler
   :: forall ops1 handler1 handler2 comp1 comp2 eff1 eff2 .
   ( Effect eff1
   , Effect eff2
-  , EffOps ops1
-  , EffOps handler1
-  , EffOps handler2
+  , ImplicitOps ops1
+  , ImplicitOps handler1
+  , ImplicitOps handler2
   )
   => handler1 ⊇ handler2
   -> Pipeline ops1 handler1 comp1 comp2 eff1 eff2
@@ -137,7 +137,7 @@ castPipelineHandler
 castPipelineHandler cast1 pipeline1 = Pipeline pipeline2
  where
   pipeline2 :: forall ops2 .
-    (EffOps ops2)
+    (ImplicitOps ops2)
     => Computation (handler2 ∪ ops2) comp1 eff1
     -> Computation (ops1 ∪ ops2) comp2 eff2
   pipeline2 comp1 = runPipeline pipeline1 comp2
@@ -153,10 +153,10 @@ composePipelines
   ( Effect eff1
   , Effect eff2
   , Effect eff3
-  , EffOps ops1
-  , EffOps ops2
-  , EffOps handler1
-  , EffOps handler2
+  , ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps handler1
+  , ImplicitOps handler2
   )
   => Pipeline (handler2 ∪ ops1) handler1 comp1 comp2 eff1 eff2
   -> Pipeline ops2 handler2 comp2 comp3 eff2 eff3
@@ -164,7 +164,7 @@ composePipelines
 composePipelines pipeline1 pipeline2 = Pipeline pipeline3
  where
   pipeline3 :: forall ops3 .
-    (EffOps ops3)
+    (ImplicitOps ops3)
     => Computation ((handler1 ∪ handler2) ∪ ops3) comp1 eff1
     -> Computation ((ops1 ∪ ops2) ∪ ops3) comp3 eff3
   pipeline3 comp1 =
@@ -186,10 +186,10 @@ runPipelineWithCast
   :: forall ops3 ops1 ops2 handler comp1 comp2 eff1 eff2 .
   ( Effect eff1
   , Effect eff2
-  , EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
-  , EffOps handler
+  , ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps ops3
+  , ImplicitOps handler
   )
   => ops3 ⊇ ops1
   -> (handler ∪ ops3) ⊇ ops2
@@ -210,12 +210,12 @@ composePipelinesWithCast
   ( Effect eff1
   , Effect eff2
   , Effect eff3
-  , EffOps ops1
-  , EffOps ops2
-  , EffOps ops3
-  , EffOps handler1
-  , EffOps handler2
-  , EffOps handler3
+  , ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps ops3
+  , ImplicitOps handler1
+  , ImplicitOps handler2
+  , ImplicitOps handler3
   )
   => (handler2 ∪ ops3) ⊇ ops1
   -> ops3 ⊇ ops2

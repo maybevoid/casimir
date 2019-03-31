@@ -85,7 +85,7 @@ await :: forall a eff
 await = awaitOp ?awaitOps
 
 runPipe :: forall a r ops eff1
-   . (Effect eff1, EffOps ops)
+   . (Effect eff1, ImplicitOps ops)
   => Computation ((YieldEff a) ∪ ops) (Return r) eff1
   -> Computation ((AwaitEff a) ∪ ops) (Return r) eff1
   -> Computation ops (Return r) eff1

@@ -61,7 +61,7 @@ instance EffFunctor NoOp where
 instance FreeOps NoEff where
   mkFreeOps _ = NoOp
 
--- | As the trivial instance for 'EffOps', @'OpsConstraint' 'NoEff'@ does not
+-- | As the trivial instance for 'ImplicitOps', @'OpsConstraint' 'NoEff'@ does not
 -- make use of implicit parameters, as its 'Operation' can be trivially be
 -- constructed.
 instance ImplicitOps NoEff where

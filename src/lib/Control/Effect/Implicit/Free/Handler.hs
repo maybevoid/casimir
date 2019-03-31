@@ -15,7 +15,8 @@ import Control.Effect.Implicit.Free.FreeEff
 withCoOpHandler
   :: forall free handler eff a r
    . ( Effect eff
-     , EffOps handler
+     , FreeOps handler
+     , ImplicitOps handler
      , FreeEff free
      )
   => CoOpHandler handler a r eff
@@ -29,8 +30,9 @@ withCoOpHandler handler comp1
 {-# INLINE withCoOpHandlerAndOps #-}
 withCoOpHandlerAndOps
   :: forall free ops handler eff a r
-    . ( EffOps ops
-      , EffOps handler
+    . ( ImplicitOps ops
+      , FreeOps handler
+      , ImplicitOps handler
       , FreeEff free
       , EffConstraint ops eff
       )
@@ -50,30 +52,32 @@ withCoOpHandlerAndOps handler comp1
 
 {-# INLINE withFreerCoOpHandler #-}
 withFreerCoOpHandler
-  :: forall free ops eff a r
+  :: forall free handler eff a r
    . ( Effect eff
-     , EffOps ops
+     , FreeOps handler
+     , ImplicitOps handler
      , FreerEff free
      )
-  => FreerCoOpHandler ops a r eff
-  -> ((OpsConstraint ops (free ops eff))
-      => free ops eff a)
+  => FreerCoOpHandler handler a r eff
+  -> ((OpsConstraint handler (free handler eff))
+      => free handler eff a)
   -> eff r
 withFreerCoOpHandler handler comp1
   = handleFreer @free handler $
-      withOps (freeOps @free @ops @eff) comp1
+      withOps (freeOps @free @handler @eff) comp1
 
 {-# INLINE withContextualCoOpHandler #-}
 withContextualCoOpHandler
-  :: forall free ops eff a r
+  :: forall free handler eff a r
    . ( Effect eff
-     , EffOps ops
+     , FreeOps handler
+     , ImplicitOps handler
      , FreeEff free
      )
-  => CoOpHandler ops a r eff
+  => CoOpHandler handler a r eff
   -> (r -> eff a)
-  -> ((OpsConstraint ops (free ops eff))
-      => free ops eff a)
+  -> ((OpsConstraint handler (free handler eff))
+      => free handler eff a)
   -> eff a
 withContextualCoOpHandler handler extract comp
   = withCoOpHandler @free handler comp >>= extract

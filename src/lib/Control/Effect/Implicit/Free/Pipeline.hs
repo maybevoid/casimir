@@ -15,8 +15,9 @@ import Control.Effect.Implicit.Free.FreeEff
 coopHandlerToPipeline
   :: forall free ops1 handler eff1 a b .
   ( Effect eff1
-  , EffOps ops1
-  , EffOps handler
+  , ImplicitOps ops1
+  , FreeOps handler
+  , ImplicitOps handler
   , FreeEff free
   )
   => Computation ops1 (CoOpHandler handler a b) eff1
@@ -25,7 +26,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2 .
-    (EffOps ops2)
+    (ImplicitOps ops2)
     => Computation (handler ∪ ops2) (Return a) eff1
     -> Computation (ops1 ∪ ops2) (Return b) eff1
   pipeline comp1 = Computation comp2
@@ -53,8 +54,9 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
 genericCoOpHandlerToPipeline
   :: forall free ops1 handler eff1 .
   ( Effect eff1
-  , EffOps ops1
-  , EffOps handler
+  , ImplicitOps ops1
+  , FreeOps handler
+  , ImplicitOps handler
   , FreeEff free
   )
   => Computation ops1 (GenericCoOpHandler handler) eff1
@@ -83,8 +85,9 @@ genericCoOpHandlerToPipeline handler1
 contextualHandlerToPipeline
   :: forall free w ops1 handler eff1 .
   ( Effect eff1
-  , EffOps ops1
-  , EffOps handler
+  , ImplicitOps ops1
+  , FreeOps handler
+  , ImplicitOps handler
   , FreeEff free
   )
   => Computation ops1 (ContextualHandler w handler) eff1

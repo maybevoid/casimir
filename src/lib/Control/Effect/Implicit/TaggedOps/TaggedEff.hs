@@ -80,8 +80,8 @@ untagCoOp (TaggedCoOp coop) = coop
 
 withTag
   :: forall l ops eff r
-   . ( EffOps ops
-     , EffOps (TaggedEff l ops)
+   . ( ImplicitOps ops
+     , ImplicitOps (TaggedEff l ops)
      , EffConstraint (TaggedEff l ops) eff
      )
   => ((OpsConstraint ops eff) => r)

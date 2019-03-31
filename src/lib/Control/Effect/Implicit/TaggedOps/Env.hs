@@ -11,7 +11,7 @@ type TaggedEnvCoOp tag e r = TaggedCoOp tag (EnvCoOp e) r
 
 askTag
   :: forall tag e eff
-   . ( EffOps (TaggedEnvEff tag e)
+   . ( ImplicitOps (TaggedEnvEff tag e)
      , EffConstraint (TaggedEnvEff tag e) eff
      )
   => eff e
