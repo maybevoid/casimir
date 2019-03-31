@@ -14,10 +14,17 @@ import Control.Effect.Implicit.Ops.Env (EnvEff, EnvOps (..))
 import Control.Effect.Implicit.Base
 
 liftReaderT
+  :: forall e eff a
+   . (Effect eff)
+  => eff a
+  -> ReaderT e eff a
+liftReaderT = lift
+
+readerTLiftEff
   :: forall a eff
    . (Effect eff)
   => LiftEff eff (ReaderT a eff)
-liftReaderT = mkLiftEff lift
+readerTLiftEff = mkLiftEff lift
 
 readerTOps :: forall a eff . (Effect eff)
   => EnvOps a (ReaderT a eff)

@@ -37,7 +37,7 @@ stateEffToEnvEffPipeline comp1 = Computation comp2
     comp3 = bindHandlerWithCast
       cast cast
       stateTHandler
-      (liftComputation (joinLift lift12 liftStateT) comp1)
+      (liftComputation (joinLift lift12 stateTLiftEff) comp1)
 
     comp4 :: StateT s eff2 a
     comp4 = returnVal $ runComp comp3 idLift NoOp

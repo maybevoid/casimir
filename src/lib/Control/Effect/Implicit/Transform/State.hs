@@ -16,9 +16,15 @@ import Control.Effect.Implicit.Ops.State
   (StateEff, StateOps(..))
 
 liftStateT
+  :: forall s eff a . (Effect eff)
+  => eff a
+  -> StateT s eff a
+liftStateT = lift
+
+stateTLiftEff
   :: forall s eff . (Effect eff)
   => LiftEff eff (StateT s eff)
-liftStateT = mkLiftEff lift
+stateTLiftEff = mkLiftEff liftStateT
 
 stateTOps
   :: forall eff s
@@ -47,7 +53,7 @@ stateTPipeline = transformerPipeline $ genericComputation handler
   handler :: forall eff
    . (EffConstraint (EnvEff s) eff)
     => TransformerHandler (StateT s) (StateEff s) eff
-  handler = TransformerHandler stateTOps liftStateT $ mkLiftEff $
+  handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
     \comp -> do
       i <- ask
       evalStateT comp i

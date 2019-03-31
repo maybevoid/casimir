@@ -12,7 +12,6 @@ import qualified Control.Monad.Trans.Reader as RT
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops.State
 import Control.Effect.Implicit.Transform.State
-import Control.Effect.Implicit.Transform.Reader
 
 import Benchmark.State.Base
 
@@ -33,7 +32,7 @@ stateEffToReaderTPipeline comp1 = Computation comp2
   comp3 = bindHandlerWithCast
     cast cast
     stateTHandler
-    (liftComputation liftStateT comp1)
+    (liftComputation stateTLiftEff comp1)
 
   comp4 :: StateT s eff1 a
   comp4 = returnVal $ runComp comp3 idLift NoOp

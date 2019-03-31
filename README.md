@@ -1,10 +1,10 @@
-## Implicit Effects: Algebraic Effects in Haskell using Implicit Parameters
+# Implicit Effects: Algebraic Effects in Haskell using Implicit Parameters
 
 [![Build Status](https://travis-ci.org/maybevoid/implicit-effects.svg?branch=master)](https://travis-ci.org/maybevoid/implicit-effects)
 
   - [Haddock documentation](https://maybevoid.com/implicit-effects-haddock/)
 
-### Introduction
+## Introduction
 
 `implicit-effects` is a new library for using algebraic effects in Haskell.
 It uses the GHC language extension
@@ -243,7 +243,7 @@ We will also see later on more abstractions provided by `implicit-effects`,
 and how the performance tradeoff may worth it when we use them to structure
 more complex applications.
 
-### EffFunctor
+## EffFunctor
 
 Following the previous example, let's say we want to add a state effect to
 store or update the fetched time. We can use `StateEff` provided by
@@ -251,10 +251,10 @@ store or update the fetched time. We can use `StateEff` provided by
 `MonadState`.
 
 ```haskell
-app :: forall eff
+app2 :: forall eff
    . (EffConstraint (TimeEff ∪ IoEff  ∪ StateEff UTCTime) eff)
   => eff ()
-app = do
+app2 = do
   time1 <- get
   liftIo $ putStrLn $ "the previous recorded time is " ++ show time1
 
@@ -289,7 +289,104 @@ stateTOps = StateOps {
 ```
 
 `stateTOps` can provide state operation on any `MonadState` instance by just
-delegating to `mtl`.
+delegating to `mtl`. With that we can for example run computations with
+`StateEff` on any `StateT eff`. Given that our previous two effect operations
+need to run on IO, it makes sense that we run our new app on `StateT IO`
+instead. But to do that we need to make new operation handlers for
+`StateOps (StateT IO)` and `IoOps (StateT IO)`.
+
+`EffFunctor` is a typeclass that support lifting computations running on a
+monad `eff` to a lifted monad `t eff`, similar to the `MonadTrans` class.
+It is more general that it can lift computations through natural transformation
+between any two effects `eff1` and `eff2`, without requiring `eff2` to be in
+the form of `t eff1`.
+
+```haskell
+class EffFunctor (comp :: (Type -> Type) -> Type) where
+  effmap :: forall eff1 eff2 .
+    (Effect eff1, Effect eff2)
+    => (eff1 ~> eff2) -- i.e. (forall x . eff1 x -> eff2 x)
+    -> comp eff1
+    -> comp eff2
+```
+
+Notice that `EffFunctor` is parameterized by a type variable `comp`, which
+is parameterized by an monad `eff`. Operation handlers are one kind of
+computation that can be an `EffFunctor`, but there are also more general
+use of `EffFunctor` which we will learn later on.
+
+`ImplicitOps` requires the `Operation` type of its effect to be an
+`EffFunctor`. We will fill in our `EffFunctor` instance for `TimeOps`, which
+we skipped in earlier section:
+
+```haskell
+instance EffFunctor TimeOps where
+  effmap lifter ops = TimeOps {
+    currentTimeOp = lifter $ currentTimeOp ops
+  }
+```
+
+With that we can now to lift both `ioTimeOps` and `ioOps` to work on
+`StateT UTCTime IO` using the `lift` method in `MonadTrans`.
+
+```haskell
+stateTIoTimeOps :: TimeOps (StateT UTCTime IO)
+stateTIoTimeOps = effmap lift ioTimeOps
+
+stateTIoOps :: TimeOps (StateT UTCTime IO)
+stateTIoOps = effmap lift ioOps
+```
+
+With all 3 operation handlers available, we can now bind our application
+and make it work on `StateT UTCTime IO`:
+
+```haskell
+app2' :: StateT UTCTime IO ()
+app2' = withOps (stateTIoTimeOps ∪ stateTIoOps ∪ stateTOps) app2
+```
+
+We can run our `StatT` monad with the usual `evalStateT`, but say if we
+need the initial state to be the time when the program starts, we'd once
+again need to get the current time. Fortunately we can reuse the
+`ioTimeOps` we defined earlier to do just that:
+
+```haskell
+app3 :: IO ()
+app3 = withOps ioTimeOps $
+  currentTime >>= evalStateT app2'
+```
+
+Given the popularity and stability of `mtl`, we can expect common use of
+similar patterns as above to use monad transformers in conjunction with
+`implicit-effects`. As such the helper function `withStateTAndOps` is
+provided to help us do the same thing with much less boilerplate:
+
+```haskell
+app4 :: forall eff .
+   . (EffConstraint (TimeEff ∪ IoEff) eff)
+  => eff ()
+app4 = do
+  start <- currentTime
+  withStateTAndOps @(TimeEff ∪ IoEff) start app2
+```
+
+`withStateTAndOps` automatically captures any operation handler specified
+in the type application, and automatically lift them to work on the lifted
+`StateT` monad. It then runs the generic computation `app2` on
+`StateT UTCTime eff` with the liften operation handlers, then finally run
+`evalStateT` and return the result in the original monad `eff`.
+
+Notice that both `app2` and `app4` are defined generically to work on any
+monad `eff`. This means unlike `app3`, `app4` can run on deeper monad
+transformer stacks with no modification required.
+
+So far we are still working on replicating the familiar patterns of `mtl` and
+make them work with `implicit-effects`. This may look redundant because if
+that is all `implicit-effects` can do, it might as well be enough for us to
+stick with just `mtl`. As we will learn in coming sections, the more
+interesting things for `implicit-effects` is that we can also run algebraic
+effects together with our regular `mtl` effects with minimal impact on
+compatibility and performance.
 
 ...
 
