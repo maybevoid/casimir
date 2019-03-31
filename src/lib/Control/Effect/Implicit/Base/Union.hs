@@ -11,8 +11,8 @@ module Control.Effect.Implicit.Base.Union
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base.FreeOps
-import Control.Effect.Implicit.Base.EffSpec
+import Control.Effect.Implicit.Base.Free
+import Control.Effect.Implicit.Base.Spec
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
 
@@ -55,10 +55,11 @@ data UnionCoOp ops1 ops2 r
   = LeftCoOp (ops1 r)
   | RightCoOp (ops2 r)
 
-instance EffSpec (Union ops1 ops2) where
+instance EffOps (Union ops1 ops2) where
   type Operation (Union ops1 ops2) =
     UnionOps (Operation ops1) (Operation ops2)
 
+instance EffCoOp (Union ops1 ops2) where
   type CoOperation (Union ops1 ops2) =
     UnionCoOp (CoOperation ops1) (CoOperation ops2)
 

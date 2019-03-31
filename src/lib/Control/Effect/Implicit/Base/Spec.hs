@@ -1,12 +1,13 @@
 
-module Control.Effect.Implicit.Base.EffSpec
-  ( EffSpec (..)
+module Control.Effect.Implicit.Base.Spec
+  ( EffOps (..)
+  , EffCoOp (..)
   )
 where
 
 import Data.Kind
 
-class EffSpec (sig :: Type) where
+class EffOps sig where
 
   -- | The operation type for @ops@ is consumed by computations to
   -- perform effect operations. The type is indexed by an 'Effect' type
@@ -18,6 +19,7 @@ class EffSpec (sig :: Type) where
   type family Operation sig
     = (ops :: (Type -> Type) -> Type) | ops -> sig
 
+class EffCoOp sig where
   -- | The co-operation type for @ops@ is produced by computations when
   -- they perform effect operations under a free monad, and is used by
   -- effect interpreters such as 'Control.Effect.Implicit.Free.CoOpHandler'

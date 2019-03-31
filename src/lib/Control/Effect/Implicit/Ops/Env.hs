@@ -14,8 +14,10 @@ data EnvOps e eff = EnvOps {
 data EnvCoOp e r =
   AskOp (e -> r)
 
-instance EffSpec (EnvEff e) where
+instance EffOps (EnvEff e) where
   type Operation (EnvEff e) = EnvOps e
+
+instance EffCoOp (EnvEff e) where
   type CoOperation (EnvEff e) = EnvCoOp e
 
 type EnvConstraint e eff = (?envOps :: EnvOps e eff)

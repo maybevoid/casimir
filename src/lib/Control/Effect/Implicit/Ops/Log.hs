@@ -17,8 +17,10 @@ data LogOps l eff = LogOps {
 data LogCoOp l r = LogOp l (() -> r)
   deriving (Functor)
 
-instance EffSpec (LogEff l) where
+instance EffOps (LogEff l) where
   type Operation (LogEff l) = LogOps l
+
+instance EffCoOp (LogEff l) where
   type CoOperation (LogEff l) = LogCoOp l
 
 type LogConstraint l eff = (?logOps :: LogOps l eff)

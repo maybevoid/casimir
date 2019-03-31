@@ -8,8 +8,8 @@ module Control.Effect.Implicit.Base.NoEff
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base.FreeOps
-import Control.Effect.Implicit.Base.EffSpec
+import Control.Effect.Implicit.Base.Free
+import Control.Effect.Implicit.Base.Spec
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
 
@@ -38,8 +38,10 @@ data NoOp (eff :: Type -> Type) = NoOp
 -- 'CoOperation' can be satisfied.
 data NoCoOp r = NoCoOp
 
-instance EffSpec NoEff where
+instance EffOps NoEff where
   type Operation NoEff = NoOp
+
+instance EffCoOp NoEff where
   type CoOperation NoEff = NoCoOp
 
 -- | @'OpsConstraint' 'NoEff' eff@ is just the empty constraint @()@ for all

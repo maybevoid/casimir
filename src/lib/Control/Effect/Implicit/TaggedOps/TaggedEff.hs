@@ -41,12 +41,14 @@ data TaggedCoOp
     -> TaggedCoOp l coop r
 
 instance
-  (EffSpec ops)
-  => EffSpec (TaggedEff l ops)
-   where
+  (EffOps ops)
+  => EffOps (TaggedEff l ops) where
     type Operation (TaggedEff l ops)
       = TaggedOps l (Operation ops)
 
+instance
+  (EffCoOp ops)
+  => EffCoOp (TaggedEff l ops) where
     type CoOperation (TaggedEff l ops)
       = TaggedCoOp l (CoOperation ops)
 

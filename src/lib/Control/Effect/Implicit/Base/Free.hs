@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Base.FreeOps
+module Control.Effect.Implicit.Base.Free
   ( FreeOps (..)
   )
 where
@@ -7,14 +7,15 @@ where
 import Data.Kind
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
-import Control.Effect.Implicit.Base.EffSpec
+import Control.Effect.Implicit.Base.Spec
 
 -- | A 'FreeOps' @ops@ has associated types that can be used for effect
 -- operations and interpretations. We typically use dummy datatypes with
 -- empty declaration for @ops@ to signify that @ops@ is only used for
 -- tagging effects and are not used at the value level.
 class
-  ( EffSpec ops
+  ( EffOps ops
+  , EffCoOp ops
   , Functor (CoOperation ops)
   , EffFunctor (Operation ops)
   )

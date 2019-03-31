@@ -19,8 +19,10 @@ data ExceptionOps e eff = ExceptionOps {
 data ExceptionCoOp e r =
   RaiseOp e
 
-instance EffSpec (ExceptionEff e) where
+instance EffOps (ExceptionEff e) where
   type Operation (ExceptionEff e) = ExceptionOps e
+
+instance EffCoOp (ExceptionEff e) where
   type CoOperation (ExceptionEff e) = ExceptionCoOp e
 
 type ExceptionConstraint e eff = (?exceptionOps :: ExceptionOps e eff)

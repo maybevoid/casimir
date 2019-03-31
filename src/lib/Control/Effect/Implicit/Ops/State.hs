@@ -22,8 +22,10 @@ data StateCoOp s a =
     GetOp (s -> a)
   | PutOp s (() -> a)
 
-instance EffSpec (StateEff s) where
+instance EffOps (StateEff s) where
   type Operation (StateEff s) = StateOps s
+
+instance EffCoOp (StateEff s) where
   type CoOperation (StateEff s) = StateCoOp s
 
 type StateConstraint s eff = (?stateOps :: StateOps s eff)

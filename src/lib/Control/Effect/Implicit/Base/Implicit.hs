@@ -8,7 +8,7 @@ where
 import Data.Kind
 
 import Control.Effect.Implicit.Base.Effect
-import Control.Effect.Implicit.Base.EffSpec
+import Control.Effect.Implicit.Base.Spec
 import Control.Effect.Implicit.Base.EffFunctor
 
 -- | An effect operation must also be an instance of 'ImplicitOps' to give
@@ -28,36 +28,38 @@ import Control.Effect.Implicit.Base.EffFunctor
 --
 -- This means any non-trivial instance for 'ImplicitOps' must somehow make use of
 -- implicit parameters for the law to hold.
-class (EffSpec ops, EffFunctor (Operation ops)) => ImplicitOps ops where
+class
+  (EffOps ops, EffFunctor (Operation ops))
+  => ImplicitOps ops where
 
-  -- | The constraint kind for the effect operation under 'Effect' @eff@.
-  -- This is typically an implicit parameter with a unique name, e.g.
-  -- @type OpsConstraint FooEff eff = (?fooOps :: Operation FooEff eff)@.
-  -- Note that there is a injective type families condition, and given that
-  -- implicit parameters have a single namespace, users must come out with
-  -- naming conventions for their custom effects to avoid name clashing
-  -- that would result in compile-time injectivity violation error.
-  type family OpsConstraint ops (eff :: Type -> Type)
-    = (c :: Constraint) | c -> ops eff
+    -- | The constraint kind for the effect operation under 'Effect' @eff@.
+    -- This is typically an implicit parameter with a unique name, e.g.
+    -- @type OpsConstraint FooEff eff = (?fooOps :: Operation FooEff eff)@.
+    -- Note that there is a injective type families condition, and given that
+    -- implicit parameters have a single namespace, users must come out with
+    -- naming conventions for their custom effects to avoid name clashing
+    -- that would result in compile-time injectivity violation error.
+    type family OpsConstraint ops (eff :: Type -> Type)
+      = (c :: Constraint) | c -> ops eff
 
-  -- | Takes an effect operation @'Operation' ops eff@ and bind it to the
-  -- implicit parameter specified in @'OpsConstraint' ops eff@ for the
-  -- continuation @r@. The expression @r@ can then use the effect operations
-  -- without having to explicitly pass them around as function arguments.
-  -- For the example @FooEff@, the body for 'withOps' can be defined as
-  -- @withOps fooOps cont = let ?fooOps = fooOps in cont @.
-  withOps :: forall eff r .
-    (Effect eff)
-    => Operation ops eff
-    -> (OpsConstraint ops eff => r)
-    -> r
+    -- | Takes an effect operation @'Operation' ops eff@ and bind it to the
+    -- implicit parameter specified in @'OpsConstraint' ops eff@ for the
+    -- continuation @r@. The expression @r@ can then use the effect operations
+    -- without having to explicitly pass them around as function arguments.
+    -- For the example @FooEff@, the body for 'withOps' can be defined as
+    -- @withOps fooOps cont = let ?fooOps = fooOps in cont @.
+    withOps :: forall eff r .
+      (Effect eff)
+      => Operation ops eff
+      -> (OpsConstraint ops eff => r)
+      -> r
 
-  -- | If an implicit parameter for the effect operation is available in the
-  -- context, capture it and return the operation as a value. For the example
-  -- @FooEff@, the body for 'captureOps' can be defined as @captureOps = ?fooOps@.
-  captureOps :: forall eff .
-    (Effect eff, OpsConstraint ops eff)
-    => Operation ops eff
+    -- | If an implicit parameter for the effect operation is available in the
+    -- context, capture it and return the operation as a value. For the example
+    -- @FooEff@, the body for 'captureOps' can be defined as @captureOps = ?fooOps@.
+    captureOps :: forall eff .
+      (Effect eff, OpsConstraint ops eff)
+      => Operation ops eff
 
 -- | This is a type alias for the implicit parameter constraint for @ops@,
 -- in addition to requiring @eff@ to be an 'Effect'. This helps reducing

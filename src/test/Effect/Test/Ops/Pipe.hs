@@ -30,12 +30,16 @@ data AwaitCoOp a r =
   AwaitOp (a -> r)
   deriving (Functor)
 
-instance EffSpec (YieldEff a) where
+instance EffOps (YieldEff a) where
   type Operation (YieldEff a) = YieldOps a
+
+instance EffCoOp (YieldEff a) where
   type CoOperation (YieldEff a) = YieldCoOp a
 
-instance EffSpec (AwaitEff a) where
+instance EffOps (AwaitEff a) where
   type Operation (AwaitEff a) = AwaitOps a
+
+instance EffCoOp (AwaitEff a) where
   type CoOperation (AwaitEff a) = AwaitCoOp a
 
 type YieldConstraint a eff = (?yieldOps :: YieldOps a eff)

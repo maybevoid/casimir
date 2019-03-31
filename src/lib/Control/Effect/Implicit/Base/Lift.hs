@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Base.LiftEff
+module Control.Effect.Implicit.Base.Lift
   ( LiftEff
   , idLift
   , mkLiftEff

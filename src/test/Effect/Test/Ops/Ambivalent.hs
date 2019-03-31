@@ -23,8 +23,10 @@ data AmbOps a eff = AmbOps {
 data AmbCoOp a r
   = SelectOp [a] (a -> r)
 
-instance EffSpec (AmbEff a) where
+instance EffOps (AmbEff a) where
   type Operation (AmbEff a) = AmbOps a
+
+instance EffCoOp (AmbEff a) where
   type CoOperation (AmbEff a) = AmbCoOp a
 
 type AmbConstraint a eff = (?ambOps :: AmbOps a eff)

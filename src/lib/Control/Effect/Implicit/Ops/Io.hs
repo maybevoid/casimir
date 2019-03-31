@@ -22,8 +22,10 @@ data IoOps eff = IoOps {
 data IoCoOp a where
   IoCoOp :: forall x a . IO x -> (x -> a) -> IoCoOp a
 
-instance EffSpec IoEff where
+instance EffOps IoEff where
   type Operation IoEff = IoOps
+
+instance EffCoOp IoEff where
   type CoOperation IoEff = IoCoOp
 
 instance Functor IoCoOp where

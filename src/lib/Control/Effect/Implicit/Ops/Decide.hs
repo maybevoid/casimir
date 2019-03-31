@@ -13,8 +13,10 @@ data DecideOps s eff = DecideOps {
 data DecideCoOp s a = DecideOp (s -> a)
   deriving (Functor)
 
-instance EffSpec (DecideEff s) where
+instance EffOps (DecideEff s) where
   type Operation (DecideEff s) = DecideOps s
+
+instance EffCoOp (DecideEff s) where
   type CoOperation (DecideEff s) = DecideCoOp s
 
 type DecideConstraint s eff = (?decideOps :: DecideOps s eff)
