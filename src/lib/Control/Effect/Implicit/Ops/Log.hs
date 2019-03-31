@@ -23,8 +23,6 @@ instance EffOps (LogEff l) where
 instance EffCoOp (LogEff l) where
   type CoOperation (LogEff l) = LogCoOp l
 
-type LogConstraint l eff = (?logOps :: LogOps l eff)
-
 instance EffFunctor (LogOps l) where
   effmap lift ops = LogOps $
     lift . logOp ops
@@ -34,14 +32,20 @@ instance FreeOps (LogEff l) where
     \l -> liftCoOp $ LogOp l id
 
 instance ImplicitOps (LogEff l) where
-  type OpsConstraint (LogEff l) eff = LogConstraint l eff
+  type OpsConstraint (LogEff l) eff =
+    (?_Control_Effect_Implicit_Ops_Log_logOps :: LogOps l eff)
 
-  withOps ops comp = let ?logOps = ops in comp
-  captureOps = ?logOps
+  withOps ops comp =
+    let
+      ?_Control_Effect_Implicit_Ops_Log_logOps =
+        ops in comp
+
+  captureOps =
+    ?_Control_Effect_Implicit_Ops_Log_logOps
 
 log
   :: forall l eff
-   . (Effect eff, LogConstraint l eff)
+   . (EffConstraint (LogEff l) eff)
   => l
   -> eff ()
 log l = logOp captureOps l

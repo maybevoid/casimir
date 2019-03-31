@@ -29,8 +29,6 @@ instance EffOps (AmbEff a) where
 instance EffCoOp (AmbEff a) where
   type CoOperation (AmbEff a) = AmbCoOp a
 
-type AmbConstraint a eff = (?ambOps :: AmbOps a eff)
-
 instance Functor (AmbCoOp a) where
   fmap f (SelectOp choice cont) = SelectOp choice (f . cont)
 
@@ -45,7 +43,7 @@ instance FreeOps (AmbEff a) where
   }
 
 instance ImplicitOps (AmbEff a) where
-  type OpsConstraint (AmbEff a) eff = AmbConstraint a eff
+  type OpsConstraint (AmbEff a) eff = (?ambOps :: AmbOps a eff)
 
   withOps ops comp = let ?ambOps = ops in comp
   captureOps = ?ambOps

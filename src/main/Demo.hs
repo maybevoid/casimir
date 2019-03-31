@@ -96,7 +96,7 @@ readerComp14 = runIdentityComp readerComp13
 
 refStateOps
   :: forall a eff .
-  (IoConstraint eff)
+  (EffConstraint IoEff eff)
   => IORef a
   -> StateOps a eff
 refStateOps ref = StateOps {
@@ -201,11 +201,9 @@ nonDetPipeline
 nonDetPipeline = coopHandlerToPipeline @ChurchMonad nonDetHandler2
 
 decideComp1
-  :: forall eff .
-  ( Effect eff
-  , DecideConstraint Bool eff
-  , IoConstraint eff
-  ) => eff Int
+  :: forall eff
+   . (EffConstraint (IoEff ∪ DecideEff Bool) eff)
+  => eff Int
 decideComp1 = do
   a <- decide
   liftIo $ putStrLn $ "a: " ++ show a

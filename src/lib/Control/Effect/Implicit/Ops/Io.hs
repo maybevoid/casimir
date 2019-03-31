@@ -3,7 +3,6 @@ module Control.Effect.Implicit.Ops.Io
   ( IoEff
   , IoOps (..)
   , IoCoOp (..)
-  , IoConstraint
   , liftIo
   , ioOps
   , ioHandler
@@ -46,19 +45,23 @@ instance FreeOps IoEff where
     liftIoOp = \io -> liftCoOp $ IoCoOp io id
   }
 
-type IoConstraint eff = (?ioOps :: IoOps eff)
-
 instance ImplicitOps IoEff where
-  type OpsConstraint IoEff eff = (IoConstraint eff)
+  type OpsConstraint IoEff eff =
+    (?_Control_Effect_Implicit_Ops_Io_ioOps :: IoOps eff)
 
-  withOps ops comp = let ?ioOps = ops in comp
+  withOps ops comp =
+    let
+      ?_Control_Effect_Implicit_Ops_Io_ioOps =
+        ops in comp
 
-  captureOps = ?ioOps
+  captureOps =
+    ?_Control_Effect_Implicit_Ops_Io_ioOps
 
 liftIo :: forall a eff .
-  (IoConstraint eff)
-  => IO a -> eff a
-liftIo = liftIoOp ?ioOps
+  (EffConstraint IoEff eff)
+  => IO a
+  -> eff a
+liftIo = liftIoOp captureOps
 
 ioOps :: IoOps IO
 ioOps = IoOps {

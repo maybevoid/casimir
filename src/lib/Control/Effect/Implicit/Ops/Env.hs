@@ -20,8 +20,6 @@ instance EffOps (EnvEff e) where
 instance EffCoOp (EnvEff e) where
   type CoOperation (EnvEff e) = EnvCoOp e
 
-type EnvConstraint e eff = (?envOps :: EnvOps e eff)
-
 instance EffFunctor (EnvOps e) where
   effmap lifter envOps = EnvOps {
     askOp = lifter $ askOp envOps
@@ -36,20 +34,25 @@ instance FreeOps (EnvEff e) where
   }
 
 instance ImplicitOps (EnvEff e) where
-  type OpsConstraint (EnvEff e) eff = (EnvConstraint e eff)
+  type OpsConstraint (EnvEff e) eff =
+    (?_Control_Effect_Implicit_Ops_Env_envOps :: EnvOps e eff)
 
-  withOps envOps comp = let ?envOps = envOps in comp
+  withOps envOps comp =
+    let
+      ?_Control_Effect_Implicit_Ops_Env_envOps =
+        envOps in comp
 
-  captureOps = ?envOps
+  captureOps =
+    ?_Control_Effect_Implicit_Ops_Env_envOps
 
-ask :: forall e eff . (EnvConstraint e eff) => eff e
-ask = askOp ?envOps
+ask :: forall e eff . (EffConstraint (EnvEff e) eff) => eff e
+ask = askOp captureOps
 
 withEnv
   :: forall r e eff
    . (Effect eff)
   => e
-  -> ((EnvConstraint e eff) => eff r)
+  -> ((OpsConstraint (EnvEff e) eff) => eff r)
   -> eff r
 withEnv x cont = withOps (mkEnvOps x) cont
 

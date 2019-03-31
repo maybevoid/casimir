@@ -3,7 +3,6 @@ module Control.Effect.Implicit.Ops.State
   ( StateEff
   , StateOps (..)
   , StateCoOp (..)
-  , StateConstraint
   , get
   , put
   )
@@ -28,8 +27,6 @@ instance EffOps (StateEff s) where
 instance EffCoOp (StateEff s) where
   type CoOperation (StateEff s) = StateCoOp s
 
-type StateConstraint s eff = (?stateOps :: StateOps s eff)
-
 instance Functor (StateCoOp s) where
   fmap f (GetOp cont) = GetOp $ fmap f cont
   fmap f (PutOp s cont) = PutOp s $ fmap f cont
@@ -47,23 +44,28 @@ instance FreeOps (StateEff s) where
   }
 
 instance ImplicitOps (StateEff s) where
-  type OpsConstraint (StateEff s) eff = StateConstraint s eff
+  type OpsConstraint (StateEff s) eff =
+    (?_Control_Effect_Implicit_Ops_State_stateOps :: StateOps s eff)
 
   {-# INLINE withOps #-}
-  withOps stateOps comp = let ?stateOps = stateOps in comp
+  withOps stateOps comp =
+    let
+      ?_Control_Effect_Implicit_Ops_State_stateOps =
+        stateOps in comp
 
   {-# INLINE captureOps #-}
-  captureOps = ?stateOps
+  captureOps =
+    ?_Control_Effect_Implicit_Ops_State_stateOps
 
 {-# INLINE get #-}
-get :: forall a eff .
-  (StateConstraint a eff)
-  => eff a
-get = getOp ?stateOps
+get :: forall s eff .
+  (EffConstraint (StateEff s) eff)
+  => eff s
+get = getOp captureOps
 
 {-# INLINE put #-}
-put :: forall a eff .
-  (StateConstraint a eff)
-  => a
+put :: forall s eff .
+  (EffConstraint (StateEff s) eff)
+  => s
   -> eff ()
-put = putOp ?stateOps
+put = putOp captureOps

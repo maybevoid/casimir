@@ -25,8 +25,6 @@ instance EffOps (ExceptionEff e) where
 instance EffCoOp (ExceptionEff e) where
   type CoOperation (ExceptionEff e) = ExceptionCoOp e
 
-type ExceptionConstraint e eff = (?exceptionOps :: ExceptionOps e eff)
-
 instance EffFunctor (ExceptionOps e) where
   effmap lifter ops = ExceptionOps {
     raiseOp = \e -> lifter $ raiseOp ops e
@@ -40,12 +38,19 @@ instance FreeOps (ExceptionEff e) where
     raiseOp = \e -> liftCoOp $ RaiseOp e
   }
 
+type ExceptionConstraint e eff =
+  (?_Control_Effect_Implicit_Ops_Exception_exceptionOps :: ExceptionOps e eff)
+
 instance ImplicitOps (ExceptionEff e) where
   type OpsConstraint (ExceptionEff e) eff = ExceptionConstraint e eff
 
-  withOps ops comp = let ?exceptionOps = ops in comp
+  withOps ops comp =
+    let
+      ?_Control_Effect_Implicit_Ops_Exception_exceptionOps
+        = ops in comp
 
-  captureOps = ?exceptionOps
+  captureOps =
+    ?_Control_Effect_Implicit_Ops_Exception_exceptionOps
 
 raise
   :: forall e a eff

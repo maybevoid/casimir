@@ -27,7 +27,6 @@ instance EffOps (AsyncEff t) where
 instance EffCoOp (AsyncEff t) where
   type CoOperation (AsyncEff t) = AsyncCoOp t
 
-type AsyncConstraint t eff = (?asyncOps :: AsyncOps t eff)
 
 instance Functor (AsyncCoOp t) where
   fmap f (AwaitOp task cont) = AwaitOp task $ f . cont
@@ -45,11 +44,19 @@ instance FreeOps (AsyncEff t) where
     awaitAllOp = \tasks -> liftCoOp $ AwaitAllOp tasks id
   }
 
+type AsyncConstraint t eff =
+  (?_Control_Effect_Implicit_Ops_Async_asyncOps :: AsyncOps t eff)
+
 instance ImplicitOps (AsyncEff t) where
   type OpsConstraint (AsyncEff t) eff = AsyncConstraint t eff
 
-  captureOps = ?asyncOps
-  withOps ops comp = let ?asyncOps = ops in comp
+  captureOps =
+    ?_Control_Effect_Implicit_Ops_Async_asyncOps
+
+  withOps ops comp =
+    let
+      ?_Control_Effect_Implicit_Ops_Async_asyncOps
+        = ops in comp
 
 await
   :: forall a t eff

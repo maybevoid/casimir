@@ -19,8 +19,6 @@ instance EffOps (DecideEff s) where
 instance EffCoOp (DecideEff s) where
   type CoOperation (DecideEff s) = DecideCoOp s
 
-type DecideConstraint s eff = (?decideOps :: DecideOps s eff)
-
 instance EffFunctor (DecideOps s) where
   effmap lifter ops = DecideOps {
     decideOp = lifter $ decideOp ops
@@ -32,13 +30,18 @@ instance FreeOps (DecideEff s) where
   }
 
 instance ImplicitOps (DecideEff s) where
-  type OpsConstraint (DecideEff s) eff = DecideConstraint s eff
+  type OpsConstraint (DecideEff s) eff =
+    (?_Control_Effect_Implicit_Ops_Decide_decideOps :: DecideOps s eff)
 
-  withOps decideOps comp = let ?decideOps = decideOps in comp
+  withOps decideOps comp =
+    let
+      ?_Control_Effect_Implicit_Ops_Decide_decideOps =
+        decideOps in comp
 
-  captureOps = ?decideOps
+  captureOps =
+    ?_Control_Effect_Implicit_Ops_Decide_decideOps
 
 decide :: forall a eff .
-  (DecideConstraint a eff)
+  (EffConstraint (DecideEff a) eff)
   => eff a
-decide = decideOp ?decideOps
+decide = decideOp captureOps

@@ -42,9 +42,6 @@ instance EffOps (AwaitEff a) where
 instance EffCoOp (AwaitEff a) where
   type CoOperation (AwaitEff a) = AwaitCoOp a
 
-type YieldConstraint a eff = (?yieldOps :: YieldOps a eff)
-type AwaitConstraint a eff = (?awaitOps :: AwaitOps a eff)
-
 instance EffFunctor (YieldOps a) where
   effmap lifter ops = YieldOps $
     \x -> lifter $ yieldOp ops x
@@ -62,7 +59,8 @@ instance FreeOps (AwaitEff a) where
     liftCoOp $ AwaitOp id
 
 instance ImplicitOps (YieldEff a) where
-  type OpsConstraint (YieldEff a) eff = YieldConstraint a eff
+  type OpsConstraint (YieldEff a) eff =
+    (?yieldOps :: YieldOps a eff)
 
   withOps yieldOps comp
     = let ?yieldOps = yieldOps in comp
@@ -70,7 +68,8 @@ instance ImplicitOps (YieldEff a) where
   captureOps = ?yieldOps
 
 instance ImplicitOps (AwaitEff a) where
-  type OpsConstraint (AwaitEff a) eff = AwaitConstraint a eff
+  type OpsConstraint (AwaitEff a) eff =
+    (?awaitOps :: AwaitOps a eff)
 
   withOps awaitOps comp
     = let ?awaitOps = awaitOps in comp
@@ -78,13 +77,13 @@ instance ImplicitOps (AwaitEff a) where
   captureOps = ?awaitOps
 
 yield :: forall a eff
-   . (Effect eff, YieldConstraint a eff)
+   . (EffConstraint (YieldEff a) eff)
   => a
   -> eff ()
 yield = yieldOp ?yieldOps
 
 await :: forall a eff
-   . (Effect eff, AwaitConstraint a eff)
+   . (EffConstraint (AwaitEff a) eff)
   => eff a
 await = awaitOp ?awaitOps
 
@@ -151,10 +150,7 @@ producerComp
 producerComp = genericReturn comp1
  where
   comp1 :: forall eff
-    . ( Effect eff
-      , YieldConstraint Int eff
-      , EnvConstraint Int eff
-      )
+    . ( EffConstraint (EnvEff Int ∪ YieldEff Int) eff)
    => eff a
   comp1
    = do

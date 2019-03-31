@@ -11,14 +11,10 @@ import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.Spec
 import Control.Effect.Implicit.Base.EffFunctor
 
--- | An effect operation must also be an instance of 'ImplicitOps' to give
--- computations access to @'Operation' ops@ through implicit parameter
--- constraints. The 'FreeOps' class hides the machinery of implicit
--- parameters and make them appear like regular constraints with local
--- scope. The definition for 'ImplicitOps' for most effect operations can
--- typically be derived mechanically. We may look into using template
--- Haskell to generate instances for 'ImplicitOps' in future to reduce the
--- boilerplate.
+-- | 'ImplicitOps' gives computations access to effect operations of an
+-- 'EffOps' through implicit parameter constraints. It hides the machinery
+-- of implicit parameters and make them appear like regular constraints except
+-- with local scope.
 --
 -- The law for 'ImplicitOps' is
 --
@@ -28,6 +24,10 @@ import Control.Effect.Implicit.Base.EffFunctor
 --
 -- This means any non-trivial instance for 'ImplicitOps' must somehow make use of
 -- implicit parameters for the law to hold.
+--
+-- The definition for 'ImplicitOps' for most effect operations can typically
+-- be derived mechanically. We may look into using template Haskell to generate
+-- instances for 'ImplicitOps' in future to reduce some boilerplate.
 class
   (EffOps ops, EffFunctor (Operation ops))
   => ImplicitOps ops where
@@ -35,6 +35,7 @@ class
     -- | The constraint kind for the effect operation under 'Effect' @eff@.
     -- This is typically an implicit parameter with a unique name, e.g.
     -- @type OpsConstraint FooEff eff = (?fooOps :: Operation FooEff eff)@.
+    --
     -- Note that there is a injective type families condition, and given that
     -- implicit parameters have a single namespace, users must come out with
     -- naming conventions for their custom effects to avoid name clashing
