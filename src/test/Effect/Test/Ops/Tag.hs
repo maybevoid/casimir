@@ -8,7 +8,7 @@ import Control.Monad.Identity
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops.Env
-import Control.Effect.Implicit.TaggedOps.Env
+import Control.Effect.Implicit.Tagged.Ops.Env
 
 taggedTests :: TestTree
 taggedTests = testGroup "TaggedEff Tests"

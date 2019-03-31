@@ -1,6 +1,6 @@
 {-# LANGUAGE PolyKinds #-}
 
-module Control.Effect.Implicit.TaggedOps.TaggedEff
+module Control.Effect.Implicit.Tagged.TaggedEff
   ( TaggedEff
   , TaggedOps (..)
   , TaggedCoOp (..)

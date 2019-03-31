@@ -10,8 +10,8 @@ import Test.Tasty.HUnit
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops
-import Control.Effect.Implicit.TaggedOps.Env
-import Control.Effect.Implicit.TaggedOps.TaggedEff
+import Control.Effect.Implicit.Tagged
+import Control.Effect.Implicit.Tagged.Ops.Env
 
 overlapTests :: TestTree
 overlapTests = testGroup "Constraint overlap Tests"
