@@ -38,8 +38,8 @@ stateTOps = StateOps {
 stateTHandler
   :: forall eff s .
   (Effect eff, MonadState s eff)
-  => Handler NoEff (StateEff s) eff
-stateTHandler = mkHandler $
+  => OpsHandler NoEff (StateEff s) eff
+stateTHandler = opsHandlerComp $
   \lifter -> applyEffmap lifter stateTOps
 
 {-# INLINE stateTPipeline #-}

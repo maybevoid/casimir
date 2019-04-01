@@ -2,9 +2,7 @@
 module Control.Effect.Implicit.Computation.Value
   ( Return (..)
   , GenericReturn
-  , GenericComputation
   , IdentityComputation
-  , returnComputation
   , genericComputation
   , genericReturn
   , runIdentityComp
@@ -27,24 +25,7 @@ instance EffFunctor (Return a) where
 type GenericReturn ops a =
   forall eff . (Effect eff) => Computation ops (Return a) eff
 
-type GenericComputation ops comp =
-  forall eff . (Effect eff) => Computation ops comp eff
-
 type IdentityComputation a = Computation NoEff (Return a) Identity
-
-returnComputation
-  :: forall ops a eff1 .
-  ( Effect eff1
-  , ImplicitOps ops
-  )
-  => (forall eff2 .
-      (EffConstraint ops eff2)
-      => LiftEff eff1 eff2
-      -> eff2 a)
-  -> Computation ops (Return a) eff1
-returnComputation comp1 = Computation $
-  \ lift12 ops ->
-    withOps ops $ Return $ comp1 lift12
 
 {-# INLINE genericComputation #-}
 genericComputation
@@ -65,8 +46,7 @@ genericReturn
       (EffConstraint ops eff)
       => eff a)
   -> GenericReturn ops a
-genericReturn comp = Computation $
-  \ _ ops -> Return $ withOps ops comp
+genericReturn comp = genericComputation $ Return comp
 
 runIdentityComp :: forall a . IdentityComputation a -> a
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp

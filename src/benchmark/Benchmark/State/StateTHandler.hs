@@ -12,7 +12,7 @@ import Benchmark.State.Base
 stateHComp1
   :: forall eff . (Effect eff)
   => Computation NoEff (Return ()) (StateT Int eff)
-stateHComp1 = bindHandlerWithCast
+stateHComp1 = bindOpsHandlerWithCast
   cast cast
   stateTHandler stateBaseComp
 

@@ -1,7 +1,7 @@
 
 module Control.Effect.Implicit.Computation.Computation
   ( Computation (..)
-  , Handler
+  , OpsHandler
   , liftComputation
   )
 where
@@ -19,11 +19,18 @@ newtype Computation ops comp eff1 = Computation {
     -> comp eff2
 }
 
-type Handler ops handler eff
+type OpsHandler ops handler eff
   = Computation ops (Operation handler) eff
 
-liftComputation :: forall ops comp eff1 eff2 .
-  (ImplicitOps ops, Effect eff1, Effect eff2)
+instance
+  (ImplicitOps ops)
+  => EffFunctor (Computation ops comp) where
+    effmap lifter =
+      liftComputation (mkLiftEff lifter)
+
+liftComputation
+  :: forall ops comp eff1 eff2
+   . (ImplicitOps ops, Effect eff1, Effect eff2)
   => LiftEff eff1 eff2
   -> Computation ops comp eff1
   -> Computation ops comp eff2

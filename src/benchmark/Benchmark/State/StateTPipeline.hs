@@ -26,7 +26,7 @@ stateTComp1 = runPipelineWithCast
 
 stateTComp2 :: forall eff . (Effect eff)
   => Computation NoEff (Return ()) (ReaderT Int eff)
-stateTComp2 = bindHandlerWithCast
+stateTComp2 = bindOpsHandlerWithCast
   cast cast
   readerTHandler stateTComp1
 

@@ -49,21 +49,21 @@ main = defaultMain
         whnf runReaderTComp
         withStateTReaderTComp
 
-    , bench "Bind StateT Handler Computation"  $
+    , bench "Bind StateT OpsHandler Computation"  $
         whnf evalStateTComp
         stateTHandlerComp
 
-    , bench "with CoOp Handler on ChurchMonad"  $
+    , bench "with CoOp OpsHandler on ChurchMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @ChurchMonad)
-    , bench "with CoOp Handler on FreeMonad"  $
+    , bench "with CoOp OpsHandler on FreeMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @FreeMonad)
-    , bench "with CoOp Handler on FreerMonad"  $
+    , bench "with CoOp OpsHandler on FreerMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @FreerMonad)
 
-    , bench "with Freer CoOp Handler on FreerMonad"  $
+    , bench "with Freer CoOp OpsHandler on FreerMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreerComp @FreerMonad)
 

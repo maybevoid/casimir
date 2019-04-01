@@ -65,5 +65,5 @@ mkEnvHandler
   :: forall e eff .
   (Effect eff)
   => e
-  -> BaseHandler (EnvEff e) eff
-mkEnvHandler = baseHandler . mkEnvOps
+  -> BaseOpsHandler (EnvEff e) eff
+mkEnvHandler = baseOpsHandler . mkEnvOps

@@ -35,6 +35,6 @@ readerTOps = EnvOps {
 readerTHandler
   :: forall a eff .
   (Effect eff)
-  => Handler NoEff (EnvEff a) (ReaderT a eff)
-readerTHandler = mkHandler $
+  => OpsHandler NoEff (EnvEff a) (ReaderT a eff)
+readerTHandler = opsHandlerComp $
   \lifter -> applyEffmap lifter readerTOps

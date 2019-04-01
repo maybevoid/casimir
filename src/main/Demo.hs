@@ -8,17 +8,17 @@ import Control.Monad.Identity
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops
 
-envHandler1 :: forall eff . (Effect eff) => BaseHandler (EnvEff Int) eff
+envHandler1 :: forall eff . (Effect eff) => BaseOpsHandler (EnvEff Int) eff
 envHandler1 = mkEnvHandler 3
 
-envHandler2 :: forall eff . (Effect eff) => BaseHandler (EnvEff Int) eff
+envHandler2 :: forall eff . (Effect eff) => BaseOpsHandler (EnvEff Int) eff
 envHandler2 = mkEnvHandler 8
 
 envHandler3
   :: forall eff .
   (Effect eff)
-  => BaseHandler (Union (EnvEff Int) (EnvEff Int)) eff
-envHandler3 = composeHandlersWithCast
+  => BaseOpsHandler (Union (EnvEff Int) (EnvEff Int)) eff
+envHandler3 = composeOpsHandlersWithCast
   cast cast
   envHandler1 envHandler2
 
@@ -30,22 +30,22 @@ readerComp1 = do
   return $ val + 1
 
 readerComp2 :: Identity Int
-readerComp2 = withHandler envHandler1 readerComp1
+readerComp2 = withOpsHandler envHandler1 readerComp1
 
 envHandler4
   :: forall free eff
    . (Effect eff, FreeEff free)
-  => BaseHandler (EnvEff Int) (free (EnvEff Int) eff)
-envHandler4 = baseHandler $ freeOps @free
+  => BaseOpsHandler (EnvEff Int) (free (EnvEff Int) eff)
+envHandler4 = baseOpsHandler $ freeOps @free
 
 readerComp3 :: FreeMonad (EnvEff Int) Identity Int
-readerComp3 = withHandler envHandler4 readerComp1
+readerComp3 = withOpsHandler envHandler4 readerComp1
 
 readerComp4 :: GenericReturn (EnvEff Int) Int
-readerComp4 = genericComputation $ Return readerComp1
+readerComp4 = genericReturn readerComp1
 
 readerComp5 :: IdentityComputation Int
-readerComp5 = bindHandlerWithCast
+readerComp5 = bindOpsHandlerWithCast
   cast cast
   envHandler1 readerComp4
 
@@ -61,33 +61,33 @@ readerComp7 :: forall eff .
 readerComp7 = castComputation cast readerComp4
 
 readerComp8 :: IdentityComputation Int
-readerComp8 = bindHandlerWithCast
+readerComp8 = bindOpsHandlerWithCast
   cast cast
   envHandler1
   readerComp7
 
 readerComp9 :: Identity Int
-readerComp9 = withHandler envHandler3 readerComp1
+readerComp9 = withOpsHandler envHandler3 readerComp1
 
 readerComp10 :: Identity Int
-readerComp10 = withHandler envHandler1 comp
+readerComp10 = withOpsHandler envHandler1 comp
   where
     comp :: (OpsConstraint (EnvEff Int) Identity) => Identity Int
-    comp = withHandler envHandler2 readerComp1
+    comp = withOpsHandler envHandler2 readerComp1
 
 readerComp11 :: Int
 readerComp11 = runIdentityComp $
-  bindHandlerWithCast
+  bindOpsHandlerWithCast
     cast cast
     envHandler3 readerComp4
 
 readerComp12 :: forall eff . (Effect eff) => Computation NoEff (Return Int) eff
-readerComp12 = bindHandlerWithCast
+readerComp12 = bindOpsHandlerWithCast
   cast cast
   envHandler2 readerComp4
 
 readerComp13 :: forall eff . (Effect eff) => Computation NoEff (Return Int) eff
-readerComp13 = bindHandlerWithCast
+readerComp13 = bindOpsHandlerWithCast
   cast cast
   envHandler1 readerComp12
 
@@ -104,27 +104,27 @@ refStateOps ref = StateOps {
   putOp = liftIo . writeIORef ref
 }
 
-refStateHandler :: forall a . IORef a -> GenericHandler IoEff (StateEff a)
-refStateHandler ioRef = genericHandler $ refStateOps ioRef
+refStateHandler :: forall a . IORef a -> GenericOpsHandler IoEff (StateEff a)
+refStateHandler ioRef = genericOpsHandler $ refStateOps ioRef
 
 refStatePipeline
   :: forall eff a .
   (Effect eff)
   => IORef a
   -> GenericPipeline IoEff (StateEff a) eff
-refStatePipeline ref = handlerToPipeline $ refStateHandler ref
+refStatePipeline ref = opsHandlerToPipeline $ refStateHandler ref
 
 ioPipeline
   :: GenericPipeline NoEff IoEff IO
-ioPipeline = handlerToPipeline ioHandler
+ioPipeline = opsHandlerToPipeline ioHandler
 
 ioAndStateHandler
   :: forall a .
   IORef a
-  -> BaseHandler (Union IoEff (StateEff a)) IO
+  -> BaseOpsHandler (Union IoEff (StateEff a)) IO
 ioAndStateHandler ref = handler
   where
-    handler = composeHandlersWithCast
+    handler = composeOpsHandlersWithCast
       cast cast
       ioHandler
       (refStateHandler ref)
@@ -144,13 +144,13 @@ stateIoComp1
   => eff Int
 stateIoComp1 = do
   ref <- liftIo $ newIORef 3
-  withHandler (refStateHandler ref) $ do
+  withOpsHandler (refStateHandler ref) $ do
     state <- get
     put $ state + 1
   liftIo $ readIORef ref
 
 stateIoComp2 :: IO Int
-stateIoComp2 = withHandler ioHandler stateIoComp1
+stateIoComp2 = withOpsHandler ioHandler stateIoComp1
 
 stateComp1
   :: forall eff .
@@ -163,7 +163,7 @@ stateComp1 = do
   return $ state2 + 1
 
 stateComp2 :: GenericReturn (StateEff Int) Int
-stateComp2 = genericComputation $ Return stateComp1
+stateComp2 = genericReturn stateComp1
 
 stateIoComp3 :: IORef Int -> Computation NoEff (Return Int) IO
 stateIoComp3 ref = runPipelineWithCast
@@ -217,10 +217,10 @@ decideComp2
   :: forall eff .
   (Effect eff)
   => Computation (Union IoEff (DecideEff Bool)) (Return Int) eff
-decideComp2 = genericComputation $ Return decideComp1
+decideComp2 = genericReturn decideComp1
 
 decideComp3 :: Computation (DecideEff Bool) (Return Int) IO
-decideComp3 = bindHandlerWithCast
+decideComp3 = bindOpsHandlerWithCast
   cast cast
   ioHandler decideComp2
 

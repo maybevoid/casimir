@@ -50,7 +50,7 @@ stateFreeComp2
   :: forall free eff .
   (FreeEff free, Effect eff)
   => Computation NoEff (Return ()) (ReaderT Int eff)
-stateFreeComp2 = bindHandlerWithCast
+stateFreeComp2 = bindOpsHandlerWithCast
   cast cast
   readerTHandler
   (stateFreeComp1 @free)
@@ -66,7 +66,7 @@ curriedFreeComp
   (FreeEff free, Effect eff)
   => Int
   -> Computation NoEff (Return ()) eff
-curriedFreeComp s = bindHandlerWithCast
+curriedFreeComp s = bindOpsHandlerWithCast
   cast cast
   (mkEnvHandler s)
   (stateFreeComp1 @free)

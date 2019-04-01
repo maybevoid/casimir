@@ -25,7 +25,7 @@ envComp2 ::
   forall a .
   (Show a)
   => GenericReturn (EnvEff a) String
-envComp2 = genericComputation $ Return envComp1
+envComp2 = genericReturn envComp1
 
 envOpsTest :: TestTree
 envOpsTest = testCase "Env ops test" $
@@ -42,7 +42,7 @@ envHandlerTest = testCase "Env handler test" $
   let
     envHandler = mkEnvHandler @Int @IO 4
     envComp3 =
-      bindHandlerWithCast @NoEff
+      bindOpsHandlerWithCast @NoEff
         cast cast
         envHandler envComp2
   res <- execComp envComp3
@@ -56,7 +56,7 @@ envPipelineTest = testCase "Env pipeline test" $
   let
     envHandler = mkEnvHandler @Int @IO 5
     envPipeline
-      = handlerToPipeline envHandler @(Return String)
+      = opsHandlerToPipeline envHandler @(Return String)
     envComp3
       = runPipelineWithCast @NoEff
         cast cast

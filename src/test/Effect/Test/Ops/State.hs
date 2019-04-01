@@ -39,13 +39,13 @@ stateComp1 = do
   return (s1, s2, s3)
 
 stateComp2 :: GenericReturn (StateEff Int) StateCompRes
-stateComp2 = genericComputation $ Return stateComp1
+stateComp2 = genericReturn stateComp1
 
 stateTComp
   :: forall eff .
   (Effect eff)
   => Computation NoEff (Return StateCompRes) (StateT Int eff)
-stateTComp = bindHandlerWithCast
+stateTComp = bindOpsHandlerWithCast
   cast cast
   stateTHandler stateComp2
 
@@ -72,7 +72,7 @@ stateComp3
     stateComp2
 
 stateComp4 :: IdentityComputation StateCompRes
-stateComp4 = bindHandlerWithCast
+stateComp4 = bindOpsHandlerWithCast
   cast cast
   (mkEnvHandler 4) stateComp3
 
@@ -84,8 +84,8 @@ stateTPipelineTest = testCase "StateT pipeline test" $
 ioStateHandler
   :: forall eff s .
   (Effect eff)
-  => Handler (IoEff ∪ EnvEff (IORef s)) (StateEff s) eff
-ioStateHandler = genericHandler StateOps {
+  => OpsHandler (IoEff ∪ EnvEff (IORef s)) (StateEff s) eff
+ioStateHandler = genericOpsHandler StateOps {
   getOp =
    do
     ref <- ask
@@ -99,13 +99,13 @@ ioStateHandler = genericHandler StateOps {
 
 ioStateComp :: IORef Int -> Computation NoEff (Return StateCompRes) IO
 ioStateComp ref =
-  bindHandlerWithCast @NoEff
+  bindOpsHandlerWithCast @NoEff
     cast cast
     ioHandler
-    (bindHandlerWithCast @IoEff
+    (bindOpsHandlerWithCast @IoEff
       cast cast
       (mkEnvHandler ref)
-      (bindHandlerWithCast
+      (bindOpsHandlerWithCast
         @(IoEff ∪ EnvEff (IORef Int))
         cast cast
         ioStateHandler
@@ -205,7 +205,7 @@ stateDynComp4 = runPipelineWithCast
 
 stateDynComp5 :: forall eff . (Effect eff)
   => Computation NoEff (Return StateCompRes) eff
-stateDynComp5 = bindHandlerWithCast
+stateDynComp5 = bindOpsHandlerWithCast
   cast cast
   (mkEnvHandler (6 :: Int))
   stateDynComp4

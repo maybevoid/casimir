@@ -19,7 +19,7 @@ withStateOpsComp = withOps stateTOps stateBaseFunc
 
 withStateTHandlerComp :: forall eff . (Effect eff)
   => StateT Int eff ()
-withStateTHandlerComp = withHandler stateTHandler stateBaseFunc
+withStateTHandlerComp = withOpsHandler stateTHandler stateBaseFunc
 
 withStateTReaderTComp :: forall eff . (Effect eff)
   => ReaderT Int eff ()

@@ -94,8 +94,8 @@ tryIo m = do
 tryIoHandler
   :: forall e eff
    . (Effect eff, Ex.Exception e)
-  => Handler ((ExceptionEff e) ∪ IoEff) IoEff eff
-tryIoHandler = genericHandler $ IoOps {
+  => OpsHandler ((ExceptionEff e) ∪ IoEff) IoEff eff
+tryIoHandler = genericOpsHandler $ IoOps {
   liftIoOp = tryIo
 }
 
