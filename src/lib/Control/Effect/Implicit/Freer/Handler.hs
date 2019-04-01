@@ -5,14 +5,13 @@ module Control.Effect.Implicit.Freer.Handler
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Freer.FreerEff
 
 {-# INLINE withFreerCoOpHandler #-}
 withFreerCoOpHandler
   :: forall free handler eff a r
    . ( Effect eff
-     , FreeOps handler
+     , FreerOps handler
      , ImplicitOps handler
      , FreerEff free
      )
@@ -22,4 +21,4 @@ withFreerCoOpHandler
   -> eff r
 withFreerCoOpHandler handler comp1
   = handleFreer @free handler $
-      withOps (freeOps @free @handler @eff) comp1
+      withOps (freerOps @free @handler @eff) comp1

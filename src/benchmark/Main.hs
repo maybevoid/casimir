@@ -56,12 +56,10 @@ main = defaultMain
     , bench "with CoOp OpsHandler on ChurchMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @ChurchMonad)
+
     , bench "with CoOp OpsHandler on FreeMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @FreeMonad)
-    , bench "with CoOp OpsHandler on FreerMonad"  $
-        whnf (\comp -> runIdentity $ comp rounds)
-        (handleFreeComp @FreerMonad)
 
     , bench "with Freer CoOp OpsHandler on FreerMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
@@ -83,9 +81,6 @@ main = defaultMain
     , bench "Curried FreeMonad"  $
         whnf applyCurriedComp
         (curriedFreeComp @FreeMonad)
-    , bench "Curried FreerMonad"  $
-        whnf applyCurriedComp
-        (curriedFreeComp @FreerMonad)
 
     , bench "ReaderT ChurchMonad"  $
         whnf runReaderTComp
@@ -93,9 +88,6 @@ main = defaultMain
     , bench "ReaderT FreeMonad"  $
         whnf runReaderTComp
         (readerTFreeComp @FreeMonad)
-    , bench "ReaderT FreerMonad"  $
-        whnf runReaderTComp
-        (readerTFreeComp @FreerMonad)
 
     ]
   ]

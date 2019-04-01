@@ -8,7 +8,6 @@ where
 import Control.Monad
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Freer.FreerEff
 
 data FreerF ops a b where
@@ -17,7 +16,7 @@ data FreerF ops a b where
      . a -> FreerF ops a b
   FreeF
     :: forall ops a b x
-     . CoOperation ops x
+     . FreerCoOp ops x
     -> (x -> b)
     -> FreerF ops a b
 
@@ -26,7 +25,7 @@ newtype FreerMonad ops eff a = FreerMonad {
 }
 
 instance
-  (Monad eff, FreeOps ops)
+  (Monad eff, FreerOps ops)
   => Functor (FreerMonad ops eff)
    where
     fmap
@@ -47,7 +46,7 @@ instance
     {-# INLINE fmap #-}
 
 instance
-  (Monad eff, FreeOps ops)
+  (Monad eff, FreerOps ops)
   => Applicative (FreerMonad ops eff)
    where
     {-# INLINE pure #-}
@@ -55,7 +54,7 @@ instance
     (<*>) = ap
 
 instance
-  (Monad eff, FreeOps ops)
+  (Monad eff, FreerOps ops)
   => Monad (FreerMonad ops eff)
    where
     return = pure
@@ -76,40 +75,19 @@ instance
       {-# INLINE cont2 #-}
     {-# INLINE (>>=) #-}
 
-instance FreeEff FreerMonad where
-  liftFree = liftFreer
-  handleFree = doHandleFree
-  freeOps = mkFreeOps liftFreerOps
-
 instance FreerEff FreerMonad where
   handleFreer = doHandleFreer
+  {-# INLINE handleFreer #-}
 
-doHandleFree
-  :: forall ops eff a r
-   . (Effect eff, FreeOps ops)
-  => CoOpHandler ops a r eff
-  -> FreerMonad ops eff a
-  -> eff r
-doHandleFree (CoOpHandler handleReturn handleCoOp) = handleFree'
- where
-  handleFree'
-   :: FreerMonad ops eff a
-    -> eff r
-  handleFree' comp = runFreerMonad comp >>= handleComp
-  {-# INLINE handleFree' #-}
+  liftFreer m = FreerMonad $ fmap PureF m
+  {-# INLINE liftFreer #-}
 
-  handleComp
-    :: FreerF ops a (FreerMonad ops eff a)
-    -> eff r
-  handleComp (PureF x) = handleReturn x
-  handleComp (FreeF ops cont) = handleCoOp $
-    fmap (handleFree' . cont) ops
-  {-# INLINE handleComp #-}
-{-# INLINE doHandleFree #-}
+  freerOps = mkFreerOps liftFreerOps
+  {-# INLINE freerOps #-}
 
 doHandleFreer
   :: forall ops eff a r
-   . (Effect eff, FreeOps ops)
+   . (Effect eff, FreerOps ops)
   => FreerCoOpHandler ops a r eff
   -> FreerMonad ops eff a
   -> eff r
@@ -131,18 +109,12 @@ doHandleFreer handler = handleFreer'
   {-# INLINE handleComp #-}
 {-# INLINE doHandleFreer #-}
 
-liftFreer
-  :: forall eff ops a
-   . (Effect eff, FreeOps ops)
-   => eff a
-   -> FreerMonad ops eff a
-liftFreer m = FreerMonad $ fmap PureF m
-{-# INLINE liftFreer #-}
-
 liftFreerOps
   :: forall eff ops a
-   . (Effect eff, FreeOps ops)
-  => CoOperation ops a
+   . (Effect eff, FreerOps ops)
+  => FreerCoOp ops a
   -> FreerMonad ops eff a
-liftFreerOps ops = FreerMonad $ return $ FreeF (fmap return ops) liftFreer
+liftFreerOps ops =
+  FreerMonad $ return $ FreeF ops $
+    FreerMonad . return . PureF
 {-# INLINE liftFreerOps #-}
