@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Free.Freer
+module Control.Effect.Implicit.Freer.Freer
   ( FreerMonad (..)
   , FreerF (..)
   )
@@ -8,7 +8,8 @@ where
 import Control.Monad
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.FreeEff
+import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Freer.FreerEff
 
 data FreerF ops a b where
   PureF

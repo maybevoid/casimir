@@ -27,9 +27,11 @@ module Control.Effect.Implicit
   ( module Control.Effect.Implicit.Base
   , module Control.Effect.Implicit.Computation
   , module Control.Effect.Implicit.Free
+  , module Control.Effect.Implicit.Freer
   )
 where
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
 import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Freer

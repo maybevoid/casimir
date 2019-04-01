@@ -2,7 +2,6 @@
 module Control.Effect.Implicit.Free.Handler
   ( withCoOpHandler
   , withCoOpHandlerAndOps
-  , withFreerCoOpHandler
   , withContextualCoOpHandler
   )
 where
@@ -49,22 +48,6 @@ withCoOpHandlerAndOps handler comp1
         ∪ effmap (liftFree @free) (captureOps @ops)
         )
         comp1
-
-{-# INLINE withFreerCoOpHandler #-}
-withFreerCoOpHandler
-  :: forall free handler eff a r
-   . ( Effect eff
-     , FreeOps handler
-     , ImplicitOps handler
-     , FreerEff free
-     )
-  => FreerCoOpHandler handler a r eff
-  -> ((OpsConstraint handler (free handler eff))
-      => free handler eff a)
-  -> eff r
-withFreerCoOpHandler handler comp1
-  = handleFreer @free handler $
-      withOps (freeOps @free @handler @eff) comp1
 
 {-# INLINE withContextualCoOpHandler #-}
 withContextualCoOpHandler
