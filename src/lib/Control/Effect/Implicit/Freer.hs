@@ -4,6 +4,7 @@ module Control.Effect.Implicit.Freer
   , FreerEffCoOp (..)
   , FreerMonad (..)
   , FreerF (..)
+  , CoOpCont (..)
   , FreerCoOpHandler (..)
   , withFreerCoOpHandler
   )

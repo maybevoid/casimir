@@ -66,16 +66,14 @@ stateFreerCoOpHandler = FreerCoOpHandler handleReturn handleOps
   {-# INLINE handleReturn #-}
 
   handleOps
-    :: forall x
-     . FreerStateCoOp s x
-    -> (x -> eff (CoState s eff a))
+    :: CoOpCont (StateEff s) (eff (CoState s eff a))
     -> eff (CoState s eff a)
-  handleOps GetOp' cont1 = return $ CoState $
+  handleOps (CoOpCont GetOp' cont1) = return $ CoState $
     \s ->
      do
       (CoState cont3) <- cont1 s
       cont3 s
-  handleOps (PutOp' s) cont1 = return $ CoState $
+  handleOps (CoOpCont (PutOp' s) cont1) = return $ CoState $
     \_ ->
      do
       (CoState cont3) <- cont1 ()

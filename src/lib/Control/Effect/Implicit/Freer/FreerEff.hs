@@ -4,6 +4,7 @@ module Control.Effect.Implicit.Freer.FreerEff
   , FreerCoOpHandler (..)
   , FreerEffCoOp (..)
   , FreerOps (..)
+  , CoOpCont (..)
   )
 where
 
@@ -14,6 +15,11 @@ import Control.Effect.Implicit.Base
 class FreerEffCoOp sig where
   type family FreerCoOp sig
     = (coop :: (Type -> Type)) | coop -> sig
+
+data CoOpCont ops a where
+  CoOpCont
+    :: forall ops a x
+      . FreerCoOp ops x -> (x -> a) -> CoOpCont ops a
 
 class
   ( EffOps ops
@@ -33,11 +39,7 @@ class
 data FreerCoOpHandler handler a r eff =
   FreerCoOpHandler {
     handleFreerReturn :: a -> eff r,
-    handleFreerCoOp
-      :: forall x
-      . FreerCoOp handler x
-      -> (x -> eff r)
-      -> eff r
+    handleFreerCoOp :: CoOpCont handler (eff r) -> eff r
   }
 
 class
