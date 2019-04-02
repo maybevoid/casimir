@@ -368,7 +368,7 @@ similar patterns as above to use monad transformers in conjunction with
 provided to help us do the same thing with much less boilerplate:
 
 ```haskell
-app4 :: forall eff .
+app4 :: forall eff
    . (EffConstraint (TimeEff ∪ IoEff) eff)
   => eff ()
 app4 = do
@@ -393,6 +393,264 @@ stick with just `mtl`. As we will learn in coming sections, the more
 interesting things for `implicit-effects` is that we can also run algebraic
 effects together with our regular `mtl` effects with minimal impact on
 compatibility and performance.
+
+## Computation
+
+As we add more effects to our app, we may notice that binding an operation
+handler to a computation function is kind of like function application
+through implicit parameters. Since it is similar to function applications,
+we can also do _partial_ application of effect operations to a computation
+as well. Consider an example app:
+
+```haskell
+app1 :: forall eff
+   . EffConstraint (TimeEff ∪ EnvEff AppConfig ∪ StateEff AppState) eff
+  => eff ()
+app1 = ...
+```
+
+Our app uses three effects, `TimeEff` for getting current time, `EnvEff` to
+reading the app config, and `StateEff` for storing states. Our app is free
+of `IoEff`, which makes it much easier to test with mock effects.
+
+It may be cumbersome if we only bind all effect operations in our main program.
+For `EnvEff` and `StateEff`, we may still need to write some code to get the
+environment or initialize state. But for `TimeEff`, we pretty much know that
+our real app is going to use some IO to get the time. So why not bind it with
+`ioTimeOps` first:
+
+```haskell
+app2 :: EffConstraint (EnvEff AppConfig ∪ StateEff AppState) IO
+  => IO ()
+app2 = withOps ioTimeOps app1
+```
+
+By binding `ioTimeOps` with app1, we also unintentionally unified the effect
+variable `eff` with `IO`, since `ioTimeOps` is defined to run directly with
+`IO`. However with that binding we now have a problem: we now have to provide
+`EnvEff` and `StateEff` ops handlers that can run on `IO`, not
+`ReaderT AppConfig IO` or `StateT AppState IO` or
+`ReaderT AppConfig StateT AppState IO`. Because of that, we can't reuse our
+`readerTOps` and `stateTOps` that are defined to work only under lifted monads.
+
+The problem is partial application of operation handlers have too eagerly bind
+the concrete monad for the entire computation. Instead we need some way to
+lazily hold on to both `ioTimeOps` and `app1`, and lift them to some other
+monad at later time is necessary. Fortunately `implicit-effects` solves this
+by providing the `Computation` datatype:
+
+```haskell
+app3 :: forall eff . (Effect eff)
+  => Computation
+       (TimeEff ∪ EnvEff AppConfig ∪ StateEff AppState)
+       (Return ())
+       eff
+app3 = genericReturn app1
+```
+
+The `Computation` type have the following signature:
+
+```haskell
+newtype Computation ops comp eff1 = Computation {
+  runComp :: forall eff2 .
+    ( ImplicitOps ops
+    , Effect eff1
+    , Effect eff2
+    )
+    => LiftEff eff1 eff2
+    -> Operation ops eff2
+    -> comp eff2
+}
+```
+
+The detailed machinery is not too important at this moment, but the gist is
+that `Computation` provides a _liftable_ computation wrapper around generic
+computation functions. The first type argument is the effect signatures of
+the required effect operations. The second type argument is the computation
+type parameterized by an effect `eff`. In normal function computations we
+use the `Return` wrapper type which is defined as:
+
+```haskell
+newtype Return a eff = Return {
+  returnVal :: eff a
+}
+```
+
+Finally the third type argument to `Computation` is the base monad that is can
+run on, as well as the base monad of operation handlers that it can accept.
+
+The `genericReturn` helper is provided by `implicit-effects` to wrap a plain
+function computation into a `Computation`:
+
+```haskell
+genericReturn :: forall ops a . (ImplicitOps ops)
+  => (forall eff . (EffConstraint ops eff)
+      => eff a)
+  -> (forall eff . (Effect eff)
+      => Computation ops (Return a) eff)
+```
+
+Other than `Return` computation for plain functions, effect `Operation`s are
+also computations since they are also parameterized by a monad type.
+
+
+```haskell
+ioTimeHandler :: Computation NoEff TimeOps IO
+ioTimeHandler = baseOpsHandler ioTimeOps
+```
+
+The `baseOpsHandler` helper is provided by `implicit-effects` to wrap an
+operation handler to a computation.
+
+```haskell
+baseOpsHandler :: forall handler eff
+   . (ImplicitOps handler, Effect eff)
+  => Operation handler eff
+  -> Computation NoEff (Operation handler) eff
+```
+
+`NoEff` is the empty effect signature, indicating that the operation handler
+computation defined does not depend on other effects. As you may have guess,
+soon after this we will talk about operation handlers that depend on other
+effects.
+
+Given we have an ops handler computation and a return computation, we can
+bind the two together as follow:
+
+```haskell
+app4 :: Computation
+         (EnvEff AppConfig ∪ StateEff AppState)
+         (Return ())
+         IO
+app4 = bindOpsHandlerWithCast
+  cast cast
+  ioTimeHandler app3
+```
+
+`bindOpsHandlerWithCast` is a helper function provided by `implicit-effects` that
+binds an ops handler to a computation, at the same time perform safe "casting"
+of the effect union constraints to a suitable target type. We will go into
+details on ops casting in later sections, but the gist of it is that without it
+we'd have to write something like:
+
+```haskell
+app4' :: Computation
+         (NoEff ∪ EnvEff AppConfig ∪ StateEff AppState)
+         (Return ())
+         IO
+app4' = bindExactOpsHandler ioTimeHandler app3
+```
+
+Notice that `NoEff` is appended to the front of `app4'`'s effect dependencies,
+as the precise version `bindExactOpsHandler` merges the effect operations
+required by both `ioTimeHandler` and `app3`. But through some Haskell hacks
+called _constraint casting_, we can statically show proofs to Haskell
+that `NoEff` can be _eliminated_ since it has a trivial constraint that can
+always be satisfied. We'll leave further explanation to the next sections
+and continue with our example.
+
+The nice thing about `Computation` is that we can partially apply ops handlers
+as many times as we need, as long as the ops handlers can run on either the
+current monad _or_ a lifted monad. With that we can for example further bind
+our app with a `StateT` handler:
+
+```haskell
+app5 :: Computation
+         (EnvEff AppConfig ∪ StateEff AppState)
+         (Return ())
+         StateT AppState IO
+app5 = liftComputation stateTLiftEff app4
+
+app6 :: Computation
+         (EnvEff AppConfig)
+         (Return ())
+         StateT AppState IO
+app6 = bindOpsHandlerWithCast
+  cast cast
+  stateTHandler app5
+```
+
+The `liftComputation` function is used to lift a computation to run on a lifted
+monad, by providing it a `LiftEff` object. `LiftEff` is an opaque object that
+can be used to apply `effmap` to an `EffFunctor`, but with the optimization
+that if it is an identity `idLift`, it just skips the `effmap` and returns the
+original `EffFunctor`.
+
+We first lift our app to work on `StateT AppState IO`, and then use
+`bindOpsHandlerWithCast` to bind it with `stateTHandler`, which is provided
+as the `Computation` version of `stateTOps`. Also notice that
+`bindOpsHandlerWithCast` allows _reordering_ of effect operations, so
+we can still bind it even though `StateEff` appears in the _last_ position
+in our original type for `app3`.
+
+We can then similarly continue with binding our reader ops with `ReaderT`:
+
+```haskell
+app7 :: Computation
+         NoEff
+         (Return ())
+         ReaderT AppConfig StateT AppState IO
+app7 = bindOpsHandlerWithCast
+  cast cast
+  readerTHandler $
+  liftComputation readerTLiftEff app6
+```
+
+Now we have "fully applied" the effect operations of a computation, making it
+requiring only `NoEff`. With that we can use `execComp` to run our computation
+and get back the underlying function:
+
+```haskell
+app8 :: ReaderT AppConfig StateT AppState IO ()
+app8 = execComp app7
+```
+
+At this stage we can then execute our monad transformer stack as usually, and
+finally get back `IO ()`. In practice, `app4` through `app8` can slowly
+be transformed in different parts of our codebase. We can essentially
+fully utilize the functional programming style and doing partial applications
+of named parameters to our computations like regular functions.
+
+## Pipeline
+
+At this point you may be suspicious of the above roundabout way of using
+`implicit-effects` just to get back our favorite monad transformer stacks.
+There is actually even simplified abstractions provided by `implicit-effects`
+that lets us use `mtl` without touching the monad transformers like  `ReaderT`
+and `StateT`.
+
+```haskell
+app1 :: Computation
+         (EnvEff AppConfig ∪ StateEff AppState)
+         (Return ())
+         IO
+app1 = ...
+
+initialAppState :: AppState
+initialAppState = ...
+
+app2 :: Computation
+         (EnvEff AppConfig)
+         (Return ())
+         IO
+app2 = runPipelineWithCast
+  cast cast
+  (stateTPipeline initialAppState)
+  app1
+```
+
+A `Pipeline` is simply generic functions that transforms computations, wrapped
+in a `newtype`. `stateTPipeline` is one of the pipelines provided by
+`implicit-effects` that given an initial state, it performs transformation
+that _removes_ the `StateEff` operation from a `Computation`. Here again we
+have to use some ops casting magic with `runPipelineWithCast` that reorder the
+effect operations of the original computation, and remove the `NoEff` noise
+from the result computation.
+
+Notice here `stateTPipeline` completely encapsulates the fact that we are using
+`StateT` underneath. As far as the computation concerns, we can swap in
+different pipelines that implement `StateEff`, with performance characteristics
+being the only difference.
 
 ...
 

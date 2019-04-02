@@ -2,6 +2,7 @@
 module Control.Effect.Implicit.Computation.Handler
   ( BaseOpsHandler
   , GenericOpsHandler
+  , bindOps
   , opsHandlerComp
   , withOpsHandler
   , baseOpsHandler
@@ -24,6 +25,20 @@ type GenericOpsHandler ops handler =
   forall eff . (Effect eff)
   => Computation ops (Operation handler) eff
 
+bindOps
+  :: forall ops1 ops2 comp eff
+   . ( Effect eff
+     , ImplicitOps ops1
+     , ImplicitOps ops2
+     )
+  => Operation ops1 eff
+  -> Computation (ops1 ∪ ops2) comp eff
+  -> Computation ops2 comp eff
+bindOps ops1 comp = Computation $
+  \lift ops2 ->
+    runComp comp lift $
+      applyEffmap lift ops1 ∪ ops2
+
 opsHandlerComp
   :: forall ops handler eff1 .
   ( ImplicitOps ops
@@ -40,8 +55,8 @@ opsHandlerComp comp = Computation $
   \ lift12 ops -> withOps ops $ comp lift12
 
 baseOpsHandler
-  :: forall handler eff .
-  (ImplicitOps handler, Effect eff)
+  :: forall handler eff
+   . (ImplicitOps handler, Effect eff)
   => Operation handler eff
   -> BaseOpsHandler handler eff
 baseOpsHandler handler = Computation $
