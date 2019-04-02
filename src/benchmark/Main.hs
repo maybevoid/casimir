@@ -65,17 +65,23 @@ main = defaultMain
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreerComp @FreerMonad)
 
+    , bench "Curried StateT Pipeline" $
+        whnf applyCurriedComp
+        curriedStateTComp
+
     , bench "Transformer StateEff to EnvEff to ReaderT Pipeline" $
         whnf runReaderTComp
         stateToReaderComp
+
     , bench "Manual StateEff to EnvEff to ReaderT Pipeline"  $
         whnf runReaderTComp
         stateEffToEnvEffToReaderTComp
+
     , bench "Manual StateEff to ReaderT Pipeline"  $
         whnf runReaderTComp
         stateEffToReaderTComp
 
-    , bench "Curried ChurchMonad"  $
+    , bench "Curried ChurchMonad" $
         whnf applyCurriedComp
         (curriedFreeComp @ChurchMonad)
     , bench "Curried FreeMonad"  $

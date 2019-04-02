@@ -18,7 +18,7 @@ import Control.Effect.Implicit.Transform.State
 stateTests :: TestTree
 stateTests = testGroup "StateEff Tests"
   [ stateTHandlerTest
-  , stateTPipelineTest
+  , stateTToEnvEffPipelineTest
   , ioStateTest
   , churchStateTest1
   , churchStateTest2
@@ -68,7 +68,7 @@ stateComp3 :: Computation (EnvEff Int) (Return StateCompRes) Identity
 stateComp3
   = runPipelineWithCast
     cast cast
-    stateTPipeline
+    stateTToEnvEffPipeline
     stateComp2
 
 stateComp4 :: IdentityComputation StateCompRes
@@ -76,8 +76,8 @@ stateComp4 = bindOpsHandlerWithCast
   cast cast
   (mkEnvHandler 4) stateComp3
 
-stateTPipelineTest :: TestTree
-stateTPipelineTest = testCase "StateT pipeline test" $
+stateTToEnvEffPipelineTest :: TestTree
+stateTToEnvEffPipelineTest = testCase "StateT pipeline test" $
   assertEqual "StateT pipeline should get/put the correct states"
     (4, 6, 6) $ runIdentityComp stateComp4
 

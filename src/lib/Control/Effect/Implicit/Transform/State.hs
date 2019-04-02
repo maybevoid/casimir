@@ -46,8 +46,23 @@ stateTHandler = opsHandlerComp $
 stateTPipeline
   :: forall s eff1 comp .
   (Effect eff1, EffFunctor comp)
+  => s
+  -> SimplePipeline NoEff (StateEff s) comp eff1
+stateTPipeline i = transformePipeline $ genericComputation handler
+ where
+  {-# INLINE handler #-}
+  handler :: forall eff
+    . (Effect eff)
+    => TransformerHandler (StateT s) (StateEff s) eff
+  handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
+    \comp -> evalStateT comp i
+
+{-# INLINE stateTToEnvEffPipeline #-}
+stateTToEnvEffPipeline
+  :: forall s eff1 comp .
+  (Effect eff1, EffFunctor comp)
   => SimplePipeline (EnvEff s) (StateEff s) comp eff1
-stateTPipeline = transformerPipeline $ genericComputation handler
+stateTToEnvEffPipeline = transformePipeline $ genericComputation handler
  where
   {-# INLINE handler #-}
   handler :: forall eff

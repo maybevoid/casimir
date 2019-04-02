@@ -25,7 +25,7 @@ module Control.Effect.Implicit.Computation
   , bindExactOpsHandler
   , composeExactOpsHandlers
   , opsHandlerToPipeline
-  , transformerPipeline
+  , transformePipeline
   , composePipelines
   , cast
   , runCast

@@ -4,6 +4,12 @@
 
   - [Haddock documentation](https://maybevoid.com/implicit-effects-haddock/)
 
+<i>
+  `implicit-effects` is currently work in progress and will soon be announced
+  publicly. The code is mostly ready but documentation is being worked on.
+  Thank you for your understanding looking at the preview of this project.
+</i>
+
 ## Introduction
 
 `implicit-effects` is a new library for using algebraic effects in Haskell.
@@ -400,3 +406,22 @@ for `implicit-effects` to learn more.
 
 You can also look at the [effect operation unit tests](src/test/Effect/Test/Ops)
 which has some example use of `implicit-effects`.
+
+
+## References
+
+  - [Effects bibliography](https://github.com/yallop/effects-bibliography), Jeremy Yallop
+  - [Programming with Algebraic Effects and Handlers](http://math.andrej.com/wp-content/uploads/2012/03/eff.pdf),
+    Andrej Bauer and Matija Pretnar
+  - [An Introduction to Algebraic Effects and Handlers](http://www.eff-lang.org/handlers-tutorial.pdf),
+    Matija Pretnar
+  - [What is algebraic about algebraic effects and handlers?](https://arxiv.org/pdf/1807.05923.pdf),
+    Andrej Bauer
+  - [Freer monads, more extensible effects](http://okmij.org/ftp/Haskell/extensible/more.pdf),
+    Oleg Kiselyov and Hiromi Ishii
+  - [Shallow Effect Handlers](http://homepages.inf.ed.ac.uk/slindley/papers/shallow-extended.pdf),
+    Daniel Hillerström and Sam Lindley
+
+  - [Freer Monads: Too Fast, Too Free](https://reasonablypolymorphic.com/blog/too-fast-too-free/),
+    Sandy Maguire
+  - [Free Monad Benchmarks](https://github.com/feuerbach/freemonad-benchmark), Roman Cheplyaka

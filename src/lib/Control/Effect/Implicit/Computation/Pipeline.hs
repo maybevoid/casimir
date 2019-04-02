@@ -5,7 +5,7 @@ module Control.Effect.Implicit.Computation.Pipeline
   , SimplePipeline
   , GenericPipeline
   , opsHandlerToPipeline
-  , transformerPipeline
+  , transformePipeline
   , castPipelineOps
   , castPipelineHandler
   , composePipelines
@@ -62,8 +62,8 @@ opsHandlerToPipeline handler1 = Pipeline pipeline
     cast cast
     handler1 comp1
 
-{-# INLINE transformerPipeline #-}
-transformerPipeline
+{-# INLINE transformePipeline #-}
+transformePipeline
   :: forall t ops1 handler eff1 .
   ( Effect eff1
   , ImplicitOps ops1
@@ -72,7 +72,7 @@ transformerPipeline
   )
   => Computation ops1 (TransformerHandler t handler) eff1
   -> GenericPipeline ops1 handler eff1
-transformerPipeline handler1 = Pipeline pipeline
+transformePipeline handler1 = Pipeline pipeline
  where
   {-# INLINE pipeline #-}
   pipeline :: forall ops2 comp .

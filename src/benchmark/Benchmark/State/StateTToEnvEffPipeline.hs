@@ -1,5 +1,5 @@
 
-module Benchmark.State.StateTPipeline
+module Benchmark.State.StateTToEnvEffPipeline
   ( stateToReaderComp
 
   -- The simple action of exporting a specialized
@@ -22,7 +22,7 @@ stateTComp1 :: forall eff . (Effect eff)
   => Computation (EnvEff Int) (Return ()) eff
 stateTComp1 = runPipelineWithCast
   cast cast
-  stateTPipeline stateBaseComp
+  stateTToEnvEffPipeline stateBaseComp
 
 stateTComp2 :: forall eff . (Effect eff)
   => Computation NoEff (Return ()) (ReaderT Int eff)

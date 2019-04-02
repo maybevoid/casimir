@@ -62,7 +62,7 @@ genericCoOpHandlerToPipeline
   => Computation ops1 (GenericCoOpHandler handler) eff1
   -> GenericPipeline ops1 handler eff1
 genericCoOpHandlerToPipeline handler1
-  = transformerPipeline $ Computation handler2
+  = transformePipeline $ Computation handler2
  where
   handler2
     :: forall eff2 .
@@ -93,7 +93,7 @@ contextualHandlerToPipeline
   => Computation ops1 (ContextualHandler w handler) eff1
   -> GenericPipeline ops1 handler eff1
 contextualHandlerToPipeline handler1
-  = transformerPipeline $ Computation handler2
+  = transformePipeline $ Computation handler2
  where
   handler2
     :: forall eff2 .
