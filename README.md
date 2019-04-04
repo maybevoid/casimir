@@ -642,10 +642,10 @@ app2 = runPipelineWithCast
 A `Pipeline` is simply generic functions that transforms computations, wrapped
 in a `newtype`. `stateTPipeline` is one of the pipelines provided by
 `implicit-effects` that given an initial state, it performs transformation
-that _removes_ the `StateEff` operation from a `Computation`. Here again we
-have to use some ops casting magic with `runPipelineWithCast` that reorder the
-effect operations of the original computation, and remove the `NoEff` noise
-from the result computation.
+that _removes_ the `StateEff` operation from a `Computation` without changing
+the monad type. Here again we have to use some ops casting magic with
+`runPipelineWithCast` that reorder the effect operations of the original
+computation, and remove the `NoEff` noise from the result computation.
 
 Notice here `stateTPipeline` completely encapsulates the fact that we are using
 `StateT` underneath. As far as the computation concerns, we can swap in
