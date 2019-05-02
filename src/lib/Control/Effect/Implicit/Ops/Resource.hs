@@ -8,7 +8,12 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
 
 import Control.Effect.Implicit.Ops.Io
-import Control.Effect.Implicit.Ops.Env
+import Control.Effect.Implicit.Ops.UnliftIo
+
+data BracketTask a = BracketTask {
+  allocateResource :: IO a,
+  releaseResource :: a -> IO ()
+}
 
 data ResourceEff
   :: (Type -> Type)
@@ -17,13 +22,13 @@ data ResourceEff
   -> Type
   where
 
-data ResourceOps t inOps inEff eff = ResourceOps
+data ResourceOps t ops eff1 eff2 = ResourceOps
   { withResourceOp
       :: forall a b
-       . (Effect inEff, ImplicitOps inOps)
+       . (Effect eff1, Effect eff2, ImplicitOps ops)
       => t a
-      -> Computation (EnvEff a ∪ inOps) (Return b) inEff
-      -> eff b
+      -> (a -> Computation ops (Return b) eff1)
+      -> eff2 b
   }
 
 data ResourceCoOp
@@ -34,20 +39,37 @@ data ResourceCoOp
   -> Type
  where
   WithResourceOp
-    :: forall t inOps inEff a b r
+    :: forall t ops eff a b r
      . t a
-    -> Computation (EnvEff a ∪ inOps) (Return b) inEff
+    -> (a -> Computation ops (Return b) eff)
     -> (b -> r)
-    -> ResourceCoOp t inOps inEff r
+    -> ResourceCoOp t ops eff r
 
-instance EffOps (ResourceEff t inOps inEff) where
-  type Operation (ResourceEff t inOps inEff)
-    = ResourceOps t inOps inEff
+instance EffOps (ResourceEff t ops eff) where
+  type Operation (ResourceEff t ops eff)
+    = ResourceOps t ops eff
 
-instance ImplicitOps (ResourceEff t inOps inEff) where
-  type OpsConstraint (ResourceEff t inOps inEff) eff
+instance EffFunctor (ResourceOps t ops inEff) where
+  effmap :: forall eff1 eff2 .
+    (Effect eff1, Effect eff2)
+    => (forall x . eff1 x -> eff2 x)
+    -> ResourceOps t ops inEff eff1
+    -> ResourceOps t ops inEff eff2
+  effmap lift ops = ResourceOps withResourceOp'
+   where
+    withResourceOp'
+      :: forall a b
+       . (Effect inEff, ImplicitOps ops)
+      => t a
+      -> (a -> Computation ops (Return b) inEff)
+      -> eff2 b
+    withResourceOp' task cont = lift $
+      withResourceOp ops task cont
+
+instance ImplicitOps (ResourceEff t ops eff) where
+  type OpsConstraint (ResourceEff t ops eff) eff2
     = (?_Control_Effects_Implicit_Ops_Resource_resourceOps
-        :: ResourceOps t inOps inEff eff)
+        :: ResourceOps t ops eff eff2)
 
   withOps ops cont =
     let
@@ -56,85 +78,40 @@ instance ImplicitOps (ResourceEff t inOps inEff) where
 
   captureOps = ?_Control_Effects_Implicit_Ops_Resource_resourceOps
 
-instance EffFunctor (ResourceOps t inOps inEff) where
-  effmap :: forall eff1 eff2 .
-    (Effect eff1, Effect eff2)
-    => (forall x . eff1 x -> eff2 x)
-    -> ResourceOps t inOps inEff eff1
-    -> ResourceOps t inOps inEff eff2
-  effmap lift ops = ResourceOps withResourceOp'
-   where
-    withResourceOp'
-      :: forall a b
-       . (Effect inEff, ImplicitOps inOps)
-      => t a
-      -> Computation (EnvEff a ∪ inOps) (Return b) inEff
-      -> eff2 b
-    withResourceOp' task cont = lift $
-      withResourceOp ops task cont
-
-data BracketTask a = BracketTask {
-  allocateResource :: IO a,
-  releaseResource :: a -> IO ()
-}
-
-bracketResourceOpsHandler
-  :: forall extractOps f inOps inEff eff
-   . ( Effect inEff
-     , Effect eff
-     , ImplicitOps extractOps
-     , ImplicitOps inOps
+bracketResourceOps
+  :: forall ops res eff1 eff2
+   . ( Effect eff1
+     , ImplicitOps ops
+     , EffConstraint (IoEff ∪ UnliftIoEff ops res eff1) eff2
      )
-  => (forall x . Pipeline NoEff inOps (Return x) (Return (f x)) inEff IO)
-  -> (forall x . Computation (EnvEff (f x) ∪ extractOps) (Return x) eff)
-  -> Computation (IoEff ∪ extractOps) (ResourceOps BracketTask inOps inEff) eff
-bracketResourceOpsHandler unliftPipeline extractComp
-  = Computation comp
+  => ResourceOps BracketTask ops eff1 eff2
+bracketResourceOps = ResourceOps withResourceOp'
  where
-  comp
-    :: forall eff2
-     . (Effect eff2)
-    => LiftEff eff eff2
-    -> Operation (IoEff ∪ extractOps) eff2
-    -> ResourceOps BracketTask inOps inEff eff2
-  comp lift12 (UnionOps ioOps' extractOps) = ResourceOps withResourceOp'
-   where
-    withResourceOp'
-      :: forall a b
-       . BracketTask a
-      -> Computation (EnvEff a ∪ inOps) (Return b) inEff
-      -> eff2 b
-    withResourceOp'
-      (BracketTask alloc release)
-      comp1 = do
-        res1 <- liftIoOp ioOps' $ bracket alloc release $
-          \x -> returnVal $ runComp (comp2 x) idLift NoOp
+  withResourceOp'
+    :: forall a b
+    .  BracketTask a
+    -> (a -> Computation ops (Return b) eff1)
+    -> eff2 b
+  withResourceOp'
+    (BracketTask alloc release)
+    comp1
+    = do
+      unlifter <- unliftIoOp captureOps
+      res1 <- liftIo $ bracket alloc release $ unlifter . comp1
+      extractIoRes res1
 
-        returnVal $ runComp extractComp lift12 $
-          mkEnvOps res1 ∪ extractOps
-
-       where
-        comp2 :: a -> Computation NoEff (Return (f b)) IO
-        comp2 x = runPipelineWithCast
-          cast cast
-          unliftPipeline $
-          bindOps (mkEnvOps x) comp1
-
--- ioResourceOps
---   :: forall inOps
---    . (ImplicitOps inOps)
---   => Operation inOps IO
---   -> ResourceOps BracketTask inOps IO IO
--- ioResourceOps ops = runComp comp idLift (ioOps ∪ NoOp)
---  where
---   comp = bracketResourceOps
---     (fmap Identity)
---     (genericReturn $ ask >>= return . runIdentity)
---     ops
-
--- ioResourceOpsComp
---   :: forall inOps
---    . (ImplicitOps inOps)
---   => Operation inOps IO
---   -> Computation NoEff (ResourceOps BracketTask inOps IO) IO
--- ioResourceOpsComp ops = baseOpsHandler $ ioResourceOps ops
+withResource
+  :: forall a b t ops eff1 eff2
+   . ( Effect eff1
+     , ImplicitOps ops
+     , EffConstraint (ResourceEff t ops eff1) eff2)
+  => t a
+  -> (forall eff
+       . (EffConstraint ops eff)
+      => a
+      -> eff b)
+  -> eff2 b
+withResource task comp1 = withResourceOp captureOps task comp2
+ where
+  comp2 :: a -> Computation ops (Return b) eff1
+  comp2 x = genericReturn $ comp1 x

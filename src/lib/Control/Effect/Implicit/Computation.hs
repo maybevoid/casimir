@@ -1,7 +1,10 @@
 module Control.Effect.Implicit.Computation
   ( Computation (..)
   , OpsHandler
+  , FunctorComp (..)
   , Return (..)
+  , Arrow (..)
+  , ReturnCtx (..)
   , Pipeline (..)
   , TransformerHandler (..)
   , Cast (..)
@@ -15,6 +18,7 @@ module Control.Effect.Implicit.Computation
   , GenericPipeline
   , genericComputation
   , genericReturn
+  , arrowComputation
   , runIdentityComp
   , execComp
   , liftComputation

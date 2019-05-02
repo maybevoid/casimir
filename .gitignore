@@ -5,3 +5,4 @@ benchmarks/
 .ghc*
 result*
 *.cabal
+.haskell-code-explorer

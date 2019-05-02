@@ -18,8 +18,17 @@ askTag
 askTag = withTag @tag @(EnvEff e) ask
 
 mkTaggedEnvOps
-  :: forall tag e eff
+  :: forall tag eff e
    . (Effect eff)
    => e
    -> TaggedEnvOps tag e eff
 mkTaggedEnvOps = TaggedOps . mkEnvOps
+
+withTaggedEnv
+  :: forall tag r e eff
+   . (Effect eff, ImplicitOps (TaggedEnvEff tag e))
+  => e
+  -> ((OpsConstraint (TaggedEnvEff tag e) eff) => eff r)
+  -> eff r
+withTaggedEnv e cont =
+  withOps (mkTaggedEnvOps @tag @eff e) cont
