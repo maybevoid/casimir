@@ -8,6 +8,7 @@ import Effect.Test.Ops.Pipe
 import Effect.Test.Ops.Exception
 import Effect.Test.Ops.Ambivalent
 import Effect.Test.Ops.Tag
+import Effect.Test.Ops.Resource
 
 opsTests :: TestTree
 opsTests = testGroup "Ops Tests"
@@ -17,4 +18,5 @@ opsTests = testGroup "Ops Tests"
   , exceptionTests
   , ambivalentTests
   , taggedTests
+  , resourceTests
   ]
