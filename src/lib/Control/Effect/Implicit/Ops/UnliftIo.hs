@@ -163,47 +163,48 @@ mkFixedUnliftIoOps (UnliftIoOps unlift1 extract1) = ops1
       return $ \comp -> unlift3 $ bindOps ops1 comp
 
 mkFixedUnliftIoOps'
-  :: forall ops res eff1 eff2
-    . ( ImplicitOps ops
+  :: forall ops1 ops2 res eff1 eff2
+    . ( ImplicitOps ops1
+      , ImplicitOps ops2
       , Effect eff1
       , Effect eff2
-      , EffConstraint ops eff2
+      , EffConstraint ops2 eff2
       )
   => (forall eff
-      . (EffConstraint ops eff)
-      => UnliftIoOps ops res eff1 eff)
-  -> FixedUnliftIoOps ops res eff1 eff2
+      . (EffConstraint ops2 eff)
+      => UnliftIoOps (ops1 ∪ ops2) res eff1 eff)
+  -> FixedUnliftIoOps (ops1 ∪ ops2) res eff1 eff2
 mkFixedUnliftIoOps' ops1 = ops2
-  where
-  ops2 :: FixedUnliftIoOps ops res eff1 eff2
+ where
+  ops2 :: FixedUnliftIoOps (ops1 ∪ ops2) res eff1 eff2
   ops2 = FixedUnliftIoOps ops3
-   where
-    ops3 :: UnliftIoOps (FixedUnliftIoEff ops res eff1 ∪ ops) res eff1 eff2
-    ops3 = UnliftIoOps unlift1 $ extractIoResOp ops4
 
-    ops4 :: UnliftIoOps ops res eff1 eff2
-    ops4 = ops1
+  ops3 :: UnliftIoOps (FixedUnliftIoEff (ops1 ∪ ops2) res eff1 ∪ ops1 ∪ ops2) res eff1 eff2
+  ops3 = UnliftIoOps unlift1 $ extractIoResOp ops4
 
-    unlift1 :: forall a
-       . eff2 (Computation (FixedUnliftIoEff ops res eff1 ∪ ops) (Return a) eff1
-              -> IO (res a))
-    unlift1 =  do
-      unlift2 <- unliftIoOp ops4
-      return $ \comp1 ->
-        let
-          comp2 :: Computation ops (Return a) eff1
-          comp2 = Computation comp3
+  ops4 :: UnliftIoOps (ops1 ∪ ops2) res eff1 eff2
+  ops4 = ops1
 
-          comp3 :: forall eff3 . (Effect eff3)
-            => LiftEff eff1 eff3
-            -> Operation ops eff3
-            -> Return a eff3
-          comp3 lift13 ops5 = runComp comp1 lift13 (ops6 ∪ ops5)
-           where
-            ops6 :: FixedUnliftIoOps ops res eff1 eff3
-            ops6 = withOps ops5 $ mkFixedUnliftIoOps' ops1
-        in
-        unlift2 comp2
+  unlift1 :: forall a
+      . eff2 (Computation (FixedUnliftIoEff (ops1 ∪ ops2) res eff1 ∪ ops1 ∪ ops2) (Return a) eff1
+            -> IO (res a))
+  unlift1 =  do
+    unlift2 <- unliftIoOp ops4
+    return $ \comp1 ->
+      let
+        comp2 :: Computation (ops1 ∪ ops2) (Return a) eff1
+        comp2 = Computation comp3
+
+        comp3 :: forall eff3 . (Effect eff3)
+          => LiftEff eff1 eff3
+          -> Operation (ops1 ∪ ops2) eff3
+          -> Return a eff3
+        comp3 lift13 ops5 = runComp comp1 lift13 (ops6 ∪ ops5)
+         where
+          ops6 :: FixedUnliftIoOps (ops1 ∪ ops2) res eff1 eff3
+          ops6 = withOps ops5 $ mkFixedUnliftIoOps' ops1
+      in
+      unlift2 comp2
 
 unfixUnliftIo
   :: forall ops res eff1 eff2 r

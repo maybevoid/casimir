@@ -129,10 +129,19 @@ bracketResourceOps = ResourceOps withResourceOp'
       res1 <- liftIo $ bracket alloc release $ unlifter . comp1
       extractIoRes res1
 
+bracketResourceOps'
+  :: forall ops res eff1 eff2
+    . ( Effect eff1
+      , ImplicitOps ops
+      , EffConstraint (FixedUnliftIoEff ops res eff1 ∪ IoEff) eff2
+      )
+  => ResourceOps BracketTask (FixedUnliftIoEff ops res eff1 ∪ ops) eff1 eff2
+bracketResourceOps' = withOps (unfixUnliftIoOps captureOps) $ bracketResourceOps
+
 mkFixedResourceOps
   :: forall t ops eff
-   . ( ImplicitOps ops
-     , EffConstraint ops eff
+   . ( Effect eff
+     , ImplicitOps ops
      )
   => ResourceOps t ops eff eff
   -> FixedResourceOps t ops eff eff
@@ -155,6 +164,52 @@ mkFixedResourceOps (ResourceOps withResource1) = ops1
     withResource2 task comp = withResource1 task $
       \x -> bindOps ops1 $ comp x
 
+mkFixedResourceOps'
+  :: forall t ops1 ops2 eff1 eff2
+    . ( ImplicitOps ops1
+      , ImplicitOps ops2
+      , Effect eff1
+      , Effect eff2
+      , EffConstraint ops2 eff2
+      )
+  => (forall eff
+      . (EffConstraint ops2 eff)
+      => ResourceOps t (ops1 ∪ ops2) eff1 eff)
+  -> FixedResourceOps t (ops1 ∪ ops2) eff1 eff2
+mkFixedResourceOps' ops1 = ops2
+ where
+  ops2 :: FixedResourceOps t (ops1 ∪ ops2) eff1 eff2
+  ops2 = FixedResourceOps ops3
+
+  ops3 :: ResourceOps t (FixedResourceEff t (ops1 ∪ ops2) eff1 ∪ ops1 ∪ ops2) eff1 eff2
+  ops3 = ResourceOps withResource'
+
+  ops4 :: ResourceOps t (ops1 ∪ ops2) eff1 eff2
+  ops4 = ops1
+
+  withResource'
+    :: forall a b
+     . t a
+    -> (a
+        -> Computation
+            (FixedResourceEff t (ops1 ∪ ops2) eff1 ∪ (ops1 ∪ ops2))
+            (Return b)
+            eff1)
+    -> eff2 b
+  withResource' task comp1 = withResourceOp ops4 task comp2
+   where
+    comp2 :: a -> Computation (ops1 ∪ ops2) (Return b) eff1
+    comp2 x = Computation comp3
+     where
+      comp3 :: forall eff3 . (Effect eff3)
+        => LiftEff eff1 eff3
+        -> Operation (ops1 ∪ ops2) eff3
+        -> Return b eff3
+      comp3 lift13 ops5 = runComp (comp1 x) lift13 (ops6 ∪ ops5)
+       where
+        ops6 :: FixedResourceOps t (ops1 ∪ ops2) eff1 eff3
+        ops6 = withOps ops5 $ mkFixedResourceOps' ops1
+
 withResource
   :: forall a b t ops eff1 eff2
    . ( Effect eff1
@@ -171,6 +226,19 @@ withResource task comp1 = withResourceOp captureOps task comp2
   comp2 :: a -> Computation ops (Return b) eff1
   comp2 x = genericReturn $ comp1 x
 
+unfixResourceOps
+  :: forall t ops eff1 eff2 r
+   . ( Effect eff1
+     , ImplicitOps ops
+     , EffConstraint (FixedResourceEff t ops eff1) eff2
+     )
+  => ((OpsConstraint
+        (ResourceEff t (FixedResourceEff t ops eff1 ∪ ops) eff1)
+        eff2)
+      => eff2 r)
+  -> eff2 r
+unfixResourceOps comp = withOps (unFixedResourceOps captureOps) comp
+
 withFixedResource
   :: forall a b t ops eff1 eff2
    . ( Effect eff1
@@ -182,10 +250,4 @@ withFixedResource
       => a
       -> eff b)
   -> eff2 b
-withFixedResource task comp1 = withResourceOp ops1 task comp2
- where
-  ops1 :: ResourceOps t (FixedResourceEff t ops eff1 ∪ ops) eff1 eff2
-  ops1 = unFixedResourceOps captureOps
-
-  comp2 :: a -> Computation (FixedResourceEff t ops eff1 ∪ ops) (Return b) eff1
-  comp2 x = genericReturn $ comp1 x
+withFixedResource task comp1 = unfixResourceOps $ withResource task comp1
