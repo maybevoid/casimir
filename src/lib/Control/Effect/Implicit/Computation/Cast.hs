@@ -4,7 +4,7 @@ module Control.Effect.Implicit.Computation.Cast
   , OpsCast
   , type (⊇)
   , cast
-  , runCast
+  , withCast
   , castOps
   , extendCast
   , composeCast
@@ -26,13 +26,13 @@ type ops1 ⊇ ops2 = OpsCast ops1 ops2
 cast :: forall p . p => Cast p
 cast = Cast
 
-runCast
-  :: forall eff ops1 ops2 r .
-  ( EffConstraint ops1 eff )
+withCast
+  :: forall eff ops1 ops2 r
+   . ( EffConstraint ops1 eff )
   => ops1 ⊇ ops2
   -> (OpsConstraint ops2 eff => r)
   -> r
-runCast caster res =
+withCast caster res =
   case caster @eff of
     Cast -> res
 
@@ -46,7 +46,7 @@ castOps
   -> Operation ops1 eff
   -> Operation ops2 eff
 castOps caster ops = withOps ops $
-  runCast @eff @ops1 @ops2
+  withCast @eff @ops1 @ops2
     caster captureOps
 
 extendCast
@@ -81,8 +81,8 @@ composeCast cast1 cast2 = cast3
       :: forall eff .
       (EffConstraint ops1 eff)
       => Cast (OpsConstraint ops3 eff)
-    cast3 = runCast @eff @ops1 @ops2 cast1 $
-      runCast @eff @ops2 @ops3 cast2 Cast
+    cast3 = withCast @eff @ops1 @ops2 cast1 $
+      withCast @eff @ops2 @ops3 cast2 Cast
 
 castComputation
   :: forall ops1 ops2 comp eff .

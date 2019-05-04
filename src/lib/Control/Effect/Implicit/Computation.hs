@@ -33,7 +33,7 @@ module Control.Effect.Implicit.Computation
   , transformePipeline
   , composePipelines
   , cast
-  , runCast
+  , withCast
   , castOps
   , castComputation
   , castOpsHandler
