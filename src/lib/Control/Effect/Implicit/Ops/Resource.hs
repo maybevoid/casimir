@@ -10,6 +10,8 @@ import Control.Effect.Implicit.Computation
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.UnliftIo
 
+type FixedEff fix ops eff = fix ops eff ∪ ops
+
 data BracketTask a = BracketTask {
   allocateResource :: IO a,
   releaseResource :: a -> IO ()
@@ -111,7 +113,7 @@ bracketResourceOps
   :: forall ops res eff1 eff2
    . ( Effect eff1
      , ImplicitOps ops
-     , EffConstraint (IoEff ∪ UnliftIoEff ops res eff1) eff2
+     , EffConstraint (IoEff ∪ UnliftIoEff res ops eff1) eff2
      )
   => ResourceOps BracketTask ops eff1 eff2
 bracketResourceOps = ResourceOps withResourceOp'
@@ -133,9 +135,9 @@ bracketResourceOps'
   :: forall ops res eff1 eff2
     . ( Effect eff1
       , ImplicitOps ops
-      , EffConstraint (FixedUnliftIoEff ops res eff1 ∪ IoEff) eff2
+      , EffConstraint (FixedUnliftIoEff res ops eff1 ∪ IoEff) eff2
       )
-  => ResourceOps BracketTask (FixedUnliftIoEff ops res eff1 ∪ ops) eff1 eff2
+  => ResourceOps BracketTask (FixedUnliftIoEff res ops eff1 ∪ ops) eff1 eff2
 bracketResourceOps' = withOps (unfixUnliftIoOps captureOps) $ bracketResourceOps
 
 mkFixedResourceOps
@@ -182,14 +184,8 @@ mkFixedResourceOps' caster ops1 = ops2
   ops2 :: forall eff3
      . (EffConstraint ops2 eff3)
     => FixedResourceOps t ops1 eff1 eff3
-  ops2 = FixedResourceOps ops3
+  ops2 = FixedResourceOps $ ResourceOps withResource'
    where
-    ops3 :: ResourceOps t (FixedResourceEff t ops1 eff1 ∪ ops1) eff1 eff3
-    ops3 = ResourceOps withResource'
-
-    ops4 :: ResourceOps t ops1 eff1 eff3
-    ops4 = ops1
-
     withResource'
       :: forall a b
       . t a
@@ -199,23 +195,23 @@ mkFixedResourceOps' caster ops1 = ops2
               (Return b)
               eff1)
       -> eff3 b
-    withResource' task comp1 = withResourceOp ops4 task comp2
+    withResource' task comp1 = withResourceOp ops1 task comp2
      where
       comp2 :: a -> Computation ops1 (Return b) eff1
       comp2 x = Computation comp3
        where
-        comp3 :: forall eff4 
+        comp3 :: forall eff4
            . (Effect eff4)
           => LiftEff eff1 eff4
           -> Operation ops1 eff4
           -> Return b eff4
-        comp3 lift13 ops5 = runComp (comp1 x) lift13 (ops6 ∪ ops5)
+        comp3 lift13 ops3 = runComp (comp1 x) lift13 (ops4 ∪ ops3)
          where
-          ops6 :: FixedResourceOps t ops1 eff1 eff4
-          ops6 = withOps ops7 $ ops2
+          ops4 :: FixedResourceOps t ops1 eff1 eff4
+          ops4 = withOps ops5 $ ops2
 
-          ops7 :: Operation ops2 eff4
-          ops7 = castOps caster ops5
+          ops5 :: Operation ops2 eff4
+          ops5 = castOps caster ops3
 
 withResource
   :: forall a b t ops eff1 eff2
