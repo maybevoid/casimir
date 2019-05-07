@@ -3,6 +3,7 @@ module Control.Effect.Implicit.Freer
   , FreerOps (..)
   , FreerEffCoOp (..)
   , FreerMonad (..)
+  , FreerChurchMonad (..)
   , FreerF (..)
   , CoOpCont (..)
   , FreerCoOpHandler (..)
@@ -11,5 +12,6 @@ module Control.Effect.Implicit.Freer
 where
 
 import Control.Effect.Implicit.Freer.Freer
+import Control.Effect.Implicit.Freer.Church
 import Control.Effect.Implicit.Freer.FreerEff
 import Control.Effect.Implicit.Freer.Handler

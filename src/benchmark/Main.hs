@@ -65,6 +65,10 @@ main = defaultMain
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreerComp @FreerMonad)
 
+    , bench "with Freer CoOp OpsHandler on FreerChurchMonad"  $
+        whnf (\comp -> runIdentity $ comp rounds)
+        (handleFreerComp @FreerChurchMonad)
+
     , bench "Curried StateT Pipeline" $
         whnf applyCurriedComp
         curriedStateTComp

@@ -50,7 +50,7 @@ class
       => Operation ops (free ops eff)
 
     liftFreer :: forall ops eff a
-      . (FreeOps ops, Effect eff)
+      . (FreerOps ops, Effect eff)
       => eff a -> free ops eff a
 
     handleFreer

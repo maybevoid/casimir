@@ -1,4 +1,3 @@
-{-# OPTIONS_HADDOCK hide #-}
 
 module Control.Effect.Implicit.Free.Church
   ( ChurchMonad (..)
