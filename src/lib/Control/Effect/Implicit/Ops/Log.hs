@@ -14,14 +14,21 @@ data LogOps l eff = LogOps {
   logOp :: l -> eff ()
 }
 
-data LogCoOp l r = LogOp l (() -> r)
+data LogCoOp l r =
+  LogOp l (() -> r)
   deriving (Functor)
+
+data LogCoOp' l r where
+  LogOp' :: l -> LogCoOp' l ()
 
 instance EffOps (LogEff l) where
   type Operation (LogEff l) = LogOps l
 
 instance EffCoOp (LogEff l) where
   type CoOperation (LogEff l) = LogCoOp l
+
+instance FreerEffCoOp (LogEff l) where
+  type FreerCoOp (LogEff l) = LogCoOp' l
 
 instance EffFunctor (LogOps l) where
   effmap lift ops = LogOps $
@@ -30,6 +37,10 @@ instance EffFunctor (LogOps l) where
 instance FreeOps (LogEff l) where
   mkFreeOps liftCoOp = LogOps $
     \l -> liftCoOp $ LogOp l id
+
+instance FreerOps (LogEff l) where
+  mkFreerOps liftCoOp = LogOps $
+    \l -> liftCoOp $ LogOp' l
 
 instance ImplicitOps (LogEff l) where
   type OpsConstraint (LogEff l) eff =

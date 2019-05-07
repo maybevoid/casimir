@@ -1,7 +1,5 @@
 module Control.Effect.Implicit.Freer
   ( FreerEff (..)
-  , FreerOps (..)
-  , FreerEffCoOp (..)
   , FreerMonad (..)
   , FreerChurchMonad (..)
   , FreerF (..)

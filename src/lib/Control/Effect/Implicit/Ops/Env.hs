@@ -14,11 +14,17 @@ data EnvOps e eff = EnvOps {
 data EnvCoOp e r =
   AskOp (e -> r)
 
+data EnvCoOp' e r where
+  AskOp' :: EnvCoOp' e e
+
 instance EffOps (EnvEff e) where
   type Operation (EnvEff e) = EnvOps e
 
 instance EffCoOp (EnvEff e) where
   type CoOperation (EnvEff e) = EnvCoOp e
+
+instance FreerEffCoOp (EnvEff e) where
+  type FreerCoOp (EnvEff e) = EnvCoOp' e
 
 instance EffFunctor (EnvOps e) where
   effmap lifter envOps = EnvOps {
@@ -31,6 +37,11 @@ instance Functor (EnvCoOp e) where
 instance FreeOps (EnvEff e) where
   mkFreeOps liftCoOp = EnvOps {
     askOp = liftCoOp $ AskOp id
+  }
+
+instance FreerOps (EnvEff e) where
+  mkFreerOps liftCoOp = EnvOps {
+    askOp = liftCoOp $ AskOp'
   }
 
 instance ImplicitOps (EnvEff e) where

@@ -1,6 +1,7 @@
 module Control.Effect.Implicit.Base.Spec
   ( EffOps (..)
   , EffCoOp (..)
+  , FreerEffCoOp (..)
   )
 where
 
@@ -40,3 +41,7 @@ class EffCoOp sig where
   type family CoOperation sig
     = (coop :: (Type -> Type)) | coop -> sig
 
+
+class FreerEffCoOp sig where
+  type family FreerCoOp sig
+    = (coop :: (Type -> Type)) | coop -> sig

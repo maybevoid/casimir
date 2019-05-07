@@ -17,7 +17,7 @@ category:             Effect
 stability:            experimental
 
 ghc-options:
-  -Wall
+  -Wall -O2 -flate-specialise -fspecialise-aggressively
 
 dependencies:
   - base >=4.9.0 && < 5

@@ -53,19 +53,19 @@ main = defaultMain
         whnf evalStateTComp
         stateTHandlerComp
 
-    , bench "with CoOp OpsHandler on ChurchMonad"  $
+    , bench "with CoOpHandler on ChurchMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @ChurchMonad)
 
-    , bench "with CoOp OpsHandler on FreeMonad"  $
+    , bench "with CoOpHandler on FreeMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @FreeMonad)
 
-    , bench "with Freer CoOp OpsHandler on FreerMonad"  $
+    , bench "with Freer CoOpHandler on FreerMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreerComp @FreerMonad)
 
-    , bench "with Freer CoOp OpsHandler on FreerChurchMonad"  $
+    , bench "with Freer CoOpHandler on FreerChurchMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreerComp @FreerChurchMonad)
 

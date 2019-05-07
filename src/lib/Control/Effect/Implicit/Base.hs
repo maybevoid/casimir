@@ -8,8 +8,10 @@ module Control.Effect.Implicit.Base
   , EffFunctor (..)
   , EffOps (..)
   , EffCoOp (..)
+  , FreerEffCoOp (..)
   , ImplicitOps (..)
   , FreeOps (..)
+  , FreerOps (..)
   , EffConstraint
   , NoEff
   , Union

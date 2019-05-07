@@ -1,6 +1,7 @@
 
 module Control.Effect.Implicit.Base.Free
   ( FreeOps (..)
+  , FreerOps (..)
   )
 where
 
@@ -34,4 +35,19 @@ class
         , Effect (t eff)
         )
       => (forall a . CoOperation ops a -> t eff a)
+      -> Operation ops (t eff)
+
+class
+  ( EffOps ops
+  , FreerEffCoOp ops
+  , Functor (CoOperation ops)
+  , EffFunctor (Operation ops)
+  )
+  => FreerOps (ops :: Type) where
+    mkFreerOps
+      :: forall t eff
+        . ( Effect eff
+          , Effect (t eff)
+          )
+      => (forall a . FreerCoOp ops a -> t eff a)
       -> Operation ops (t eff)

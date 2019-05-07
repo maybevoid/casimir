@@ -3,6 +3,7 @@ module Control.Effect.Implicit.Ops.Io
   ( IoEff
   , IoOps (..)
   , IoCoOp (..)
+  , IoCoOp' (..)
   , liftIo
   , ioOps
   , ioHandler
@@ -19,7 +20,10 @@ data IoOps eff = IoOps {
 }
 
 data IoCoOp a where
-  IoCoOp :: forall x a . IO x -> (x -> a) -> IoCoOp a
+  LiftIoOp :: forall x a . IO x -> (x -> a) -> IoCoOp a
+
+data IoCoOp' r where
+  LiftIoOp' :: IO a -> IoCoOp' a
 
 instance EffOps IoEff where
   type Operation IoEff = IoOps
@@ -27,13 +31,16 @@ instance EffOps IoEff where
 instance EffCoOp IoEff where
   type CoOperation IoEff = IoCoOp
 
+instance FreerEffCoOp IoEff where
+  type FreerCoOp IoEff = IoCoOp'
+
 instance Functor IoCoOp where
   fmap
     :: forall a b
      . (a -> b)
     -> IoCoOp a
     -> IoCoOp b
-  fmap f (IoCoOp io cont) = IoCoOp io (f . cont)
+  fmap f (LiftIoOp io cont) = LiftIoOp io (f . cont)
 
 instance EffFunctor IoOps where
   effmap lifter ops = IoOps {
@@ -42,7 +49,12 @@ instance EffFunctor IoOps where
 
 instance FreeOps IoEff where
   mkFreeOps liftCoOp = IoOps {
-    liftIoOp = \io -> liftCoOp $ IoCoOp io id
+    liftIoOp = \io -> liftCoOp $ LiftIoOp io id
+  }
+
+instance FreerOps IoEff where
+  mkFreerOps liftCoOp = IoOps {
+    liftIoOp = \io -> liftCoOp $ LiftIoOp' io
   }
 
 instance ImplicitOps IoEff where
