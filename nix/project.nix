@@ -1,6 +1,5 @@
-{ mkDerivation, async, base, criterion, free, hpack, mtl
-, QuickCheck, stdenv, tasty, tasty-hunit, tasty-quickcheck
-, transformers
+{ mkDerivation, async, base, criterion, free, mtl, QuickCheck
+, stdenv, tasty, tasty-hunit, tasty-quickcheck, transformers
 }:
 mkDerivation {
   pname = "implicit-effects";
@@ -9,15 +8,14 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [ async base free mtl transformers ];
-  libraryToolDepends = [ hpack ];
-  executableHaskellDepends = [
-    async base criterion free mtl transformers
-  ];
+  executableHaskellDepends = [ async base free mtl transformers ];
   testHaskellDepends = [
     async base free mtl QuickCheck tasty tasty-hunit tasty-quickcheck
     transformers
   ];
-  preConfigure = "hpack";
+  benchmarkHaskellDepends = [
+    async base criterion free mtl transformers
+  ];
   homepage = "https://github.com/maybevoid/implicit-effects";
   description = "Algebraic Effects in Haskell using Implicit Parameters";
   license = stdenv.lib.licenses.bsd3;
