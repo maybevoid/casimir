@@ -1,7 +1,4 @@
 
-hpack:
-	nix-shell --pure shell.nix --run hpack
-
 clean-env:
 	rm -f .ghc.environment*
 
@@ -12,7 +9,7 @@ release-doc: clean-env
 	nix-build -A doc nix/release.nix
 
 shell:
-	cd code && nix-shell ../nix/shell.nix
+	nix-shell nix/shell.nix
 
 external-shell:
 	nix-shell nix/external.nix
