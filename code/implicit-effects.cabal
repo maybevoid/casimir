@@ -1,0 +1,164 @@
+cabal-version: 2.2
+
+name:           implicit-effects
+version:        0.1.0
+synopsis:       Algebraic Effects in Haskell using Implicit Parameters
+description:    implicit-effects is a experimental effect library to support
+                algebraic effects in Haskell.
+category:       Effect
+stability:      experimental
+homepage:       https://github.com/maybevoid/implicit-effects
+bug-reports:    https://github.com/maybevoid/implicit-effects/issues
+author:         Soares Chen
+maintainer:     Soares Chen <soares.chen@maybevoid.com>
+copyright:      Copyright (C) Soares Ruofei Chen
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/maybevoid/implicit-effects
+
+common deps
+  ghc-options: -Wall -O2 -flate-specialise
+  default-language: Haskell2010
+  build-depends:
+      async
+    , base
+    , free
+    , mtl
+    , transformers
+  default-extensions:
+    GADTs
+    Strict
+    DataKinds
+    StrictData
+    RankNTypes
+    TypeFamilies
+    InstanceSigs
+    TypeOperators
+    DeriveFunctor
+    TypeOperators
+    ImplicitParams
+    ExplicitForAll
+    KindSignatures
+    ConstraintKinds
+    TypeApplications
+    FlexibleContexts
+    FlexibleInstances
+    OverloadedStrings
+    DerivingStrategies
+    AllowAmbiguousTypes
+    ScopedTypeVariables
+    QuantifiedConstraints
+    MultiParamTypeClasses
+    TypeFamilyDependencies
+    GeneralizedNewtypeDeriving
+
+library
+  import: deps
+  exposed-modules:
+      Control.Effect.Implicit
+      Control.Effect.Implicit.Base
+      Control.Effect.Implicit.Computation
+      Control.Effect.Implicit.Free
+      Control.Effect.Implicit.Freer
+      Control.Effect.Implicit.Ops
+      Control.Effect.Implicit.Ops.Async
+      Control.Effect.Implicit.Ops.Decide
+      Control.Effect.Implicit.Ops.Env
+      Control.Effect.Implicit.Ops.Exception
+      Control.Effect.Implicit.Ops.Io
+      Control.Effect.Implicit.Ops.Log
+      Control.Effect.Implicit.Ops.Resource
+      Control.Effect.Implicit.Ops.State
+      Control.Effect.Implicit.Ops.UnliftIo
+      Control.Effect.Implicit.Tagged
+      Control.Effect.Implicit.Tagged.Ops
+      Control.Effect.Implicit.Tagged.Ops.Env
+      Control.Effect.Implicit.Tagged.TaggedEff
+      Control.Effect.Implicit.Transform
+      Control.Effect.Implicit.Transform.Reader
+      Control.Effect.Implicit.Transform.State
+  other-modules:
+      Control.Effect.Implicit.Base.Effect
+      Control.Effect.Implicit.Base.EffFunctor
+      Control.Effect.Implicit.Base.Free
+      Control.Effect.Implicit.Base.Implicit
+      Control.Effect.Implicit.Base.Lift
+      Control.Effect.Implicit.Base.NoEff
+      Control.Effect.Implicit.Base.Spec
+      Control.Effect.Implicit.Base.Union
+      Control.Effect.Implicit.Computation.Cast
+      Control.Effect.Implicit.Computation.Computation
+      Control.Effect.Implicit.Computation.Handler
+      Control.Effect.Implicit.Computation.Pipeline
+      Control.Effect.Implicit.Computation.Value
+      Control.Effect.Implicit.Free.Church
+      Control.Effect.Implicit.Free.Free
+      Control.Effect.Implicit.Free.FreeEff
+      Control.Effect.Implicit.Free.Handler
+      Control.Effect.Implicit.Free.Pipeline
+      Control.Effect.Implicit.Freer.Church
+      Control.Effect.Implicit.Freer.Freer
+      Control.Effect.Implicit.Freer.FreerEff
+      Control.Effect.Implicit.Freer.Handler
+  hs-source-dirs:
+      src/lib
+
+benchmark implicit-effects-benchmark
+  import: deps
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Benchmark.State
+      Benchmark.State.Base
+      Benchmark.State.CurriedStateTPipeline
+      Benchmark.State.FreePipeline
+      Benchmark.State.HandleFree
+      Benchmark.State.MTL
+      Benchmark.State.StateEffToEnvEff
+      Benchmark.State.StateEffToReaderT
+      Benchmark.State.StateTHandler
+      Benchmark.State.StateTToEnvEffPipeline
+      Benchmark.State.WithStateT
+  hs-source-dirs:
+      src/benchmark
+  build-depends:
+      implicit-effects
+    , criterion
+
+executable implicit-effects-demo
+  import: deps
+  main-is: Main.hs
+  other-modules:
+      Demo
+  hs-source-dirs:
+      src/main
+  build-depends:
+      implicit-effects
+
+test-suite implicit-effects-test
+  import: deps
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Effect.Test.Main
+      Effect.Test.Ops
+      Effect.Test.Ops.Ambivalent
+      Effect.Test.Ops.Env
+      Effect.Test.Ops.Exception
+      Effect.Test.Ops.Pipe
+      Effect.Test.Ops.Resource
+      Effect.Test.Ops.State
+      Effect.Test.Ops.Tag
+      Effect.Test.Overlap
+  hs-source-dirs:
+      src/test
+  build-depends:
+      QuickCheck
+    , implicit-effects
+    , tasty
+    , tasty-hunit
+    , tasty-quickcheck
