@@ -1,26 +1,26 @@
 hpack:
-	hpack
+	cd code && hpack
 
 sync: hpack
-	cabal2nix . > default.nix
+	cd nix && cabal2nix ../code > project.nix
 
 clean:
-	cabal new-clean
+	cd code && cabal new-clean
 
 repl: hpack
-	cabal new-repl --write-ghc-environment-files never lib:implicit-effects
+	cd code && cabal new-repl --write-ghc-environment-files never lib:implicit-effects
 
 doc: hpack
-	cabal new-haddock --write-ghc-environment-files never
+	cd code && cabal new-haddock --write-ghc-environment-files never
 
 test: hpack
-	cabal new-test --write-ghc-environment-files never
+	cd code && cabal new-test --write-ghc-environment-files never
 
 test-repl: hpack
-	cabal new-repl --write-ghc-environment-files never test:implicit-effects-test
+	cd code && cabal new-repl --write-ghc-environment-files never test:implicit-effects-test
 
 benchmark: hpack
-	cabal new-run --write-ghc-environment-files never \
+	cd code && cabal new-run --write-ghc-environment-files never \
 		exe:implicit-effects-benchmark \
 		-- --output 'benchmarks/$(shell date).html'
 

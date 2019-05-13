@@ -5,7 +5,7 @@
 mkDerivation {
   pname = "implicit-effects";
   version = "0.1.0";
-  src = ./.;
+  src = ../code;
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [ async base free mtl transformers ];

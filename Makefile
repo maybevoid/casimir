@@ -12,7 +12,7 @@ release-doc: clean-env
 	nix-build -A doc nix/release.nix
 
 shell:
-	nix-shell nix/shell.nix
+	cd code && nix-shell ../nix/shell.nix
 
 external-shell:
 	nix-shell nix/external.nix
@@ -23,7 +23,7 @@ clean:
 
 hoogle:
 	nix-shell --pure nix/external.nix --run \
-		"hoogle server --local --host 0.0.0.0 -p 8333"
+		"cd code && hoogle server --local --host 0.0.0.0 -p 8333"
 
 repl:
 	nix-shell --pure nix/shell.nix --run \

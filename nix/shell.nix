@@ -3,7 +3,7 @@ let
   inherit (nixpkgs) pkgs;
   inherit (pkgs) haskellPackages;
 
-  project = haskellPackages.callPackage ../default.nix { };
+  project = haskellPackages.callPackage ./project.nix { };
 in
 pkgs.stdenv.mkDerivation {
   name = "shell";
