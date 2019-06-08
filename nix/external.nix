@@ -4,7 +4,7 @@ let
 
   haskellPackages = pkgs.haskellPackages.override {
     overrides = self: super: {
-      currentProject = self.callPackage ./project.nix {};
+      currentProject = self.callPackage ./release.nix {};
     };
   };
 

@@ -1,26 +1,27 @@
-sync:
-	cd nix && cabal2nix ../code > project.nix
 
 clean:
-	cd code && cabal new-clean
+	cabal v2-clean \
+		implicit-effects
 
 repl:
-	cd code && cabal new-repl --write-ghc-environment-files never \
-		lib:implicit-effects
+	cabal v2-repl \
+		implicit-effects
 
 doc:
-	cd code && cabal new-haddock --write-ghc-environment-files never
+	cabal v2-haddock \
+		implicit-effects
 
 test:
-	cd code && cabal new-test --write-ghc-environment-files never
+	cabal v2-test \
+		implicit-effects-test
 
 test-repl:
-	cd code && cabal new-repl --write-ghc-environment-files never \
+	cabal v2-repl \
 		implicit-effects-test
 
 benchmark:
-	cd code && cabal new-run --write-ghc-environment-files never \
+	cabal v2-run \
 		implicit-effects-benchmark \
 		-- --output '../benchmarks/$(shell date).html'
 
-.PHONY: hpack sync repl doc test test-repl benchmark
+.PHONY: sync repl doc test test-repl benchmark

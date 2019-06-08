@@ -3,13 +3,13 @@ let
   inherit (nixpkgs) pkgs;
   inherit (pkgs) haskellPackages;
 
-  project = haskellPackages.callPackage ./project.nix { };
+  project = haskellPackages.callPackage ./release.nix { inherit nixpkgs; };
 in
-pkgs.stdenv.mkDerivation {
+pkgs.mkShell {
   name = "shell";
   LANG = "en_US.UTF-8";
-  buildInputs = project.env.nativeBuildInputs ++ [
-    pkgs.cabal2nix
+  inputsFrom = [ project.env ];
+  buildInputs = [
     pkgs.glibcLocales
     haskellPackages.cabal-install
   ];
