@@ -37,14 +37,11 @@ instance ImplicitOps (TaggedEnvEff Bar e) where
   captureOps = ?barEnvOps
 
 comp1
-  :: forall eff
-   . ( EffConstraint
-         ( TaggedEnvEff Foo String
-         ∪ TaggedEnvEff Bar String
-         )
-       eff
-     )
-  => eff String
+  :: Eff
+      ( TaggedEnvEff Foo String
+      ∪ TaggedEnvEff Bar String
+      )
+      String
 comp1 = do
   fooVal <- askTag @Foo
   barVal <- askTag @Bar

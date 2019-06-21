@@ -54,11 +54,7 @@ instance ImplicitOps (LogEff l) where
   captureOps =
     ?_Control_Effect_Implicit_Ops_Log_logOps
 
-log
-  :: forall l eff
-   . (EffConstraint (LogEff l) eff)
-  => l
-  -> eff ()
+log :: forall l . l -> Eff (LogEff l) ()
 log l = logOp captureOps l
 
 stateLoggerHandler

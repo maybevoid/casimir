@@ -69,10 +69,7 @@ instance ImplicitOps IoEff where
   captureOps =
     ?_Control_Effect_Implicit_Ops_Io_ioOps
 
-liftIo :: forall a eff .
-  (EffConstraint IoEff eff)
-  => IO a
-  -> eff a
+liftIo :: forall a . IO a -> Eff IoEff a
 liftIo = liftIoOp captureOps
 
 ioOps :: IoOps IO

@@ -20,11 +20,9 @@ newtype Error = Error String
   deriving (Eq, Show)
 
 divideComp1
-  :: forall eff
-   . (EffConstraint (ExceptionEff Error) eff)
-  => Int
+  :: Int
   -> Int
-  -> eff Int
+  -> Eff (ExceptionEff Error) Int
 divideComp1 x y =
   if y == 0
   then raise (Error "Division by zero")

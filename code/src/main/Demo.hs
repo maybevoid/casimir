@@ -21,9 +21,7 @@ envHandler3
 envHandler3 = composeOpsHandlers
   envHandler1 envHandler2
 
-readerComp1 :: forall eff .
-  (EffConstraint (EnvEff Int) eff)
-  => eff Int
+readerComp1 :: Eff (EnvEff Int) Int
 readerComp1 = do
   val <- ask
   return $ val + 1
@@ -127,10 +125,7 @@ stateIoPipeline ref = composePipelines
   (refStatePipeline ref)
   ioPipeline
 
-stateIoComp1
-  :: forall eff .
-  (EffConstraint IoEff eff)
-  => eff Int
+stateIoComp1 :: Eff IoEff Int
 stateIoComp1 = do
   ref <- liftIo $ newIORef 3
   withOpsHandler (refStateHandler ref) $ do
@@ -141,10 +136,7 @@ stateIoComp1 = do
 stateIoComp2 :: IO Int
 stateIoComp2 = withOpsHandler ioHandler stateIoComp1
 
-stateComp1
-  :: forall eff .
-  (EffConstraint (StateEff Int) eff)
-  => eff Int
+stateComp1 :: Eff (StateEff Int) Int
 stateComp1 = do
   state1 <- get
   put $ state1 + 1
@@ -188,10 +180,7 @@ nonDetPipeline
   => Pipeline NoEff (DecideEff Bool) (Return Int) (Return [Int]) eff eff
 nonDetPipeline = coopHandlerToPipeline @ChurchMonad nonDetHandler2
 
-decideComp1
-  :: forall eff
-   . (EffConstraint (IoEff ∪ DecideEff Bool) eff)
-  => eff Int
+decideComp1 :: Eff (IoEff ∪ DecideEff Bool) Int
 decideComp1 = do
   a <- decide
   liftIo $ putStrLn $ "a: " ++ show a

@@ -76,15 +76,10 @@ instance ImplicitOps (AwaitEff a) where
 
   captureOps = ?awaitOps
 
-yield :: forall a eff
-   . (EffConstraint (YieldEff a) eff)
-  => a
-  -> eff ()
+yield :: forall a . a -> Eff (YieldEff a) ()
 yield = yieldOp ?yieldOps
 
-await :: forall a eff
-   . (EffConstraint (AwaitEff a) eff)
-  => eff a
+await :: forall a . Eff (AwaitEff a) a
 await = awaitOp ?awaitOps
 
 runPipe :: forall a r ops eff1
@@ -149,9 +144,7 @@ producerComp
   GenericReturn ((YieldEff Int) ∪ (EnvEff Int)) a
 producerComp = genericReturn comp1
  where
-  comp1 :: forall eff
-    . ( EffConstraint (EnvEff Int ∪ YieldEff Int) eff)
-   => eff a
+  comp1 :: Eff (EnvEff Int ∪ YieldEff Int) a
   comp1
    = do
       seed <- ask

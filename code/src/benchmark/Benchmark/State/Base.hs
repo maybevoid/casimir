@@ -7,10 +7,7 @@ import Control.Effect.Implicit.Ops.State
 
 newtype CoState s eff a = CoState (s -> eff a)
 
-stateBaseFunc
-  :: forall eff
-   . (EffConstraint (StateEff Int) eff)
-  => eff ()
+stateBaseFunc :: Eff (StateEff Int) ()
 stateBaseFunc =
  do
   s <- get

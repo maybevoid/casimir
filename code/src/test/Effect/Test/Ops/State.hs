@@ -27,10 +27,7 @@ stateTests = testGroup "StateEff Tests"
 
 type StateCompRes = (Int, Int, Int)
 
-stateComp1
-  :: forall eff .
-  (EffConstraint (StateEff Int) eff)
-  => eff StateCompRes
+stateComp1 :: Eff (StateEff Int) StateCompRes
 stateComp1 = do
   s1 <- get
   put $ s1 + 2
@@ -42,8 +39,7 @@ stateComp2 :: GenericReturn (StateEff Int) StateCompRes
 stateComp2 = genericReturn stateComp1
 
 stateTComp
-  :: forall eff .
-  (Effect eff)
+  :: forall eff . (Effect eff)
   => Computation NoEff (Return StateCompRes) (StateT Int eff)
 stateTComp = bindOpsHandler
   stateTHandler stateComp2

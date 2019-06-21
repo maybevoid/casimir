@@ -72,14 +72,9 @@ instance ImplicitOps (StateEff s) where
     ?_Control_Effect_Implicit_Ops_State_stateOps
 
 {-# INLINE get #-}
-get :: forall s eff .
-  (EffConstraint (StateEff s) eff)
-  => eff s
+get :: forall s . Eff (StateEff s) s
 get = getOp captureOps
 
 {-# INLINE put #-}
-put :: forall s eff .
-  (EffConstraint (StateEff s) eff)
-  => s
-  -> eff ()
+put :: forall s . s -> Eff (StateEff s) ()
 put = putOp captureOps

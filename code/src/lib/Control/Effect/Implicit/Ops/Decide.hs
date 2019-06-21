@@ -41,7 +41,5 @@ instance ImplicitOps (DecideEff s) where
   captureOps =
     ?_Control_Effect_Implicit_Ops_Decide_decideOps
 
-decide :: forall a eff .
-  (EffConstraint (DecideEff a) eff)
-  => eff a
+decide :: forall a . Eff (DecideEff a) a
 decide = decideOp captureOps

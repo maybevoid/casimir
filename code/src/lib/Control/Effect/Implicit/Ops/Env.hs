@@ -56,7 +56,7 @@ instance ImplicitOps (EnvEff e) where
   captureOps =
     ?_Control_Effect_Implicit_Ops_Env_envOps
 
-ask :: forall e eff . (EffConstraint (EnvEff e) eff) => eff e
+ask :: forall e . Eff (EnvEff e) e
 ask = askOp captureOps
 
 withEnv

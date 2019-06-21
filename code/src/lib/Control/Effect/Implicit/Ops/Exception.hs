@@ -79,12 +79,10 @@ exceptionToEitherHandler =
     handleCoOp (RaiseOp e) = return $ Left e
 
 tryIo
-  :: forall eff e a .
-  ( Ex.Exception e
-  , EffConstraint (IoEff ∪ (ExceptionEff e)) eff
-  )
+  :: forall e a .
+    (Ex.Exception e)
   => IO a
-  -> eff a
+  -> Eff (IoEff ∪ (ExceptionEff e)) a
 tryIo m = do
   res <- liftIo $ Ex.try @e m
   case res of
