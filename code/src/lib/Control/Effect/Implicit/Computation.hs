@@ -32,16 +32,19 @@ module Control.Effect.Implicit.Computation
   , opsHandlerToPipeline
   , transformePipeline
   , composePipelines
+  , composeExactPipelines
   , cast
   , withCast
   , castOps
   , castComputation
   , castOpsHandler
+  , bindOpsHandler
   , bindOpsHandlerWithCast
   , composeOpsHandlers
   , composeOpsHandlersWithCast
   , extendCast
   , composeCast
+  , runPipeline
   , runPipelineWithCast
   , castPipelineOps
   , castPipelineHandler

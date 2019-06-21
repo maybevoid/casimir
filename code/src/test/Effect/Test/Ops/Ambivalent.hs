@@ -69,7 +69,7 @@ solveQueen = solveQueen' 1 []
   solveQueen'
     :: Int
     -> [(Int, Int)]
-    -> eff [(Int, Int)]
+    -> Eff (AmbEff Int) [(Int, Int)]
   solveQueen' x qs =
     if x == 9 then return qs else
     do

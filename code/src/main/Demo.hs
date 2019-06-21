@@ -44,8 +44,7 @@ readerComp4 :: GenericReturn (EnvEff Int) Int
 readerComp4 = genericReturn readerComp1
 
 readerComp5 :: IdentityComputation Int
-readerComp5 = bindOpsHandlerWithCast
-  cast cast
+readerComp5 = bindOpsHandler
   envHandler1 readerComp4
 
 readerComp6 :: Int
@@ -60,8 +59,7 @@ readerComp7 :: forall eff .
 readerComp7 = castComputation cast readerComp4
 
 readerComp8 :: IdentityComputation Int
-readerComp8 = bindOpsHandlerWithCast
-  cast cast
+readerComp8 = bindOpsHandler
   envHandler1
   readerComp7
 
@@ -76,19 +74,13 @@ readerComp10 = withOpsHandler envHandler1 comp
 
 readerComp11 :: Int
 readerComp11 = runIdentityComp $
-  bindOpsHandlerWithCast
-    cast cast
-    envHandler3 readerComp4
+  bindOpsHandler envHandler3 readerComp4
 
 readerComp12 :: forall eff . (Effect eff) => Computation NoEff (Return Int) eff
-readerComp12 = bindOpsHandlerWithCast
-  cast cast
-  envHandler2 readerComp4
+readerComp12 = bindOpsHandler envHandler2 readerComp4
 
 readerComp13 :: forall eff . (Effect eff) => Computation NoEff (Return Int) eff
-readerComp13 = bindOpsHandlerWithCast
-  cast cast
-  envHandler1 readerComp12
+readerComp13 = bindOpsHandler envHandler1 readerComp12
 
 readerComp14 :: Int
 readerComp14 = runIdentityComp readerComp13
@@ -120,7 +112,7 @@ ioPipeline = opsHandlerToPipeline ioHandler
 ioAndStateHandler
   :: forall a .
   IORef a
-  -> BaseOpsHandler (Union IoEff (StateEff a)) IO
+  -> BaseOpsHandler (IoEff ∪ StateEff a) IO
 ioAndStateHandler ref = handler
   where
     handler = composeOpsHandlers
@@ -131,8 +123,7 @@ stateIoPipeline
   :: forall a .
   IORef a
   -> GenericPipeline NoEff (Union IoEff (StateEff a)) IO
-stateIoPipeline ref = composePipelinesWithCast
-  cast cast cast
+stateIoPipeline ref = composePipelines
   (refStatePipeline ref)
   ioPipeline
 
@@ -164,8 +155,7 @@ stateComp2 :: GenericReturn (StateEff Int) Int
 stateComp2 = genericReturn stateComp1
 
 stateIoComp3 :: IORef Int -> Computation NoEff (Return Int) IO
-stateIoComp3 ref = runPipelineWithCast
-  cast cast
+stateIoComp3 ref = runPipeline
   (stateIoPipeline ref)
   stateComp2
 
@@ -214,12 +204,11 @@ decideComp1 = do
 decideComp2
   :: forall eff .
   (Effect eff)
-  => Computation (Union IoEff (DecideEff Bool)) (Return Int) eff
+  => Computation (IoEff ∪ (DecideEff Bool)) (Return Int) eff
 decideComp2 = genericReturn decideComp1
 
 decideComp3 :: Computation (DecideEff Bool) (Return Int) IO
-decideComp3 = bindOpsHandlerWithCast
-  cast cast
+decideComp3 = bindOpsHandler
   ioHandler decideComp2
 
 decideComp4 :: IO [Int]
@@ -231,13 +220,11 @@ decideComp5
   :: forall eff .
   (Effect eff)
   => Computation IoEff (Return [Int]) eff
-decideComp5 = runPipelineWithCast
-  cast cast
+decideComp5 = runPipeline
   nonDetPipeline decideComp2
 
 decideComp6 :: Computation NoEff (Return [Int]) IO
-decideComp6 = runPipelineWithCast
-  cast cast
+decideComp6 = runPipeline
   ioPipeline decideComp5
 
 decideComp7 :: IO [Int]
@@ -251,16 +238,14 @@ pipeline1
       (Return [Int])
       IO
       IO
-pipeline1 = composePipelinesWithCast
-  cast cast cast
+pipeline1 = composePipelines
   ioPipeline nonDetPipeline
 
 decideComp8 :: IO [Int]
 decideComp8 = returnVal $ runComp comp idLift NoOp
  where
   comp :: Computation NoEff (Return [Int]) IO
-  comp = runPipelineWithCast
-    cast cast
+  comp = runPipeline
     pipeline1 decideComp2
 
 ops1 :: UnionOps (EnvOps Int) IoOps IO

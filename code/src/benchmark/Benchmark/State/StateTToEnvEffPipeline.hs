@@ -20,14 +20,12 @@ import Benchmark.State.Base
 
 stateTComp1 :: forall eff . (Effect eff)
   => Computation (EnvEff Int) (Return ()) eff
-stateTComp1 = runPipelineWithCast
-  cast cast
+stateTComp1 = runPipeline
   stateTToEnvEffPipeline stateBaseComp
 
 stateTComp2 :: forall eff . (Effect eff)
   => Computation NoEff (Return ()) (ReaderT Int eff)
-stateTComp2 = bindOpsHandlerWithCast
-  cast cast
+stateTComp2 = bindOpsHandler
   readerTHandler stateTComp1
 
 stateToReaderComp :: forall eff . (Effect eff)

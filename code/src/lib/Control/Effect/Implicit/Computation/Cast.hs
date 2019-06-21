@@ -5,6 +5,7 @@ module Control.Effect.Implicit.Computation.Cast
   , OpsCast
   , OpsCast'
   , EntailOps (..)
+  , EntailOps' (..)
   , type (⊇)
   , cast
   , withCast
@@ -32,19 +33,11 @@ type ops1 ⊇ ops2 = OpsCast ops1 ops2
 cast :: forall p . p => Cast p
 cast = Cast
 
-entailOps
-  :: forall eff ops1 ops2 p q
-   . ( Effect eff, ImplicitOps ops1, ImplicitOps ops2 )
-  => (p ~ OpsConstraint ops1 eff, q ~ OpsConstraint ops2 eff)
-  => (p => q)
-  => OpsCast' ops1 ops2 eff
-entailOps = Cast
-
 class
   (Effect eff, ImplicitOps ops1, ImplicitOps ops2)
   => EntailOps' ops1 ops2 eff
   where
-    opsEntailment' :: OpsCast' ops1 ops2 eff
+    entailOps' :: OpsCast' ops1 ops2 eff
 
 instance
   ( Effect eff, ImplicitOps ops1, ImplicitOps ops2
@@ -53,14 +46,14 @@ instance
   )
   => EntailOps' ops1 ops2 eff
   where
-    opsEntailment' :: OpsCast' ops1 ops2 eff
-    opsEntailment' = entailOps @eff @ops1 @ops2
+    entailOps' :: OpsCast' ops1 ops2 eff
+    entailOps' = Cast
 
 class
   (ImplicitOps ops1, ImplicitOps ops2)
   => EntailOps ops1 ops2
   where
-    opsEntailment :: OpsCast ops1 ops2
+    entailOps :: OpsCast ops1 ops2
 
 instance
   ( ImplicitOps ops1, ImplicitOps ops2
@@ -68,8 +61,8 @@ instance
   )
   => EntailOps ops1 ops2
   where
-    opsEntailment :: forall eff . OpsCast' ops1 ops2 eff
-    opsEntailment = opsEntailment' @ops1 @ops2 @eff
+    entailOps :: forall eff . OpsCast' ops1 ops2 eff
+    entailOps = entailOps' @ops1 @ops2 @eff
 
 withCast
   :: forall eff ops1 ops2 r

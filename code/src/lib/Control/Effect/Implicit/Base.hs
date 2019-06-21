@@ -12,6 +12,7 @@ module Control.Effect.Implicit.Base
   , ImplicitOps (..)
   , FreeOps (..)
   , FreerOps (..)
+  , Eff
   , EffConstraint
   , NoEff
   , Union

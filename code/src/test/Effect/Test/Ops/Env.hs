@@ -14,8 +14,9 @@ envTests = testGroup "EnvEff Tests"
   ]
 
 envComp1
-  :: forall a . (Show a)
-  => Eff (EnvEff a) String
+  :: forall eff a
+   . (EffConstraint (EnvEff a) eff, Show a)
+  => eff String
 envComp1 = do
   env <- ask
   return $ "Env: " ++ show env
@@ -41,8 +42,7 @@ envHandlerTest = testCase "Env handler test" $
   let
     envHandler = mkEnvHandler @Int @IO 4
     envComp3 =
-      bindOpsHandlerWithCast @NoEff
-        cast cast
+      bindOpsHandler @NoEff
         envHandler envComp2
   res <- execComp envComp3
   assertEqual
@@ -57,8 +57,7 @@ envPipelineTest = testCase "Env pipeline test" $
     envPipeline
       = opsHandlerToPipeline envHandler @(Return String)
     envComp3
-      = runPipelineWithCast @NoEff
-        cast cast
+      = runPipeline @NoEff
         envPipeline envComp2
   res <- execComp @NoEff envComp3
   assertEqual

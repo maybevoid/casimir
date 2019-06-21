@@ -45,8 +45,7 @@ stateTComp
   :: forall eff .
   (Effect eff)
   => Computation NoEff (Return StateCompRes) (StateT Int eff)
-stateTComp = bindOpsHandlerWithCast
-  cast cast
+stateTComp = bindOpsHandler
   stateTHandler stateComp2
 
 stateTHandlerTest :: TestTree
@@ -66,14 +65,12 @@ stateTHandlerTest = testCase "StateT handler test" $
 
 stateComp3 :: Computation (EnvEff Int) (Return StateCompRes) Identity
 stateComp3
-  = runPipelineWithCast
-    cast cast
+  = runPipeline
     stateTToEnvEffPipeline
     stateComp2
 
 stateComp4 :: IdentityComputation StateCompRes
-stateComp4 = bindOpsHandlerWithCast
-  cast cast
+stateComp4 = bindOpsHandler
   (mkEnvHandler 4) stateComp3
 
 stateTToEnvEffPipelineTest :: TestTree
@@ -99,15 +96,12 @@ ioStateHandler = genericOpsHandler StateOps {
 
 ioStateComp :: IORef Int -> Computation NoEff (Return StateCompRes) IO
 ioStateComp ref =
-  bindOpsHandlerWithCast @NoEff
-    cast cast
+  bindOpsHandler @NoEff
     ioHandler
-    (bindOpsHandlerWithCast @IoEff
-      cast cast
+    (bindOpsHandler @IoEff
       (mkEnvHandler ref)
-      (bindOpsHandlerWithCast
+      (bindOpsHandler
         @(IoEff ∪ EnvEff (IORef Int))
-        cast cast
         ioStateHandler
         stateComp2
       ))
@@ -199,14 +193,12 @@ statePipeline1 = contextualHandlerToPipeline @ChurchMonad $
 
 stateDynComp4 :: forall eff . (Effect eff)
   => Computation (EnvEff Int) (Return StateCompRes) eff
-stateDynComp4 = runPipelineWithCast
-  cast cast
+stateDynComp4 = runPipeline
   statePipeline1 stateComp2
 
 stateDynComp5 :: forall eff . (Effect eff)
   => Computation NoEff (Return StateCompRes) eff
-stateDynComp5 = bindOpsHandlerWithCast
-  cast cast
+stateDynComp5 = bindOpsHandler
   (mkEnvHandler (6 :: Int))
   stateDynComp4
 

@@ -1,5 +1,4 @@
-{ nixpkgs ? import <nixpkgs> {} }:
-nixpkgs.pkgs.haskellPackages.callCabal2nix
-  "implicit-effects"
-  ../code
-  {}
+let
+  pkgs = import <nixpkgs> { };
+in
+pkgs.haskellPackages.callPackage ./project.nix { }
