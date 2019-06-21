@@ -152,7 +152,7 @@ mkFixedResourceOps'
       , Effect eff
       , EffConstraint ops2 eff
       )
-  => ops1 ⊇ ops2
+  => OpsCast ops1 ops2
   -> (forall eff2
       . (EffConstraint ops2 eff2)
       => ResourceOps t ops1 eff2)

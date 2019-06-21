@@ -155,7 +155,7 @@ mkFixedUnliftIoOps'
       , ImplicitOps ops2
       , EffConstraint ops2 eff
       )
-  => ops1 ⊇ ops2
+  => OpsCast ops1 ops2
   -> (forall eff2
       . (EffConstraint ops2 eff2)
       => UnliftIoOps res ops1 eff2)

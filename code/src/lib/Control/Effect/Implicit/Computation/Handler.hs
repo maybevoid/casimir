@@ -147,7 +147,7 @@ castOpsHandler
   , ImplicitOps ops1
   , ImplicitOps ops2
   )
-  => ops1 ⊇ ops2
+  => OpsCast ops1 ops2
   -> OpsHandler ops2 handler eff
   -> OpsHandler ops1 handler eff
 castOpsHandler = castComputation
@@ -164,8 +164,8 @@ composeOpsHandlersWithCast
   , ImplicitOps handler2
   , Effect eff
   )
-  => ops3 ⊇ ops1
-  -> (handler1 ∪ ops3) ⊇ ops2
+  => OpsCast ops3 ops1
+  -> OpsCast (handler1 ∪ ops3) ops2
   -> OpsHandler ops1 handler1 eff
   -> OpsHandler ops2 handler2 eff
   -> OpsHandler ops3 (handler1 ∪ handler2) eff
@@ -185,8 +185,8 @@ composeOpsHandlers
   , ImplicitOps handler1
   , ImplicitOps handler2
   , Effect eff
-  , EntailOps ops3 ops1
-  , EntailOps (handler1 ∪ ops3) ops2
+  , ops3 ⊇ ops1
+  , (handler1 ∪ ops3) ⊇ ops2
   )
   => OpsHandler ops1 handler1 eff
   -> OpsHandler ops2 handler2 eff
@@ -204,8 +204,8 @@ bindOpsHandlerWithCast
   , ImplicitOps handler
   , Effect eff
   )
-  => ops3 ⊇ ops1
-  -> (handler ∪ ops3) ⊇ ops2
+  => OpsCast ops3 ops1
+  -> OpsCast (handler ∪ ops3) ops2
   -> OpsHandler ops1 handler eff
   -> Computation ops2 r eff
   -> Computation ops3 r eff
@@ -215,14 +215,13 @@ bindOpsHandlerWithCast cast31 cast32 handler comp =
     (castComputation cast32 comp)
 {-# INLINE bindOpsHandlerWithCast #-}
 
-
 bindOpsHandler
   :: forall ops3 ops1 ops2 handler eff r .
   ( ImplicitOps ops1
   , ImplicitOps ops2
   , ImplicitOps ops3
-  , EntailOps ops3 ops1
-  , EntailOps (handler ∪ ops3) ops2
+  , ops3 ⊇ ops1
+  , (handler ∪ ops3) ⊇ ops2
   , ImplicitOps handler
   , Effect eff
   )

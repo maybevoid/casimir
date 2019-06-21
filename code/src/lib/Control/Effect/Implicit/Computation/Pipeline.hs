@@ -105,7 +105,7 @@ castPipelineOps
   , ImplicitOps ops2
   , ImplicitOps handler
   )
-  => ops2 ⊇ ops1
+  => OpsCast ops2 ops1
   -> Pipeline ops1 handler comp1 comp2 eff1 eff2
   -> Pipeline ops2 handler comp1 comp2 eff1 eff2
 castPipelineOps cast21 pipeline1 = Pipeline pipeline2
@@ -122,7 +122,7 @@ castPipelineOps cast21 pipeline1 = Pipeline pipeline2
     comp3 :: Computation (ops1 ∪ ops3) comp2 eff2
     comp3 = runExactPipeline pipeline1 comp1
 
-    cast21' :: (ops2 ∪ ops3) ⊇ (ops1 ∪ ops3)
+    cast21' :: OpsCast (ops2 ∪ ops3) (ops1 ∪ ops3)
     cast21' = extendCast @ops2 @ops1 cast21
 
 castPipelineHandler
@@ -133,7 +133,7 @@ castPipelineHandler
   , ImplicitOps handler1
   , ImplicitOps handler2
   )
-  => handler1 ⊇ handler2
+  => OpsCast handler1 handler2
   -> Pipeline ops1 handler1 comp1 comp2 eff1 eff2
   -> Pipeline ops1 handler2 comp1 comp2 eff1 eff2
 castPipelineHandler cast1 pipeline1 = Pipeline pipeline2
@@ -147,7 +147,7 @@ castPipelineHandler cast1 pipeline1 = Pipeline pipeline2
     comp2 :: Computation (handler1 ∪ ops2) comp1 eff1
     comp2 = castComputation cast2 comp1
 
-    cast2 :: (handler1 ∪ ops2) ⊇ (handler2 ∪ ops2)
+    cast2 :: OpsCast (handler1 ∪ ops2) (handler2 ∪ ops2)
     cast2 = extendCast @handler1 @handler2 cast1
 
 composeExactPipelines
@@ -193,8 +193,8 @@ runPipelineWithCast
   , ImplicitOps ops3
   , ImplicitOps handler
   )
-  => ops3 ⊇ ops1
-  -> (handler ∪ ops3) ⊇ ops2
+  => OpsCast ops3 ops1
+  -> OpsCast (handler ∪ ops3) ops2
   -> Pipeline ops1 handler comp1 comp2 eff1 eff2
   -> Computation ops2 comp1 eff1
   -> Computation ops3 comp2 eff2
@@ -211,8 +211,8 @@ runPipeline
   :: forall ops3 ops1 ops2 handler comp1 comp2 eff1 eff2 .
   ( Effect eff1
   , Effect eff2
-  , EntailOps ops3 ops1
-  , EntailOps (handler ∪ ops3) ops2
+  , ops3 ⊇ ops1
+  , (handler ∪ ops3) ⊇ ops2
   , ImplicitOps ops1
   , ImplicitOps ops2
   , ImplicitOps ops3
@@ -237,9 +237,9 @@ composePipelinesWithCast
   , ImplicitOps handler2
   , ImplicitOps handler3
   )
-  => (handler2 ∪ ops3) ⊇ ops1
-  -> ops3 ⊇ ops2
-  -> (handler1 ∪ handler2) ⊇ handler3
+  => OpsCast (handler2 ∪ ops3) ops1
+  -> OpsCast ops3 ops2
+  -> OpsCast (handler1 ∪ handler2) handler3
   -> Pipeline ops1 handler1 comp1 comp2 eff1 eff2
   -> Pipeline ops2 handler2 comp2 comp3 eff2 eff3
   -> Pipeline ops3 handler3 comp1 comp3 eff1 eff3
@@ -265,9 +265,9 @@ composePipelines
   , ImplicitOps handler1
   , ImplicitOps handler2
   , ImplicitOps handler3
-  , EntailOps (handler2 ∪ ops3) ops1
-  , EntailOps ops3 ops2
-  , EntailOps (handler1 ∪ handler2) handler3
+  , (handler2 ∪ ops3) ⊇ ops1
+  , ops3 ⊇ ops2
+  , (handler1 ∪ handler2) ⊇ handler3
   )
   => Pipeline ops1 handler1 comp1 comp2 eff1 eff2
   -> Pipeline ops2 handler2 comp2 comp3 eff2 eff3

@@ -27,9 +27,6 @@ type OpsCast' ops1 ops2 eff =
 type OpsCast ops1 ops2 =
   forall eff . OpsCast' ops1 ops2 eff
 
-infixl 6 ⊇
-type ops1 ⊇ ops2 = OpsCast ops1 ops2
-
 cast :: forall p . p => Cast p
 cast = Cast
 
@@ -64,10 +61,13 @@ instance
     entailOps :: forall eff . OpsCast' ops1 ops2 eff
     entailOps = entailOps' @ops1 @ops2 @eff
 
+infixl 6 ⊇
+type ops1 ⊇ ops2 = EntailOps ops1 ops2
+
 withCast
   :: forall eff ops1 ops2 r
    . ( EffConstraint ops1 eff )
-  => ops1 ⊇ ops2
+  => OpsCast ops1 ops2
   -> (OpsConstraint ops2 eff => r)
   -> r
 withCast caster res =
@@ -80,7 +80,7 @@ castOps
   , ImplicitOps ops1
   , ImplicitOps ops2
   )
-  => ops1 ⊇ ops2
+  => OpsCast ops1 ops2
   -> Operation ops1 eff
   -> Operation ops2 eff
 castOps caster ops = withOps ops $
@@ -93,8 +93,8 @@ extendCast
   , ImplicitOps ops2
   , ImplicitOps ops3
   )
-  => ops1 ⊇ ops2
-  -> (ops1 ∪ ops3) ⊇ (ops2 ∪ ops3)
+  => OpsCast ops1 ops2
+  -> OpsCast (ops1 ∪ ops3) (ops2 ∪ ops3)
 extendCast caster1 = caster2
  where
   caster2
@@ -110,9 +110,9 @@ composeCast
   , ImplicitOps ops2
   , ImplicitOps ops3
   )
-  => ops1 ⊇ ops2
-  -> ops2 ⊇ ops3
-  -> ops1 ⊇ ops3
+  => OpsCast ops1 ops2
+  -> OpsCast ops2 ops3
+  -> OpsCast ops1 ops3
 composeCast cast1 cast2 = cast3
   where
     cast3
@@ -128,7 +128,7 @@ castComputation
   , ImplicitOps ops1
   , ImplicitOps ops2
   )
-  => ops1 ⊇ ops2
+  => OpsCast ops1 ops2
   -> Computation ops2 comp eff
   -> Computation ops1 comp eff
 castComputation caster comp = Computation $
