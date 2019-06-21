@@ -49,10 +49,9 @@ instance ImplicitOps (AmbEff a) where
   captureOps = ?ambOps
 
 select
-  :: forall a eff
-   . (EffConstraint (AmbEff a) eff)
-  => [a]
-  -> eff a
+  :: forall a
+   . [a]
+  -> Eff (AmbEff a) a
 select = selectOp captureOps
 
 noAttack :: (Int, Int) -> (Int, Int) -> Bool
@@ -64,10 +63,7 @@ availableMoves x qs =
   filter (\y -> all (noAttack (x,y)) qs)
   [1..8]
 
-solveQueen
-  :: forall eff
-   . (EffConstraint (AmbEff Int) eff)
-  => eff [(Int, Int)]
+solveQueen :: Eff (AmbEff Int) [(Int, Int)]
 solveQueen = solveQueen' 1 []
  where
   solveQueen'

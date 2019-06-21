@@ -38,6 +38,7 @@ module Control.Effect.Implicit.Computation
   , castComputation
   , castOpsHandler
   , bindOpsHandlerWithCast
+  , composeOpsHandlers
   , composeOpsHandlersWithCast
   , extendCast
   , composeCast

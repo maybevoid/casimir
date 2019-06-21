@@ -15,4 +15,3 @@ where
 -- which does a great job explaning algebraic effects without mentioning the
 -- M-word.
 type Effect eff = Monad eff
-

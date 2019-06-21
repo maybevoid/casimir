@@ -10,6 +10,7 @@ module Control.Effect.Implicit.Computation.Handler
   , bindExactOpsHandler
   , composeExactOpsHandlers
   , castOpsHandler
+  , composeOpsHandlers
   , composeOpsHandlersWithCast
   , bindOpsHandlerWithCast
   )
@@ -171,6 +172,28 @@ composeOpsHandlersWithCast cast31 cast32 handler1 handler2 =
   composeExactOpsHandlers
     (castOpsHandler cast31 handler1)
     (castOpsHandler cast32 handler2)
+
+composeOpsHandlers
+  :: forall
+    ops1 ops2 ops3
+    handler1 handler2
+    eff .
+  ( ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps ops3
+  , ImplicitOps handler1
+  , ImplicitOps handler2
+  , Effect eff
+  , EntailOps ops3 ops1
+  , EntailOps (handler1 ∪ ops3) ops2
+  )
+  => OpsHandler ops1 handler1 eff
+  -> OpsHandler ops2 handler2 eff
+  -> OpsHandler ops3 (handler1 ∪ handler2) eff
+composeOpsHandlers = composeOpsHandlersWithCast
+  @ops1 @ops2 @ops3
+  (opsEntailment @ops3 @ops1)
+  (opsEntailment @(handler1 ∪ ops3) @ops2)
 
 bindOpsHandlerWithCast
   :: forall ops3 ops1 ops2 handler eff r .

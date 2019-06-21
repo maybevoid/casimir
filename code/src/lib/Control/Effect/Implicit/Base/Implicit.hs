@@ -2,6 +2,7 @@
 module Control.Effect.Implicit.Base.Implicit
   ( ImplicitOps (..)
   , EffConstraint
+  , Eff
   )
 where
 
@@ -67,3 +68,5 @@ class
 -- boilerplate in generic computations so that we do not have to keep
 -- repeating the @(Effect eff)@ constraint in our type signatures.
 type EffConstraint ops eff = (Effect eff, OpsConstraint ops eff)
+
+type Eff ops a = forall eff . (EffConstraint ops eff) => eff a

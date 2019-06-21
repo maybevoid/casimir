@@ -18,8 +18,7 @@ envHandler3
   :: forall eff .
   (Effect eff)
   => BaseOpsHandler (Union (EnvEff Int) (EnvEff Int)) eff
-envHandler3 = composeOpsHandlersWithCast
-  cast cast
+envHandler3 = composeOpsHandlers
   envHandler1 envHandler2
 
 readerComp1 :: forall eff .
@@ -124,8 +123,7 @@ ioAndStateHandler
   -> BaseOpsHandler (Union IoEff (StateEff a)) IO
 ioAndStateHandler ref = handler
   where
-    handler = composeOpsHandlersWithCast
-      cast cast
+    handler = composeOpsHandlers
       ioHandler
       (refStateHandler ref)
 

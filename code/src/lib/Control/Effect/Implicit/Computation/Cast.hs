@@ -1,7 +1,10 @@
+{-# LANGUAGE UndecidableInstances #-}
 
 module Control.Effect.Implicit.Computation.Cast
   ( Cast (..)
   , OpsCast
+  , OpsCast'
+  , EntailOps (..)
   , type (⊇)
   , cast
   , withCast
@@ -17,14 +20,56 @@ import Control.Effect.Implicit.Computation.Computation
 
 data Cast p = p => Cast
 
+type OpsCast' ops1 ops2 eff =
+  (EffConstraint ops1 eff) => Cast (OpsConstraint ops2 eff)
+
 type OpsCast ops1 ops2 =
-  forall eff . (EffConstraint ops1 eff) => Cast (OpsConstraint ops2 eff)
+  forall eff . OpsCast' ops1 ops2 eff
 
 infixl 6 ⊇
 type ops1 ⊇ ops2 = OpsCast ops1 ops2
 
 cast :: forall p . p => Cast p
 cast = Cast
+
+entailOps
+  :: forall eff ops1 ops2 p q
+   . ( Effect eff, ImplicitOps ops1, ImplicitOps ops2 )
+  => (p ~ OpsConstraint ops1 eff, q ~ OpsConstraint ops2 eff)
+  => (p => q)
+  => OpsCast' ops1 ops2 eff
+entailOps = Cast
+
+class
+  (Effect eff, ImplicitOps ops1, ImplicitOps ops2)
+  => EntailOps' ops1 ops2 eff
+  where
+    opsEntailment' :: OpsCast' ops1 ops2 eff
+
+instance
+  ( Effect eff, ImplicitOps ops1, ImplicitOps ops2
+  , (p ~ OpsConstraint ops1 eff, q ~ OpsConstraint ops2 eff)
+  , (p => q)
+  )
+  => EntailOps' ops1 ops2 eff
+  where
+    opsEntailment' :: OpsCast' ops1 ops2 eff
+    opsEntailment' = entailOps @eff @ops1 @ops2
+
+class
+  (ImplicitOps ops1, ImplicitOps ops2)
+  => EntailOps ops1 ops2
+  where
+    opsEntailment :: OpsCast ops1 ops2
+
+instance
+  ( ImplicitOps ops1, ImplicitOps ops2
+  , forall eff . Effect eff => EntailOps' ops1 ops2 eff
+  )
+  => EntailOps ops1 ops2
+  where
+    opsEntailment :: forall eff . OpsCast' ops1 ops2 eff
+    opsEntailment = opsEntailment' @ops1 @ops2 @eff
 
 withCast
   :: forall eff ops1 ops2 r
