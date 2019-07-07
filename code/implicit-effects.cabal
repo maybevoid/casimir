@@ -28,8 +28,9 @@ common deps
     , base
     , free
     , mtl
-    , transformers
     , reflection
+    , constraints
+    , transformers
   default-extensions:
     GADTs
     Strict

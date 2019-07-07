@@ -4,12 +4,16 @@ module Control.Effect.Implicit.Reflect.Reflect
 where
 
 import Data.Kind
-import Data.Coerce
 import Unsafe.Coerce
+import Data.Constraint
 import Data.Reflection
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Cast
+
+newtype ReflectM ops eff a =
+  ReflectM (eff a)
+  deriving (Functor, Applicative, Monad)
 
 class
   ( Effect eff
@@ -21,40 +25,58 @@ class
 
 instance
   ( Effect eff
-  , ImplicitOps ops1
-  , ImplicitOps ops2
-  , EntailOps ops1 ops2
-  , Given (Operation ops1 eff)
+  , ImplicitOps ops
+  , Given (Operation ops eff)
   )
-  => ReifiesOps ops2 eff
+  => ReifiesOps ops eff
   where
-    reflectOps = castOps
-      @eff @ops1 @ops2
-      (entailOps @ops1 @ops2)
-      given
+    reflectOps = given
 
 class
-  ( ImplicitOps ops
-  , forall eff a
-     . (Coercible (ReflectM ops eff a) (eff a))
-  , forall eff
-     . (Effect eff, ReifiesOps ops eff)
-    => OpsClass ops (ReflectM ops eff)
-  )
+  (ImplicitOps ops)
   => ReflectOps ops
   where
-    type ReflectM ops (eff :: Type -> Type)
-      :: Type -> Type
-
     type OpsClass ops (eff :: Type -> Type) =
       (c :: Constraint) | c -> ops eff
+
+    opsDict
+      :: forall eff
+       . (Effect eff)
+      => Operation ops eff
+      -> Dict (OpsClass ops eff)
+
+instance
+  ( ReflectOps ops1, ReflectOps ops2 )
+  => ReflectOps (ops1 ∪ ops2)
+  where
+    type OpsClass (ops1 ∪ ops2) eff =
+      (OpsClass ops1 eff, OpsClass ops2 eff)
+
+    opsDict (UnionOps ops1 ops2) =
+      mergeDict (opsDict ops1) (opsDict ops2)
+
+withReifiedOps
+  :: forall ops eff r
+   . (ImplicitOps ops, Effect eff)
+  => Operation ops eff
+  -> ((ReifiesOps ops eff) => r)
+  -> r
+withReifiedOps ops cont = give ops cont
 
 castClass
   :: forall eff ops
    . ( Effect eff
-     , ImplicitOps ops
      , ReflectOps ops
      )
-  => Cast (OpsClass ops (ReflectM ops eff))
-  -> Cast (OpsClass ops eff)
+  => Dict (OpsClass ops (ReflectM ops eff))
+  -> Dict (OpsClass ops eff)
 castClass = unsafeCoerce
+
+reflectComputation
+  :: forall ops eff a
+   . (Effect eff, ReflectOps ops)
+  => (OpsClass ops eff => eff a)
+  -> (OpsConstraint ops eff => eff a)
+reflectComputation comp =
+  case (opsDict @ops @eff $ captureOps) of
+    Dict -> comp

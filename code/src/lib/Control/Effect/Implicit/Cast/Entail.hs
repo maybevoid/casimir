@@ -7,6 +7,7 @@ module Control.Effect.Implicit.Cast.Entail
   )
 where
 
+import Data.Constraint
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Cast.Cast
 
@@ -24,7 +25,7 @@ instance
   => EntailOps' ops1 ops2 eff
   where
     entailOps' :: OpsCast' ops1 ops2 eff
-    entailOps' = Cast
+    entailOps' = Dict
 
 class
   (ImplicitOps ops1, ImplicitOps ops2)

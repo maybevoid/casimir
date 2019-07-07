@@ -1,9 +1,9 @@
 
 module Control.Effect.Implicit.Cast.Cast
-  ( Cast (..)
-  , OpsCast
+  ( OpsCast
   , OpsCast'
   , cast
+  , mergeDict
   , withCast
   , castOps
   , extendCast
@@ -11,18 +11,25 @@ module Control.Effect.Implicit.Cast.Cast
   )
 where
 
+import Data.Constraint
+
 import Control.Effect.Implicit.Base
 
-data Cast p = p => Cast
-
 type OpsCast' ops1 ops2 eff =
-  (EffConstraint ops1 eff) => Cast (OpsConstraint ops2 eff)
+  (EffConstraint ops1 eff) => Dict (OpsConstraint ops2 eff)
 
 type OpsCast ops1 ops2 =
   forall eff . OpsCast' ops1 ops2 eff
 
-cast :: forall p . p => Cast p
-cast = Cast
+cast :: forall p . p => Dict p
+cast = Dict
+
+mergeDict
+  :: forall p q
+   . Dict p
+  -> Dict q
+  -> Dict (p, q)
+mergeDict Dict Dict = Dict
 
 withCast
   :: forall eff ops1 ops2 r
@@ -32,7 +39,7 @@ withCast
   -> r
 withCast caster res =
   case caster @eff of
-    Cast -> res
+    Dict -> res
 
 castOps
   :: forall eff ops1 ops2 .
@@ -60,9 +67,9 @@ extendCast caster1 = caster2
   caster2
     :: forall eff .
     (EffConstraint (ops1 ∪ ops3) eff)
-    => Cast (OpsConstraint (ops2 ∪ ops3) eff)
+    => Dict (OpsConstraint (ops2 ∪ ops3) eff)
   caster2 = case caster1 @eff of
-    Cast -> Cast
+    Dict -> Dict
 
 composeCast
   :: forall ops1 ops2 ops3.
@@ -78,6 +85,6 @@ composeCast cast1 cast2 = cast3
     cast3
       :: forall eff .
       (EffConstraint ops1 eff)
-      => Cast (OpsConstraint ops3 eff)
+      => Dict (OpsConstraint ops3 eff)
     cast3 = withCast @eff @ops1 @ops2 cast1 $
-      withCast @eff @ops2 @ops3 cast2 Cast
+      withCast @eff @ops2 @ops3 cast2 Dict
