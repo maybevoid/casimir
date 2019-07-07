@@ -29,6 +29,7 @@ common deps
     , free
     , mtl
     , transformers
+    , reflection
   default-extensions:
     GADTs
     Strict
@@ -64,6 +65,8 @@ library
       Control.Effect.Implicit.Computation
       Control.Effect.Implicit.Free
       Control.Effect.Implicit.Freer
+      Control.Effect.Implicit.Cast
+      Control.Effect.Implicit.Reflect
       Control.Effect.Implicit.Ops
       Control.Effect.Implicit.Ops.Async
       Control.Effect.Implicit.Ops.Decide
@@ -104,6 +107,11 @@ library
       Control.Effect.Implicit.Freer.Freer
       Control.Effect.Implicit.Freer.FreerEff
       Control.Effect.Implicit.Freer.Handler
+      Control.Effect.Implicit.Cast.Cast
+      Control.Effect.Implicit.Cast.Entail
+      Control.Effect.Implicit.Reflect.Reflect
+      Control.Effect.Implicit.Reflect.State
+
   hs-source-dirs:
       src/lib
 

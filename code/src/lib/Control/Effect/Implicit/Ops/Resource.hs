@@ -5,7 +5,7 @@ import Data.Kind
 import Control.Exception
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation
+import Control.Effect.Implicit.Cast
 
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.UnliftIo

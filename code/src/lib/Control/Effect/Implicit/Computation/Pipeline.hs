@@ -17,6 +17,7 @@ module Control.Effect.Implicit.Computation.Pipeline
 where
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Cast
 import Control.Effect.Implicit.Computation.Cast
 import Control.Effect.Implicit.Computation.Handler
 import Control.Effect.Implicit.Computation.Computation

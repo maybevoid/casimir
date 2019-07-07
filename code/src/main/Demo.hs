@@ -248,3 +248,6 @@ ops3 :: UnionOps
   (UnionOps IoOps (EnvOps Int))
   IO
 ops3 = UnionOps ops1 ops2
+
+-- uniqueCast :: OpsCast (EnvEff Int ∪ EnvEff String) (EnvEff Int ∪ EnvEff String)
+-- uniqueCast = entailOps @(EnvEff Int ∪ EnvEff String) @(EnvEff Int ∪ EnvEff String)

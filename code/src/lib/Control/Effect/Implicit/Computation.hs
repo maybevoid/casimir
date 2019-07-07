@@ -7,9 +7,6 @@ module Control.Effect.Implicit.Computation
   , ReturnCtx (..)
   , Pipeline (..)
   , TransformerHandler (..)
-  , Cast (..)
-  , OpsCast
-  , type (⊇)
   , GenericReturn
   , IdentityComputation
   , BaseOpsHandler
@@ -33,17 +30,12 @@ module Control.Effect.Implicit.Computation
   , transformePipeline
   , composePipelines
   , composeExactPipelines
-  , cast
-  , withCast
-  , castOps
   , castComputation
   , castOpsHandler
   , bindOpsHandler
   , bindOpsHandlerWithCast
   , composeOpsHandlers
   , composeOpsHandlersWithCast
-  , extendCast
-  , composeCast
   , runPipeline
   , runPipelineWithCast
   , castPipelineOps
