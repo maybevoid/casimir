@@ -26,8 +26,6 @@
 module Control.Effect.Implicit
   ( module Control.Effect.Implicit.Base
   , module Control.Effect.Implicit.Computation
-  , module Control.Effect.Implicit.Free
-  , module Control.Effect.Implicit.Freer
   , module Control.Effect.Implicit.Cast
   , module Control.Effect.Implicit.Reflect
   )
@@ -35,7 +33,5 @@ where
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
-import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Cast
 import Control.Effect.Implicit.Reflect

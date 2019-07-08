@@ -4,8 +4,9 @@ where
 import Data.Kind
 import Control.Monad.Identity
 
-import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Cast
+import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Ops.Io
 
 newtype GenericComp ops a = GenericComp {

@@ -5,6 +5,8 @@ module Control.Effect.Implicit.Freer.Handler
 where
 
 import Control.Effect.Implicit.Base
+
+import Control.Effect.Implicit.Freer.FreeOps
 import Control.Effect.Implicit.Freer.FreerEff
 
 {-# INLINE withFreerCoOpHandler #-}

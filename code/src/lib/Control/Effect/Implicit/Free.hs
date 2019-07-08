@@ -1,6 +1,10 @@
 module Control.Effect.Implicit.Free
-  ( CoOpHandler (..)
+  ( EffCoOp (..)
+  , FreeOps (..)
+  , CoOpHandler (..)
   , FreeEff (..)
+  , NoCoOp (..)
+  , UnionCoOp (..)
   , ChurchMonad (..)
   , FreeMonad (..)
   , GenericCoOpHandler (..)
@@ -15,6 +19,10 @@ module Control.Effect.Implicit.Free
   )
 where
 
+import Control.Effect.Implicit.Free.EffCoOp
+import Control.Effect.Implicit.Free.FreeOps
+import Control.Effect.Implicit.Free.NoEff
+import Control.Effect.Implicit.Free.Union
 import Control.Effect.Implicit.Free.FreeEff
 import Control.Effect.Implicit.Free.Church
 import Control.Effect.Implicit.Free.Free

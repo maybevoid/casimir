@@ -3,6 +3,9 @@ module Benchmark.State.HandleFree
 where
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Freer
+
 import Benchmark.State.Base
 
 handleFreeComp

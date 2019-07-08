@@ -68,6 +68,7 @@ library
       Control.Effect.Implicit.Freer
       Control.Effect.Implicit.Cast
       Control.Effect.Implicit.Reflect
+
       Control.Effect.Implicit.Ops
       Control.Effect.Implicit.Ops.Async
       Control.Effect.Implicit.Ops.Decide
@@ -78,39 +79,51 @@ library
       Control.Effect.Implicit.Ops.Resource
       Control.Effect.Implicit.Ops.State
       Control.Effect.Implicit.Ops.UnliftIo
+
       Control.Effect.Implicit.Tagged
       Control.Effect.Implicit.Tagged.Ops
       Control.Effect.Implicit.Tagged.Ops.Env
       Control.Effect.Implicit.Tagged.TaggedEff
+
       Control.Effect.Implicit.Transform
       Control.Effect.Implicit.Transform.Reader
       Control.Effect.Implicit.Transform.State
   other-modules:
       Control.Effect.Implicit.Base.Effect
       Control.Effect.Implicit.Base.EffFunctor
-      Control.Effect.Implicit.Base.Free
       Control.Effect.Implicit.Base.Implicit
       Control.Effect.Implicit.Base.BaseOps
       Control.Effect.Implicit.Base.Lift
       Control.Effect.Implicit.Base.NoEff
-      Control.Effect.Implicit.Base.Spec
+      Control.Effect.Implicit.Base.EffOps
       Control.Effect.Implicit.Base.Union
+
       Control.Effect.Implicit.Computation.Cast
       Control.Effect.Implicit.Computation.Computation
       Control.Effect.Implicit.Computation.Handler
       Control.Effect.Implicit.Computation.Pipeline
       Control.Effect.Implicit.Computation.Value
+
+      Control.Effect.Implicit.Free.EffCoOp
+      Control.Effect.Implicit.Free.FreeOps
       Control.Effect.Implicit.Free.Church
       Control.Effect.Implicit.Free.Free
       Control.Effect.Implicit.Free.FreeEff
+      Control.Effect.Implicit.Free.NoEff
+      Control.Effect.Implicit.Free.Union
       Control.Effect.Implicit.Free.Handler
       Control.Effect.Implicit.Free.Pipeline
+
+      Control.Effect.Implicit.Freer.EffCoOp
+      Control.Effect.Implicit.Freer.FreeOps
       Control.Effect.Implicit.Freer.Church
       Control.Effect.Implicit.Freer.Freer
       Control.Effect.Implicit.Freer.FreerEff
       Control.Effect.Implicit.Freer.Handler
+
       Control.Effect.Implicit.Cast.Cast
       Control.Effect.Implicit.Cast.Entail
+
       Control.Effect.Implicit.Reflect.Reflect
       Control.Effect.Implicit.Reflect.State
 

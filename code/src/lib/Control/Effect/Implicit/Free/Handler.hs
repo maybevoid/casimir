@@ -9,6 +9,7 @@ where
 import Control.Effect.Implicit.Base
 
 import Control.Effect.Implicit.Free.FreeEff
+import Control.Effect.Implicit.Free.FreeOps
 
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler

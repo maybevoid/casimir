@@ -2,14 +2,12 @@
 module Control.Effect.Implicit.Base.NoEff
   ( NoEff
   , NoOp (..)
-  , NoCoOp (..)
   , NoConstraint
   )
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base.Free
-import Control.Effect.Implicit.Base.Spec
+import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
 
@@ -33,16 +31,8 @@ data NoEff
 -- 'Operation' can be satisfied.
 data NoOp (eff :: Type -> Type) = NoOp
 
--- | @'CoOperation' 'NoEff' r@ is really just @()@ for all return type @r@. We instead define
--- 'NoCoOp' with phantom type @r@ so that the injectivity condition for
--- 'CoOperation' can be satisfied.
-data NoCoOp r = NoCoOp
-
 instance EffOps NoEff where
   type Operation NoEff = NoOp
-
-instance EffCoOp NoEff where
-  type CoOperation NoEff = NoCoOp
 
 -- | @'OpsConstraint' 'NoEff' eff@ is just the empty constraint @()@ for all
 -- 'Effect' @eff@. We instead define the empty class 'NoConstraint' with
@@ -54,14 +44,8 @@ class NoConstraint (eff :: Type -> Type) where
 -- satisfied.
 instance NoConstraint eff where
 
-instance Functor NoCoOp where
-  fmap _ _ = NoCoOp
-
 instance EffFunctor NoOp where
   effmap _ _ = NoOp
-
-instance FreeOps NoEff where
-  mkFreeOps _ = NoOp
 
 -- | As the trivial instance for 'ImplicitOps', @'OpsConstraint' 'NoEff'@ does not
 -- make use of implicit parameters, as its 'Operation' can be trivially be

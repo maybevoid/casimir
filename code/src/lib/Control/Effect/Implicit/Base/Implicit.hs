@@ -9,7 +9,7 @@ where
 import Data.Kind
 
 import Control.Effect.Implicit.Base.Effect
-import Control.Effect.Implicit.Base.Spec
+import Control.Effect.Implicit.Base.EffOps
 
 -- | 'ImplicitOps' gives computations access to effect operations of an
 -- 'EffOps' through implicit parameter constraints. It hides the machinery

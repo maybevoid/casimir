@@ -4,15 +4,13 @@ module Control.Effect.Implicit.Base.Union
   , (∪)
   , UnionOps (..)
   , type (∪)
-  , UnionCoOp (..)
   , leftOps
   , rightOps
   )
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base.Free
-import Control.Effect.Implicit.Base.Spec
+import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
 
@@ -48,26 +46,9 @@ type (∪) = Union
 (∪) :: forall ops1 ops2 eff . ops1 eff -> ops2 eff -> UnionOps ops1 ops2 eff
 (∪) = UnionOps
 
--- | The 'CoOperation' of @ops1 '∪' ops2@ under return type
--- @r@ is the sum of the underlying @'CoOperation' ops1 r@ and
--- @'CoOperation' ops2 r@.
-data UnionCoOp ops1 ops2 r
-  = LeftCoOp (ops1 r)
-  | RightCoOp (ops2 r)
-
 instance EffOps (Union ops1 ops2) where
   type Operation (Union ops1 ops2) =
     UnionOps (Operation ops1) (Operation ops2)
-
-instance EffCoOp (Union ops1 ops2) where
-  type CoOperation (Union ops1 ops2) =
-    UnionCoOp (CoOperation ops1) (CoOperation ops2)
-
-instance (Functor ops1, Functor ops2)
-  => Functor (UnionCoOp ops1 ops2)
-  where
-    fmap f (LeftCoOp x) = LeftCoOp $ fmap f x
-    fmap f (RightCoOp x) = RightCoOp $ fmap f x
 
 instance
   ( EffFunctor ops1
@@ -77,19 +58,6 @@ instance
   where
     effmap f (UnionOps x y)
       = UnionOps (effmap f x) (effmap f y)
-
--- | @ops1 '∪' ops2@ is a 'FreeOps' if both @ops1@ and @ops2@ are instance of
--- 'FreeOps', with @'Operation' (ops1 '∪' ops2)@ being the product of the
--- underlying 'Operation's and @'CoOperation' (ops1 '∪' ops2)@ being the
--- sum of the underlying 'CoOperation's.
-instance
-  (FreeOps ops1, FreeOps ops2) =>
-  FreeOps (Union ops1 ops2)
-   where
-    mkFreeOps liftReturn = UnionOps ops1 ops2
-     where
-      ops1 = mkFreeOps (liftReturn . LeftCoOp)
-      ops2 = mkFreeOps (liftReturn . RightCoOp)
 
 -- | @ops1 '∪' ops2@ is a 'ImplicitOps' if both @ops1@ and @ops2@ are instance of
 -- 'ImplicitOps', with @'OpsConstraint' (ops1 '∪' ops2)@ being the **reversed**

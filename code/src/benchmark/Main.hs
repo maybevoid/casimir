@@ -8,6 +8,8 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Freer
 
 import Benchmark.State
 

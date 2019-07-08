@@ -10,6 +10,7 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
 
 import Control.Effect.Implicit.Free.FreeEff
+import Control.Effect.Implicit.Free.FreeOps
 
 {-# INLINE coopHandlerToPipeline #-}
 coopHandlerToPipeline

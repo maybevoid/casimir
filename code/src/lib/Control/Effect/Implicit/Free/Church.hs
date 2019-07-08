@@ -7,6 +7,8 @@ where
 import Control.Monad (ap)
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free.EffCoOp
+import Control.Effect.Implicit.Free.FreeOps
 import Control.Effect.Implicit.Free.FreeEff
 
 newtype ChurchMonad ops eff a = ChurchMonad {

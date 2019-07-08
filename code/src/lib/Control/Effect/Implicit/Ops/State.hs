@@ -10,6 +10,8 @@ module Control.Effect.Implicit.Ops.State
 where
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Freer
 
 data StateEff s where
 

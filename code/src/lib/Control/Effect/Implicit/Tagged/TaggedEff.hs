@@ -13,6 +13,7 @@ where
 import Data.Kind
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free
 
 data TaggedEff l ops
 

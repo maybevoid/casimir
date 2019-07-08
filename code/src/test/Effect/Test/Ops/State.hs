@@ -10,6 +10,7 @@ import Control.Monad.Trans.State.Strict
   (StateT, runStateT)
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.Env
 import Control.Effect.Implicit.Ops.State
@@ -217,4 +218,3 @@ freeStateTest1 = testCase "Free state test 1" $
  assertEqual "State ops handler should handle state correctly"
   (7, 9, 9) $
   runIdentity stateFreeComp2
-

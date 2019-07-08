@@ -3,6 +3,7 @@ module Control.Effect.Implicit.Ops.Decide
 where
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free
 
 data DecideEff s
 

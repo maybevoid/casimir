@@ -9,6 +9,7 @@ import Control.Monad.Trans.Free
 import Control.Monad.Trans.Class
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Ops.Env
 
 data YieldEff a

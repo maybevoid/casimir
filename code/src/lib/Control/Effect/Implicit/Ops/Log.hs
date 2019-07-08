@@ -3,6 +3,8 @@ module Control.Effect.Implicit.Ops.Log
 where
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Computation
 
 import Control.Effect.Implicit.Ops.Io

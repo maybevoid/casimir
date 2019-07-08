@@ -1,14 +1,12 @@
 
-module Control.Effect.Implicit.Base.Free
+module Control.Effect.Implicit.Free.FreeOps
   ( FreeOps (..)
-  , FreerOps (..)
   )
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base.Effect
-import Control.Effect.Implicit.Base.EffFunctor
-import Control.Effect.Implicit.Base.Spec
+import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free.EffCoOp
 
 -- | A 'FreeOps' @ops@ has associated types that can be used for effect
 -- operations and interpretations. We typically use dummy datatypes with
@@ -35,19 +33,4 @@ class
         , Effect (t eff)
         )
       => (forall a . CoOperation ops a -> t eff a)
-      -> Operation ops (t eff)
-
-class
-  ( EffOps ops
-  , FreerEffCoOp ops
-  , Functor (CoOperation ops)
-  , EffFunctor (Operation ops)
-  )
-  => FreerOps (ops :: Type) where
-    mkFreerOps
-      :: forall t eff
-        . ( Effect eff
-          , Effect (t eff)
-          )
-      => (forall a . FreerCoOp ops a -> t eff a)
       -> Operation ops (t eff)

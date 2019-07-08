@@ -3,6 +3,8 @@ module Control.Effect.Implicit.Ops.Env
 where
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Computation
 
 data EnvEff e

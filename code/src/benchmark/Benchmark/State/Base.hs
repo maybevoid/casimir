@@ -3,6 +3,8 @@ module Benchmark.State.Base
 where
 
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Ops.State
 
 newtype CoState s eff a = CoState (s -> eff a)
