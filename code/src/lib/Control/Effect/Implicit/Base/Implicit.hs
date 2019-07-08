@@ -10,7 +10,6 @@ import Data.Kind
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.Spec
-import Control.Effect.Implicit.Base.EffFunctor
 
 -- | 'ImplicitOps' gives computations access to effect operations of an
 -- 'EffOps' through implicit parameter constraints. It hides the machinery
@@ -30,7 +29,7 @@ import Control.Effect.Implicit.Base.EffFunctor
 -- be derived mechanically. We may look into using template Haskell to generate
 -- instances for 'ImplicitOps' in future to reduce some boilerplate.
 class
-  (EffOps ops, EffFunctor (Operation ops))
+  (EffOps ops)
   => ImplicitOps ops where
 
     -- | The constraint kind for the effect operation under 'Effect' @eff@.

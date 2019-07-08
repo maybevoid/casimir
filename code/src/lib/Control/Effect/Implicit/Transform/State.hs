@@ -75,7 +75,7 @@ stateTToEnvEffPipeline = transformePipeline $ genericComputation handler
 
 withStateTAndOps
   :: forall ops s r eff .
-  ( ImplicitOps ops
+  ( BaseOps ops
   , EffConstraint ops eff
   )
   => s

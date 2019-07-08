@@ -90,6 +90,7 @@ library
       Control.Effect.Implicit.Base.EffFunctor
       Control.Effect.Implicit.Base.Free
       Control.Effect.Implicit.Base.Implicit
+      Control.Effect.Implicit.Base.BaseOps
       Control.Effect.Implicit.Base.Lift
       Control.Effect.Implicit.Base.NoEff
       Control.Effect.Implicit.Base.Spec

@@ -10,6 +10,7 @@ module Control.Effect.Implicit.Base
   , EffCoOp (..)
   , FreerEffCoOp (..)
   , ImplicitOps (..)
+  , BaseOps
   , FreeOps (..)
   , FreerOps (..)
   , Eff
@@ -38,6 +39,7 @@ import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
 import Control.Effect.Implicit.Base.Spec
 import Control.Effect.Implicit.Base.Implicit
+import Control.Effect.Implicit.Base.BaseOps
 import Control.Effect.Implicit.Base.Free
 import Control.Effect.Implicit.Base.Union
 import Control.Effect.Implicit.Base.NoEff

@@ -15,7 +15,7 @@ withCoOpHandler
   :: forall free handler eff a r
    . ( Effect eff
      , FreeOps handler
-     , ImplicitOps handler
+     , BaseOps handler
      , FreeEff free
      )
   => CoOpHandler handler a r eff
@@ -29,9 +29,9 @@ withCoOpHandler handler comp1
 {-# INLINE withCoOpHandlerAndOps #-}
 withCoOpHandlerAndOps
   :: forall free ops handler eff a r
-    . ( ImplicitOps ops
+    . ( BaseOps ops
       , FreeOps handler
-      , ImplicitOps handler
+      , BaseOps handler
       , FreeEff free
       , EffConstraint ops eff
       )
@@ -54,7 +54,7 @@ withContextualCoOpHandler
   :: forall free handler eff a r
    . ( Effect eff
      , FreeOps handler
-     , ImplicitOps handler
+     , BaseOps handler
      , FreeEff free
      )
   => CoOpHandler handler a r eff

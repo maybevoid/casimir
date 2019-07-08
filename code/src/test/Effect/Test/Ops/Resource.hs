@@ -48,7 +48,7 @@ testUnliftIo1 = testCase "UnliftIo test 1" $ do
 stateCompTransform
   :: forall ops eff s a
    . ( Effect eff
-     , ImplicitOps ops
+     , BaseOps ops
      )
   => s
   -> Computation (StateEff s ∪ ops) (Return a) eff
@@ -71,7 +71,7 @@ stateCompTransform s comp1 = Computation comp2
 envCompTransform
   :: forall ops eff e a
    . ( Effect eff
-     , ImplicitOps ops
+     , BaseOps ops
      )
   => e
   -> Computation (EnvEff e ∪ ops) (Return a) eff

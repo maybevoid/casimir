@@ -31,8 +31,8 @@ type GenericOpsHandler ops handler =
 bindOps
   :: forall ops1 ops2 comp eff
    . ( Effect eff
-     , ImplicitOps ops1
-     , ImplicitOps ops2
+     , BaseOps ops1
+     , BaseOps ops2
      )
   => Operation ops1 eff
   -> Computation (ops1 ∪ ops2) comp eff
@@ -40,12 +40,12 @@ bindOps
 bindOps ops1 comp = Computation $
   \lift ops2 ->
     runComp comp lift $
-      applyEffmap lift ops1 ∪ ops2
+      (applyEffmap lift ops1) ∪ ops2
 
 opsHandlerComp
   :: forall ops handler eff1 .
-  ( ImplicitOps ops
-  , ImplicitOps handler
+  ( BaseOps ops
+  , BaseOps handler
   , Effect eff1
   )
   => (forall eff2 .
@@ -59,7 +59,9 @@ opsHandlerComp comp = Computation $
 
 baseOpsHandler
   :: forall handler eff
-   . (ImplicitOps handler, Effect eff)
+   . ( BaseOps handler
+     , Effect eff
+     )
   => Operation handler eff
   -> BaseOpsHandler handler eff
 baseOpsHandler handler = Computation $
@@ -67,7 +69,7 @@ baseOpsHandler handler = Computation $
 
 genericOpsHandler
   :: forall ops handler .
-  (ImplicitOps ops, ImplicitOps handler)
+  (BaseOps ops, BaseOps handler)
   => (forall eff .
       (EffConstraint ops eff)
       => Operation handler eff)
@@ -77,8 +79,8 @@ genericOpsHandler handler = Computation $
 
 bindExactOpsHandler
   :: forall ops handler eff1 comp .
-  ( ImplicitOps ops
-  , ImplicitOps handler
+  ( BaseOps ops
+  , BaseOps handler
   , Effect eff1
   )
   => OpsHandler ops handler eff1
@@ -103,9 +105,9 @@ bindExactOpsHandler handler1 comp1
 
 composeExactOpsHandlers
   :: forall ops handler1 handler2 eff1 .
-  ( ImplicitOps ops
-  , ImplicitOps handler1
-  , ImplicitOps handler2
+  ( BaseOps ops
+  , BaseOps handler1
+  , BaseOps handler2
   , Effect eff1
   )
   => OpsHandler ops handler1 eff1
@@ -131,8 +133,8 @@ composeExactOpsHandlers handler1 handler2
 
 withOpsHandler
   :: forall ops handler eff r .
-  ( ImplicitOps ops
-  , ImplicitOps handler
+  ( BaseOps ops
+  , BaseOps handler
   , EffConstraint ops eff
   )
   => OpsHandler ops handler eff
@@ -145,8 +147,8 @@ withOpsHandler handler =
 castOpsHandler
   :: forall ops1 ops2 handler eff .
   ( Effect eff
-  , ImplicitOps ops1
-  , ImplicitOps ops2
+  , BaseOps ops1
+  , BaseOps ops2
   )
   => OpsCast ops1 ops2
   -> OpsHandler ops2 handler eff
@@ -158,11 +160,11 @@ composeOpsHandlersWithCast
     ops1 ops2 ops3
     handler1 handler2
     eff .
-  ( ImplicitOps ops1
-  , ImplicitOps ops2
-  , ImplicitOps ops3
-  , ImplicitOps handler1
-  , ImplicitOps handler2
+  ( BaseOps ops1
+  , BaseOps ops2
+  , BaseOps ops3
+  , BaseOps handler1
+  , BaseOps handler2
   , Effect eff
   )
   => OpsCast ops3 ops1
@@ -180,11 +182,11 @@ composeOpsHandlers
     ops1 ops2 ops3
     handler1 handler2
     eff .
-  ( ImplicitOps ops1
-  , ImplicitOps ops2
-  , ImplicitOps ops3
-  , ImplicitOps handler1
-  , ImplicitOps handler2
+  ( BaseOps ops1
+  , BaseOps ops2
+  , BaseOps ops3
+  , BaseOps handler1
+  , BaseOps handler2
   , Effect eff
   , ops3 ⊇ ops1
   , (handler1 ∪ ops3) ⊇ ops2
@@ -199,10 +201,10 @@ composeOpsHandlers = composeOpsHandlersWithCast
 
 bindOpsHandlerWithCast
   :: forall ops3 ops1 ops2 handler eff r .
-  ( ImplicitOps ops1
-  , ImplicitOps ops2
-  , ImplicitOps ops3
-  , ImplicitOps handler
+  ( BaseOps ops1
+  , BaseOps ops2
+  , BaseOps ops3
+  , BaseOps handler
   , Effect eff
   )
   => OpsCast ops3 ops1
@@ -218,12 +220,12 @@ bindOpsHandlerWithCast cast31 cast32 handler comp =
 
 bindOpsHandler
   :: forall ops3 ops1 ops2 handler eff r .
-  ( ImplicitOps ops1
-  , ImplicitOps ops2
-  , ImplicitOps ops3
+  ( BaseOps ops1
+  , BaseOps ops2
+  , BaseOps ops3
   , ops3 ⊇ ops1
   , (handler ∪ ops3) ⊇ ops2
-  , ImplicitOps handler
+  , BaseOps handler
   , Effect eff
   )
   => OpsHandler ops1 handler eff
