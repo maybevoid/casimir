@@ -11,9 +11,10 @@ module Control.Effect.Implicit.Ops.Io
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Computation
+
+import qualified Control.Effect.Implicit.Free as Free
+import qualified Control.Effect.Implicit.Freer as Freer
 
 data IoEff
 
@@ -30,11 +31,11 @@ data IoCoOp' r where
 instance EffOps IoEff where
   type Operation IoEff = IoOps
 
-instance EffCoOp IoEff where
+instance Free.EffCoOp IoEff where
   type CoOperation IoEff = IoCoOp
 
-instance FreerEffCoOp IoEff where
-  type FreerCoOp IoEff = IoCoOp'
+instance Freer.EffCoOp IoEff where
+  type CoOperation IoEff = IoCoOp'
 
 instance Functor IoCoOp where
   fmap
@@ -49,13 +50,13 @@ instance EffFunctor IoOps where
     liftIoOp = lifter . liftIoOp ops
   }
 
-instance FreeOps IoEff where
+instance Free.FreeOps IoEff where
   mkFreeOps liftCoOp = IoOps {
     liftIoOp = \io -> liftCoOp $ LiftIoOp io id
   }
 
-instance FreerOps IoEff where
-  mkFreerOps liftCoOp = IoOps {
+instance Freer.FreeOps IoEff where
+  mkFreeOps liftCoOp = IoOps {
     liftIoOp = \io -> liftCoOp $ LiftIoOp' io
   }
 

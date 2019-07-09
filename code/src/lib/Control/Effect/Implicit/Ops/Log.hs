@@ -3,9 +3,10 @@ module Control.Effect.Implicit.Ops.Log
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Computation
+
+import qualified Control.Effect.Implicit.Free as Free
+import qualified Control.Effect.Implicit.Freer as Freer
 
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.State
@@ -26,22 +27,22 @@ data LogCoOp' l r where
 instance EffOps (LogEff l) where
   type Operation (LogEff l) = LogOps l
 
-instance EffCoOp (LogEff l) where
+instance Free.EffCoOp (LogEff l) where
   type CoOperation (LogEff l) = LogCoOp l
 
-instance FreerEffCoOp (LogEff l) where
-  type FreerCoOp (LogEff l) = LogCoOp' l
+instance Freer.EffCoOp (LogEff l) where
+  type CoOperation (LogEff l) = LogCoOp' l
 
 instance EffFunctor (LogOps l) where
   effmap lift ops = LogOps $
     lift . logOp ops
 
-instance FreeOps (LogEff l) where
+instance Free.FreeOps (LogEff l) where
   mkFreeOps liftCoOp = LogOps $
     \l -> liftCoOp $ LogOp l id
 
-instance FreerOps (LogEff l) where
-  mkFreerOps liftCoOp = LogOps $
+instance Freer.FreeOps (LogEff l) where
+  mkFreeOps liftCoOp = LogOps $
     \l -> liftCoOp $ LogOp' l
 
 instance ImplicitOps (LogEff l) where

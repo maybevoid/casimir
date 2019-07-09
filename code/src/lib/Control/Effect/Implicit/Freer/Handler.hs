@@ -1,26 +1,26 @@
 
 module Control.Effect.Implicit.Freer.Handler
-  ( withFreerCoOpHandler
+  ( withCoOpHandler
   )
 where
 
 import Control.Effect.Implicit.Base
 
 import Control.Effect.Implicit.Freer.FreeOps
-import Control.Effect.Implicit.Freer.FreerEff
+import Control.Effect.Implicit.Freer.FreeEff
 
-{-# INLINE withFreerCoOpHandler #-}
-withFreerCoOpHandler
+{-# INLINE withCoOpHandler #-}
+withCoOpHandler
   :: forall free handler eff a r
    . ( Effect eff
-     , FreerOps handler
+     , FreeOps handler
      , ImplicitOps handler
-     , FreerEff free
+     , FreeEff free
      )
   => FreerCoOpHandler handler a r eff
   -> ((OpsConstraint handler (free handler eff))
       => free handler eff a)
   -> eff r
-withFreerCoOpHandler handler comp1
-  = handleFreer @free handler $
-      withOps (freerOps @free @handler @eff) comp1
+withCoOpHandler handler comp1
+  = handleFree @free handler $
+      withOps (freeOps @free @handler @eff) comp1

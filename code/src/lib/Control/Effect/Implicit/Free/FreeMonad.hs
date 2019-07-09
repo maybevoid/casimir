@@ -1,7 +1,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
-module Control.Effect.Implicit.Free.Free
+module Control.Effect.Implicit.Free.FreeMonad
   ( FreeMonad (..)
   )
 where

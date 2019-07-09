@@ -3,9 +3,10 @@ module Control.Effect.Implicit.Ops.Env
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Computation
+
+import qualified Control.Effect.Implicit.Free as Free
+import qualified Control.Effect.Implicit.Freer as Freer
 
 data EnvEff e
 
@@ -22,11 +23,11 @@ data EnvCoOp' e r where
 instance EffOps (EnvEff e) where
   type Operation (EnvEff e) = EnvOps e
 
-instance EffCoOp (EnvEff e) where
+instance Free.EffCoOp (EnvEff e) where
   type CoOperation (EnvEff e) = EnvCoOp e
 
-instance FreerEffCoOp (EnvEff e) where
-  type FreerCoOp (EnvEff e) = EnvCoOp' e
+instance Freer.EffCoOp (EnvEff e) where
+  type CoOperation (EnvEff e) = EnvCoOp' e
 
 instance EffFunctor (EnvOps e) where
   effmap lifter envOps = EnvOps {
@@ -36,13 +37,13 @@ instance EffFunctor (EnvOps e) where
 instance Functor (EnvCoOp e) where
   fmap f (AskOp cont) = AskOp $ fmap f cont
 
-instance FreeOps (EnvEff e) where
+instance Free.FreeOps (EnvEff e) where
   mkFreeOps liftCoOp = EnvOps {
     askOp = liftCoOp $ AskOp id
   }
 
-instance FreerOps (EnvEff e) where
-  mkFreerOps liftCoOp = EnvOps {
+instance Freer.FreeOps (EnvEff e) where
+  mkFreeOps liftCoOp = EnvOps {
     askOp = liftCoOp $ AskOp'
   }
 

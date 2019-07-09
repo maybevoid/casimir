@@ -106,8 +106,8 @@ library
 
       Control.Effect.Implicit.Free.EffCoOp
       Control.Effect.Implicit.Free.FreeOps
-      Control.Effect.Implicit.Free.Church
-      Control.Effect.Implicit.Free.Free
+      Control.Effect.Implicit.Free.ChurchMonad
+      Control.Effect.Implicit.Free.FreeMonad
       Control.Effect.Implicit.Free.FreeEff
       Control.Effect.Implicit.Free.NoEff
       Control.Effect.Implicit.Free.Union
@@ -116,9 +116,9 @@ library
 
       Control.Effect.Implicit.Freer.EffCoOp
       Control.Effect.Implicit.Freer.FreeOps
-      Control.Effect.Implicit.Freer.Church
-      Control.Effect.Implicit.Freer.Freer
-      Control.Effect.Implicit.Freer.FreerEff
+      Control.Effect.Implicit.Freer.ChurchMonad
+      Control.Effect.Implicit.Freer.FreerMonad
+      Control.Effect.Implicit.Freer.FreeEff
       Control.Effect.Implicit.Freer.Handler
 
       Control.Effect.Implicit.Cast.Cast

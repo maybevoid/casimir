@@ -10,8 +10,9 @@ module Control.Effect.Implicit.Ops.State
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Freer
+
+import qualified Control.Effect.Implicit.Free as Free
+import qualified Control.Effect.Implicit.Freer as Freer
 
 data StateEff s where
 
@@ -31,11 +32,11 @@ data FreerStateCoOp s a where
 instance EffOps (StateEff s) where
   type Operation (StateEff s) = StateOps s
 
-instance EffCoOp (StateEff s) where
+instance Free.EffCoOp (StateEff s) where
   type CoOperation (StateEff s) = StateCoOp s
 
-instance FreerEffCoOp (StateEff s) where
-  type FreerCoOp (StateEff s) = FreerStateCoOp s
+instance Freer.EffCoOp (StateEff s) where
+  type CoOperation (StateEff s) = FreerStateCoOp s
 
 instance Functor (StateCoOp s) where
   fmap f (GetOp cont) = GetOp $ fmap f cont
@@ -47,14 +48,14 @@ instance EffFunctor (StateOps a) where
     putOp = lifter . putOp stateOps
   }
 
-instance FreeOps (StateEff s) where
+instance Free.FreeOps (StateEff s) where
   mkFreeOps liftCoOp = StateOps {
     getOp = liftCoOp $ GetOp id,
     putOp = \x -> liftCoOp $ PutOp x id
   }
 
-instance FreerOps (StateEff s) where
-  mkFreerOps liftCoOp = StateOps {
+instance Freer.FreeOps (StateEff s) where
+  mkFreeOps liftCoOp = StateOps {
     getOp = liftCoOp $ GetOp',
     putOp = \x -> liftCoOp $ PutOp' x
   }

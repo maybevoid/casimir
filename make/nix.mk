@@ -1,23 +1,21 @@
 
 clean:
-	cabal v2-clean \
-		implicit-effects
+	cabal v2-clean implicit-effects
+
+build:
+	cabal v2-build all
 
 repl:
-	cabal v2-repl \
-		implicit-effects
+	cabal v2-repl implicit-effects
 
 doc:
-	cabal v2-haddock \
-		implicit-effects
+	cabal v2-haddock implicit-effects
 
 test:
-	cabal v2-test \
-		implicit-effects-test
+	cabal v2-test implicit-effects-test
 
 test-repl:
-	cabal v2-repl \
-		implicit-effects-test
+	cabal v2-repl implicit-effects-test
 
 benchmark:
 	cabal v2-run \

@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Free.Church
+module Control.Effect.Implicit.Free.ChurchMonad
   ( ChurchMonad (..)
   )
 where

@@ -1,11 +1,11 @@
 
 module Control.Effect.Implicit.Freer.EffCoOp
-  ( FreerEffCoOp (..)
+  ( EffCoOp (..)
   )
 where
 
 import Data.Kind
 
-class FreerEffCoOp sig where
-  type family FreerCoOp sig
+class EffCoOp sig where
+  type family CoOperation sig
     = (coop :: (Type -> Type)) | coop -> sig

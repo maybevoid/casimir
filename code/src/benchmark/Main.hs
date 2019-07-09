@@ -8,8 +8,9 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict
 
 import Control.Effect.Implicit
-import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Freer
+
+import qualified Control.Effect.Implicit.Free as Free
+import qualified Control.Effect.Implicit.Freer as Freer
 
 import Benchmark.State
 
@@ -57,19 +58,19 @@ main = defaultMain
 
     , bench "with CoOpHandler on ChurchMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
-        (handleFreeComp @ChurchMonad)
+        (handleFreeComp @Free.ChurchMonad)
 
     , bench "with CoOpHandler on FreeMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
-        (handleFreeComp @FreeMonad)
+        (handleFreeComp @Free.FreeMonad)
 
     , bench "with Freer CoOpHandler on FreerMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
-        (handleFreerComp @FreerMonad)
+        (handleFreerComp @Freer.FreerMonad)
 
-    , bench "with Freer CoOpHandler on FreerChurchMonad"  $
+    , bench "with Freer CoOpHandler on ChurchMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
-        (handleFreerComp @FreerChurchMonad)
+        (handleFreerComp @Freer.ChurchMonad)
 
     , bench "Curried StateT Pipeline" $
         whnf applyCurriedComp
@@ -89,17 +90,17 @@ main = defaultMain
 
     , bench "Curried ChurchMonad" $
         whnf applyCurriedComp
-        (curriedFreeComp @ChurchMonad)
+        (curriedFreeComp @Free.ChurchMonad)
     , bench "Curried FreeMonad"  $
         whnf applyCurriedComp
-        (curriedFreeComp @FreeMonad)
+        (curriedFreeComp @Free.FreeMonad)
 
     , bench "ReaderT ChurchMonad"  $
         whnf runReaderTComp
-        (readerTFreeComp @ChurchMonad)
+        (readerTFreeComp @Free.ChurchMonad)
     , bench "ReaderT FreeMonad"  $
         whnf runReaderTComp
-        (readerTFreeComp @FreeMonad)
+        (readerTFreeComp @Free.FreeMonad)
 
     ]
   ]

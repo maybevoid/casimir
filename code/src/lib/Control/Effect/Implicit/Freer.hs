@@ -1,19 +1,19 @@
 module Control.Effect.Implicit.Freer
-  ( FreerEffCoOp (..)
-  , FreerOps (..)
-  , FreerEff (..)
+  ( EffCoOp (..)
+  , FreeOps (..)
+  , FreeEff (..)
   , FreerMonad (..)
-  , FreerChurchMonad (..)
+  , ChurchMonad (..)
   , FreerF (..)
   , CoOpCont (..)
   , FreerCoOpHandler (..)
-  , withFreerCoOpHandler
+  , withCoOpHandler
   )
 where
 
 import Control.Effect.Implicit.Freer.EffCoOp
 import Control.Effect.Implicit.Freer.FreeOps
-import Control.Effect.Implicit.Freer.Freer
-import Control.Effect.Implicit.Freer.Church
-import Control.Effect.Implicit.Freer.FreerEff
+import Control.Effect.Implicit.Freer.FreerMonad
+import Control.Effect.Implicit.Freer.ChurchMonad
+import Control.Effect.Implicit.Freer.FreeEff
 import Control.Effect.Implicit.Freer.Handler

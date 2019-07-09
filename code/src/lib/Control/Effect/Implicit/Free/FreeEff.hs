@@ -13,8 +13,8 @@ import Control.Effect.Implicit.Free.EffCoOp
 import Control.Effect.Implicit.Free.FreeOps
 
 data CoOpHandler handler a r eff = CoOpHandler {
-  handleFreeReturn :: a -> eff r,
-  handleFreeCoOp :: CoOperation handler (eff r) -> eff r
+  returnHandler :: a -> eff r,
+  coOpHandler :: CoOperation handler (eff r) -> eff r
 }
 
 class

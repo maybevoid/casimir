@@ -1,6 +1,6 @@
 
 module Control.Effect.Implicit.Freer.FreeOps
-  ( FreerOps (..)
+  ( FreeOps (..)
   )
 where
 
@@ -10,14 +10,14 @@ import Control.Effect.Implicit.Freer.EffCoOp
 
 class
   ( EffOps ops
-  , FreerEffCoOp ops
+  , EffCoOp ops
   , EffFunctor (Operation ops)
   )
-  => FreerOps (ops :: Type) where
-    mkFreerOps
+  => FreeOps (ops :: Type) where
+    mkFreeOps
       :: forall t eff
         . ( Effect eff
           , Effect (t eff)
           )
-      => (forall a . FreerCoOp ops a -> t eff a)
+      => (forall a . CoOperation ops a -> t eff a)
       -> Operation ops (t eff)

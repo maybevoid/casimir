@@ -3,29 +3,30 @@ module Benchmark.State.HandleFree
 where
 
 import Control.Effect.Implicit
-import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Freer
+
+import qualified Control.Effect.Implicit.Free as Free
+import qualified Control.Effect.Implicit.Freer as Freer
 
 import Benchmark.State.Base
 
 handleFreeComp
   :: forall free eff
-   . (FreeEff free, Effect eff)
+   . (Free.FreeEff free, Effect eff)
   => Int
   -> eff ()
 handleFreeComp s
-  = withContextualCoOpHandler @free
+  = Free.withContextualCoOpHandler @free
     stateCoOpHandler
     (runCoState s)
     stateBaseFunc
 
 handleFreerComp
   :: forall free eff
-   . (FreerEff free, Effect eff)
+   . (Freer.FreeEff free, Effect eff)
   => Int
   -> eff ()
 handleFreerComp s =
-  withFreerCoOpHandler @free
+  Freer.withCoOpHandler @free
     stateFreerCoOpHandler
     stateBaseFunc
   >>= runCoState s
