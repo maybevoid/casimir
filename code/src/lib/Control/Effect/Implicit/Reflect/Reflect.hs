@@ -17,7 +17,7 @@ newtype ReflectM ops eff a =
 
 class
   ( Effect eff
-  , ImplicitOps ops
+  , EffOps ops
   )
   => ReifiesOps ops eff
   where
@@ -25,7 +25,7 @@ class
 
 instance
   ( Effect eff
-  , ImplicitOps ops
+  , EffOps ops
   , Given (Operation ops eff)
   )
   => ReifiesOps ops eff
@@ -33,7 +33,7 @@ instance
     reflectOps = given
 
 class
-  (ImplicitOps ops)
+  (EffOps ops)
   => ReflectOps ops
   where
     type OpsClass ops (eff :: Type -> Type) =
@@ -57,24 +57,27 @@ instance
 
 withReifiedOps
   :: forall ops eff r
-   . (ImplicitOps ops, Effect eff)
+   . (EffOps ops, Effect eff)
   => Operation ops eff
   -> ((ReifiesOps ops eff) => r)
   -> r
 withReifiedOps ops cont = give ops cont
 
-castClass
+castOpsClass
   :: forall eff ops
    . ( Effect eff
      , ReflectOps ops
      )
   => Dict (OpsClass ops (ReflectM ops eff))
   -> Dict (OpsClass ops eff)
-castClass = unsafeCoerce
+castOpsClass = unsafeCoerce
 
 reflectComputation
   :: forall ops eff a
-   . (Effect eff, ReflectOps ops)
+   . ( Effect eff
+     , ReflectOps ops
+     , ImplicitOps ops
+     )
   => (OpsClass ops eff => eff a)
   -> (OpsConstraint ops eff => eff a)
 reflectComputation comp =

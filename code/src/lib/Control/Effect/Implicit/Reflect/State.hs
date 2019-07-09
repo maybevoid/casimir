@@ -31,4 +31,4 @@ instance
       = MonadState s eff
 
     opsDict ops = withReifiedOps ops $
-      castClass Dict
+      castOpsClass Dict
