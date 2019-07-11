@@ -68,6 +68,7 @@ library
       Control.Effect.Implicit.Freer
       Control.Effect.Implicit.Cast
       Control.Effect.Implicit.Reflect
+      Control.Effect.Implicit.Higher
 
       Control.Effect.Implicit.Ops
       Control.Effect.Implicit.Ops.Async
@@ -126,6 +127,9 @@ library
 
       Control.Effect.Implicit.Reflect.Reflect
       Control.Effect.Implicit.Reflect.State
+
+      Control.Effect.Implicit.Higher.HigherEff
+      Control.Effect.Implicit.Higher.Union
 
   hs-source-dirs:
       src/lib

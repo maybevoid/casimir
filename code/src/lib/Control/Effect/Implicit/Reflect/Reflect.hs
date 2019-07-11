@@ -73,13 +73,29 @@ castOpsClass
 castOpsClass = unsafeCoerce
 
 reflectComputation
-  :: forall ops eff a
+  :: forall ops eff r
    . ( Effect eff
      , ReflectOps ops
      , ImplicitOps ops
      )
-  => (OpsClass ops eff => eff a)
-  -> (OpsConstraint ops eff => eff a)
+  => (OpsClass ops eff => r)
+  -> (OpsConstraint ops eff => r)
 reflectComputation comp =
   case (opsDict @ops @eff $ captureOps) of
     Dict -> comp
+
+
+reflectGeneric
+  :: forall ops1 ops2 a
+  . ( ReflectOps ops2
+    , ImplicitOps ops1
+    , ImplicitOps ops2
+    )
+  => (forall eff .
+        ( Effect eff
+        , OpsConstraint ops1 eff
+        , OpsClass ops2 eff
+        )
+      => eff a)
+  -> Eff (ops1 ∪ ops2) a
+reflectGeneric _ = undefined
