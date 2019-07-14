@@ -13,12 +13,13 @@ class
       = (operation :: (Type -> Type) -> (Type -> Type) -> Type)
       | operation -> hops
 
-class HigherOpsFunctor hops where
+class HigherEffFunctor hops where
   liftHigherOps
     :: forall eff1 eff2
       . ( Effect eff1
         , Effect eff2
         )
-    => hops eff1 eff1
+    => (forall x . eff1 x -> eff2 x)
     -> Weaver eff1 eff2
+    -> hops eff1 eff1
     -> hops eff2 eff2

@@ -12,6 +12,9 @@ data HUnion ops1 ops2
 data HUnionOps ops1 ops2
   (eff1 :: Type -> Type)
   (eff2 :: Type -> Type)
+  = HUnionOps
+     (ops1 eff1 eff2)
+     (ops2 eff1 eff2)
 
 instance
   ( HigherOps ops1
@@ -20,7 +23,10 @@ instance
   => HigherOps (HUnion ops1 ops2)
    where
     type HOperation (HUnion ops1 ops2)  =
-      HUnionOps ops1 ops2
+      HUnionOps (HOperation ops1) (HOperation ops2)
 
-instance HigherOpsFunctor (HUnionOps ops1 ops2) where
-    liftHigherOps _ _ = undefined
+instance
+  (HigherEffFunctor ops1, HigherEffFunctor ops2)
+  => HigherEffFunctor (HUnionOps ops1 ops2) where
+  liftHigherOps lifter weaver (HUnionOps ops1 ops2) =
+    HUnionOps (liftHigherOps lifter weaver ops1) (liftHigherOps lifter weaver ops2)

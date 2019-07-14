@@ -18,6 +18,6 @@ instance HigherOps (LiftedEff ops) where
 
 instance
   (EffOps ops, EffFunctor (Operation ops))
-  => HigherOpsFunctor (LiftedOps ops)
+  => HigherEffFunctor (LiftedOps ops)
    where
-    liftHigherOps = undefined
+    liftHigherOps _ = undefined

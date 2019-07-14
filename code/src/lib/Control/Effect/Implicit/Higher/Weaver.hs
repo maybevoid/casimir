@@ -7,7 +7,5 @@ data WeaverOps eff1 eff2 w = WeaverOps
   , weaveOut :: forall x . w x -> eff2 x
   }
 
-data Weaver eff1 eff2 = Weaver
-  { liftInEff :: forall x . eff1 x -> eff2 x
-  , weaverOps :: forall w . eff2 (WeaverOps eff1 eff2 w)
-  }
+data Weaver eff1 eff2 where
+  Weaver :: forall eff1 eff2 w . eff2 (WeaverOps eff1 eff2 w) -> Weaver eff1 eff2

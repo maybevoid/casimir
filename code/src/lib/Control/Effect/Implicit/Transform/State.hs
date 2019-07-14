@@ -3,13 +3,14 @@ module Control.Effect.Implicit.Transform.State
 where
 
 import Control.Monad.State.Class (MonadState  (..))
-import Control.Monad.Trans.State.Strict (StateT, evalStateT)
+import Control.Monad.Trans.State.Strict (StateT, evalStateT, runStateT)
 
 import Control.Monad.Trans.Class
   (MonadTrans (..))
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
+import Control.Effect.Implicit.Higher
 
 import Control.Effect.Implicit.Ops.Env
 import Control.Effect.Implicit.Ops.State
@@ -34,6 +35,30 @@ stateTOps = StateOps {
   getOp = get,
   putOp = put
 }
+
+stateTWeaver
+  :: forall eff s
+   . (Effect eff)
+  => Weaver eff (StateT s eff)
+stateTWeaver = Weaver weaver1
+ where
+  weaver1 :: StateT s eff (WeaverOps eff (StateT s eff) ((,) s))
+  weaver1 = do
+    s <- get
+    return $ weaver2 s
+
+  weaver2 :: s -> WeaverOps eff (StateT s eff) ((,) s)
+  weaver2 s1 = WeaverOps suspend resume
+   where
+    suspend :: forall a . StateT s eff a -> eff (s, a)
+    suspend comp = do
+      (x, s2) <- runStateT comp s1
+      return $ (s2, x)
+
+    resume :: forall a . (s, a) -> StateT s eff a
+    resume (s2, x) = do
+      put s2
+      return x
 
 stateTHandler
   :: forall eff s .
