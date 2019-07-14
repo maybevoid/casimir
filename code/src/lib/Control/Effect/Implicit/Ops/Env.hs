@@ -3,7 +3,6 @@ module Control.Effect.Implicit.Ops.Env
 where
 
 import Data.Kind
-import GHC.Classes
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
@@ -56,17 +55,8 @@ type EnvEff e = LabeledEff EnvLabel (EnvEff' e)
 
 type EnvOps e eff = LabeledOps EnvLabel (EnvEff' e) eff
 
--- instance ImplicitOps (EnvEff e) where
---   type OpsConstraint (EnvEff e) eff =
---     IP EnvLabel (EnvOps e eff)
-
---   withOps ops cont =
---     let ?_Control_Effect_Implicit_Ops_Env_envOps = ops in cont
-
---   captureOps = ip @EnvLabel
-
 ask :: forall e . Eff (EnvEff e) e
-ask = askOp $ captureLabel @EnvLabel
+ask = askOp $ captureLabel @Type @EnvLabel
 
 withEnv
   :: forall r e eff
@@ -74,7 +64,7 @@ withEnv
   => e
   -> ((OpsConstraint (EnvEff e) eff) => eff r)
   -> eff r
-withEnv x cont = withLabel @EnvLabel @(EnvEff' e) @eff (unlabelOps $ mkEnvOps x) cont
+withEnv x cont = withLabel @Type @EnvLabel @(EnvEff' e) @eff (unlabelOps $ mkEnvOps x) cont
 
 mkEnvOps :: forall e eff . (Effect eff) => e -> EnvOps e eff
 mkEnvOps x = LabeledOps $ EnvOps {

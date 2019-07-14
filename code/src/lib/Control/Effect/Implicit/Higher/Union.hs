@@ -23,4 +23,4 @@ instance
       HUnionOps ops1 ops2
 
 instance HigherOpsFunctor (HUnionOps ops1 ops2) where
-    liftHigherOps = undefined
+    liftHigherOps _ _ = undefined

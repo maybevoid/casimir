@@ -23,7 +23,7 @@ instance HigherOps BracketEff
       BracketOps
 
 instance HigherOpsFunctor BracketOps where
-    liftHigherOps ops weaver = BracketOps undefined
+    liftHigherOps _ _ = BracketOps undefined
 
 ioBracketOps :: BracketOps IO IO
 ioBracketOps = BracketOps bracket
