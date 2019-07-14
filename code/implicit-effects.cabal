@@ -121,7 +121,7 @@ library
       Control.Effect.Implicit.Cast.Cast
       Control.Effect.Implicit.Cast.Entail
 
-      Control.Effect.Implicit.Higher.Weaver
+      Control.Effect.Implicit.Higher.ContraLift
       Control.Effect.Implicit.Higher.HigherOps
       Control.Effect.Implicit.Higher.LowerEff
       Control.Effect.Implicit.Higher.LiftedOps

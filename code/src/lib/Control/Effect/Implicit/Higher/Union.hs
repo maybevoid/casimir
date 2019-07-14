@@ -28,5 +28,7 @@ instance
 instance
   (HigherEffFunctor ops1, HigherEffFunctor ops2)
   => HigherEffFunctor (HUnionOps ops1 ops2) where
-  liftHigherOps lifter weaver (HUnionOps ops1 ops2) =
-    HUnionOps (liftHigherOps lifter weaver ops1) (liftHigherOps lifter weaver ops2)
+    invEffmap lifter contraLifter (HUnionOps ops1 ops2) =
+      HUnionOps
+        (invEffmap lifter contraLifter ops1)
+        (invEffmap lifter contraLifter ops2)

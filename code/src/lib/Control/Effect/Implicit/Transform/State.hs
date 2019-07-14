@@ -36,19 +36,19 @@ stateTOps = StateOps {
   putOp = put
 }
 
-stateTWeaver
+stateTContraLift
   :: forall eff s
    . (Effect eff)
-  => Weaver eff (StateT s eff)
-stateTWeaver = Weaver weaver1
+  => ContraLiftEff eff (StateT s eff)
+stateTContraLift = ContraLiftEff weaver1
  where
-  weaver1 :: StateT s eff (WeaverOps eff (StateT s eff) ((,) s))
+  weaver1 :: StateT s eff (ContraLiftEff' eff (StateT s eff) ((,) s))
   weaver1 = do
     s <- get
     return $ weaver2 s
 
-  weaver2 :: s -> WeaverOps eff (StateT s eff) ((,) s)
-  weaver2 s1 = WeaverOps suspend resume
+  weaver2 :: s -> ContraLiftEff' eff (StateT s eff) ((,) s)
+  weaver2 s1 = ContraLiftEff' suspend resume
    where
     suspend :: forall a . StateT s eff a -> eff (s, a)
     suspend comp = do

@@ -20,4 +20,4 @@ instance
   (EffOps ops, EffFunctor (Operation ops))
   => HigherEffFunctor (LiftedOps ops)
    where
-    liftHigherOps _ = undefined
+    invEffmap _ = undefined

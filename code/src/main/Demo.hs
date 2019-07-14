@@ -238,16 +238,18 @@ decideComp8 = returnVal $ runComp comp idLift NoOp
   comp = runPipeline
     pipeline1 decideComp2
 
-ops1 :: UnionOps (EnvOps Int) IoOps IO
+ops1 :: Operation ((EnvEff Int) ∪ IoEff) IO
 ops1 = UnionOps (mkEnvOps 2) ioOps
 
-ops2 :: UnionOps IoOps (EnvOps Int) IO
+ops2 :: Operation (IoEff ∪ (EnvEff Int)) IO
 ops2 = UnionOps ioOps (mkEnvOps 3)
 
-ops3 :: UnionOps
-  (UnionOps (EnvOps Int) IoOps)
-  (UnionOps IoOps (EnvOps Int))
-  IO
+ops3
+  :: Operation
+      ( ((EnvEff Int) ∪ IoEff)
+      ∪ (IoEff ∪ (EnvEff Int))
+      )
+      IO
 ops3 = UnionOps ops1 ops2
 
 -- uniqueCast :: OpsCast (EnvEff Int ∪ EnvEff String) (EnvEff Int ∪ EnvEff String)
