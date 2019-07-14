@@ -27,7 +27,6 @@ module Control.Effect.Implicit
   ( module Control.Effect.Implicit.Base
   , module Control.Effect.Implicit.Computation
   , module Control.Effect.Implicit.Cast
-  , module Control.Effect.Implicit.Reflect
   , module Control.Effect.Implicit.Higher
   )
 where
@@ -35,5 +34,4 @@ where
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
 import Control.Effect.Implicit.Cast
-import Control.Effect.Implicit.Reflect
 import Control.Effect.Implicit.Higher

@@ -49,8 +49,9 @@ class
     -- without having to explicitly pass them around as function arguments.
     -- For the example @FooEff@, the body for 'withOps' can be defined as
     -- @withOps fooOps cont = let ?fooOps = fooOps in cont @.
-    withOps :: forall eff r .
-      (Effect eff)
+    withOps
+      :: forall eff r
+       . (Effect eff)
       => Operation ops eff
       -> (OpsConstraint ops eff => r)
       -> r
@@ -58,8 +59,9 @@ class
     -- | If an implicit parameter for the effect operation is available in the
     -- context, capture it and return the operation as a value. For the example
     -- @FooEff@, the body for 'captureOps' can be defined as @captureOps = ?fooOps@.
-    captureOps :: forall eff .
-      (Effect eff, OpsConstraint ops eff)
+    captureOps
+      :: forall eff
+       . (Effect eff, OpsConstraint ops eff)
       => Operation ops eff
 
 -- | This is a type alias for the implicit parameter constraint for @ops@,

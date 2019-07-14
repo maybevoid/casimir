@@ -31,6 +31,7 @@ common deps
     , reflection
     , constraints
     , transformers
+    , ghc-prim
   default-extensions:
     GADTs
     Strict
@@ -67,7 +68,6 @@ library
       Control.Effect.Implicit.Free
       Control.Effect.Implicit.Freer
       Control.Effect.Implicit.Cast
-      Control.Effect.Implicit.Reflect
       Control.Effect.Implicit.Higher
 
       Control.Effect.Implicit.Ops
@@ -81,11 +81,6 @@ library
       Control.Effect.Implicit.Ops.State
       Control.Effect.Implicit.Ops.UnliftIo
 
-      Control.Effect.Implicit.Tagged
-      Control.Effect.Implicit.Tagged.Ops
-      Control.Effect.Implicit.Tagged.Ops.Env
-      Control.Effect.Implicit.Tagged.TaggedEff
-
       Control.Effect.Implicit.Transform
       Control.Effect.Implicit.Transform.Reader
       Control.Effect.Implicit.Transform.State
@@ -98,6 +93,7 @@ library
       Control.Effect.Implicit.Base.NoEff
       Control.Effect.Implicit.Base.EffOps
       Control.Effect.Implicit.Base.Union
+      Control.Effect.Implicit.Base.LabeledOps
 
       Control.Effect.Implicit.Computation.Cast
       Control.Effect.Implicit.Computation.Computation
@@ -125,11 +121,12 @@ library
       Control.Effect.Implicit.Cast.Cast
       Control.Effect.Implicit.Cast.Entail
 
-      Control.Effect.Implicit.Reflect.Reflect
-      Control.Effect.Implicit.Reflect.State
-
-      Control.Effect.Implicit.Higher.HigherEff
+      Control.Effect.Implicit.Higher.Weaver
+      Control.Effect.Implicit.Higher.HigherOps
+      Control.Effect.Implicit.Higher.LowerEff
+      Control.Effect.Implicit.Higher.LiftedOps
       Control.Effect.Implicit.Higher.Union
+      Control.Effect.Implicit.Higher.Bracket
 
   hs-source-dirs:
       src/lib
@@ -179,8 +176,6 @@ test-suite implicit-effects-test
       Effect.Test.Ops.Pipe
       Effect.Test.Ops.Resource
       Effect.Test.Ops.State
-      Effect.Test.Ops.Tag
-      Effect.Test.Overlap
   hs-source-dirs:
       src/test
   build-depends:

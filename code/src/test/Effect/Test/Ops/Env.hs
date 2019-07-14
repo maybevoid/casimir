@@ -34,7 +34,8 @@ envOpsTest = testCase "Env ops test" $
   res <- withOps envOps envComp1
   assertEqual
     "Computation should read and format '3' from environment"
-    res "Env: 3"
+    "Env: 3"
+    res
 
 envHandlerTest :: TestTree
 envHandlerTest = testCase "Env handler test" $
@@ -47,7 +48,8 @@ envHandlerTest = testCase "Env handler test" $
   res <- execComp envComp3
   assertEqual
     "Computation should read and format '4' from environment"
-    res "Env: 4"
+    "Env: 4"
+    res
 
 envPipelineTest :: TestTree
 envPipelineTest = testCase "Env pipeline test" $
@@ -62,4 +64,5 @@ envPipelineTest = testCase "Env pipeline test" $
   res <- execComp @NoEff envComp3
   assertEqual
     "Computation should read and format '5' from environment"
-    res "Env: 5"
+    "Env: 5"
+    res
