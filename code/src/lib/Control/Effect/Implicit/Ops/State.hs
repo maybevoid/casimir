@@ -14,6 +14,7 @@ import Control.Effect.Implicit.Base
 import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
 
+data StateTag
 data StateEff s where
 
 data StateOps s eff = StateOps {
@@ -62,17 +63,10 @@ instance Freer.FreeOps (StateEff s) where
 
 instance ImplicitOps (StateEff s) where
   type OpsConstraint (StateEff s) eff =
-    (?_Control_Effect_Implicit_Ops_State_stateOps :: StateOps s eff)
+    (TagConstraint StateTag (StateEff s) eff)
 
-  {-# INLINE withOps #-}
-  withOps stateOps comp =
-    let
-      ?_Control_Effect_Implicit_Ops_State_stateOps =
-        stateOps in comp
-
-  {-# INLINE captureOps #-}
-  captureOps =
-    ?_Control_Effect_Implicit_Ops_State_stateOps
+  withOps = withTag @StateTag
+  captureOps = captureTag @StateTag
 
 {-# INLINE get #-}
 get :: forall s . Eff (StateEff s) s

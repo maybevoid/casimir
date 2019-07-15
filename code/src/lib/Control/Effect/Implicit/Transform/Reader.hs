@@ -9,7 +9,7 @@ import Control.Monad.Trans.Class
   (MonadTrans (..))
 
 import Control.Effect.Implicit.Computation
-import Control.Effect.Implicit.Ops.Env (EnvEff, EnvOps, EnvOps' (..))
+import Control.Effect.Implicit.Ops.Env (EnvEff, EnvOps (..))
 
 import Control.Effect.Implicit.Base
 
@@ -28,7 +28,7 @@ readerTLiftEff = mkLiftEff lift
 
 readerTOps :: forall a eff . (Effect eff)
   => EnvOps a (ReaderT a eff)
-readerTOps = LabeledOps $ EnvOps {
+readerTOps = EnvOps {
   askOp = ask
 }
 

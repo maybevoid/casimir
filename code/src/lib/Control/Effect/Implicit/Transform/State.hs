@@ -40,15 +40,21 @@ stateTContraLift
   :: forall eff s
    . (Effect eff)
   => ContraLiftEff eff (StateT s eff)
-stateTContraLift = ContraLiftEff weaver1
+stateTContraLift = ContraLiftEff contraLift1
  where
-  weaver1 :: StateT s eff (ContraLiftEff' eff (StateT s eff) ((,) s))
-  weaver1 = do
+  contraLift1
+    :: forall r
+     . (forall w
+         . ContraLiftOps eff (StateT s eff) w
+        -> StateT s eff r
+       )
+    -> StateT s eff r
+  contraLift1 cont = do
     s <- get
-    return $ weaver2 s
+    cont $ contraLift2 s
 
-  weaver2 :: s -> ContraLiftEff' eff (StateT s eff) ((,) s)
-  weaver2 s1 = ContraLiftEff' suspend resume
+  contraLift2 :: s -> ContraLiftOps eff (StateT s eff) ((,) s)
+  contraLift2 s1 = ContraLiftOps suspend resume
    where
     suspend :: forall a . StateT s eff a -> eff (s, a)
     suspend comp = do

@@ -32,7 +32,7 @@ instance HigherEffFunctor BracketOps where
     -> ContraLiftEff eff1 eff2
     -> BracketOps eff1 eff1
     -> BracketOps eff2 eff2
-  invEffmap lifter (ContraLiftEff contraLift1) (BracketOps doBracket) =
+  invEffmap lifter contraLift1 (BracketOps doBracket) =
     BracketOps ops
      where
       ops
@@ -41,11 +41,11 @@ instance HigherEffFunctor BracketOps where
         -> (a -> IO ())
         -> (a -> eff2 b)
         -> eff2 b
-      ops alloc release cont1 = contraLift1 >>= cont2
+      ops alloc release cont1 = withContraLift contraLift1 cont2
        where
         cont2
           :: forall w
-          . ContraLiftEff' eff1 eff2 w
+          . ContraLiftOps eff1 eff2 w
           -> eff2 b
         cont2 contraLift2 = do
           mx <- cont3

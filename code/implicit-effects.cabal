@@ -93,7 +93,7 @@ library
       Control.Effect.Implicit.Base.NoEff
       Control.Effect.Implicit.Base.EffOps
       Control.Effect.Implicit.Base.Union
-      Control.Effect.Implicit.Base.LabeledOps
+      Control.Effect.Implicit.Base.Label
 
       Control.Effect.Implicit.Computation.Cast
       Control.Effect.Implicit.Computation.Computation

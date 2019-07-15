@@ -26,7 +26,7 @@ module Control.Effect.Implicit.Base
   , liftEff
   , applyEffmap
   , joinLift
-  , module Control.Effect.Implicit.Base.LabeledOps
+  , module Control.Effect.Implicit.Base.Label
 )
 where
 
@@ -38,4 +38,4 @@ import Control.Effect.Implicit.Base.BaseOps
 import Control.Effect.Implicit.Base.Union
 import Control.Effect.Implicit.Base.NoEff
 import Control.Effect.Implicit.Base.Lift
-import Control.Effect.Implicit.Base.LabeledOps
+import Control.Effect.Implicit.Base.Label
