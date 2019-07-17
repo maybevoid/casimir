@@ -2,16 +2,14 @@
 module Control.Effect.Implicit.Higher
   ( module Control.Effect.Implicit.Higher.ContraLift
   , module Control.Effect.Implicit.Higher.HigherOps
-  , module Control.Effect.Implicit.Higher.LowerEff
   , module Control.Effect.Implicit.Higher.Union
-  , module Control.Effect.Implicit.Higher.LiftedOps
-  , module Control.Effect.Implicit.Higher.Bracket
+  , module Control.Effect.Implicit.Higher.LowerOps
+  , module Control.Effect.Implicit.Higher.UpperOps
   )
 where
 
 import Control.Effect.Implicit.Higher.ContraLift
 import Control.Effect.Implicit.Higher.HigherOps
-import Control.Effect.Implicit.Higher.LowerEff
-import Control.Effect.Implicit.Higher.LiftedOps
 import Control.Effect.Implicit.Higher.Union
-import Control.Effect.Implicit.Higher.Bracket
+import Control.Effect.Implicit.Higher.LowerOps
+import Control.Effect.Implicit.Higher.UpperOps

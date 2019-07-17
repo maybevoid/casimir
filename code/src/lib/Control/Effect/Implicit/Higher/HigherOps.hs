@@ -7,11 +7,10 @@ import Data.Kind
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.ContraLift
 
-class
-  HigherOps hops where
-    type family HOperation hops
-      = (operation :: (Type -> Type) -> (Type -> Type) -> Type)
-      | operation -> hops
+class HigherOps hops where
+  type family HOperation hops
+    = (operation :: (Type -> Type) -> (Type -> Type) -> Type)
+    | operation -> hops
 
 class HigherEffFunctor hops where
   invEffmap

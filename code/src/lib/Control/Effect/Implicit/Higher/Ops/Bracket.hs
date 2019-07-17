@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Higher.Bracket
+module Control.Effect.Implicit.Higher.Ops.Bracket
 where
 
 import Control.Exception (bracket)
@@ -25,9 +25,9 @@ instance HigherOps BracketEff where
 instance HigherEffFunctor BracketOps where
   invEffmap
     :: forall eff1 eff2
-      . ( Effect eff1
-        , Effect eff2
-        )
+     . ( Effect eff1
+       , Effect eff2
+       )
     => (forall x . eff1 x -> eff2 x)
     -> ContraLiftEff eff1 eff2
     -> BracketOps eff1 eff1
@@ -37,7 +37,7 @@ instance HigherEffFunctor BracketOps where
      where
       ops
         :: forall a b
-        . IO a
+         . IO a
         -> (a -> IO ())
         -> (a -> eff2 b)
         -> eff2 b

@@ -38,7 +38,7 @@ instance EffFunctor (EnvOps e) where
 
 instance ImplicitOps (EnvEff e) where
   type OpsConstraint (EnvEff e) eff =
-    TagConstraint EnvTag (EnvEff e) eff
+    TagParam EnvTag (EnvEff e) eff
 
   withOps = withTag @EnvTag
   captureOps = captureTag @EnvTag
@@ -63,9 +63,9 @@ withEnv
   :: forall r e eff
    . (Effect eff)
   => e
-  -> ((OpsConstraint (EnvEff e) eff) => eff r)
+  -> (Operation (EnvEff e) eff -> eff r)
   -> eff r
-withEnv x cont = withOps (mkEnvOps x) cont
+withEnv x cont = cont (mkEnvOps x)
 
 mkEnvOps :: forall e eff . (Effect eff) => e -> EnvOps e eff
 mkEnvOps x = EnvOps {

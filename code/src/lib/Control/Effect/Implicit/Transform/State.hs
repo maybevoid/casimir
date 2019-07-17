@@ -43,15 +43,10 @@ stateTContraLift
 stateTContraLift = ContraLiftEff contraLift1
  where
   contraLift1
-    :: forall r
-     . (forall w
-         . ContraLiftOps eff (StateT s eff) w
-        -> StateT s eff r
-       )
-    -> StateT s eff r
-  contraLift1 cont = do
+    :: StateT s eff (ContraLiftOps eff (StateT s eff) ((,) s))
+  contraLift1 = do
     s <- get
-    cont $ contraLift2 s
+    return $ contraLift2 s
 
   contraLift2 :: s -> ContraLiftOps eff (StateT s eff) ((,) s)
   contraLift2 s1 = ContraLiftOps suspend resume
@@ -107,16 +102,17 @@ stateTToEnvEffPipeline = transformePipeline $ genericComputation handler
 withStateTAndOps
   :: forall ops s r eff .
   ( BaseOps ops
-  , EffConstraint ops eff
+  , Effect eff
   )
   => s
-  -> ((EffConstraint (StateEff s ∪ ops) (StateT s eff))
-      => StateT s eff r)
+  -> Operation ops eff
+  -> (Operation (StateEff s ∪ ops) (StateT s eff)
+      -> StateT s eff r)
   -> eff r
-withStateTAndOps i comp1 = evalStateT comp2 i
+withStateTAndOps i ops1 comp1 = evalStateT comp2 i
  where
   comp2 :: StateT s eff r
-  comp2 = withOps ops comp1
+  comp2 = comp1 ops2
 
-  ops :: Operation (StateEff s ∪ ops) (StateT s eff)
-  ops = stateTOps ∪ effmap lift captureOps
+  ops2 :: Operation (StateEff s ∪ ops) (StateT s eff)
+  ops2 = stateTOps ∪ (effmap lift ops1)

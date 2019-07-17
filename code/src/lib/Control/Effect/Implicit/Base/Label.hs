@@ -23,13 +23,13 @@ newtype LabeledOps (label :: k) ops eff = LabeledOps {
   unlabelOps :: Operation ops eff
 }
 
-class LabelConstraint k (label :: k) ops eff
+class LabelParam k (label :: k) ops eff
     | label -> ops eff
   where
     captureLabel :: Operation ops eff
 
-type TagConstraint (label :: Type) = LabelConstraint Type label
-type NameConstraint (label :: Symbol) = LabelConstraint Symbol label
+type TagParam (label :: Type) = LabelParam Type label
+type NameParam (label :: Symbol) = LabelParam Symbol label
 
 data OpsReflector k (label :: k) ops eff = OpsReflector {
   reflectOps :: Operation ops eff
@@ -39,11 +39,11 @@ withLabel
   :: forall (label :: k) ops eff r
    . (Effect eff, EffOps ops)
   => Operation ops eff
-  -> ((LabelConstraint k (label :: k) ops eff) => r)
+  -> ((LabelParam k (label :: k) ops eff) => r)
   -> r
 withLabel ops cont = case dict of Dict -> cont
  where
-  dict :: Dict (LabelConstraint k label ops eff)
+  dict :: Dict (LabelParam k label ops eff)
   dict = unsafeCoerce $ OpsReflector @k @label @ops @eff ops
 
 instance
@@ -69,19 +69,19 @@ instance
   => ImplicitOps (LabeledEff (label :: k) ops)
    where
     type OpsConstraint (LabeledEff (label :: k) ops) eff =
-      LabelConstraint k label (LabeledEff label ops) eff
+      LabelParam k label (LabeledEff label ops) eff
 
     withOps
       :: forall eff r
        . (Effect eff)
       => LabeledOps label ops eff
-      -> (LabelConstraint k label (LabeledEff label ops) eff => r)
+      -> (LabelParam k label (LabeledEff label ops) eff => r)
       -> r
     withOps = withLabel @k @label
 
     captureOps
       :: forall eff
-       . (Effect eff, LabelConstraint k label (LabeledEff label ops) eff)
+       . (Effect eff, LabelParam k label (LabeledEff label ops) eff)
       => LabeledOps label ops eff
     captureOps = captureLabel @k @label
 
@@ -91,7 +91,7 @@ withTag
       , EffOps ops
       )
   => Operation ops eff
-  -> (LabelConstraint Type label ops eff => r)
+  -> (LabelParam Type label ops eff => r)
   -> r
 withTag = withLabel @Type @label
 
@@ -99,7 +99,7 @@ captureTag
   :: forall label ops eff
    . ( Effect eff
      , EffOps ops
-     , LabelConstraint Type label ops eff
+     , LabelParam Type label ops eff
      )
   => Operation ops eff
 captureTag = captureLabel @Type @label
@@ -110,7 +110,7 @@ withName
       , EffOps ops
       )
   => Operation ops eff
-  -> (LabelConstraint Symbol label ops eff => r)
+  -> (LabelParam Symbol label ops eff => r)
   -> r
 withName = withLabel @Symbol @label
 
@@ -118,7 +118,7 @@ captureName
   :: forall (label :: Symbol) ops eff
    . ( Effect eff
      , EffOps ops
-     , LabelConstraint Symbol label ops eff
+     , LabelParam Symbol label ops eff
      )
   => Operation ops eff
 captureName = captureLabel @Symbol @label

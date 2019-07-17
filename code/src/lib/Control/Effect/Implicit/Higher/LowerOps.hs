@@ -1,6 +1,6 @@
 {-# Language UndecidableInstances #-}
 
-module Control.Effect.Implicit.Higher.LowerEff
+module Control.Effect.Implicit.Higher.LowerOps
 where
 
 import Control.Effect.Implicit.Base
@@ -14,12 +14,12 @@ data InnerOps hops inOps inEff eff = InnerOps
   , outerOps :: HOperation hops inEff eff
   }
 
-data LowerOps hops inOps eff = LowerOps {
-  lowerOps
-    :: forall inEff
+data LowerOps hops inOps eff where
+  LowerOps
+    :: forall inEff hops inOps eff
      . (Effect eff)
     => InnerOps hops inOps inEff eff
-}
+    -> LowerOps hops inOps eff
 
 instance
   (HigherOps hops, EffOps inOps)

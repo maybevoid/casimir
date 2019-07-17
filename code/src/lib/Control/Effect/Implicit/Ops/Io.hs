@@ -16,6 +16,7 @@ import Control.Effect.Implicit.Computation
 import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
 
+data IoTag
 data IoEff
 
 data IoOps eff = IoOps {
@@ -62,15 +63,10 @@ instance Freer.FreeOps IoEff where
 
 instance ImplicitOps IoEff where
   type OpsConstraint IoEff eff =
-    (?_Control_Effect_Implicit_Ops_Io_ioOps :: IoOps eff)
+    TagParam IoTag IoEff eff
 
-  withOps ops comp =
-    let
-      ?_Control_Effect_Implicit_Ops_Io_ioOps =
-        ops in comp
-
-  captureOps =
-    ?_Control_Effect_Implicit_Ops_Io_ioOps
+  withOps = withTag @IoTag
+  captureOps = captureTag @IoTag
 
 liftIo :: forall a . IO a -> Eff IoEff a
 liftIo = liftIoOp captureOps

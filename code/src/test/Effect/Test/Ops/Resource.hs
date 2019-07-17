@@ -165,9 +165,9 @@ unliftComp3 = withOps unliftOps2 unliftComp2
 
 unliftComp4 :: IO Int
 unliftComp4 =
-  withOps ioOps $
-  withEnv 3 $
-  withStateTAndOps @(EnvEff Int ∪ IoEff) 5 $
+  withEnv 3 $ \envOps ->
+  withStateTAndOps 5 (envOps ∪ ioOps) $ \ops ->
+  withOps ops $
     unliftComp3
 
 testUnliftIo2 :: TestTree
@@ -309,9 +309,9 @@ runResourceComp
       a
   -> IO a
 runResourceComp comp =
-  withOps ioOps $
-  withStateTAndOps @IoEff 10 $
-  withEnv 2 $
+  withEnv 2 $ \ops1 ->
+  withStateTAndOps 10 (ops1 ∪ ioOps) $ \ops2 ->
+  withOps ops2 $
   withOps resourceOps4 $
     comp
 

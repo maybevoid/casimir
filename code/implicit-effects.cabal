@@ -84,6 +84,12 @@ library
       Control.Effect.Implicit.Transform
       Control.Effect.Implicit.Transform.Reader
       Control.Effect.Implicit.Transform.State
+
+      Control.Effect.Implicit.Higher.Ops
+      Control.Effect.Implicit.Higher.Ops.Bracket
+      Control.Effect.Implicit.Higher.Ops.Reader
+      Control.Effect.Implicit.Higher.Ops.Cont
+
   other-modules:
       Control.Effect.Implicit.Base.Effect
       Control.Effect.Implicit.Base.EffFunctor
@@ -123,10 +129,9 @@ library
 
       Control.Effect.Implicit.Higher.ContraLift
       Control.Effect.Implicit.Higher.HigherOps
-      Control.Effect.Implicit.Higher.LowerEff
-      Control.Effect.Implicit.Higher.LiftedOps
+      Control.Effect.Implicit.Higher.LowerOps
+      Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.Union
-      Control.Effect.Implicit.Higher.Bracket
 
   hs-source-dirs:
       src/lib

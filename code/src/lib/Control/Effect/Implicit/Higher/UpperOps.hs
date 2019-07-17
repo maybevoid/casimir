@@ -1,23 +1,23 @@
 {-# Language UndecidableInstances #-}
 
-module Control.Effect.Implicit.Higher.LiftedOps
+module Control.Effect.Implicit.Higher.UpperOps
 where
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.HigherOps
 
-data LiftedEff ops
+data UpperEff ops
 
-data LiftedOps ops inEff eff = HIoOps
+data UpperOps ops inEff eff = UpperOps
   { innerOps' :: Operation ops inEff
   , outerOps' :: Operation ops eff
   }
 
-instance HigherOps (LiftedEff ops) where
-  type HOperation (LiftedEff ops) = LiftedOps ops
+instance HigherOps (UpperEff ops) where
+  type HOperation (UpperEff ops) = UpperOps ops
 
 instance
   (EffOps ops, EffFunctor (Operation ops))
-  => HigherEffFunctor (LiftedOps ops)
+  => HigherEffFunctor (UpperOps ops)
    where
     invEffmap _ = undefined
