@@ -6,8 +6,8 @@ module Control.Implicit.Param
   , NamedParam
   , TaggedParam
   , captureParam
-  , getName
-  , getTag
+  , captureName
+  , captureTag
   , withParam
   , withName
   , withTag
@@ -39,17 +39,17 @@ captureParam
   => a
 captureParam = captureParam' @k @label @a
 
-getName
+captureName
   :: forall label a
    . (NamedParam label a)
   => a
-getName = captureParam @Symbol @label
+captureName = captureParam @Symbol @label
 
-getTag
+captureTag
   :: forall label a
    . (TaggedParam label a)
   => a
-getTag = captureParam @Type @label
+captureTag = captureParam @Type @label
 
 withParam
   :: forall k (label :: k) a r

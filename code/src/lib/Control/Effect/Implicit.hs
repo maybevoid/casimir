@@ -17,7 +17,6 @@
   The following submodules and their descendents require manual import:
 
     - "Control.Effect.Implicit.Ops".*
-    - "Control.Effect.Implicit.TaggedOps".*
     - "Control.Effect.Implicit.Transform".*
 
   Refer the submodules for complete documentation.

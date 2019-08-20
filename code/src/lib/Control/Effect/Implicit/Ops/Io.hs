@@ -63,10 +63,10 @@ instance Freer.FreeOps IoEff where
 
 instance ImplicitOps IoEff where
   type OpsConstraint IoEff eff =
-    TaggedOps IoTag IoEff eff
+    TaggedOpsParam IoTag IoEff eff
 
-  withOps = withTaggedOps @IoTag
-  captureOps = captureTaggedOps @IoTag
+  withOps = withTag @IoTag
+  captureOps = captureTag @IoTag
 
 liftIo :: forall a . IO a -> Eff IoEff a
 liftIo = liftIoOp captureOps

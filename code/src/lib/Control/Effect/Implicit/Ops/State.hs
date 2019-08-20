@@ -9,6 +9,7 @@ module Control.Effect.Implicit.Ops.State
   )
 where
 
+import Control.Implicit.Param
 import Control.Effect.Implicit.Base
 
 import qualified Control.Effect.Implicit.Free as Free
@@ -63,10 +64,10 @@ instance Freer.FreeOps (StateEff s) where
 
 instance ImplicitOps (StateEff s) where
   type OpsConstraint (StateEff s) eff =
-    (TaggedOps StateTag (StateEff s) eff)
+    (TaggedOpsParam StateTag (StateEff s) eff)
 
-  withOps = withTaggedOps @StateTag
-  captureOps = captureTaggedOps @StateTag
+  withOps = withTag @StateTag
+  captureOps = captureTag @StateTag
 
 {-# INLINE get #-}
 get :: forall s . Eff (StateEff s) s

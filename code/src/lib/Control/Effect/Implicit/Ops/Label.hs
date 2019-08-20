@@ -11,8 +11,8 @@ import Control.Effect.Implicit.Base
 
 data LabeledEff k (label :: k) ops
 
-type NamedEff (label :: Symbol) ops = LabeledEff Symbol label ops
-type TaggedEff (label :: Type) ops = LabeledEff Type label ops
+type NamedEff label ops = LabeledEff Symbol label ops
+type TaggedEff label ops = LabeledEff Type label ops
 
 newtype LabeledOps k (label :: k) ops eff = LabeledOps {
   unlabelOps :: Operation ops eff
@@ -49,10 +49,10 @@ instance
       => LabeledOps k label ops eff
       -> (OpsParam k label (LabeledEff k label ops) eff => r)
       -> r
-    withOps = withOpsParam @k @label
+    withOps = withParam @k @label
 
     captureOps
       :: forall eff
        . (Effect eff, OpsParam k label (LabeledEff k label ops) eff)
       => LabeledOps k label ops eff
-    captureOps = captureOpsParam @k @label
+    captureOps = captureParam @k @label
