@@ -63,10 +63,10 @@ instance Freer.FreeOps (StateEff s) where
 
 instance ImplicitOps (StateEff s) where
   type OpsConstraint (StateEff s) eff =
-    (TagParam StateTag (StateEff s) eff)
+    (TaggedOps StateTag (StateEff s) eff)
 
-  withOps = withTag @StateTag
-  captureOps = captureTag @StateTag
+  withOps = withTaggedOps @StateTag
+  captureOps = captureTaggedOps @StateTag
 
 {-# INLINE get #-}
 get :: forall s . Eff (StateEff s) s

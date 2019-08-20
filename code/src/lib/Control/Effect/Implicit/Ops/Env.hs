@@ -38,10 +38,10 @@ instance EffFunctor (EnvOps e) where
 
 instance ImplicitOps (EnvEff e) where
   type OpsConstraint (EnvEff e) eff =
-    TagParam EnvTag (EnvEff e) eff
+    TaggedOps EnvTag (EnvEff e) eff
 
-  withOps = withTag @EnvTag
-  captureOps = captureTag @EnvTag
+  withOps = withTaggedOps @EnvTag
+  captureOps = captureTaggedOps @EnvTag
 
 instance Functor (EnvCoOp e) where
   fmap f (AskOp cont) = AskOp $ fmap f cont

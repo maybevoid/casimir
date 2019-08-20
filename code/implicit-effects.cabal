@@ -62,6 +62,8 @@ common deps
 library
   import: deps
   exposed-modules:
+      Control.Implicit.Param
+
       Control.Effect.Implicit
       Control.Effect.Implicit.Base
       Control.Effect.Implicit.Computation
@@ -71,6 +73,7 @@ library
       Control.Effect.Implicit.Higher
 
       Control.Effect.Implicit.Ops
+      Control.Effect.Implicit.Ops.Label
       Control.Effect.Implicit.Ops.Async
       Control.Effect.Implicit.Ops.Decide
       Control.Effect.Implicit.Ops.Env
