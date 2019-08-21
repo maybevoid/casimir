@@ -45,3 +45,6 @@ instance HigherEffFunctor (ReaderOps e) where
           comp2 :: eff1 (w a)
           comp2 = localOp ops modifyEnv $
             contraLiftEff contraLift2 comp1
+
+  outerEffmap _ = undefined
+  contraEffmap _ = undefined

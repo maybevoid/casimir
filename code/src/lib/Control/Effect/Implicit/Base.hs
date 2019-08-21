@@ -23,10 +23,11 @@ module Control.Effect.Implicit.Base
   , liftEff
   , applyEffmap
   , joinLift
-  , module Control.Effect.Implicit.Base.Label
+  , module Control.Implicit.Param
 )
 where
 
+import Control.Implicit.Param
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
 import Control.Effect.Implicit.Base.Implicit
@@ -34,4 +35,3 @@ import Control.Effect.Implicit.Base.BaseOps
 import Control.Effect.Implicit.Base.Union
 import Control.Effect.Implicit.Base.NoOp
 import Control.Effect.Implicit.Base.Lift
-import Control.Effect.Implicit.Base.Label

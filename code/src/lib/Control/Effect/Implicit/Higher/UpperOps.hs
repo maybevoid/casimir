@@ -20,3 +20,5 @@ instance
   => HigherEffFunctor (UpperOps ops)
    where
     invEffmap _ = undefined
+    outerEffmap _ = undefined
+    contraEffmap _ = undefined

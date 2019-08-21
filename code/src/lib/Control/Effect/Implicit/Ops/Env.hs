@@ -33,7 +33,7 @@ instance EffFunctor (EnvOps e) where
 
 instance ImplicitOps (EnvOps e) where
   type OpsConstraint (EnvOps e) eff =
-    TaggedOpsParam EnvTag (EnvOps e) eff
+    TaggedParam EnvTag (EnvOps e eff)
 
   withOps = withTag @EnvTag
   captureOps = captureTag @EnvTag

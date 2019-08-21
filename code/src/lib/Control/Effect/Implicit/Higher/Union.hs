@@ -19,8 +19,19 @@ data HUnion ops1 ops2
 
 instance
   (HigherEffFunctor ops1, HigherEffFunctor ops2)
-  => HigherEffFunctor (HUnion ops1 ops2) where
+  => HigherEffFunctor (HUnion ops1 ops2)
+   where
     invEffmap lifter contraLifter (HUnion ops1 ops2) =
       HUnion
         (invEffmap lifter contraLifter ops1)
         (invEffmap lifter contraLifter ops2)
+
+    outerEffmap lifter (HUnion ops1 ops2) =
+      HUnion
+        (outerEffmap lifter ops1)
+        (outerEffmap lifter ops2)
+
+    contraEffmap lifter contraLifter (HUnion ops1 ops2) =
+      HUnion
+        (contraEffmap lifter contraLifter ops1)
+        (contraEffmap lifter contraLifter ops2)

@@ -70,6 +70,9 @@ instance HigherEffFunctor ContOps where
             cont9 :: eff2 a
             cont9 = cont1 cont6
 
+  outerEffmap _ = undefined
+  contraEffmap _ = undefined
+
 contTOps
   :: forall eff r . (Effect eff)
   => ContOps (ContT.ContT r eff) (ContT.ContT r eff)

@@ -42,7 +42,6 @@ common deps
     InstanceSigs
     TypeOperators
     DeriveFunctor
-    TypeOperators
     ImplicitParams
     ExplicitForAll
     KindSignatures
@@ -101,7 +100,6 @@ library
       Control.Effect.Implicit.Base.Lift
       Control.Effect.Implicit.Base.NoOp
       Control.Effect.Implicit.Base.Union
-      Control.Effect.Implicit.Base.Label
 
       Control.Effect.Implicit.Computation.Cast
       Control.Effect.Implicit.Computation.Computation

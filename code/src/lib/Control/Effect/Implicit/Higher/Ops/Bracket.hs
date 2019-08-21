@@ -52,5 +52,8 @@ instance HigherEffFunctor BracketOps where
             cont4 :: a -> eff1 (w b)
             cont4 x = contraLiftEff contraLift2 $ cont1 x
 
+  outerEffmap _ = undefined
+  contraEffmap _ = undefined
+
 ioBracketOps :: BracketOps IO IO
 ioBracketOps = BracketOps bracket

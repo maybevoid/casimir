@@ -8,6 +8,7 @@ where
 
 import Data.Kind
 
+import Control.Implicit.Param
 import Control.Effect.Implicit.Base.Effect
 
 -- | 'ImplicitOps' gives computations access to effect operations of an

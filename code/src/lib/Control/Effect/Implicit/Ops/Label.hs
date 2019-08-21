@@ -34,18 +34,18 @@ instance
 instance ImplicitOps (LabeledOps k (label :: k) ops)
    where
     type OpsConstraint (LabeledOps k (label :: k) ops) eff =
-      OpsParam k label (LabeledOps k label ops) eff
+      ImplicitParam k label (LabeledOps k label ops eff)
 
     withOps
       :: forall eff r
        . (Effect eff)
       => LabeledOps k label ops eff
-      -> (OpsParam k label (LabeledOps k label ops) eff => r)
+      -> (ImplicitParam k label (LabeledOps k label ops eff) => r)
       -> r
     withOps = withParam @k @label
 
     captureOps
       :: forall eff
-       . (Effect eff, OpsParam k label (LabeledOps k label ops) eff)
+       . (Effect eff, ImplicitParam k label (LabeledOps k label ops eff))
       => LabeledOps k label ops eff
     captureOps = captureParam @k @label

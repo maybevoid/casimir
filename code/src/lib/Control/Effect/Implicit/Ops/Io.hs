@@ -58,7 +58,7 @@ instance Freer.FreeOps IoOps where
 
 instance ImplicitOps IoOps where
   type OpsConstraint IoOps eff =
-    TaggedOpsParam IoTag IoOps eff
+    TaggedParam IoTag (IoOps eff)
 
   withOps = withTag @IoTag
   captureOps = captureTag @IoTag

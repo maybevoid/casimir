@@ -59,7 +59,7 @@ instance Freer.FreeOps (StateOps s) where
 
 instance ImplicitOps (StateOps s) where
   type OpsConstraint (StateOps s) eff =
-    (TaggedOpsParam StateTag (StateOps s) eff)
+    TaggedParam StateTag (StateOps s eff)
 
   withOps = withTag @StateTag
   captureOps = captureTag @StateTag
