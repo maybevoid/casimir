@@ -9,5 +9,5 @@
   publicly. The code is mostly ready but documentation is being worked on.
 </i>
 
-# [Quick Overview](doc/overview.md)
+# [Quick Overview](doc/overview.lhs)
 # [Tutorial](doc/tutorial.md)

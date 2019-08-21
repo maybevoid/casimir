@@ -42,4 +42,5 @@ test-repl:
 	nix-shell --pure nix/shell.nix --run \
 		"make -f make/nix.mk test-repl"
 
-.PHONY: hpack clean-env release release-doc shell external-shell hoogle repl benchmark test test-repl sync
+.PHONY: clean-env release release-doc shell external-shell \
+	hoogle repl doc benchmark test test-repl sync
