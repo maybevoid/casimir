@@ -1,22 +1,20 @@
 
-module Control.Effect.Implicit.Base.NoEff
-  ( NoEff
-  , NoOp (..)
+module Control.Effect.Implicit.Base.NoOp
+  ( NoOp (..)
   , NoConstraint
   )
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
 
--- | The trivial effect 'NoEff' have singleton operation and can be trivially
+-- | The trivial effect 'NoOp' have singleton operation and can be trivially
 -- satisfied for all 'Effect' @eff@. It is the identity for the
 -- @Control.Effect.Implicit.Base.Union@ type operator such that:
 --
 -- @
--- forall ops . ops 'Control.Effect.Implicit.Base.∪' 'NoEff' ~= 'NoEff' 'Control.Effect.Implicit.Base.∪' ops ~= ops
+-- forall ops . ops 'Control.Effect.Implicit.Base.∪' 'NoOp' ~= 'NoOp' 'Control.Effect.Implicit.Base.∪' ops ~= ops
 -- @
 --
 -- which by @ops1 ~= ops2@ means
@@ -24,17 +22,13 @@ import Control.Effect.Implicit.Base.EffFunctor
 -- @ops2 'Control.Effect.Implicit.Computation.⊇' ops1@, i.e. they satisfies
 -- equivalent set of 'OpsConstraints' up to casting equivalents by
 -- 'Control.Effect.Implicit.Computation.OpsCast'.
-data NoEff
 
--- | @'Operation' 'NoEff' eff@ is really just @()@ for all 'Effect' @eff@. We instead define
+-- | @'Operation' 'NoOp' eff@ is really just @()@ for all 'Effect' @eff@. We instead define
 -- 'NoOp' with phantom type @eff@ so that the injectivity condition for
 -- 'Operation' can be satisfied.
 data NoOp (eff :: Type -> Type) = NoOp
 
-instance EffOps NoEff where
-  type Operation NoEff = NoOp
-
--- | @'OpsConstraint' 'NoEff' eff@ is just the empty constraint @()@ for all
+-- | @'OpsConstraint' 'NoOp' eff@ is just the empty constraint @()@ for all
 -- 'Effect' @eff@. We instead define the empty class 'NoConstraint' with
 -- trivial instance for all 'Effect' @eff@ so that the injectivity condition
 -- for 'OpsConstraint' can be satisfied.
@@ -47,11 +41,11 @@ instance NoConstraint eff where
 instance EffFunctor NoOp where
   effmap _ _ = NoOp
 
--- | As the trivial instance for 'ImplicitOps', @'OpsConstraint' 'NoEff'@ does not
+-- | As the trivial instance for 'ImplicitOps', @'OpsConstraint' 'NoOp'@ does not
 -- make use of implicit parameters, as its 'Operation' can be trivially be
 -- constructed.
-instance ImplicitOps NoEff where
-  type OpsConstraint NoEff eff = NoConstraint eff
+instance ImplicitOps NoOp where
+  type OpsConstraint NoOp eff = NoConstraint eff
 
   withOps _ = id
 

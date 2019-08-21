@@ -6,18 +6,15 @@
 module Control.Effect.Implicit.Base
   ( Effect
   , EffFunctor (..)
-  , EffOps (..)
   , ImplicitOps (..)
   , BaseOps
   , Eff
   , EffConstraint
-  , NoEff
-  , Union
+  , NoOp (..)
   , LiftEff
   , type (∪)
-  , NoOp (..)
   , NoConstraint
-  , UnionOps (..)
+  , Union (..)
   , (∪)
   , leftOps
   , rightOps
@@ -32,10 +29,9 @@ where
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
-import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.BaseOps
 import Control.Effect.Implicit.Base.Union
-import Control.Effect.Implicit.Base.NoEff
+import Control.Effect.Implicit.Base.NoOp
 import Control.Effect.Implicit.Base.Lift
 import Control.Effect.Implicit.Base.Label

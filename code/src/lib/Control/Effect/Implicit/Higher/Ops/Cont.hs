@@ -7,17 +7,12 @@ import qualified Control.Monad.Trans.Cont as ContT
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher
 
-data ContEff
-
 data ContOps inEff eff = ContOps {
   callCCOp
     :: forall a b
      . ((a -> inEff b) -> inEff a)
     -> eff a
 }
-
-instance HigherOps ContEff where
-  type HOperation ContEff = ContOps
 
 instance HigherEffFunctor ContOps where
   invEffmap

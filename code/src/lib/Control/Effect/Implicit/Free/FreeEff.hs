@@ -23,7 +23,7 @@ class
   where
     freeOps :: forall ops eff .
       (FreeOps ops, Effect eff)
-      => Operation ops (free ops eff)
+      => ops (free ops eff)
 
     liftFree :: forall ops eff a .
       (FreeOps ops, Effect eff)

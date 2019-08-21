@@ -34,7 +34,7 @@ instance
   (FreeOps ops1, FreeOps ops2) =>
   FreeOps (Union ops1 ops2)
    where
-    mkFreeOps liftReturn = UnionOps ops1 ops2
+    mkFreeOps liftReturn = Union ops1 ops2
      where
       ops1 = mkFreeOps (liftReturn . LeftCoOp)
       ops2 = mkFreeOps (liftReturn . RightCoOp)

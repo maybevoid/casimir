@@ -11,8 +11,6 @@ import qualified Control.Effect.Implicit.Freer as Freer
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.State
 
-data LogEff l
-
 data LogOps l eff = LogOps {
   logOp :: l -> eff ()
 }
@@ -24,29 +22,26 @@ data LogCoOp l r =
 data LogCoOp' l r where
   LogOp' :: l -> LogCoOp' l ()
 
-instance EffOps (LogEff l) where
-  type Operation (LogEff l) = LogOps l
+instance Free.EffCoOp (LogOps l) where
+  type CoOperation (LogOps l) = LogCoOp l
 
-instance Free.EffCoOp (LogEff l) where
-  type CoOperation (LogEff l) = LogCoOp l
-
-instance Freer.EffCoOp (LogEff l) where
-  type CoOperation (LogEff l) = LogCoOp' l
+instance Freer.EffCoOp (LogOps l) where
+  type CoOperation (LogOps l) = LogCoOp' l
 
 instance EffFunctor (LogOps l) where
   effmap lift ops = LogOps $
     lift . logOp ops
 
-instance Free.FreeOps (LogEff l) where
+instance Free.FreeOps (LogOps l) where
   mkFreeOps liftCoOp = LogOps $
     \l -> liftCoOp $ LogOp l id
 
-instance Freer.FreeOps (LogEff l) where
+instance Freer.FreeOps (LogOps l) where
   mkFreeOps liftCoOp = LogOps $
     \l -> liftCoOp $ LogOp' l
 
-instance ImplicitOps (LogEff l) where
-  type OpsConstraint (LogEff l) eff =
+instance ImplicitOps (LogOps l) where
+  type OpsConstraint (LogOps l) eff =
     (?_Control_Effect_Implicit_Ops_Log_logOps :: LogOps l eff)
 
   withOps ops comp =
@@ -57,13 +52,13 @@ instance ImplicitOps (LogEff l) where
   captureOps =
     ?_Control_Effect_Implicit_Ops_Log_logOps
 
-log :: forall l . l -> Eff (LogEff l) ()
+log :: forall l . l -> Eff (LogOps l) ()
 log l = logOp captureOps l
 
 stateLoggerHandler
   :: forall l eff
    . (Effect eff)
-  => OpsHandler (StateEff [l]) (LogEff l) eff
+  => OpsHandler (StateOps [l]) (LogOps l) eff
 stateLoggerHandler = genericOpsHandler $ LogOps $
   \l -> do
     logs <- get
@@ -72,6 +67,6 @@ stateLoggerHandler = genericOpsHandler $ LogOps $
 printLoggerHandler
   :: forall a eff
    . (Effect eff, Show a)
-  => OpsHandler IoEff (LogEff a) eff
+  => OpsHandler IoOps (LogOps a) eff
 printLoggerHandler = genericOpsHandler $ LogOps $
   liftIo . print

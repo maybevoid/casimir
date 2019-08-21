@@ -9,10 +9,9 @@ where
 import Data.Kind
 
 import Control.Effect.Implicit.Base.Effect
-import Control.Effect.Implicit.Base.EffOps
 
 -- | 'ImplicitOps' gives computations access to effect operations of an
--- 'EffOps' through implicit parameter constraints. It hides the machinery
+-- operation through implicit parameter constraints. It hides the machinery
 -- of implicit parameters and make them appear like regular constraints except
 -- with local scope.
 --
@@ -28,13 +27,11 @@ import Control.Effect.Implicit.Base.EffOps
 -- The definition for 'ImplicitOps' for most effect operations can typically
 -- be derived mechanically. We may look into using template Haskell to generate
 -- instances for 'ImplicitOps' in future to reduce some boilerplate.
-class
-  (EffOps ops)
-  => ImplicitOps ops where
+class ImplicitOps (ops :: (Type -> Type) -> Type) where
 
     -- | The constraint kind for the effect operation under 'Effect' @eff@.
     -- This is typically an implicit parameter with a unique name, e.g.
-    -- @type OpsConstraint FooEff eff = (?fooOps :: Operation FooEff eff)@.
+    -- @type OpsConstraint FooOps eff = (?fooOps :: FooOps eff)@.
     --
     -- Note that there is a injective type families condition, and given that
     -- implicit parameters have a single namespace, users must come out with
@@ -52,7 +49,7 @@ class
     withOps
       :: forall eff r
        . (Effect eff)
-      => Operation ops eff
+      => ops eff
       -> (OpsConstraint ops eff => r)
       -> r
 
@@ -62,7 +59,7 @@ class
     captureOps
       :: forall eff
        . (Effect eff, OpsConstraint ops eff)
-      => Operation ops eff
+      => ops eff
 
 -- | This is a type alias for the implicit parameter constraint for @ops@,
 -- in addition to requiring @eff@ to be an 'Effect'. This helps reducing

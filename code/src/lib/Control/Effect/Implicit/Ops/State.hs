@@ -1,7 +1,6 @@
 
 module Control.Effect.Implicit.Ops.State
-  ( StateEff
-  , StateOps (..)
+  ( StateOps (..)
   , StateCoOp (..)
   , FreerStateCoOp (..)
   , get
@@ -16,7 +15,6 @@ import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
 
 data StateTag
-data StateEff s where
 
 data StateOps s eff = StateOps {
   getOp :: eff s,
@@ -31,14 +29,11 @@ data FreerStateCoOp s a where
   GetOp' :: FreerStateCoOp s s
   PutOp' :: s -> FreerStateCoOp s ()
 
-instance EffOps (StateEff s) where
-  type Operation (StateEff s) = StateOps s
+instance Free.EffCoOp (StateOps s) where
+  type CoOperation (StateOps s) = StateCoOp s
 
-instance Free.EffCoOp (StateEff s) where
-  type CoOperation (StateEff s) = StateCoOp s
-
-instance Freer.EffCoOp (StateEff s) where
-  type CoOperation (StateEff s) = FreerStateCoOp s
+instance Freer.EffCoOp (StateOps s) where
+  type CoOperation (StateOps s) = FreerStateCoOp s
 
 instance Functor (StateCoOp s) where
   fmap f (GetOp cont) = GetOp $ fmap f cont
@@ -50,29 +45,29 @@ instance EffFunctor (StateOps a) where
     putOp = lifter . putOp stateOps
   }
 
-instance Free.FreeOps (StateEff s) where
+instance Free.FreeOps (StateOps s) where
   mkFreeOps liftCoOp = StateOps {
     getOp = liftCoOp $ GetOp id,
     putOp = \x -> liftCoOp $ PutOp x id
   }
 
-instance Freer.FreeOps (StateEff s) where
+instance Freer.FreeOps (StateOps s) where
   mkFreeOps liftCoOp = StateOps {
     getOp = liftCoOp $ GetOp',
     putOp = \x -> liftCoOp $ PutOp' x
   }
 
-instance ImplicitOps (StateEff s) where
-  type OpsConstraint (StateEff s) eff =
-    (TaggedOpsParam StateTag (StateEff s) eff)
+instance ImplicitOps (StateOps s) where
+  type OpsConstraint (StateOps s) eff =
+    (TaggedOpsParam StateTag (StateOps s) eff)
 
   withOps = withTag @StateTag
   captureOps = captureTag @StateTag
 
 {-# INLINE get #-}
-get :: forall s . Eff (StateEff s) s
+get :: forall s . Eff (StateOps s) s
 get = getOp captureOps
 
 {-# INLINE put #-}
-put :: forall s . s -> Eff (StateEff s) ()
+put :: forall s . s -> Eff (StateOps s) ()
 put = putOp captureOps

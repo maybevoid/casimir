@@ -10,8 +10,6 @@ import qualified Control.Effect.Implicit.Freer as Freer
 
 data EnvTag
 
-data EnvEff e
-
 data EnvOps e eff = EnvOps {
   askOp :: eff e
 }
@@ -22,23 +20,20 @@ data EnvCoOp e r =
 data EnvCoOp' e r where
   AskOp' :: EnvCoOp' e e
 
-instance EffOps (EnvEff e) where
-  type Operation (EnvEff e) = EnvOps e
+instance Free.EffCoOp (EnvOps e) where
+  type CoOperation (EnvOps e) = EnvCoOp e
 
-instance Free.EffCoOp (EnvEff e) where
-  type CoOperation (EnvEff e) = EnvCoOp e
-
-instance Freer.EffCoOp (EnvEff e) where
-  type CoOperation (EnvEff e) = EnvCoOp' e
+instance Freer.EffCoOp (EnvOps e) where
+  type CoOperation (EnvOps e) = EnvCoOp' e
 
 instance EffFunctor (EnvOps e) where
   effmap lifter envOps = EnvOps {
     askOp = lifter $ askOp envOps
   }
 
-instance ImplicitOps (EnvEff e) where
-  type OpsConstraint (EnvEff e) eff =
-    TaggedOpsParam EnvTag (EnvEff e) eff
+instance ImplicitOps (EnvOps e) where
+  type OpsConstraint (EnvOps e) eff =
+    TaggedOpsParam EnvTag (EnvOps e) eff
 
   withOps = withTag @EnvTag
   captureOps = captureTag @EnvTag
@@ -46,24 +41,24 @@ instance ImplicitOps (EnvEff e) where
 instance Functor (EnvCoOp e) where
   fmap f (AskOp cont) = AskOp $ fmap f cont
 
-instance Free.FreeOps (EnvEff e) where
+instance Free.FreeOps (EnvOps e) where
   mkFreeOps liftCoOp = EnvOps {
     askOp = liftCoOp $ AskOp id
   }
 
-instance Freer.FreeOps (EnvEff e) where
+instance Freer.FreeOps (EnvOps e) where
   mkFreeOps liftCoOp = EnvOps {
     askOp = liftCoOp $ AskOp'
   }
 
-ask :: forall e . Eff (EnvEff e) e
+ask :: forall e . Eff (EnvOps e) e
 ask = askOp captureOps
 
 withEnv
   :: forall r e eff
    . (Effect eff)
   => e
-  -> (Operation (EnvEff e) eff -> eff r)
+  -> (EnvOps e eff -> eff r)
   -> eff r
 withEnv x cont = cont (mkEnvOps x)
 
@@ -76,5 +71,5 @@ mkEnvHandler
   :: forall e eff .
   (Effect eff)
   => e
-  -> BaseOpsHandler (EnvEff e) eff
+  -> BaseOpsHandler (EnvOps e) eff
 mkEnvHandler = baseOpsHandler . mkEnvOps

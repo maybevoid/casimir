@@ -15,12 +15,12 @@ newtype Computation ops comp eff1 = Computation {
     , Effect eff2
     )
     => LiftEff eff1 eff2
-    -> Operation ops eff2
+    -> ops eff2
     -> comp eff2
 }
 
 type OpsHandler ops handler eff
-  = Computation ops (Operation handler) eff
+  = Computation ops handler eff
 
 instance
   (BaseOps ops)
@@ -43,6 +43,6 @@ liftComputation lift12 comp1 = Computation comp2
       ( Effect eff3
       )
       => LiftEff eff2 eff3
-      -> Operation ops eff3
+      -> ops eff3
       -> comp eff3
     comp2 lift23 = runComp comp1 $ joinLift lift12 lift23

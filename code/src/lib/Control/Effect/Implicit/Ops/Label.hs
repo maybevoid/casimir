@@ -9,24 +9,19 @@ import GHC.Types (Symbol)
 
 import Control.Effect.Implicit.Base
 
-data LabeledEff k (label :: k) ops
+type NamedOps label ops = LabeledOps Symbol label ops
+type TaggedOps label ops = LabeledOps Type label ops
 
-type NamedEff label ops = LabeledEff Symbol label ops
-type TaggedEff label ops = LabeledEff Type label ops
-
-newtype LabeledOps k (label :: k) ops eff = LabeledOps {
-  unlabelOps :: Operation ops eff
-}
-
-instance
-  (EffOps ops)
-  => EffOps (LabeledEff k (label :: k) ops)
-   where
-    type Operation (LabeledEff k label ops) =
-      LabeledOps k label ops
+newtype LabeledOps
+  k (label :: k)
+  ops
+  (eff :: Type -> Type)
+  = LabeledOps {
+    unlabelOps :: ops eff
+  }
 
 instance
-  (EffFunctor (Operation ops))
+  (EffFunctor ops)
   => EffFunctor (LabeledOps k (label :: k) ops)
    where
     effmap :: forall eff1 eff2 .
@@ -36,23 +31,21 @@ instance
       -> LabeledOps k label ops eff2
     effmap lifter (LabeledOps ops) = LabeledOps $ effmap lifter ops
 
-instance
-  (EffOps ops)
-  => ImplicitOps (LabeledEff k (label :: k) ops)
+instance ImplicitOps (LabeledOps k (label :: k) ops)
    where
-    type OpsConstraint (LabeledEff k (label :: k) ops) eff =
-      OpsParam k label (LabeledEff k label ops) eff
+    type OpsConstraint (LabeledOps k (label :: k) ops) eff =
+      OpsParam k label (LabeledOps k label ops) eff
 
     withOps
       :: forall eff r
        . (Effect eff)
       => LabeledOps k label ops eff
-      -> (OpsParam k label (LabeledEff k label ops) eff => r)
+      -> (OpsParam k label (LabeledOps k label ops) eff => r)
       -> r
     withOps = withParam @k @label
 
     captureOps
       :: forall eff
-       . (Effect eff, OpsParam k label (LabeledEff k label ops) eff)
+       . (Effect eff, OpsParam k label (LabeledOps k label ops) eff)
       => LabeledOps k label ops eff
     captureOps = captureParam @k @label

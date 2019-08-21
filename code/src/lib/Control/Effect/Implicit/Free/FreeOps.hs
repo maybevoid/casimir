@@ -4,7 +4,6 @@ module Control.Effect.Implicit.Free.FreeOps
   )
 where
 
-import Data.Kind
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Free.EffCoOp
 
@@ -13,12 +12,11 @@ import Control.Effect.Implicit.Free.EffCoOp
 -- empty declaration for @ops@ to signify that @ops@ is only used for
 -- tagging effects and are not used at the value level.
 class
-  ( EffOps ops
-  , EffCoOp ops
+  ( EffCoOp ops
   , Functor (CoOperation ops)
-  , EffFunctor (Operation ops)
+  , EffFunctor ops
   )
-  => FreeOps (ops :: Type) where
+  => FreeOps ops where
 
     -- | The free ops constructor is used for generating free operations that
     -- can work under any free monad transformer @t@ and any 'Effect' @eff@.
@@ -33,4 +31,4 @@ class
         , Effect (t eff)
         )
       => (forall a . CoOperation ops a -> t eff a)
-      -> Operation ops (t eff)
+      -> ops (t eff)

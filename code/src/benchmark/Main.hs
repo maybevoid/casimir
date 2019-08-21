@@ -18,7 +18,7 @@ rounds :: Int
 rounds = 5000
 
 applyCurriedComp
-  :: (Int -> Computation NoEff (Return a) Identity)
+  :: (Int -> Computation NoOp (Return a) Identity)
   -> a
 applyCurriedComp comp = runIdentity $ returnVal $
   runComp (comp rounds) idLift NoOp
@@ -76,17 +76,17 @@ main = defaultMain
         whnf applyCurriedComp
         curriedStateTComp
 
-    , bench "Transformer StateEff to EnvEff to ReaderT Pipeline" $
+    , bench "Transformer StateOps to EnvOps to ReaderT Pipeline" $
         whnf runReaderTComp
         stateToReaderComp
 
-    , bench "Manual StateEff to EnvEff to ReaderT Pipeline"  $
+    , bench "Manual StateOps to EnvOps to ReaderT Pipeline"  $
         whnf runReaderTComp
-        stateEffToEnvEffToReaderTComp
+        stateOpsToEnvOpsToReaderTComp
 
-    , bench "Manual StateEff to ReaderT Pipeline"  $
+    , bench "Manual StateOps to ReaderT Pipeline"  $
         whnf runReaderTComp
-        stateEffToReaderTComp
+        stateOpsToReaderTComp
 
     , bench "Curried ChurchMonad" $
         whnf applyCurriedComp

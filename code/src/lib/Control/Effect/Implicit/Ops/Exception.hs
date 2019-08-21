@@ -10,8 +10,6 @@ import Control.Effect.Implicit.Computation
 
 import Control.Effect.Implicit.Ops.Io
 
-data ExceptionEff e
-
 data ExceptionOps e eff = ExceptionOps {
   raiseOp :: e -> eff Void
 }
@@ -19,11 +17,8 @@ data ExceptionOps e eff = ExceptionOps {
 data ExceptionCoOp e r =
   RaiseOp e
 
-instance EffOps (ExceptionEff e) where
-  type Operation (ExceptionEff e) = ExceptionOps e
-
-instance EffCoOp (ExceptionEff e) where
-  type CoOperation (ExceptionEff e) = ExceptionCoOp e
+instance EffCoOp (ExceptionOps e) where
+  type CoOperation (ExceptionOps e) = ExceptionCoOp e
 
 instance EffFunctor (ExceptionOps e) where
   effmap lifter ops = ExceptionOps {
@@ -33,7 +28,7 @@ instance EffFunctor (ExceptionOps e) where
 instance Functor (ExceptionCoOp e) where
   fmap _ (RaiseOp e) = RaiseOp e
 
-instance FreeOps (ExceptionEff e) where
+instance FreeOps (ExceptionOps e) where
   mkFreeOps liftCoOp = ExceptionOps {
     raiseOp = \e -> liftCoOp $ RaiseOp e
   }
@@ -41,8 +36,8 @@ instance FreeOps (ExceptionEff e) where
 type ExceptionConstraint e eff =
   (?_Control_Effect_Implicit_Ops_Exception_exceptionOps :: ExceptionOps e eff)
 
-instance ImplicitOps (ExceptionEff e) where
-  type OpsConstraint (ExceptionEff e) eff = ExceptionConstraint e eff
+instance ImplicitOps (ExceptionOps e) where
+  type OpsConstraint (ExceptionOps e) eff = ExceptionConstraint e eff
 
   withOps ops comp =
     let
@@ -63,7 +58,7 @@ mkExceptionCoOpHandler
   :: forall eff e a
    . (Effect eff)
   => (e -> eff a)
-  -> CoOpHandler (ExceptionEff e) a a eff
+  -> CoOpHandler (ExceptionOps e) a a eff
 mkExceptionCoOpHandler handleException =
   CoOpHandler return $
     \(RaiseOp e) -> handleException e
@@ -71,7 +66,7 @@ mkExceptionCoOpHandler handleException =
 exceptionToEitherHandler
   :: forall eff e a
    . (Effect eff)
-  => CoOpHandler (ExceptionEff e) a (Either e a) eff
+  => CoOpHandler (ExceptionOps e) a (Either e a) eff
 exceptionToEitherHandler =
   CoOpHandler handleReturn handleCoOp
    where
@@ -82,7 +77,7 @@ tryIo
   :: forall e a .
     (Ex.Exception e)
   => IO a
-  -> Eff (IoEff ∪ (ExceptionEff e)) a
+  -> Eff (IoOps ∪ (ExceptionOps e)) a
 tryIo m = do
   res <- liftIo $ Ex.try @e m
   case res of
@@ -92,7 +87,7 @@ tryIo m = do
 tryIoHandler
   :: forall e eff
    . (Effect eff, Ex.Exception e)
-  => OpsHandler ((ExceptionEff e) ∪ IoEff) IoEff eff
+  => OpsHandler ((ExceptionOps e) ∪ IoOps) IoOps eff
 tryIoHandler = genericOpsHandler $ IoOps {
   liftIoOp = tryIo
 }
@@ -102,23 +97,23 @@ try
    . ( Effect eff
      , FreeEff free
      )
-  => (OpsConstraint (ExceptionEff e) (free (ExceptionEff e) eff)
-      => free (ExceptionEff e) eff a)
+  => (OpsConstraint (ExceptionOps e) (free (ExceptionOps e) eff)
+      => free (ExceptionOps e) eff a)
   -> (e -> eff a)
   -> eff a
 try comp handler1 = withCoOpHandler @free handler2 comp
  where
-  handler2 :: CoOpHandler (ExceptionEff e) a a eff
+  handler2 :: CoOpHandler (ExceptionOps e) a a eff
   handler2 = CoOpHandler return $
     \(RaiseOp e) -> handler1 e
 
 tryFinally
   :: forall free eff e a
    . ( FreeEff free
-     , EffConstraint (ExceptionEff e) eff
+     , EffConstraint (ExceptionOps e) eff
      )
-  => ((OpsConstraint (ExceptionEff e) (free (ExceptionEff e) eff))
-      => free (ExceptionEff e) eff a)
+  => ((OpsConstraint (ExceptionOps e) (free (ExceptionOps e) eff))
+      => free (ExceptionOps e) eff a)
   -> (() -> eff ())
   -> eff a
 tryFinally comp handler1 =
@@ -142,16 +137,16 @@ tryComp
      , BaseOps ops
      , EffConstraint ops eff
      )
-  => Computation ((ExceptionEff e) ∪ ops) (Return a) eff
+  => Computation ((ExceptionOps e) ∪ ops) (Return a) eff
   -> (e -> eff a)
   -> eff a
 tryComp comp1 handler1 = handleFree handler2 comp2
  where
-  comp2 :: free (ExceptionEff e) eff a
+  comp2 :: free (ExceptionOps e) eff a
   comp2 = returnVal $ runComp comp1 freeLiftEff $
-    UnionOps freeOps $ effmap liftFree captureOps
+    Union freeOps $ effmap liftFree captureOps
 
-  handler2 :: CoOpHandler (ExceptionEff e) a a eff
+  handler2 :: CoOpHandler (ExceptionOps e) a a eff
   handler2 = CoOpHandler return $
     \(RaiseOp e) -> handler1 e
 
@@ -161,19 +156,19 @@ bracketComp
      , BaseOps ops
      , EffConstraint ops eff
      )
-  => Computation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init
-  -> (a -> Computation ((ExceptionEff e) ∪ ops) (Return ()) eff)  -- cleanup
-  -> (a -> Computation ((ExceptionEff e) ∪ ops) (Return b) eff)   -- between
-  -> Computation ((ExceptionEff e) ∪ ops) (Return b) eff
+  => Computation ((ExceptionOps e) ∪ ops) (Return a) eff          -- init
+  -> (a -> Computation ((ExceptionOps e) ∪ ops) (Return ()) eff)  -- cleanup
+  -> (a -> Computation ((ExceptionOps e) ∪ ops) (Return b) eff)   -- between
+  -> Computation ((ExceptionOps e) ∪ ops) (Return b) eff
 bracketComp initComp cleanupComp betweenComp = Computation comp1
  where
   comp1
     :: forall eff2
      . (Effect eff2)
     => LiftEff eff eff2
-    -> Operation ((ExceptionEff e) ∪ ops) eff2
+    -> ((ExceptionOps e) ∪ ops) eff2
     -> Return b eff2
-  comp1 lift12 ops@(UnionOps eOps ops1) = Return comp5
+  comp1 lift12 ops@(Union eOps ops1) = Return comp5
    where
     comp2 :: eff2 a
     comp2 = returnVal $ runComp initComp lift12 ops
@@ -183,7 +178,7 @@ bracketComp initComp cleanupComp betweenComp = Computation comp1
       exceptionToEitherHandler $ returnVal $
         runComp (betweenComp x)
           (joinLift lift12 freeLiftEff) $
-          UnionOps freeOps $
+          Union freeOps $
             effmap liftFree ops1
 
     comp4 :: a -> eff2 ()

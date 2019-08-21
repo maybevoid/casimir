@@ -21,7 +21,7 @@ where
 
 import Control.Effect.Implicit.Free.EffCoOp
 import Control.Effect.Implicit.Free.FreeOps
-import Control.Effect.Implicit.Free.NoEff
+import Control.Effect.Implicit.Free.NoOp
 import Control.Effect.Implicit.Free.Union
 import Control.Effect.Implicit.Free.FreeEff
 import Control.Effect.Implicit.Free.ChurchMonad

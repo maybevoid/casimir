@@ -1,8 +1,7 @@
 
 module Control.Effect.Implicit.Base.Union
-  ( Union
+  ( Union (..)
   , (∪)
-  , UnionOps (..)
   , type (∪)
   , leftOps
   , rightOps
@@ -10,24 +9,21 @@ module Control.Effect.Implicit.Base.Union
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
 
 -- | Combines two effect operations into a new effect operation. Union can
 -- be used multiple times to combine multiple effect operations into one.
-data Union ops1 ops2
 
 -- | The 'Operation' of @ops1 '∪' ops2@ undef effect @eff@
 -- is the product of the underlying @'Operation' ops1 eff@ and
 -- @'Operation' ops2 eff@.
-data UnionOps ops1 ops2
+data Union ops1 ops2
   (eff :: Type -> Type)
-  = UnionOps (ops1 eff) (ops2 eff)
+  = Union (ops1 eff) (ops2 eff)
 
 infixr 7 ∪
 infixr 7 `Union`
-infixr 7 `UnionOps`
 
 -- | Right associative type operator alias for 'Union', e.g.
 --
@@ -37,27 +33,23 @@ infixr 7 `UnionOps`
 -- @
 type (∪) = Union
 
--- | Right associative term operator alias for 'UnionOps', e.g.
+-- | Right associative term operator alias for 'Union', e.g.
 --
 -- @
 -- forall ops1 ops2 ops3 .
---   ops1 ∪ ops2 ∪ ops3 === UnionOps ops1 (UnionOps ops2 ops3)
+--   ops1 ∪ ops2 ∪ ops3 === Union ops1 (Union ops2 ops3)
 -- @
-(∪) :: forall ops1 ops2 eff . ops1 eff -> ops2 eff -> UnionOps ops1 ops2 eff
-(∪) = UnionOps
-
-instance EffOps (Union ops1 ops2) where
-  type Operation (Union ops1 ops2) =
-    UnionOps (Operation ops1) (Operation ops2)
+(∪) :: forall ops1 ops2 eff . ops1 eff -> ops2 eff -> Union ops1 ops2 eff
+(∪) = Union
 
 instance
   ( EffFunctor ops1
   , EffFunctor ops2
   )
-  => EffFunctor (UnionOps ops1 ops2)
+  => EffFunctor (Union ops1 ops2)
   where
-    effmap f (UnionOps x y)
-      = UnionOps (effmap f x) (effmap f y)
+    effmap f (Union x y)
+      = Union (effmap f x) (effmap f y)
 
 -- | @ops1 '∪' ops2@ is a 'ImplicitOps' if both @ops1@ and @ops2@ are instance of
 -- 'ImplicitOps', with @'OpsConstraint' (ops1 '∪' ops2)@ being the **reversed**
@@ -76,19 +68,19 @@ instance
     type OpsConstraint (Union ops1 ops2) eff =
       (OpsConstraint ops2 eff, OpsConstraint ops1 eff)
 
-    withOps (UnionOps ops1 ops2) comp =
+    withOps (Union ops1 ops2) comp =
       withOps ops1 $ withOps ops2 comp
 
-    captureOps = UnionOps captureOps captureOps
+    captureOps = Union captureOps captureOps
 
 -- | Get the left operation of the @'Operation' (ops1 '∪' ops2)@ product.
 leftOps :: forall ops1 ops2 eff
-   . UnionOps ops1 ops2 eff
+   . Union ops1 ops2 eff
    -> ops1 eff
-leftOps (UnionOps ops _) = ops
+leftOps (Union ops _) = ops
 
 -- | Get the right operation of the @'Operation' (ops1 '∪' ops2)@ product.
 rightOps :: forall ops1 ops2 eff
-   . UnionOps ops1 ops2 eff
+   . Union ops1 ops2 eff
    -> ops2 eff
-rightOps (UnionOps _ ops) = ops
+rightOps (Union _ ops) = ops

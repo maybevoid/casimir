@@ -1,5 +1,5 @@
 
-module Benchmark.State.StateTToEnvEffPipeline
+module Benchmark.State.StateTToEnvOpsPipeline
   ( stateToReaderComp
 
   -- The simple action of exporting a specialized
@@ -19,12 +19,12 @@ import Control.Effect.Implicit.Transform.Reader
 import Benchmark.State.Base
 
 stateTComp1 :: forall eff . (Effect eff)
-  => Computation (EnvEff Int) (Return ()) eff
+  => Computation (EnvOps Int) (Return ()) eff
 stateTComp1 = runPipeline
-  stateTToEnvEffPipeline stateBaseComp
+  stateTToEnvOpsPipeline stateBaseComp
 
 stateTComp2 :: forall eff . (Effect eff)
-  => Computation NoEff (Return ()) (ReaderT Int eff)
+  => Computation NoOp (Return ()) (ReaderT Int eff)
 stateTComp2 = bindOpsHandler
   readerTHandler stateTComp1
 

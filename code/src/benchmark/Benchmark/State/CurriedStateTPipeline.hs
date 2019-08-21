@@ -11,7 +11,7 @@ import Benchmark.State.Base
 
 curriedStateTComp :: forall eff . (Effect eff)
   => Int
-  -> Computation NoEff (Return ()) eff
+  -> Computation NoOp (Return ()) eff
 curriedStateTComp i = runPipeline
   (stateTPipeline i)
   stateBaseComp

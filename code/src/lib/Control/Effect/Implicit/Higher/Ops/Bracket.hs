@@ -5,10 +5,8 @@ where
 import Control.Exception (bracket)
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Higher.HigherOps
+import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
-
-data BracketEff
 
 data BracketOps inEff eff = BracketOps {
   bracketOp
@@ -18,9 +16,6 @@ data BracketOps inEff eff = BracketOps {
     -> (a -> inEff b)
     -> eff b
 }
-
-instance HigherOps BracketEff where
-  type HOperation BracketEff = BracketOps
 
 instance HigherEffFunctor BracketOps where
   invEffmap

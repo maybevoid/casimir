@@ -6,8 +6,6 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Ops.Env
 
-data ReaderEff e
-
 data ReaderOps e inEff eff = ReaderOps
   { innerEnvOps :: EnvOps e inEff
   , outerEnvOps :: EnvOps e eff
@@ -17,9 +15,6 @@ data ReaderOps e inEff eff = ReaderOps
       -> inEff a
       -> eff a
   }
-
-instance HigherOps (ReaderEff e) where
-  type HOperation (ReaderEff e) = ReaderOps e
 
 instance HigherEffFunctor (ReaderOps e) where
   invEffmap

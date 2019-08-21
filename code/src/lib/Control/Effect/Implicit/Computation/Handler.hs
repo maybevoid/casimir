@@ -22,11 +22,11 @@ import Control.Effect.Implicit.Cast
 import Control.Effect.Implicit.Computation.Cast
 import Control.Effect.Implicit.Computation.Computation
 
-type BaseOpsHandler handler eff = Computation NoEff (Operation handler) eff
+type BaseOpsHandler handler eff = Computation NoOp handler eff
 
 type GenericOpsHandler ops handler =
   forall eff . (Effect eff)
-  => Computation ops (Operation handler) eff
+  => Computation ops handler eff
 
 bindOps
   :: forall ops1 ops2 comp eff
@@ -34,7 +34,7 @@ bindOps
      , BaseOps ops1
      , BaseOps ops2
      )
-  => Operation ops1 eff
+  => ops1 eff
   -> Computation (ops1 ∪ ops2) comp eff
   -> Computation ops2 comp eff
 bindOps ops1 comp = Computation $
@@ -51,7 +51,7 @@ opsHandlerComp
   => (forall eff2 .
        (EffConstraint ops eff2)
        => LiftEff eff1 eff2
-       -> Operation handler eff2
+       -> handler eff2
      )
   -> OpsHandler ops handler eff1
 opsHandlerComp comp = Computation $
@@ -62,7 +62,7 @@ baseOpsHandler
    . ( BaseOps handler
      , Effect eff
      )
-  => Operation handler eff
+  => handler eff
   -> BaseOpsHandler handler eff
 baseOpsHandler handler = Computation $
   \ lift12 _ -> applyEffmap lift12 handler
@@ -72,7 +72,7 @@ genericOpsHandler
   (BaseOps ops, BaseOps handler)
   => (forall eff .
       (EffConstraint ops eff)
-      => Operation handler eff)
+      => handler eff)
   -> GenericOpsHandler ops handler
 genericOpsHandler handler = Computation $
   \ _ ops -> withOps ops handler
@@ -93,12 +93,12 @@ bindExactOpsHandler handler1 comp1
       :: forall eff2 .
       (Effect eff2)
       => LiftEff eff1 eff2
-      -> Operation ops eff2
+      -> ops eff2
       -> comp eff2
     comp2 lift12 ops
       = runComp comp1 lift12 (handler2 ∪ ops)
        where
-        handler2 :: Operation handler eff2
+        handler2 :: handler eff2
         handler2 = runComp handler1 lift12 ops
     {-# INLINE comp2 #-}
 {-# INLINE bindExactOpsHandler #-}
@@ -120,15 +120,15 @@ composeExactOpsHandlers handler1 handler2
       :: forall eff2 .
       (Effect eff2)
       => LiftEff eff1 eff2
-      -> Operation ops eff2
-      -> Operation (handler1 ∪ handler2) eff2
+      -> ops eff2
+      -> (handler1 ∪ handler2) eff2
     comp1 lift12 ops
       = handler3 ∪ handler4
        where
-        handler3 :: Operation handler1 eff2
+        handler3 :: handler1 eff2
         handler3 = runComp handler1 lift12 ops
 
-        handler4 :: Operation handler2 eff2
+        handler4 :: handler2 eff2
         handler4 = runComp handler2 lift12 (handler3 ∪ ops)
 
 withOpsHandler

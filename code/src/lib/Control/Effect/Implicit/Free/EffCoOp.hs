@@ -10,7 +10,7 @@ import Data.Kind
 -- type and a co-operation type associated with the @sig@ type. The class
 -- 'EffCoOp' represents the effect co-operation with an injective type family
 -- 'CoOperation.
-class EffCoOp sig where
+class EffCoOp (ops :: (Type -> Type) -> Type) where
   -- | The co-operation type for @sig@ is produced by computations when
   -- they perform effect operations under a free monad, and is used by
   -- effect interpreters such as 'Control.Effect.Implicit.Free.CoOpHandler'
@@ -20,5 +20,5 @@ class EffCoOp sig where
   -- payload type in free monads such as
   -- 'Control.Effect.Implicit.Free.ChurchMonad' or
   -- 'Control.Effect.Implicit.Free.FreeMonad'
-  type family CoOperation sig
-    = (coop :: (Type -> Type)) | coop -> sig
+  type family CoOperation ops
+    = (coop :: (Type -> Type)) | coop -> ops

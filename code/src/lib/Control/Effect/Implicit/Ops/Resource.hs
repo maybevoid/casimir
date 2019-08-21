@@ -10,20 +10,10 @@ import Control.Effect.Implicit.Cast
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.UnliftIo
 
-type FixedEff fix ops eff = fix ops eff ∪ ops
-
 data BracketTask a = BracketTask {
   allocateResource :: IO a,
   releaseResource :: a -> IO ()
 }
-
-data ResourceEff
-  (t :: Type -> Type)
-  (ops :: Type)
-
-data FixedResourceEff
-  (t :: Type -> Type)
-  (ops :: Type)
 
 data ResourceOps t ops eff = ResourceOps
   { withResourceOp
@@ -38,12 +28,12 @@ data ResourceOps t ops eff = ResourceOps
 
 data FixedResourceOps t ops eff = FixedResourceOps {
   unFixedResourceOps
-    :: ResourceOps t (FixedResourceEff t ops ∪ ops) eff
+    :: ResourceOps t (FixedResourceOps t ops ∪ ops) eff
 }
 
 data ResourceCoOp
   :: (Type -> Type)
-  -> Type
+  -> ((Type -> Type) -> Type)
   -> Type
   -> Type
  where
@@ -55,14 +45,6 @@ data ResourceCoOp
         => a -> eff b)
     -> (b -> r)
     -> ResourceCoOp t ops r
-
-instance EffOps (ResourceEff t ops) where
-  type Operation (ResourceEff t ops)
-    = ResourceOps t ops
-
-instance EffOps (FixedResourceEff t ops) where
-  type Operation (FixedResourceEff t ops)
-    = FixedResourceOps t ops
 
 instance EffFunctor (ResourceOps t ops) where
   effmap :: forall eff1 eff2 .
@@ -87,8 +69,8 @@ instance EffFunctor (FixedResourceOps ops res) where
   effmap lift (FixedResourceOps ops) =
     FixedResourceOps $ effmap lift ops
 
-instance ImplicitOps (ResourceEff t ops) where
-  type OpsConstraint (ResourceEff t ops) eff
+instance ImplicitOps (ResourceOps t ops) where
+  type OpsConstraint (ResourceOps t ops) eff
     = (?_Control_Effects_Implicit_Ops_Resource_resourceOps
         :: ResourceOps t ops eff)
 
@@ -100,8 +82,8 @@ instance ImplicitOps (ResourceEff t ops) where
   captureOps =
     ?_Control_Effects_Implicit_Ops_Resource_resourceOps
 
-instance ImplicitOps (FixedResourceEff t ops) where
-  type OpsConstraint (FixedResourceEff t ops) eff
+instance ImplicitOps (FixedResourceOps t ops) where
+  type OpsConstraint (FixedResourceOps t ops) eff
     = (?_Control_Effects_Implicit_Ops_Resource_fixedResourceOps
         :: FixedResourceOps t ops eff)
 
@@ -116,7 +98,7 @@ instance ImplicitOps (FixedResourceEff t ops) where
 bracketResourceOps
   :: forall ops res eff
    . ( ImplicitOps ops
-     , EffConstraint (IoEff ∪ UnliftIoEff res ops) eff
+     , EffConstraint (IoOps ∪ UnliftIoOps res ops) eff
      )
   => ResourceOps BracketTask ops eff
 bracketResourceOps = ResourceOps withResourceOp'
@@ -140,9 +122,9 @@ bracketResourceOps = ResourceOps withResourceOp'
 bracketResourceOps'
   :: forall ops res eff
     . ( ImplicitOps ops
-      , EffConstraint (FixedUnliftIoEff res ops ∪ IoEff) eff
+      , EffConstraint (FixedUnliftIoOps res ops ∪ IoOps) eff
       )
-  => ResourceOps BracketTask (FixedUnliftIoEff res ops ∪ ops) eff
+  => ResourceOps BracketTask (FixedUnliftIoOps res ops ∪ ops) eff
 bracketResourceOps' = withOps (unfixUnliftIoOps captureOps) $ bracketResourceOps
 
 mkFixedResourceOps'
@@ -169,7 +151,7 @@ mkFixedResourceOps' caster ops1 = ops2
       . t a
       -> (forall eff2
            . (EffConstraint
-                (FixedResourceEff t ops1 ∪ ops1)
+                (FixedResourceOps t ops1 ∪ ops1)
                 eff2)
           => a -> eff2 b)
       -> eff3 b
@@ -199,7 +181,7 @@ mkFixedResourceOps = mkFixedResourceOps' @ops cast
 withResource
   :: forall a b t ops eff
    . ( ImplicitOps ops
-     , EffConstraint (ResourceEff t ops) eff)
+     , EffConstraint (ResourceOps t ops) eff)
   => t a
   -> (forall eff2
        . (EffConstraint ops eff2)
@@ -211,10 +193,10 @@ withResource task comp1 = withResourceOp captureOps task comp1
 unfixResourceOps
   :: forall t ops eff r
    . ( ImplicitOps ops
-     , EffConstraint (FixedResourceEff t ops) eff
+     , EffConstraint (FixedResourceOps t ops) eff
      )
   => ((OpsConstraint
-        (ResourceEff t (FixedResourceEff t ops ∪ ops))
+        (ResourceOps t (FixedResourceOps t ops ∪ ops))
         eff)
       => eff r)
   -> eff r
@@ -223,10 +205,10 @@ unfixResourceOps comp = withOps (unFixedResourceOps captureOps) comp
 withFixedResource
   :: forall a b t ops eff
    . ( ImplicitOps ops
-     , EffConstraint (FixedResourceEff t ops) eff)
+     , EffConstraint (FixedResourceOps t ops) eff)
   => t a
   -> (forall eff2
-       . (EffConstraint (FixedResourceEff t ops ∪ ops) eff2)
+       . (EffConstraint (FixedResourceOps t ops ∪ ops) eff2)
       => a
       -> eff2 b)
   -> eff b

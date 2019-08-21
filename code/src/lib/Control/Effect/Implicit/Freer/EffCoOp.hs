@@ -6,6 +6,6 @@ where
 
 import Data.Kind
 
-class EffCoOp sig where
-  type family CoOperation sig
-    = (coop :: (Type -> Type)) | coop -> sig
+class EffCoOp (ops :: (Type -> Type) -> Type) where
+  type family CoOperation ops
+    = (coop :: (Type -> Type)) | coop -> ops

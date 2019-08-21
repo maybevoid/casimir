@@ -1,6 +1,6 @@
 
-module Benchmark.State.StateEffToReaderT
-  (stateEffToReaderTComp)
+module Benchmark.State.StateOpsToReaderT
+  (stateOpsToReaderTComp)
 where
 
 import Control.Monad.Trans.Class (lift)
@@ -15,20 +15,20 @@ import Control.Effect.Implicit.Transform.State
 
 import Benchmark.State.Base
 
-stateEffToReaderTPipeline
+stateOpsToReaderTPipeline
   :: forall s a eff1
    . (Effect eff1)
-  => Computation (StateEff s) (Return a) eff1
-  -> Computation NoEff (Return a) (ReaderT s eff1)
-stateEffToReaderTPipeline comp1 = Computation comp2
+  => Computation (StateOps s) (Return a) eff1
+  -> Computation NoOp (Return a) (ReaderT s eff1)
+stateOpsToReaderTPipeline comp1 = Computation comp2
  where
   comp2 :: forall eff2 . (Effect eff2)
     => LiftEff (ReaderT s eff1) eff2
-    -> Operation NoEff eff2
+    -> NoOp eff2
     -> Return a eff2
   comp2 lift12 _ = Return $ liftEff lift12 comp5
 
-  comp3 :: Computation NoEff (Return a) (StateT s eff1)
+  comp3 :: Computation NoOp (Return a) (StateT s eff1)
   comp3 = bindOpsHandler
     stateTHandler
     (liftComputation stateTLiftEff comp1)
@@ -43,10 +43,10 @@ stateEffToReaderTPipeline comp1 = Computation comp2
 
 stateComp1
   :: forall eff . (Effect eff)
-  => Computation NoEff (Return ()) (ReaderT Int eff)
-stateComp1 = stateEffToReaderTPipeline stateBaseComp
+  => Computation NoOp (Return ()) (ReaderT Int eff)
+stateComp1 = stateOpsToReaderTPipeline stateBaseComp
 
-stateEffToReaderTComp
+stateOpsToReaderTComp
   :: forall eff . (Effect eff)
   => ReaderT Int eff ()
-stateEffToReaderTComp = returnVal $ runComp stateComp1 idLift NoOp
+stateOpsToReaderTComp = returnVal $ runComp stateComp1 idLift NoOp

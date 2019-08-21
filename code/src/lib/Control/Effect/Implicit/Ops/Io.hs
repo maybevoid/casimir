@@ -1,7 +1,6 @@
 
 module Control.Effect.Implicit.Ops.Io
-  ( IoEff
-  , IoOps (..)
+  ( IoOps (..)
   , IoCoOp (..)
   , IoCoOp' (..)
   , liftIo
@@ -17,7 +16,6 @@ import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
 
 data IoTag
-data IoEff
 
 data IoOps eff = IoOps {
   liftIoOp :: forall a . IO a -> eff a
@@ -29,14 +27,11 @@ data IoCoOp a where
 data IoCoOp' r where
   LiftIoOp' :: IO a -> IoCoOp' a
 
-instance EffOps IoEff where
-  type Operation IoEff = IoOps
+instance Free.EffCoOp IoOps where
+  type CoOperation IoOps = IoCoOp
 
-instance Free.EffCoOp IoEff where
-  type CoOperation IoEff = IoCoOp
-
-instance Freer.EffCoOp IoEff where
-  type CoOperation IoEff = IoCoOp'
+instance Freer.EffCoOp IoOps where
+  type CoOperation IoOps = IoCoOp'
 
 instance Functor IoCoOp where
   fmap
@@ -51,24 +46,24 @@ instance EffFunctor IoOps where
     liftIoOp = lifter . liftIoOp ops
   }
 
-instance Free.FreeOps IoEff where
+instance Free.FreeOps IoOps where
   mkFreeOps liftCoOp = IoOps {
     liftIoOp = \io -> liftCoOp $ LiftIoOp io id
   }
 
-instance Freer.FreeOps IoEff where
+instance Freer.FreeOps IoOps where
   mkFreeOps liftCoOp = IoOps {
     liftIoOp = \io -> liftCoOp $ LiftIoOp' io
   }
 
-instance ImplicitOps IoEff where
-  type OpsConstraint IoEff eff =
-    TaggedOpsParam IoTag IoEff eff
+instance ImplicitOps IoOps where
+  type OpsConstraint IoOps eff =
+    TaggedOpsParam IoTag IoOps eff
 
   withOps = withTag @IoTag
   captureOps = captureTag @IoTag
 
-liftIo :: forall a . IO a -> Eff IoEff a
+liftIo :: forall a . IO a -> Eff IoOps a
 liftIo = liftIoOp captureOps
 
 ioOps :: IoOps IO
@@ -76,7 +71,7 @@ ioOps = IoOps {
   liftIoOp = id
 }
 
-ioHandler :: BaseOpsHandler IoEff IO
+ioHandler :: BaseOpsHandler IoOps IO
 ioHandler = baseOpsHandler IoOps {
   liftIoOp = id
 }

@@ -99,8 +99,7 @@ library
       Control.Effect.Implicit.Base.Implicit
       Control.Effect.Implicit.Base.BaseOps
       Control.Effect.Implicit.Base.Lift
-      Control.Effect.Implicit.Base.NoEff
-      Control.Effect.Implicit.Base.EffOps
+      Control.Effect.Implicit.Base.NoOp
       Control.Effect.Implicit.Base.Union
       Control.Effect.Implicit.Base.Label
 
@@ -115,7 +114,7 @@ library
       Control.Effect.Implicit.Free.ChurchMonad
       Control.Effect.Implicit.Free.FreeMonad
       Control.Effect.Implicit.Free.FreeEff
-      Control.Effect.Implicit.Free.NoEff
+      Control.Effect.Implicit.Free.NoOp
       Control.Effect.Implicit.Free.Union
       Control.Effect.Implicit.Free.Handler
       Control.Effect.Implicit.Free.Pipeline
@@ -131,7 +130,7 @@ library
       Control.Effect.Implicit.Cast.Entail
 
       Control.Effect.Implicit.Higher.ContraLift
-      Control.Effect.Implicit.Higher.HigherOps
+      Control.Effect.Implicit.Higher.EffFunctor
       Control.Effect.Implicit.Higher.LowerOps
       Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.Union
@@ -150,10 +149,10 @@ benchmark implicit-effects-benchmark
       Benchmark.State.FreePipeline
       Benchmark.State.HandleFree
       Benchmark.State.MTL
-      Benchmark.State.StateEffToEnvEff
-      Benchmark.State.StateEffToReaderT
+      Benchmark.State.StateOpsToEnvOps
+      Benchmark.State.StateOpsToReaderT
       Benchmark.State.StateTHandler
-      Benchmark.State.StateTToEnvEffPipeline
+      Benchmark.State.StateTToEnvOpsPipeline
       Benchmark.State.WithStateT
   hs-source-dirs:
       src/benchmark

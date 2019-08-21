@@ -3,21 +3,20 @@
 module Control.Effect.Implicit.Higher.UpperOps
 where
 
+import Data.Kind
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Higher.HigherOps
+import Control.Effect.Implicit.Higher.EffFunctor
 
-data UpperEff ops
-
-data UpperOps ops inEff eff = UpperOps
-  { innerOps' :: Operation ops inEff
-  , outerOps' :: Operation ops eff
-  }
-
-instance HigherOps (UpperEff ops) where
-  type HOperation (UpperEff ops) = UpperOps ops
+data UpperOps ops
+  (inEff :: Type -> Type)
+  eff
+  = UpperOps
+    { innerOps' :: ops inEff
+    , outerOps' :: ops eff
+    }
 
 instance
-  (EffOps ops, EffFunctor (Operation ops))
+  (EffFunctor ops)
   => HigherEffFunctor (UpperOps ops)
    where
     invEffmap _ = undefined

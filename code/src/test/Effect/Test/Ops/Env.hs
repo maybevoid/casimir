@@ -7,7 +7,7 @@ import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops.Env
 
 envTests :: TestTree
-envTests = testGroup "EnvEff Tests"
+envTests = testGroup "EnvOps Tests"
   [ envOpsTest
   , envHandlerTest
   , envPipelineTest
@@ -16,7 +16,7 @@ envTests = testGroup "EnvEff Tests"
 envComp1
   :: forall a
    . (Show a)
-  => Eff (EnvEff a) String
+  => Eff (EnvOps a) String
 envComp1 = do
   env <- ask
   return $ "Env: " ++ show env
@@ -24,7 +24,7 @@ envComp1 = do
 envComp2 ::
   forall a .
   (Show a)
-  => GenericReturn (EnvEff a) String
+  => GenericReturn (EnvOps a) String
 envComp2 = genericReturn envComp1
 
 envOpsTest :: TestTree
@@ -43,7 +43,7 @@ envHandlerTest = testCase "Env handler test" $
   let
     envHandler = mkEnvHandler @Int @IO 4
     envComp3 =
-      bindOpsHandler @NoEff
+      bindOpsHandler @NoOp
         envHandler envComp2
   res <- execComp envComp3
   assertEqual
@@ -59,9 +59,9 @@ envPipelineTest = testCase "Env pipeline test" $
     envPipeline
       = opsHandlerToPipeline envHandler @(Return String)
     envComp3
-      = runPipeline @NoEff
+      = runPipeline @NoOp
         envPipeline envComp2
-  res <- execComp @NoEff envComp3
+  res <- execComp @NoOp envComp3
   assertEqual
     "Computation should read and format '5' from environment"
     "Env: 5"

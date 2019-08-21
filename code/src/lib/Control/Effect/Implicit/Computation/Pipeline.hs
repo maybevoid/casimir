@@ -32,7 +32,7 @@ newtype Pipeline ops1 handler comp1 comp2 eff1 eff2
   }
 
 data TransformerHandler t handler eff = TransformerHandler {
-  tCoOpHandler :: Operation handler (t eff),
+  tCoOpHandler :: handler (t eff),
   tLiftEff :: LiftEff eff (t eff),
   tUnliftEff :: LiftEff (t eff) eff
 }
@@ -80,7 +80,7 @@ transformePipeline handler1 = Pipeline pipeline
   {-# INLINE pipeline #-}
   pipeline :: forall ops2 comp .
     ( BaseOps ops2
-    , EffFunctor (Operation ops2)
+    , EffFunctor ops2
     , EffFunctor comp
     )
     => Computation (handler ∪ ops2) comp eff1
@@ -90,16 +90,16 @@ transformePipeline handler1 = Pipeline pipeline
     comp2
       :: forall eff2 . (Effect eff2)
       => LiftEff eff1 eff2
-      -> Operation (ops1 ∪ ops2) eff2
+      -> (ops1 ∪ ops2) eff2
       -> comp eff2
-    comp2 lift12 (UnionOps ops1 ops2) = applyEffmap unliftT comp3
+    comp2 lift12 (Union ops1 ops2) = applyEffmap unliftT comp3
      where
       TransformerHandler coopHandler liftT unliftT
         = runComp handler1 lift12 ops1
 
       comp3 :: comp (t eff2)
       comp3 = runComp comp1 (joinLift lift12 liftT) $
-        UnionOps coopHandler $ applyEffmap liftT ops2
+        Union coopHandler $ applyEffmap liftT ops2
 
 castPipelineOps
   :: forall ops1 ops2 handler comp1 comp2 eff1 eff2  .
