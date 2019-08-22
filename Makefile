@@ -26,6 +26,10 @@ repl:
 	nix-shell --pure nix/shell.nix --run \
 		"make -f make/nix.mk repl"
 
+demo:
+	nix-shell --pure nix/shell.nix --run \
+		"cabal v2-repl implicit-effects-demo"
+
 doc:
 	nix-shell --pure nix/shell.nix --run \
 		"make -f make/nix.mk doc"
@@ -43,4 +47,4 @@ test-repl:
 		"make -f make/nix.mk test-repl"
 
 .PHONY: clean-env release release-doc shell external-shell \
-	hoogle repl doc benchmark test test-repl sync
+	hoogle repl demo doc benchmark test test-repl

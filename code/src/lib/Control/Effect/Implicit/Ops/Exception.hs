@@ -6,6 +6,7 @@ import qualified Control.Exception as Ex
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Free.Handler
 import Control.Effect.Implicit.Computation
 
 import Control.Effect.Implicit.Ops.Io

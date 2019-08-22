@@ -1,0 +1,30 @@
+cabal-version: 2.2
+
+name:           implicit-effects-demo
+version:        0.1.0
+synopsis:       Algebraic Effects in Haskell using Implicit Parameters
+description:    implicit-effects is a experimental effect library to support
+                algebraic effects in Haskell.
+category:       Effect
+stability:      experimental
+homepage:       https://github.com/maybevoid/implicit-effects
+bug-reports:    https://github.com/maybevoid/implicit-effects/issues
+author:         Soares Chen
+maintainer:     Soares Chen <soares.chen@maybevoid.com>
+copyright:      Copyright (C) Soares Ruofei Chen
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/maybevoid/implicit-effects
+
+executable implicit-effects-demo
+  main-is: demo.lhs
+  hs-source-dirs: ./
+  build-depends:
+      base
+    , mtl
+    , transformers
+    , implicit-effects

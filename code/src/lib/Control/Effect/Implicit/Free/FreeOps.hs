@@ -26,9 +26,7 @@ class
     -- is used by 'Control.Effect.Implicit.Free.FreeEff' instances so that
     -- they can create a free operation for any free monad.
     mkFreeOps
-      :: forall t eff
-      . ( Effect eff
-        , Effect (t eff)
-        )
-      => (forall a . CoOperation ops a -> t eff a)
-      -> ops (t eff)
+      :: forall eff
+      . (Effect eff)
+      => (forall a . CoOperation ops a -> eff a)
+      -> ops eff

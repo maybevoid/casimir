@@ -14,9 +14,7 @@ class
   => FreeOps ops
    where
     mkFreeOps
-      :: forall t eff
-        . ( Effect eff
-          , Effect (t eff)
-          )
-      => (forall a . CoOperation ops a -> t eff a)
-      -> ops (t eff)
+      :: forall eff
+        . (Effect eff)
+      => (forall a . CoOperation ops a -> eff a)
+      -> ops eff

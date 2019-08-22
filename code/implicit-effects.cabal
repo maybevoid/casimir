@@ -71,6 +71,10 @@ library
       Control.Effect.Implicit.Cast
       Control.Effect.Implicit.Higher
 
+      Control.Effect.Implicit.Free.Handler
+      Control.Effect.Implicit.Free.FreeMonad
+      Control.Effect.Implicit.Free.ChurchMonad
+
       Control.Effect.Implicit.Ops
       Control.Effect.Implicit.Ops.Label
       Control.Effect.Implicit.Ops.Async
@@ -109,12 +113,9 @@ library
 
       Control.Effect.Implicit.Free.EffCoOp
       Control.Effect.Implicit.Free.FreeOps
-      Control.Effect.Implicit.Free.ChurchMonad
-      Control.Effect.Implicit.Free.FreeMonad
       Control.Effect.Implicit.Free.FreeEff
       Control.Effect.Implicit.Free.NoOp
       Control.Effect.Implicit.Free.Union
-      Control.Effect.Implicit.Free.Handler
       Control.Effect.Implicit.Free.Pipeline
 
       Control.Effect.Implicit.Freer.EffCoOp
@@ -158,7 +159,7 @@ benchmark implicit-effects-benchmark
       implicit-effects
     , criterion
 
-executable implicit-effects-demo
+executable implicit-effects-demo2
   import: deps
   main-is: Main.hs
   other-modules:

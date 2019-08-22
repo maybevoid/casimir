@@ -1,6 +1,8 @@
 
 module Control.Effect.Implicit.Free.ChurchMonad
   ( ChurchMonad (..)
+  , withCoOpHandler
+  , withCoOpHandlerAndOps
   )
 where
 
@@ -10,10 +12,38 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Free.EffCoOp
 import Control.Effect.Implicit.Free.FreeOps
 import Control.Effect.Implicit.Free.FreeEff
+import qualified Control.Effect.Implicit.Free.Handler as Handler
 
 newtype ChurchMonad ops eff a = ChurchMonad {
   runChurchMonad :: forall r . CoOpHandler ops a r eff -> eff r
 }
+
+withCoOpHandler
+  :: forall handler eff a r
+   . ( Effect eff
+     , FreeOps handler
+     , BaseOps handler
+     )
+  => CoOpHandler handler a r eff
+  -> ((OpsConstraint handler (ChurchMonad handler eff))
+      => ChurchMonad handler eff a)
+  -> eff r
+withCoOpHandler = Handler.withCoOpHandler @ChurchMonad
+
+withCoOpHandlerAndOps
+  :: forall ops handler eff a r
+    . ( BaseOps ops
+      , FreeOps handler
+      , BaseOps handler
+      , EffConstraint ops eff
+      )
+  => CoOpHandler handler a r eff
+  -> (( OpsConstraint handler (ChurchMonad handler eff)
+      , OpsConstraint ops (ChurchMonad handler eff)
+      )
+      => ChurchMonad handler eff a)
+  -> eff r
+withCoOpHandlerAndOps = Handler.withCoOpHandlerAndOps @ChurchMonad @ops
 
 instance
   (Monad eff, FreeOps ops)

@@ -1,2 +1,2 @@
-packages: code
+packages: code demo
 write-ghc-environment-files: never

@@ -9,6 +9,7 @@ import Test.Tasty.HUnit
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Free
+import Control.Effect.Implicit.Free.Handler
 
 ambivalentTests :: TestTree
 ambivalentTests = testGroup "Ambivalent Tests"
