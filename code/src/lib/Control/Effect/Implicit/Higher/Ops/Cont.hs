@@ -14,6 +14,11 @@ data ContOps inEff eff = ContOps {
     -> eff a
 }
 
+instance
+  (Effect inEff)
+  => EffFunctor (ContOps inEff) where
+    effmap _ = undefined
+
 instance HigherEffFunctor ContOps where
   invEffmap
     :: forall eff1 eff2
@@ -70,7 +75,6 @@ instance HigherEffFunctor ContOps where
             cont9 :: eff2 a
             cont9 = cont1 cont6
 
-  outerEffmap _ = undefined
   contraEffmap _ = undefined
 
 contTOps

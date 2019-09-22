@@ -5,6 +5,7 @@ where
 
 import Data.Kind
 
+import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.EffFunctor
 
 infixr 7 ⊎
@@ -18,6 +19,12 @@ data HUnion ops1 ops2
      (ops2 eff1 eff2)
 
 instance
+  (Effect eff, EffFunctor (ops1 eff), EffFunctor (ops2 eff))
+  => EffFunctor (HUnion ops1 ops2 eff)
+  where
+    effmap _ = undefined
+
+instance
   (HigherEffFunctor ops1, HigherEffFunctor ops2)
   => HigherEffFunctor (HUnion ops1 ops2)
    where
@@ -25,11 +32,6 @@ instance
       HUnion
         (invEffmap lifter contraLifter ops1)
         (invEffmap lifter contraLifter ops2)
-
-    outerEffmap lifter (HUnion ops1 ops2) =
-      HUnion
-        (outerEffmap lifter ops1)
-        (outerEffmap lifter ops2)
 
     contraEffmap lifter contraLifter (HUnion ops1 ops2) =
       HUnion

@@ -16,6 +16,11 @@ data ReaderOps e inEff eff = ReaderOps
       -> eff a
   }
 
+instance
+  (Effect inEff)
+  => EffFunctor (ReaderOps e inEff) where
+    effmap _ = undefined
+
 instance HigherEffFunctor (ReaderOps e) where
   invEffmap
     :: forall eff1 eff2
@@ -46,5 +51,4 @@ instance HigherEffFunctor (ReaderOps e) where
           comp2 = localOp ops modifyEnv $
             contraLiftEff contraLift2 comp1
 
-  outerEffmap _ = undefined
   contraEffmap _ = undefined

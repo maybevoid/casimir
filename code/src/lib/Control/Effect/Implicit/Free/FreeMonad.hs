@@ -30,6 +30,8 @@ deriving newtype
 instance FreeEff FreeMonad where
   freeOps = freeMonadOps
   liftFree = liftFreeMonad
+
+instance FreeHandler FreeMonad where
   handleFree = handleFreeMonad
 
 liftFreeMonad

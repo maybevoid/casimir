@@ -96,7 +96,7 @@ tryIoHandler = genericOpsHandler $ IoOps {
 try
   :: forall free eff e a
    . ( Effect eff
-     , FreeEff free
+     , FreeHandler free
      )
   => (OpsConstraint (ExceptionOps e) (free (ExceptionOps e) eff)
       => free (ExceptionOps e) eff a)
@@ -110,7 +110,7 @@ try comp handler1 = withCoOpHandler @free handler2 comp
 
 tryFinally
   :: forall free eff e a
-   . ( FreeEff free
+   . ( FreeHandler free
      , EffConstraint (ExceptionOps e) eff
      )
   => ((OpsConstraint (ExceptionOps e) (free (ExceptionOps e) eff))
@@ -134,7 +134,7 @@ tryFinally comp handler1 =
 
 tryComp
   :: forall free eff ops e a
-   . ( FreeEff free
+   . ( FreeHandler free
      , BaseOps ops
      , EffConstraint ops eff
      )
@@ -153,7 +153,7 @@ tryComp comp1 handler1 = handleFree handler2 comp2
 
 bracketComp
   :: forall free eff ops e a b
-   . ( FreeEff free
+   . ( FreeHandler free
      , BaseOps ops
      , EffConstraint ops eff
      )

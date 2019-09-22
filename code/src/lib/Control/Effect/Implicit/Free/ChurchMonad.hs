@@ -12,6 +12,8 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Free.EffCoOp
 import Control.Effect.Implicit.Free.FreeOps
 import Control.Effect.Implicit.Free.FreeEff
+-- import Control.Effect.Implicit.Higher.ContraLift
+
 import qualified Control.Effect.Implicit.Free.Handler as Handler
 
 newtype ChurchMonad ops eff a = ChurchMonad {
@@ -71,6 +73,10 @@ instance
   where
     freeOps = churchOps
     liftFree = liftChurchMonad
+
+instance
+  FreeHandler ChurchMonad
+   where
     handleFree handler eff = runChurchMonad eff handler
 
 liftChurchMonad

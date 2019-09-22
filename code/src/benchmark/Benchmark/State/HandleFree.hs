@@ -13,7 +13,7 @@ import Benchmark.State.Base
 
 handleFreeComp
   :: forall free eff
-   . (Free.FreeEff free, Effect eff)
+   . (Free.FreeHandler free, Effect eff)
   => Int
   -> eff ()
 handleFreeComp s

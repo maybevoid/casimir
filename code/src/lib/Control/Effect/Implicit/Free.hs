@@ -3,6 +3,7 @@ module Control.Effect.Implicit.Free
   , FreeOps (..)
   , CoOpHandler (..)
   , FreeEff (..)
+  , FreeHandler (..)
   , NoCoOp (..)
   , UnionCoOp (..)
   , ChurchMonad (..)

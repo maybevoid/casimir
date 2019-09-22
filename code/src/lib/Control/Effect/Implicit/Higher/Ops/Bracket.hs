@@ -17,6 +17,11 @@ data BracketOps inEff eff = BracketOps {
     -> eff b
 }
 
+instance
+  (Effect inEff)
+  => EffFunctor (BracketOps inEff) where
+    effmap _ = undefined
+
 instance HigherEffFunctor BracketOps where
   invEffmap
     :: forall eff1 eff2
@@ -52,8 +57,16 @@ instance HigherEffFunctor BracketOps where
             cont4 :: a -> eff1 (w b)
             cont4 x = contraLiftEff contraLift2 $ cont1 x
 
-  outerEffmap _ = undefined
   contraEffmap _ = undefined
+
+-- bracket
+--   :: forall inEff eff a b
+--    . (Effect inEff, Effect eff)
+--   => IO a
+--   -> (a -> IO ())
+--   -> (a -> inEff b)
+--   -> eff b
+-- bracket
 
 ioBracketOps :: BracketOps IO IO
 ioBracketOps = BracketOps bracket

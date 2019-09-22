@@ -69,7 +69,7 @@ awaitAll = awaitAllOp captureOps
 
 handleAsync
   :: forall free eff a t
-   . ( FreeEff free
+   . ( FreeHandler free
      , EffConstraint IoOps eff
      )
   => (forall x

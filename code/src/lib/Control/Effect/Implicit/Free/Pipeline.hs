@@ -19,7 +19,7 @@ coopHandlerToPipeline
   , BaseOps ops1
   , FreeOps handler
   , BaseOps handler
-  , FreeEff free
+  , FreeHandler free
   )
   => Computation ops1 (CoOpHandler handler a b) eff1
   -> Pipeline ops1 handler (Return a) (Return b) eff1 eff1
@@ -58,7 +58,7 @@ genericCoOpHandlerToPipeline
   , BaseOps ops1
   , FreeOps handler
   , BaseOps handler
-  , FreeEff free
+  , FreeHandler free
   )
   => Computation ops1 (GenericCoOpHandler handler) eff1
   -> GenericPipeline ops1 handler eff1
@@ -89,7 +89,7 @@ contextualHandlerToPipeline
   , BaseOps ops1
   , FreeOps handler
   , BaseOps handler
-  , FreeEff free
+  , FreeHandler free
   )
   => Computation ops1 (ContextualHandler w handler) eff1
   -> GenericPipeline ops1 handler eff1

@@ -95,6 +95,7 @@ library
       Control.Effect.Implicit.Higher.Ops.Bracket
       Control.Effect.Implicit.Higher.Ops.Reader
       Control.Effect.Implicit.Higher.Ops.Cont
+      Control.Effect.Implicit.Higher.Ops.Exception
 
   other-modules:
       Control.Effect.Implicit.Base.Effect

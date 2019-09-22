@@ -15,10 +15,16 @@ data UpperOps ops
     , outerOps' :: ops eff
     }
 
+
+instance
+  (Effect eff, EffFunctor ops)
+  => EffFunctor (UpperOps ops eff)
+  where
+    effmap _ = undefined
+
 instance
   (EffFunctor ops)
   => HigherEffFunctor (UpperOps ops)
    where
     invEffmap _ = undefined
-    outerEffmap _ = undefined
     contraEffmap _ = undefined

@@ -1,6 +1,7 @@
 
 module Control.Effect.Implicit.Free.FreeEff
   ( FreeEff (..)
+  , FreeHandler (..)
   , CoOpHandler (..)
   , GenericCoOpHandler (..)
   , ContextualHandler (..)
@@ -29,6 +30,10 @@ class
       (FreeOps ops, Effect eff)
       => eff a -> free ops eff a
 
+class
+  (FreeEff free)
+  => FreeHandler free
+   where
     handleFree
       :: forall ops eff a r
       . (Effect eff, FreeOps ops)

@@ -17,7 +17,7 @@ withCoOpHandler
    . ( Effect eff
      , FreeOps handler
      , BaseOps handler
-     , FreeEff free
+     , FreeHandler free
      )
   => CoOpHandler handler a r eff
   -> ((OpsConstraint handler (free handler eff))
@@ -33,7 +33,7 @@ withCoOpHandlerAndOps
     . ( BaseOps ops
       , FreeOps handler
       , BaseOps handler
-      , FreeEff free
+      , FreeHandler free
       , EffConstraint ops eff
       )
   => CoOpHandler handler a r eff
@@ -56,7 +56,7 @@ withContextualCoOpHandler
    . ( Effect eff
      , FreeOps handler
      , BaseOps handler
-     , FreeEff free
+     , FreeHandler free
      )
   => CoOpHandler handler a r eff
   -> (r -> eff a)
