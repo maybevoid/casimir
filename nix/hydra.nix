@@ -1,10 +1,8 @@
 let
-  pkgs = import <nixpkgs> {};
-
-  jobs = rec {
+  jobs = {
     build = { system ? builtins.currentSystem }:
       let
-        nixpkgs = import <nixpkgs> { inherit system; };
+        nixpkgs = import ./nixpkgs.nix { inherit system; };
       in
 
       import ./release.nix {
