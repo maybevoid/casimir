@@ -251,6 +251,3 @@ ops3
      )
      IO
 ops3 = Union ops1 ops2
-
--- uniqueCast :: OpsCast (EnvOps Int ∪ EnvOps String) (EnvOps Int ∪ EnvOps String)
--- uniqueCast = entailOps @(EnvOps Int ∪ EnvOps String) @(EnvOps Int ∪ EnvOps String)
