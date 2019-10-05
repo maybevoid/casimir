@@ -15,6 +15,18 @@ data ContraLiftEff eff1 eff2 where
      . eff2 (ContraLiftOps eff1 eff2 w)
     -> ContraLiftEff eff1 eff2
 
+type ContraLiftOps' eff1 eff2 w =
+  forall a
+   . ((forall x . eff2 x -> eff1 (w x))
+      -> eff1 (w a))
+  -> eff2 a
+
+data ContraLiftEff' eff1 eff2 where
+  ContraLiftEff'
+    :: forall eff1 eff2 w
+     . ContraLiftOps' eff1 eff2 w
+    -> ContraLiftEff' eff1 eff2
+
 withContraLift
   :: forall eff1 eff2 r
    . (Effect eff1, Effect eff2)

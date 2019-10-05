@@ -2,6 +2,7 @@
 module Control.Effect.Implicit.Transform.State
 where
 
+import Data.Tuple (swap)
 import Control.Monad.State.Class (MonadState  (..))
 import Control.Monad.Trans.State.Strict (StateT, evalStateT, runStateT)
 
@@ -60,6 +61,26 @@ stateTContraLift = ContraLiftEff contraLift1
     resume (s2, x) = do
       put s2
       return x
+
+stateTContraLift'
+  :: forall eff s
+   . (Effect eff)
+  => ContraLiftEff' eff (StateT s eff)
+stateTContraLift' = ContraLiftEff' contraLift1
+ where
+  contraLift1
+    :: forall a
+     . ((forall x . StateT s eff x -> eff (s, x))
+        -> eff (s, a))
+    -> StateT s eff a
+  contraLift1 cont1 = do
+    s1 <- get
+    let
+      contraLift2 :: forall x . StateT s eff x -> eff (s, x)
+      contraLift2 comp = swap <$> runStateT comp s1
+    (s2, x) <- lift $ cont1 contraLift2
+    put s2
+    return x
 
 stateTHandler
   :: forall eff s .

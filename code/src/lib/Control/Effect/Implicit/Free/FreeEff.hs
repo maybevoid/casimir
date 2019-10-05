@@ -19,7 +19,10 @@ data CoOpHandler handler a r eff = CoOpHandler {
 }
 
 class
-  (forall ops eff . (FreeOps ops, Effect eff) => Monad (free ops eff))
+  ( forall ops eff
+    . (FreeOps ops, Effect eff)
+    => Monad (free ops eff)
+  )
   => FreeEff free
   where
     freeOps :: forall ops eff .

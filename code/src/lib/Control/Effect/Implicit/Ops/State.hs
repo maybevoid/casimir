@@ -21,9 +21,9 @@ data StateOps s eff = StateOps {
   putOp :: s -> eff ()
 }
 
-data StateCoOp s a =
-    GetOp (s -> a)
-  | PutOp s (() -> a)
+data StateCoOp s r =
+    GetOp (s -> r)
+  | PutOp s (() -> r)
 
 data FreerStateCoOp s a where
   GetOp' :: FreerStateCoOp s s

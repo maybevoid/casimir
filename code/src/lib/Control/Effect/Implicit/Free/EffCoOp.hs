@@ -21,4 +21,4 @@ class EffCoOp (ops :: (Type -> Type) -> Type) where
   -- 'Control.Effect.Implicit.Free.ChurchMonad' or
   -- 'Control.Effect.Implicit.Free.FreeMonad'
   type family CoOperation ops
-    = (coop :: (Type -> Type)) | coop -> ops
+    = (coop :: Type -> Type) | coop -> ops
