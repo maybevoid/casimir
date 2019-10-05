@@ -134,6 +134,7 @@ library
       Control.Effect.Implicit.Higher.LowerOps
       Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.Union
+      Control.Effect.Implicit.Higher.Free
 
   hs-source-dirs:
       src/lib

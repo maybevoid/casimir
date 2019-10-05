@@ -32,23 +32,24 @@ instance HigherEffFunctor (ReaderOps e) where
     -> ReaderOps e eff1 eff1
     -> ReaderOps e eff2 eff2
   invEffmap lifter contraLift1 ops
-    = ReaderOps
-        (effmap lifter $ innerEnvOps ops)
-        (effmap lifter $ outerEnvOps ops)
-        local
-    where
-      local :: forall a . (e -> e) -> eff2 a -> eff2 a
-      local modifyEnv comp1 = withContraLift contraLift1 cont
-       where
-        cont :: forall w
-              . ContraLiftOps eff1 eff2 w
-             -> eff2 a
-        cont contraLift2 = do
-          res <- lifter comp2
-          liftResume contraLift2 res
-         where
-          comp2 :: eff1 (w a)
-          comp2 = localOp ops modifyEnv $
-            contraLiftEff contraLift2 comp1
+    = undefined
+    -- = ReaderOps
+    --     (effmap lifter $ innerEnvOps ops)
+    --     (effmap lifter $ outerEnvOps ops)
+    --     local
+    -- where
+    --   local :: forall a . (e -> e) -> eff2 a -> eff2 a
+    --   local modifyEnv comp1 = withContraLift contraLift1 cont
+    --    where
+    --     cont :: forall w
+    --           . ContraLiftOps eff1 eff2 w
+    --          -> eff2 a
+    --     cont contraLift2 = do
+    --       res <- lifter comp2
+    --       liftResume contraLift2 res
+    --      where
+    --       comp2 :: eff1 (w a)
+    --       comp2 = localOp ops modifyEnv $
+    --         contraLiftEff contraLift2 comp1
 
   contraEffmap _ = undefined

@@ -5,7 +5,6 @@ module Control.Effect.Implicit.Higher
   , module Control.Effect.Implicit.Higher.Union
   , module Control.Effect.Implicit.Higher.LowerOps
   , module Control.Effect.Implicit.Higher.UpperOps
-  , module Control.Effect.Implicit.Higher.Free
   )
 where
 
@@ -14,4 +13,3 @@ import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.Union
 import Control.Effect.Implicit.Higher.LowerOps
 import Control.Effect.Implicit.Higher.UpperOps
-import Control.Effect.Implicit.Higher.Free

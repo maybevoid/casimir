@@ -44,31 +44,6 @@ stateTContraLift
 stateTContraLift = ContraLiftEff contraLift1
  where
   contraLift1
-    :: StateT s eff (ContraLiftOps eff (StateT s eff) ((,) s))
-  contraLift1 = do
-    s <- get
-    return $ contraLift2 s
-
-  contraLift2 :: s -> ContraLiftOps eff (StateT s eff) ((,) s)
-  contraLift2 s1 = ContraLiftOps suspend resume
-   where
-    suspend :: forall a . StateT s eff a -> eff (s, a)
-    suspend comp = do
-      (x, s2) <- runStateT comp s1
-      return $ (s2, x)
-
-    resume :: forall a . (s, a) -> StateT s eff a
-    resume (s2, x) = do
-      put s2
-      return x
-
-stateTContraLift'
-  :: forall eff s
-   . (Effect eff)
-  => ContraLiftEff' eff (StateT s eff)
-stateTContraLift' = ContraLiftEff' contraLift1
- where
-  contraLift1
     :: forall a
      . ((forall x . StateT s eff x -> eff (s, x))
         -> eff (s, a))
