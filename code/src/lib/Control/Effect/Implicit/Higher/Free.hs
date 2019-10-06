@@ -3,10 +3,7 @@ module Control.Effect.Implicit.Higher.Free
 where
 
 import Data.Kind
-import Control.Monad.Identity
 
-import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
 
 class EffCoOp
@@ -34,9 +31,9 @@ data CoOpHandler
 
 class CoOpFunctor ops where
   mapCoOpHandler
-    :: forall f1 f2
+    :: forall w f1 f2
      . Monad f2
     => (forall x . f1 x -> f2 x)
-    -> ContraLiftEff f1 f2
+    -> ContraLift w f1 f2
     -> CoOpHandler ops f1
     -> CoOpHandler ops f2

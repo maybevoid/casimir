@@ -3,7 +3,6 @@ module Control.Effect.Implicit.Higher.Ops.Bracket
 where
 
 import Control.Exception (bracket)
-import Control.Monad.Identity
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.EffFunctor
@@ -35,16 +34,16 @@ instance
 
 instance HigherEffFunctor BracketOps where
   invEffmap
-    :: forall eff1 eff2
+    :: forall w eff1 eff2
       . ( Effect eff1
         , Effect eff2
         )
     => (forall x . eff1 x -> eff2 x)
-    -> ContraLiftEff eff1 eff2
+    -> ContraLift w eff1 eff2
     -> BracketOps eff1 eff1
     -> BracketOps eff2 eff2
   invEffmap _
-    (ContraLiftEff contraLift1)
+    (ContraLift contraLift1)
     (BracketOps doBracket) =
       BracketOps ops
        where
@@ -57,8 +56,7 @@ instance HigherEffFunctor BracketOps where
         ops alloc release cont1 = contraLift1 cont2
          where
           cont2
-            :: forall w
-            . (eff2 b -> eff1 (w b))
+            :: (forall x . eff2 x -> eff1 (w x))
             -> eff1 (w b)
           cont2 contraLift2 = doBracket alloc release cont3
            where
@@ -90,15 +88,15 @@ bracketCoOpHandler = CoOpHandler return handleOp
 
 instance CoOpFunctor BracketOps where
   mapCoOpHandler
-    :: forall f1 f2
+    :: forall w f1 f2
      . (Monad f2)
     => (forall x . f1 x -> f2 x)
-    -> ContraLiftEff f1 f2
+    -> ContraLift w f1 f2
     -> CoOpHandler BracketOps f1
     -> CoOpHandler BracketOps f2
   mapCoOpHandler
     lift
-    (ContraLiftEff contraLift1)
+    (ContraLift contraLift1)
     (CoOpHandler handleReturn1 handleOp1) =
     CoOpHandler handleReturn2 handleOp2
      where
@@ -128,8 +126,7 @@ instance CoOpFunctor BracketOps where
               res1 = contraLift1 cont3
 
               cont3
-                :: forall w
-                 . (forall x . f2 x -> f1 (w x))
+                :: (forall x . f2 x -> f1 (w x))
                 -> f1 (w c)
               cont3 contraLift2 = handleOp1 $
                 BracketOp alloc2 release2 comp3 handleReturn1

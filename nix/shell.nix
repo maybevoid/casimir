@@ -14,5 +14,6 @@ pkgs.mkShell {
   buildInputs = [
     pkgs.glibcLocales
     haskellPackages.cabal-install
+    haskellPackages.ghcid
   ];
 }
