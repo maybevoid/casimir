@@ -1,0 +1,24 @@
+{
+  "enabled": 1,
+  "hidden": false,
+  "description": "Algebraic Effects in Haskell",
+  "nixexprinput": "implicit-effects",
+  "nixexprpath": "nix/jobsets.nix",
+  "checkinterval": 60,
+  "schedulingshares": 100,
+  "enableemail": false,
+  "emailoverride": "",
+  "keepnr": 3,
+  "inputs": {
+    "implicit-effects": {
+      "type": "git",
+      "value": "https://github.com/maybevoid/implicit-effects.git master",
+      "emailresponsible": false
+    },
+    "nixpkgs": {
+      "type": "git",
+      "value": "https://github.com/NixOS/nixpkgs.git release-19.03",
+      "emailresponsible": false
+    }
+  }
+}
