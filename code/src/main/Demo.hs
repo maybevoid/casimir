@@ -218,36 +218,36 @@ decideComp6 :: Computation NoOp (Return [Int]) IO
 decideComp6 = runPipeline
   ioPipeline decideComp5
 
-decideComp7 :: IO [Int]
-decideComp7 = returnVal $ runComp decideComp6 idLift NoOp
+-- decideComp7 :: IO [Int]
+-- decideComp7 = returnVal $ runComp decideComp6 idLift NoOp
 
-pipeline1
-  :: Pipeline
-      NoOp
-      (Union (DecideOps Bool) IoOps)
-      (Return Int)
-      (Return [Int])
-      IO
-      IO
-pipeline1 = composePipelines
-  ioPipeline nonDetPipeline
+-- pipeline1
+--   :: Pipeline
+--       NoOp
+--       (Union (DecideOps Bool) IoOps)
+--       (Return Int)
+--       (Return [Int])
+--       IO
+--       IO
+-- pipeline1 = composePipelines
+--   ioPipeline nonDetPipeline
 
-decideComp8 :: IO [Int]
-decideComp8 = returnVal $ runComp comp idLift NoOp
- where
-  comp :: Computation NoOp (Return [Int]) IO
-  comp = runPipeline
-    pipeline1 decideComp2
+-- decideComp8 :: IO [Int]
+-- decideComp8 = returnVal $ runComp comp idLift NoOp
+--  where
+--   comp :: Computation NoOp (Return [Int]) IO
+--   comp = runPipeline
+--     pipeline1 decideComp2
 
-ops1 :: ((EnvOps Int) ∪ IoOps) IO
-ops1 = Union (mkEnvOps 2) ioOps
+-- ops1 :: ((EnvOps Int) ∪ IoOps) IO
+-- ops1 = Union (mkEnvOps 2) ioOps
 
-ops2 :: (IoOps ∪ (EnvOps Int)) IO
-ops2 = Union ioOps (mkEnvOps 3)
+-- ops2 :: (IoOps ∪ (EnvOps Int)) IO
+-- ops2 = Union ioOps (mkEnvOps 3)
 
-ops3
-  :: ( ((EnvOps Int) ∪ IoOps)
-     ∪ (IoOps ∪ (EnvOps Int))
-     )
-     IO
-ops3 = Union ops1 ops2
+-- ops3
+--   :: ( ((EnvOps Int) ∪ IoOps)
+--      ∪ (IoOps ∪ (EnvOps Int))
+--      )
+--      IO
+-- ops3 = Union ops1 ops2
