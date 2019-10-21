@@ -40,7 +40,7 @@ stateTOps = StateOps {
 stateTContraLift
   :: forall eff s
    . (Effect eff)
-  => ContraLift ((,) s) eff (StateT s eff)
+  => ContraLift eff (StateT s eff)
 stateTContraLift = ContraLift contraLift1
  where
   contraLift1

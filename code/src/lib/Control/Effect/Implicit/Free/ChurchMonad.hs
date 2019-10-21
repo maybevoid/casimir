@@ -12,7 +12,6 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Free.EffCoOp
 import Control.Effect.Implicit.Free.FreeOps
 import Control.Effect.Implicit.Free.FreeEff
--- import Control.Effect.Implicit.Higher.ContraLift
 
 import qualified Control.Effect.Implicit.Free.Handler as Handler
 

@@ -18,14 +18,14 @@ data BracketOps inEff eff = BracketOps {
     -> eff b
 }
 
-data BracketCoOp f a where
+data BracketCoOp f r where
   BracketOp
-    :: forall f a b c
+    :: forall f a b r
      . IO a
     -> (a -> IO ())
     -> (a -> f b)
-    -> (b -> f c)
-    -> BracketCoOp f c
+    -> (b -> f r)
+    -> BracketCoOp f r
 
 instance
   (Effect inEff)
@@ -34,12 +34,12 @@ instance
 
 instance HigherEffFunctor BracketOps where
   invEffmap
-    :: forall w eff1 eff2
+    :: forall eff1 eff2
       . ( Effect eff1
         , Effect eff2
         )
     => (forall x . eff1 x -> eff2 x)
-    -> ContraLift w eff1 eff2
+    -> ContraLift eff1 eff2
     -> BracketOps eff1 eff1
     -> BracketOps eff2 eff2
   invEffmap _
@@ -56,7 +56,8 @@ instance HigherEffFunctor BracketOps where
         ops alloc release cont1 = contraLift1 cont2
          where
           cont2
-            :: (forall x . eff2 x -> eff1 (w x))
+            :: forall w
+             . (forall x . eff2 x -> eff1 (w x))
             -> eff1 (w b)
           cont2 contraLift2 = doBracket alloc release cont3
            where
@@ -74,62 +75,61 @@ instance EffCoOp BracketOps where
 instance
   (Functor f)
   => Functor (BracketCoOp f) where
-    fmap mapper (BracketOp alloc release comp cont1) =
-      BracketOp alloc release comp cont2
-       where
-        cont2 = fmap (fmap mapper) cont1
+    fmap f (BracketOp alloc release comp cont) =
+      BracketOp alloc release comp (fmap (fmap f) cont)
 
-bracketCoOpHandler
-  :: CoOpHandler BracketOps IO
-bracketCoOpHandler = CoOpHandler return handleOp
- where
-  handleOp (BracketOp alloc release comp cont) =
-    bracket alloc release comp >>= cont
+-- bracketCoOpHandler
+--   :: CoOpHandler BracketOps IO
+-- bracketCoOpHandler = CoOpHandler return handleOp
+--  where
+--   handleOp (BracketOp alloc release comp cont) =
+--     bracket alloc release comp >>= cont
 
-instance CoOpFunctor BracketOps where
-  mapCoOpHandler
-    :: forall w f1 f2
-     . (Monad f2)
-    => (forall x . f1 x -> f2 x)
-    -> ContraLift w f1 f2
-    -> CoOpHandler BracketOps f1
-    -> CoOpHandler BracketOps f2
-  mapCoOpHandler
-    lift
-    (ContraLift contraLift1)
-    (CoOpHandler handleReturn1 handleOp1) =
-    CoOpHandler handleReturn2 handleOp2
-     where
-      handleReturn2
-        :: forall a . a -> f2 a
-      handleReturn2 = lift . handleReturn1
+-- instance CoOpFunctor BracketOps where
+--   mapCoOpHandler
+--     :: forall f1 f2
+--      . (Monad f2)
+--     => (forall x . f1 x -> f2 x)
+--     -> ContraLift f1 f2
+--     -> CoOpHandler BracketOps f1
+--     -> CoOpHandler BracketOps f2
+--   mapCoOpHandler
+--     lift
+--     (ContraLift contraLift1)
+--     (CoOpHandler handleReturn1 handleOp1) =
+--     CoOpHandler handleReturn2 handleOp2
+--      where
+--       handleReturn2
+--         :: forall a . a -> f2 a
+--       handleReturn2 = lift . handleReturn1
 
-      handleOp2
-        :: forall a
-         . BracketCoOp f2 a
-        -> f2 a
-      handleOp2
-        (BracketOp alloc1 release1 comp1 cont1)
-        = handleOp3 alloc1 release1 comp1 cont1
-         where
-          handleOp3
-            :: forall b c
-             . IO b
-            -> (b -> IO ())
-            -> (b -> f2 c)
-            -> (c -> f2 a)
-            -> f2 a
-          handleOp3 alloc2 release2 comp2 cont2 =
-            res1 >>= cont2
-             where
-              res1 :: f2 c
-              res1 = contraLift1 cont3
+--       handleOp2
+--         :: forall a
+--          . BracketCoOp f2 a
+--         -> f2 a
+--       handleOp2
+--         (BracketOp alloc1 release1 comp1 cont1)
+--         = handleOp3 alloc1 release1 comp1 cont1
+--          where
+--           handleOp3
+--             :: forall b c
+--              . IO b
+--             -> (b -> IO ())
+--             -> (b -> f2 c)
+--             -> (c -> f2 a)
+--             -> f2 a
+--           handleOp3 alloc2 release2 comp2 cont2 =
+--             res1 >>= cont2
+--              where
+--               res1 :: f2 c
+--               res1 = contraLift1 cont3
 
-              cont3
-                :: (forall x . f2 x -> f1 (w x))
-                -> f1 (w c)
-              cont3 contraLift2 = handleOp1 $
-                BracketOp alloc2 release2 comp3 handleReturn1
-               where
-                comp3 :: (b -> f1 (w c))
-                comp3 = contraLift2 . comp2
+--               cont3
+--                 :: forall w
+--                  . (forall x . f2 x -> f1 (w x))
+--                 -> f1 (w c)
+--               cont3 contraLift2 = handleOp1 $
+--                 BracketOp alloc2 release2 comp3 handleReturn1
+--                where
+--                 comp3 :: (b -> f1 (w c))
+--                 comp3 = contraLift2 . comp2

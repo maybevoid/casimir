@@ -21,12 +21,12 @@ instance
 
 instance HigherEffFunctor ContOps where
   invEffmap
-    :: forall w eff1 eff2
+    :: forall eff1 eff2
       . ( Effect eff1
         , Effect eff2
         )
     => (forall x . eff1 x -> eff2 x)
-    -> ContraLift w eff1 eff2
+    -> ContraLift eff1 eff2
     -> ContOps eff1 eff1
     -> ContOps eff2 eff2
   invEffmap lifter (ContraLift contraLift1) ops =
@@ -45,7 +45,8 @@ instance HigherEffFunctor ContOps where
     callCC2 cont1 = contraLift1 cont2
      where
       cont2
-        :: (forall x . eff2 x -> eff1 (w x))
+        :: forall w
+         . (forall x . eff2 x -> eff1 (w x))
         -> eff1 (w a)
       cont2 contraLift2 = callCC1 cont3
        where
