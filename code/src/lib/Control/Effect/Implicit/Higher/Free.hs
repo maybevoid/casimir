@@ -8,7 +8,18 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
 
-newtype Nest f a = Nest (f (f a))
+newtype Nest eff f a = Nest (eff (f a))
+
+data ContraFree eff f = ContraFree {
+  runContraFree
+    :: forall a b
+     . (forall w
+         . (Functor w)
+        => (forall x . f x -> eff (w x))
+        -> eff (w a))
+    -> (a -> eff (f b))
+    -> eff (f b)
+}
 
 class EffCoOp
   (ops :: (Type -> Type) -> (Type -> Type) -> Type)
@@ -22,35 +33,27 @@ class EffCoOp
 
 data CoOpHandler
   (ops :: (Type -> Type) -> (Type -> Type) -> Type)
+  (eff :: Type -> Type)
   (f :: Type -> Type)
   = CoOpHandler
     { returnHandler
-        :: forall a . a -> f a
+        :: forall a . a -> eff (f a)
 
-    , joinHandler
-        :: forall f a
-         . f (f a)
-        -> f a
-
-    , coOpHandler
+    , operationHandler
         :: forall a r
-        . CoOperation ops f a
-        -> (a -> f (f r))
-        -> f r
+        . CoOperation ops (Nest eff f) a
+        -> (a -> eff (f r))
+        -> eff (f r)
     }
 
 class
   ( EffCoOp ops
+  , forall f
+     . (Functor f)
+    => Functor (CoOperation ops f)
   )
   => CoOpFunctor ops
   where
-    mapCoOp
-      :: forall f a b
-       . (Functor f)
-      => (a -> b)
-      -> CoOperation ops f a
-      -> CoOperation ops f b
-
     liftCoOp
       :: forall f1 f2 a
        . (Functor f1, Functor f2)
@@ -65,15 +68,15 @@ class
   )
   => FreeOps ops where
     mkFreeOps
-      :: forall f eff
+      :: forall eff
       . (Effect eff)
-      => (forall a . CoOperation ops f a -> eff a)
+      => (forall a . CoOperation ops eff a -> eff a)
       -> ops eff eff
 
 class
   ( forall ops eff
     . (FreeOps ops, Effect eff)
-    => Monad (free ops eff)
+    => Effect (free ops eff)
   )
   => FreeEff free
    where
@@ -90,39 +93,47 @@ class
   (FreeEff free)
   => FreeHandler free
    where
-    handleFree
-      :: forall ops eff t a r
-       . ( Effect eff
-         , FreeOps ops
-         , Functor (t eff)
-         )
-      => CoOpHandler ops (t eff)
-      -> free ops eff a
-      -> (a -> t eff r)
-      -> t eff r
-
-class
-  (FreeEff free)
-  => HigherFreeHandler free
-   where
-    handleContraLift
+    freeContraLift
       :: forall eff ops
        . ( Effect eff
          , FreeOps ops
          )
       => ContraLift eff (free ops eff)
 
-    handleHigherFree
-      :: forall ops eff t a r
+    handleFree
+      :: forall ops eff f a
        . ( Effect eff
          , FreeOps ops
-         , Functor (t eff)
+         , Functor f
          )
-      => CoOpHandler ops (t eff)
-      -> ContraLift eff (t eff)
+      => CoOpHandler ops eff f
+      -> ContraFree eff f
       -> free ops eff a
-      -> (a -> t eff r)
-      -> t eff r
+      -> eff (f a)
+
+data CoState s eff a = CoState {
+  runCoState :: s -> eff (s, a)
+}
+
+contraState
+  :: forall s eff
+   . (Effect eff)
+  => ContraFree eff (CoState s eff)
+contraState = ContraFree handler1
+ where
+  handler1
+    :: forall a b
+     . ((forall x . CoState s eff x -> eff (s, x))
+        -> eff (s, a))
+    -> (a -> eff (CoState s eff b))
+    -> eff (CoState s eff b)
+  handler1 cont1 cont2 = return $ CoState handler2
+   where
+    handler2 :: s -> eff (s, b)
+    handler2 s1 = do
+      (s2, x) <- cont1 $ flip runCoState s1
+      cont3 <- cont2 x
+      runCoState cont3 s2
 
 -- class CoOpFunctor ops where
 --   mapCoOpHandler

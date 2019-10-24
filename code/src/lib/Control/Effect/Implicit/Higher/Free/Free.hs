@@ -10,22 +10,21 @@ import Control.Effect.Implicit.Higher.Free
 
 data FreeF
   (ops :: (Type -> Type) -> (Type -> Type) -> Type)
-  (f :: Type -> Type)
   (eff :: Type -> Type)
   a
   where
-    PureF :: a -> FreeF ops f eff a
-    FreeF :: CoOperation ops f a -> FreeF ops f eff a
-    ContraF
-      :: forall ops f eff a
-       . (forall w
-           . (Functor w)
-          => (forall x . f x -> eff (w x))
-          -> eff (w (f a)))
-      -> FreeF ops f eff a
+    PureF :: a -> FreeF ops eff a
+    FreeF :: CoOperation ops eff a -> FreeF ops eff a
+    -- ContraF
+    --   :: forall ops f eff a
+    --    . (forall w
+    --        . (Functor w)
+    --       => (forall x . f x -> eff (w x))
+    --       -> eff (w (f a)))
+    --   -> FreeF ops eff f a
 
 newtype FreeMonad ops eff a = FreeMonad {
-  runFreerMonad :: eff (FreeF ops (FreeMonad ops eff) eff a)
+  runFreerMonad :: eff (FreeF ops (FreeMonad ops eff) a)
 }
 
 -- liftPure
