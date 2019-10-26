@@ -3,14 +3,23 @@ module Control.Effect.Implicit.Higher.Free
 where
 
 import Data.Kind
+import Control.Monad.Identity
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
 
-newtype Nest f g a = Nest (f (g a))
+newtype Nest f g a = Nest {
+  unNest :: f (g a)
+}
 
 type f ∘ g = Nest f g
+
+instance
+  (Functor f, Functor g)
+  => Functor (Nest f g)
+   where
+    fmap f (Nest mx) = Nest $ fmap (fmap f) mx
 
 type ContraFree eff f =
   forall a
@@ -43,6 +52,7 @@ data CoOpHandler
         . CoOperation ops (eff ∘ f) a
         -> (a -> eff (f r))
         -> eff (f r)
+
     , contraLiftHandler
         :: ContraFree eff f
     }
@@ -65,9 +75,10 @@ class
 class
   ( EffCoOp ops
   , CoOpFunctor ops
-  , HigherEffFunctor ops
+  , HEffFunctor ops
   )
-  => FreeOps ops where
+  => FreeOps ops
+   where
     mkFreeOps
       :: forall eff
       . (Effect eff)
@@ -115,6 +126,22 @@ data CoState s eff a = CoState {
   runCoState :: s -> eff (s, a)
 } deriving (Functor)
 
+contraIdentity
+  :: forall eff
+   . (Effect eff)
+  => ContraFree eff Identity
+contraIdentity = handler1
+ where
+  handler1
+    :: forall a
+     . ((forall x . Identity (eff x) -> eff (Identity x))
+        -> eff (Identity (eff (Identity a))))
+    -> eff (Identity a)
+  handler1 cont1 = cont1 contra1 >>= runIdentity
+
+  contra1 :: forall a . Identity (eff a) -> eff (Identity a)
+  contra1 (Identity mx) = mx >>= return . Identity
+
 contraState
   :: forall s eff
    . (Effect eff)
@@ -139,80 +166,3 @@ contraState = handler1
         (s2, mx) <- cont3 s1
         x <- mx
         return (s2, x)
-
--- composeContraFree
---   :: forall eff f1 f2
---    . ( Effect eff
---      , Functor f1
---      , Functor f2
---      , MonadWrap f1 eff
---      , MonadWrap f2 eff
---      )
---   => ContraFree eff f1
---   -> ContraFree eff f2
---   -> ContraFree eff (f1 ∘ f2)
--- composeContraFree
---   (ContraFree contraFree1)
---   (ContraFree contraFree2) =
---   ContraFree contraFree3
---  where
---   contraFree3
---     :: forall a
---      . (forall w
---          . (Functor w)
---         => (forall x . (f1 ∘ f2) (eff x) -> eff (w x))
---         -> eff (w (eff ((f1 ∘ f2) a))))
---     -> eff ((f1 ∘ f2) a)
---   contraFree3 cont1 =
---     Nest <$> contraFree1 cont2
---    where
---     cont2
---       :: forall w1
---        . (Functor w1)
---       => (forall x . f1 (eff x) -> eff (w1 x))
---       -> eff (w1 (eff (f1 (f2 a))))
---     cont2 contraFree4 = do
---       f2a :: f2 a <- contraFree2 cont3
---       undefined
---      where
---       cont3
---         :: forall w2
---         . (Functor w2)
---         => (forall x . f2 (eff x) -> eff (w2 x))
---         -> eff (w2 (eff (f2 a)))
---       cont3 contraFree5 = undefined
-
--- class CoOpFunctor ops where
---   mapCoOpHandler
---     :: forall f1 f2
---      . Monad f2
---     => (forall x . f1 x -> f2 x)
---     -> ContraLift f1 f2
---     -> CoOpHandler ops f1
---     -> CoOpHandler ops f2
-
--- freeContraLift
---   :: forall t w ops eff free
---    . ( Functor w
---      , EffCoOp ops
---      , Effect eff
---      , FreeOps ops
---      , FreeEff free
---      )
---   => CoOpHandler ops (t eff)
---   -> (((forall a . t eff a -> eff (w a))
---        -> eff (w a))
---       -> t eff a)
---   -> ContraLift w (free ops eff) eff
--- freeContraLift _ _ = undefined
-  -- weaver suspend =
-  -- ContraLift contraLift1
-  --  where
-  --   contraLift1
-  --     :: forall a
-  --     . ((forall x . eff2 x -> eff1 (w x))
-  --         -> eff1 (w a))
-  --     -> eff2 a
-  --   contraLift1 cont = do
-  --     context1 <- suspend
-  --     undefined

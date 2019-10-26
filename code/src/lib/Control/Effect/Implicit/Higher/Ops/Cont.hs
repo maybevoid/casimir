@@ -19,7 +19,7 @@ instance
   => EffFunctor (ContOps inEff) where
     effmap _ = undefined
 
-instance HigherEffFunctor ContOps where
+instance HEffFunctor ContOps where
   invEffmap
     :: forall eff1 eff2
       . ( Effect eff1

@@ -21,7 +21,7 @@ instance
   => EffFunctor (ReaderOps e inEff) where
     effmap _ = undefined
 
-instance HigherEffFunctor (ReaderOps e) where
+instance HEffFunctor (ReaderOps e) where
   invEffmap
     :: forall eff1 eff2
      . ( Effect eff1

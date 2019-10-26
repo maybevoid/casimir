@@ -25,8 +25,8 @@ instance
     effmap _ = undefined
 
 instance
-  (HigherEffFunctor ops1, HigherEffFunctor ops2)
-  => HigherEffFunctor (HUnion ops1 ops2)
+  (HEffFunctor ops1, HEffFunctor ops2)
+  => HEffFunctor (HUnion ops1 ops2)
    where
     invEffmap lifter contraLifter (HUnion ops1 ops2) =
       HUnion

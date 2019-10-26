@@ -92,7 +92,32 @@ instance FreeEff ChurchMonad where
     :: forall ops eff
      . (FreeOps ops, Effect eff)
     => ops (ChurchMonad ops eff) (ChurchMonad ops eff)
-  freeOps = undefined
+  freeOps = mkFreeOps liftOps
+   where
+    liftOps
+      :: forall a
+       . CoOperation ops (ChurchMonad ops eff) a
+      -> ChurchMonad ops eff a
+    liftOps coop1 = ChurchMonad m1
+     where
+      m1
+        :: forall f r
+         . (Functor f)
+        => CoOpHandler ops eff f
+        -> (a -> eff (f r))
+        -> eff (f r)
+      m1 coopHandler cont =
+        operationHandler coopHandler coop2 cont
+       where
+        coop2 :: CoOperation ops (eff ∘ f) a
+        coop2 = liftCoOp runChurch coop1
+
+        runChurch
+          :: forall x
+           . ChurchMonad ops eff x
+          -> (eff ∘ f) x
+        runChurch (ChurchMonad m2) = Nest $
+          m2 coopHandler $ returnHandler coopHandler
 
   liftFree
     :: forall ops eff a
@@ -162,29 +187,3 @@ instance FreeHandler ChurchMonad where
           contraLift2 (ChurchMonad m2) = do
             fx <- m2 coopHandler $ returnHandler coopHandler
             contraFree2 $ fmap return fx
-
---      where
---       res2 :: f (f r)
---       res2 = fmap cont2 res1
-
---       res1 :: f a
---       res1 = undefined
-      -- res1 = runContraLift (contraLiftHandler coopHandler) cont3
-
-      -- cont3
-      --   :: forall w
-      --    . (Functor w)
-      --   => (forall x . f x -> eff (w x))
-      --   -> eff (w a)
-      -- cont3 contraLift3 = cont1 contraLift4
-      --  where
-      --   contraLift4
-      --     :: forall x
-      --      . ChurchMonad ops eff x
-      --     -> eff (w x)
-      --   contraLift4 = undefined
---         contraLift4 (ChurchMonad m3) = contraLift3 m4
---          where
---           m4 :: f x
---           m4 = m3 coopHandler $
---             returnHandler coopHandler

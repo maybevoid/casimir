@@ -22,6 +22,6 @@ instance
   => EffFunctor (ExceptionOps e inEff) where
     effmap _ = undefined
 
-instance HigherEffFunctor (ExceptionOps e) where
+instance HEffFunctor (ExceptionOps e) where
   invEffmap _ = undefined
   contraEffmap _ = undefined

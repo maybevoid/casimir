@@ -24,7 +24,7 @@ instance
 
 instance
   (EffFunctor ops)
-  => HigherEffFunctor (UpperOps ops)
+  => HEffFunctor (UpperOps ops)
    where
     invEffmap _ = undefined
     contraEffmap _ = undefined

@@ -2,6 +2,7 @@
 module Control.Effect.Implicit.Higher.Ops.Bracket
 where
 
+import Control.Monad.Identity
 import Control.Exception (bracket)
 
 import Control.Effect.Implicit.Base
@@ -20,11 +21,10 @@ data BracketOps inEff eff = BracketOps {
 
 data BracketCoOp f r where
   BracketOp
-    :: forall f a b r
+    :: forall f a r
      . IO a
     -> (a -> IO ())
-    -> (a -> f b)
-    -> (b -> f r)
+    -> (a -> f r)
     -> BracketCoOp f r
 
 instance
@@ -32,7 +32,7 @@ instance
   => EffFunctor (BracketOps inEff) where
     effmap _ = undefined
 
-instance HigherEffFunctor BracketOps where
+instance HEffFunctor BracketOps where
   invEffmap
     :: forall eff1 eff2
       . ( Effect eff1
@@ -75,61 +75,45 @@ instance EffCoOp BracketOps where
 instance
   (Functor f)
   => Functor (BracketCoOp f) where
-    fmap f (BracketOp alloc release comp cont) =
-      BracketOp alloc release comp (fmap (fmap f) cont)
+    fmap f (BracketOp alloc release comp) =
+      BracketOp alloc release (fmap (fmap f) comp)
 
--- bracketCoOpHandler
---   :: CoOpHandler BracketOps IO
--- bracketCoOpHandler = CoOpHandler return handleOp
---  where
---   handleOp (BracketOp alloc release comp cont) =
---     bracket alloc release comp >>= cont
+instance CoOpFunctor BracketOps where
+  liftCoOp
+    :: forall f1 f2 a
+      . (Functor f1, Functor f2)
+    => (forall x . f1 x -> f2 x)
+    -> BracketCoOp f1 a
+    -> BracketCoOp f2 a
+  liftCoOp lifter (BracketOp alloc release comp) =
+    BracketOp alloc release (fmap lifter comp)
 
--- instance CoOpFunctor BracketOps where
---   mapCoOpHandler
---     :: forall f1 f2
---      . (Monad f2)
---     => (forall x . f1 x -> f2 x)
---     -> ContraLift f1 f2
---     -> CoOpHandler BracketOps f1
---     -> CoOpHandler BracketOps f2
---   mapCoOpHandler
---     lift
---     (ContraLift contraLift1)
---     (CoOpHandler handleReturn1 handleOp1) =
---     CoOpHandler handleReturn2 handleOp2
---      where
---       handleReturn2
---         :: forall a . a -> f2 a
---       handleReturn2 = lift . handleReturn1
+instance FreeOps BracketOps where
+  mkFreeOps
+    :: forall eff
+    . (Effect eff)
+    => (forall a . BracketCoOp eff a -> eff a)
+    -> BracketOps eff eff
+  mkFreeOps lifter = BracketOps handler
+   where
+    handler
+      :: forall a b
+       . IO a
+      -> (a -> IO ())
+      -> (a -> eff b)
+      -> eff b
+    handler alloc release comp = lifter $
+      BracketOp alloc release comp
 
---       handleOp2
---         :: forall a
---          . BracketCoOp f2 a
---         -> f2 a
---       handleOp2
---         (BracketOp alloc1 release1 comp1 cont1)
---         = handleOp3 alloc1 release1 comp1 cont1
---          where
---           handleOp3
---             :: forall b c
---              . IO b
---             -> (b -> IO ())
---             -> (b -> f2 c)
---             -> (c -> f2 a)
---             -> f2 a
---           handleOp3 alloc2 release2 comp2 cont2 =
---             res1 >>= cont2
---              where
---               res1 :: f2 c
---               res1 = contraLift1 cont3
-
---               cont3
---                 :: forall w
---                  . (forall x . f2 x -> f1 (w x))
---                 -> f1 (w c)
---               cont3 contraLift2 = handleOp1 $
---                 BracketOp alloc2 release2 comp3 handleReturn1
---                where
---                 comp3 :: (b -> f1 (w c))
---                 comp3 = contraLift2 . comp2
+bracketCoOpHandler
+  :: CoOpHandler BracketOps IO Identity
+bracketCoOpHandler = CoOpHandler
+  (return . Identity) handleOp contraIdentity
+ where
+  handleOp
+    :: BracketCoOp (IO ∘ Identity) a
+    -> (a -> IO (Identity r))
+    -> IO (Identity r)
+  handleOp (BracketOp alloc release comp1) cont = do
+    Identity a <- bracket alloc release (fmap unNest comp1)
+    cont a

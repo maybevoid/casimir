@@ -7,7 +7,7 @@ import Control.Effect.Implicit.Higher.ContraLift
 
 class
   (forall eff . (Effect eff) => EffFunctor (hops eff))
-  => HigherEffFunctor hops where
+  => HEffFunctor hops where
     invEffmap
       :: forall eff1 eff2
         . ( Effect eff1
