@@ -61,8 +61,6 @@ instance HEffFunctor ContOps where
             x2 :: w a <- contraLift2 $ return x1
             cont4 x2
 
-  contraEffmap _ = undefined
-
 contTOps
   :: forall eff r . (Effect eff)
   => ContOps (ContT.ContT r eff) (ContT.ContT r eff)

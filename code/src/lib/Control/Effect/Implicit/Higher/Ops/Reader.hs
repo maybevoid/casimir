@@ -47,5 +47,3 @@ instance HEffFunctor (ReaderOps e) where
         cont contraLift2 =
           localOp ops modifyEnv $
             contraLift2 comp1
-
-  contraEffmap _ = undefined

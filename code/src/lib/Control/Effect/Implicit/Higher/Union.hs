@@ -32,8 +32,3 @@ instance
       HUnion
         (invEffmap lifter contraLifter ops1)
         (invEffmap lifter contraLifter ops2)
-
-    contraEffmap lifter contraLifter (HUnion ops1 ops2) =
-      HUnion
-        (contraEffmap lifter contraLifter ops1)
-        (contraEffmap lifter contraLifter ops2)

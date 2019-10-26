@@ -27,4 +27,3 @@ instance
   => HEffFunctor (UpperOps ops)
    where
     invEffmap _ = undefined
-    contraEffmap _ = undefined

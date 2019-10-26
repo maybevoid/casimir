@@ -64,8 +64,6 @@ instance HEffFunctor BracketOps where
             cont3 :: a -> eff1 (w b)
             cont3 x = contraLift2 $ cont1 x
 
-  contraEffmap _ = undefined
-
 ioBracketOps :: BracketOps IO IO
 ioBracketOps = BracketOps bracket
 
@@ -111,7 +109,8 @@ bracketCoOpHandler = CoOpHandler
   (return . Identity) handleOp contraIdentity
  where
   handleOp
-    :: BracketCoOp (IO ∘ Identity) a
+    :: forall a r
+     . BracketCoOp (IO ∘ Identity) a
     -> (a -> IO (Identity r))
     -> IO (Identity r)
   handleOp (BracketOp alloc release comp1) cont = do
