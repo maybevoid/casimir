@@ -8,18 +8,17 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
 
-newtype Nest eff f a = Nest (eff (f a))
+newtype Nest f g a = Nest (f (g a))
 
-data ContraFree eff f = ContraFree {
-  runContraFree
-    :: forall a b
-     . (forall w
-         . (Functor w)
-        => (forall x . f x -> eff (w x))
-        -> eff (w a))
-    -> (a -> eff (f b))
-    -> eff (f b)
-}
+type f ∘ g = Nest f g
+
+type ContraFree eff f =
+  forall a
+   . (forall w
+       . (Functor w)
+     => (forall x . f (eff x) -> eff (w x))
+     -> eff (w (eff (f a))))
+  -> eff (f a)
 
 class EffCoOp
   (ops :: (Type -> Type) -> (Type -> Type) -> Type)
@@ -41,9 +40,11 @@ data CoOpHandler
 
     , operationHandler
         :: forall a r
-        . CoOperation ops (Nest eff f) a
+        . CoOperation ops (eff ∘ f) a
         -> (a -> eff (f r))
         -> eff (f r)
+    , contraLiftHandler
+        :: ContraFree eff f
     }
 
 class
@@ -107,33 +108,79 @@ class
          , Functor f
          )
       => CoOpHandler ops eff f
-      -> ContraFree eff f
       -> free ops eff a
       -> eff (f a)
 
 data CoState s eff a = CoState {
   runCoState :: s -> eff (s, a)
-}
+} deriving (Functor)
 
 contraState
   :: forall s eff
    . (Effect eff)
   => ContraFree eff (CoState s eff)
-contraState = ContraFree handler1
+contraState = handler1
  where
   handler1
-    :: forall a b
-     . ((forall x . CoState s eff x -> eff (s, x))
-        -> eff (s, a))
-    -> (a -> eff (CoState s eff b))
-    -> eff (CoState s eff b)
-  handler1 cont1 cont2 = return $ CoState handler2
+    :: forall a
+     . ((forall x . CoState s eff (eff x) -> eff (s, x))
+        -> eff (s, eff (CoState s eff a)))
+    -> eff (CoState s eff a)
+  handler1 cont1 = return $ CoState handler2
    where
-    handler2 :: s -> eff (s, b)
+    handler2 :: s -> eff (s, a)
     handler2 s1 = do
-      (s2, x) <- cont1 $ flip runCoState s1
-      cont3 <- cont2 x
+      (s2, cont2) <- cont1 handler3
+      cont3 <- cont2
       runCoState cont3 s2
+     where
+      handler3 :: CoState s eff (eff x) -> eff (s, x)
+      handler3 (CoState cont3) = do
+        (s2, mx) <- cont3 s1
+        x <- mx
+        return (s2, x)
+
+-- composeContraFree
+--   :: forall eff f1 f2
+--    . ( Effect eff
+--      , Functor f1
+--      , Functor f2
+--      , MonadWrap f1 eff
+--      , MonadWrap f2 eff
+--      )
+--   => ContraFree eff f1
+--   -> ContraFree eff f2
+--   -> ContraFree eff (f1 ∘ f2)
+-- composeContraFree
+--   (ContraFree contraFree1)
+--   (ContraFree contraFree2) =
+--   ContraFree contraFree3
+--  where
+--   contraFree3
+--     :: forall a
+--      . (forall w
+--          . (Functor w)
+--         => (forall x . (f1 ∘ f2) (eff x) -> eff (w x))
+--         -> eff (w (eff ((f1 ∘ f2) a))))
+--     -> eff ((f1 ∘ f2) a)
+--   contraFree3 cont1 =
+--     Nest <$> contraFree1 cont2
+--    where
+--     cont2
+--       :: forall w1
+--        . (Functor w1)
+--       => (forall x . f1 (eff x) -> eff (w1 x))
+--       -> eff (w1 (eff (f1 (f2 a))))
+--     cont2 contraFree4 = do
+--       f2a :: f2 a <- contraFree2 cont3
+--       undefined
+--      where
+--       cont3
+--         :: forall w2
+--         . (Functor w2)
+--         => (forall x . f2 (eff x) -> eff (w2 x))
+--         -> eff (w2 (eff (f2 a)))
+--       cont3 contraFree5 = undefined
 
 -- class CoOpFunctor ops where
 --   mapCoOpHandler

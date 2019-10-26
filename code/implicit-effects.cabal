@@ -55,6 +55,7 @@ common deps
     ScopedTypeVariables
     QuantifiedConstraints
     MultiParamTypeClasses
+    FunctionalDependencies
     TypeFamilyDependencies
     GeneralizedNewtypeDeriving
 

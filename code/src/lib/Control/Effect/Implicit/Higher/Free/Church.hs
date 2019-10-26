@@ -19,7 +19,6 @@ newtype ChurchMonad
         :: forall f r
          . (Functor f)
         => CoOpHandler ops eff f
-        -> ContraFree eff f
         -> (a -> eff (f r))
         -> eff (f r)
     }
@@ -39,11 +38,10 @@ instance
         :: forall f r
          . (Functor f)
         => CoOpHandler ops eff f
-        -> ContraFree eff f
         -> (b -> eff (f r))
         -> eff (f r)
-      m2 handler contraFree cont =
-        m1 handler contraFree $ cont . f
+      m2 handler cont =
+        m1 handler $ cont . f
 
 instance
   (FreeOps ops, Effect eff)
@@ -58,10 +56,9 @@ instance
       m :: forall f r
          . (Functor f)
         => CoOpHandler ops eff f
-        -> ContraFree eff f
         -> (a -> eff (f r))
         -> eff (f r)
-      m _ _ cont = cont x
+      m _ cont = cont x
 
     (<*>) = ap
 
@@ -80,16 +77,15 @@ instance
         :: forall f r
          . (Functor f)
         => CoOpHandler ops eff f
-        -> ContraFree eff f
         -> (b -> eff (f r))
         -> eff (f r)
-      m2 coopHandler contraFree cont2 =
-        m1 coopHandler contraFree cont3
+      m2 coopHandler cont2 =
+        m1 coopHandler cont3
        where
         cont3 :: a -> eff (f r)
         cont3 a = do
           let (ChurchMonad m3) = cont1 a
-          m3 coopHandler contraFree cont2
+          m3 coopHandler cont2
 
 instance FreeEff ChurchMonad where
   freeOps
@@ -109,10 +105,9 @@ instance FreeEff ChurchMonad where
       :: forall f r
         . (Functor f)
       => CoOpHandler ops eff f
-      -> ContraFree eff f
       -> (a -> eff (f r))
       -> eff (f r)
-    m2 _ _ cont = m1 >>= cont
+    m2 _ cont = m1 >>= cont
 
 instance FreeHandler ChurchMonad where
   handleFree
@@ -122,11 +117,10 @@ instance FreeHandler ChurchMonad where
        , Functor f
        )
     => CoOpHandler ops eff f
-    -> ContraFree eff f
     -> ChurchMonad ops eff a
     -> eff (f a)
-  handleFree coopHandler contraFree (ChurchMonad m1) =
-    m1 coopHandler contraFree $ returnHandler coopHandler
+  handleFree coopHandler (ChurchMonad m1) =
+    m1 coopHandler $ returnHandler coopHandler
 
   freeContraLift
     :: forall ops eff
@@ -147,26 +141,27 @@ instance FreeHandler ChurchMonad where
         :: forall f r
           . (Functor f)
         => CoOpHandler ops eff f
-        -> ContraFree eff f
         -> (a -> eff (f r))
         -> eff (f r)
-      m1 coopHandler contraFree1 cont2 =
-        runContraFree contraFree1 cont3 cont2
+      m1 coopHandler cont2 =
+        contraLiftHandler coopHandler cont3
        where
         cont3
           :: forall w
            . (Functor w)
-          => (forall x . f x -> eff (w x))
-          -> eff (w a)
-        cont3 contraFree2 = cont1 contraLift2
+          => (forall x . f (eff x) -> eff (w x))
+          -> eff (w (eff (f r)))
+        cont3 contraFree2 = do
+          wa :: w a <- cont1 contraLift2
+          return $ fmap cont2 wa
          where
           contraLift2
             :: forall x
              . ChurchMonad ops eff x
             -> eff (w x)
           contraLift2 (ChurchMonad m2) = do
-            fx <- m2 coopHandler contraFree1 $ returnHandler coopHandler
-            contraFree2 fx
+            fx <- m2 coopHandler $ returnHandler coopHandler
+            contraFree2 $ fmap return fx
 
 --      where
 --       res2 :: f (f r)
