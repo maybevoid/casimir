@@ -1,3 +1,4 @@
+{-# LANGUAGE PolyKinds #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Control.Effect.Implicit.Free.Union
@@ -16,9 +17,11 @@ data UnionCoOp ops1 ops2 r
   = LeftCoOp (ops1 r)
   | RightCoOp (ops2 r)
 
-instance EffCoOp (Union ops1 ops2) where
-  type CoOperation (Union ops1 ops2) =
-    UnionCoOp (CoOperation ops1) (CoOperation ops2)
+instance
+  (EffOps ops1, EffOps ops2)
+  => EffCoOp (Union ops1 ops2) where
+    type CoOperation (Union ops1 ops2) =
+      UnionCoOp (CoOperation ops1) (CoOperation ops2)
 
 instance (Functor ops1, Functor ops2)
   => Functor (UnionCoOp ops1 ops2)
@@ -34,7 +37,7 @@ instance
   (FreeOps ops1, FreeOps ops2) =>
   FreeOps (Union ops1 ops2)
    where
-    mkFreeOps liftReturn = Union ops1 ops2
+    mkFreeOps liftReturn = UnionOps ops1 ops2
      where
       ops1 = mkFreeOps (liftReturn . LeftCoOp)
       ops2 = mkFreeOps (liftReturn . RightCoOp)

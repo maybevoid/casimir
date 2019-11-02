@@ -1,13 +1,17 @@
 
 module Control.Effect.Implicit.Base.NoOp
-  ( NoOp (..)
+  ( NoEff
+  , NoOp (..)
   , NoConstraint
   )
 where
 
 import Data.Kind
+import Control.Effect.Implicit.Base.Base
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
+
+data NoEff
 
 -- | The trivial effect 'NoOp' have singleton operation and can be trivially
 -- satisfied for all 'Effect' @eff@. It is the identity for the
@@ -28,6 +32,9 @@ import Control.Effect.Implicit.Base.EffFunctor
 -- 'Operation' can be satisfied.
 data NoOp (eff :: Type -> Type) = NoOp
 
+instance EffOps NoEff where
+  type Operation NoEff = NoOp
+
 -- | @'OpsConstraint' 'NoOp' eff@ is just the empty constraint @()@ for all
 -- 'Effect' @eff@. We instead define the empty class 'NoConstraint' with
 -- trivial instance for all 'Effect' @eff@ so that the injectivity condition
@@ -44,8 +51,8 @@ instance EffFunctor NoOp where
 -- | As the trivial instance for 'ImplicitOps', @'OpsConstraint' 'NoOp'@ does not
 -- make use of implicit parameters, as its 'Operation' can be trivially be
 -- constructed.
-instance ImplicitOps NoOp where
-  type OpsConstraint NoOp eff = NoConstraint eff
+instance ImplicitOps NoEff where
+  type OpsConstraint NoEff eff = NoConstraint eff
 
   withOps _ = id
 

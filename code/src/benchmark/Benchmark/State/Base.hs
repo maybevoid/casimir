@@ -9,7 +9,7 @@ import Control.Effect.Implicit.Ops.State
 
 newtype CoState s eff a = CoState (s -> eff a)
 
-stateBaseFunc :: Eff (StateOps Int) ()
+stateBaseFunc :: Eff (StateEff Int) ()
 stateBaseFunc =
  do
   s <- get
@@ -20,7 +20,7 @@ stateBaseFunc =
       stateBaseFunc
 {-# INLINE stateBaseFunc #-}
 
-stateBaseComp :: GenericReturn (StateOps Int) ()
+stateBaseComp :: GenericReturn (StateEff Int) ()
 stateBaseComp = genericReturn stateBaseFunc
 
 runCoState
@@ -33,7 +33,7 @@ runCoState i (CoState cont) = cont i
 stateCoOpHandler
   :: forall eff s a .
   (Effect eff)
-  => CoOpHandler (StateOps s) a (CoState s eff a) eff
+  => CoOpHandler (StateEff s) a (CoState s eff a) eff
 stateCoOpHandler = CoOpHandler handleReturn handleOps
  where
   handleReturn :: a -> eff (CoState s eff a)
@@ -57,7 +57,7 @@ stateCoOpHandler = CoOpHandler handleReturn handleOps
 stateFreerCoOpHandler
   :: forall eff s a .
   (Effect eff)
-  => FreerCoOpHandler (StateOps s) a (CoState s eff a) eff
+  => FreerCoOpHandler (StateEff s) a (CoState s eff a) eff
 stateFreerCoOpHandler = FreerCoOpHandler handleReturn handleOps
  where
   handleReturn :: a -> eff (CoState s eff a)
@@ -65,7 +65,7 @@ stateFreerCoOpHandler = FreerCoOpHandler handleReturn handleOps
   {-# INLINE handleReturn #-}
 
   handleOps
-    :: CoOpCont (StateOps s) (eff (CoState s eff a))
+    :: CoOpCont (StateEff s) (eff (CoState s eff a))
     -> eff (CoState s eff a)
   handleOps (CoOpCont GetOp' cont1) = return $ CoState $
     \s ->

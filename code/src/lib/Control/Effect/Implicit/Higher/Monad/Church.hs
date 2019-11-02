@@ -6,13 +6,13 @@ import Control.Monad (ap)
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.Free
 import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.ContraLift
 
 newtype ChurchMonad
-  (ops :: (Type -> Type) -> (Type -> Type) -> Type)
+  ops
   (eff :: Type -> Type)
   a =
     ChurchMonad {
@@ -92,7 +92,7 @@ instance FreeEff ChurchMonad where
   freeOps
     :: forall ops eff
      . (FreeOps ops, Effect eff)
-    => ops (ChurchMonad ops eff) (ChurchMonad ops eff)
+    => Operation ops (ChurchMonad ops eff) (ChurchMonad ops eff)
   freeOps = mkFreeOps liftOps
    where
     liftOps

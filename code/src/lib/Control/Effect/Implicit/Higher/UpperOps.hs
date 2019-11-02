@@ -4,26 +4,34 @@ module Control.Effect.Implicit.Higher.UpperOps
 where
 
 import Data.Kind
-import Control.Effect.Implicit.Base
+
+import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.EffFunctor
+
+import qualified Control.Effect.Implicit.Base as Base
 
 data UpperOps ops
   (inEff :: Type -> Type)
-  eff
+  (eff :: Type -> Type)
   = UpperOps
-    { innerOps' :: ops inEff
-    , outerOps' :: ops eff
+    { innerOps' :: Base.Operation ops inEff
+    , outerOps' :: Base.Operation ops eff
     }
 
-
 instance
-  (Effect eff, EffFunctor ops)
-  => EffFunctor (UpperOps ops eff)
+  ( Effect eff
+  , Base.EffOps ops
+  , Base.EffFunctor (Base.Operation ops)
+  )
+  => Base.EffFunctor (UpperOps ops eff)
   where
     effmap _ = undefined
 
 instance
-  (EffFunctor ops)
-  => HEffFunctor (UpperOps ops)
+  ( Effect eff
+  , Base.EffOps ops
+  , Base.EffFunctor (Base.Operation ops)
+  )
+  => EffFunctor (UpperOps ops)
    where
     invEffmap _ = undefined

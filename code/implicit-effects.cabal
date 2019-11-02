@@ -99,6 +99,7 @@ library
       Control.Effect.Implicit.Higher.Ops.Exception
 
   other-modules:
+      Control.Effect.Implicit.Base.Base
       Control.Effect.Implicit.Base.Effect
       Control.Effect.Implicit.Base.EffFunctor
       Control.Effect.Implicit.Base.Implicit
@@ -130,12 +131,14 @@ library
       Control.Effect.Implicit.Cast.Cast
       Control.Effect.Implicit.Cast.Entail
 
-      Control.Effect.Implicit.Higher.ContraLift
-      Control.Effect.Implicit.Higher.EffFunctor
+      Control.Effect.Implicit.Higher.Base
+      Control.Effect.Implicit.Higher.CoOp
+      Control.Effect.Implicit.Higher.Free
+      Control.Effect.Implicit.Higher.Union
       Control.Effect.Implicit.Higher.LowerOps
       Control.Effect.Implicit.Higher.UpperOps
-      Control.Effect.Implicit.Higher.Union
-      Control.Effect.Implicit.Higher.Free
+      Control.Effect.Implicit.Higher.EffFunctor
+      Control.Effect.Implicit.Higher.ContraLift
       Control.Effect.Implicit.Higher.Monad.Free
       Control.Effect.Implicit.Higher.Monad.Church
 

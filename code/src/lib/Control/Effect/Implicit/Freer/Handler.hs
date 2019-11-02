@@ -13,6 +13,7 @@ import Control.Effect.Implicit.Freer.FreeEff
 withCoOpHandler
   :: forall free handler eff a r
    . ( Effect eff
+     , EffOps handler
      , FreeOps handler
      , ImplicitOps handler
      , FreeEff free

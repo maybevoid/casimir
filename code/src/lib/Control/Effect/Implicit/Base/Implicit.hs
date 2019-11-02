@@ -8,6 +8,7 @@ where
 
 import Data.Kind
 
+import Control.Effect.Implicit.Base.Base
 import Control.Effect.Implicit.Base.Effect
 
 -- | 'ImplicitOps' gives computations access to effect operations of an
@@ -27,7 +28,9 @@ import Control.Effect.Implicit.Base.Effect
 -- The definition for 'ImplicitOps' for most effect operations can typically
 -- be derived mechanically. We may look into using template Haskell to generate
 -- instances for 'ImplicitOps' in future to reduce some boilerplate.
-class ImplicitOps (ops :: (Type -> Type) -> Type) where
+class
+  (EffOps ops)
+  => ImplicitOps ops where
 
     -- | The constraint kind for the effect operation under 'Effect' @eff@.
     -- This is typically an implicit parameter with a unique name, e.g.
@@ -49,7 +52,7 @@ class ImplicitOps (ops :: (Type -> Type) -> Type) where
     withOps
       :: forall eff r
        . (Effect eff)
-      => ops eff
+      => Operation ops eff
       -> (OpsConstraint ops eff => r)
       -> r
 
@@ -59,7 +62,7 @@ class ImplicitOps (ops :: (Type -> Type) -> Type) where
     captureOps
       :: forall eff
        . (Effect eff, OpsConstraint ops eff)
-      => ops eff
+      => Operation ops eff
 
 -- | This is a type alias for the implicit parameter constraint for @ops@,
 -- in addition to requiring @eff@ to be an 'Effect'. This helps reducing

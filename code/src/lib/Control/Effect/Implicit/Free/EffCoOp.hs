@@ -5,12 +5,15 @@ module Control.Effect.Implicit.Free.EffCoOp
 where
 
 import Data.Kind
+import Control.Effect.Implicit.Base
 
 -- | An effect specification is consist of a dummy datatype @sig@, an operation
 -- type and a co-operation type associated with the @sig@ type. The class
 -- 'EffCoOp' represents the effect co-operation with an injective type family
 -- 'CoOperation.
-class EffCoOp (ops :: (Type -> Type) -> Type) where
+class
+  (EffOps ops)
+  => EffCoOp ops where
   -- | The co-operation type for @sig@ is produced by computations when
   -- they perform effect operations under a free monad, and is used by
   -- effect interpreters such as 'Control.Effect.Implicit.Free.CoOpHandler'

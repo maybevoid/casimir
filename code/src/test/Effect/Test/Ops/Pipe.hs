@@ -12,6 +12,9 @@ import Control.Effect.Implicit
 import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Ops.Env
 
+data YieldEff a
+data AwaitEff a
+
 data YieldOps a eff = YieldOps {
   yieldOp :: a -> eff ()
 }
@@ -28,11 +31,17 @@ data AwaitCoOp a r =
   AwaitOp (a -> r)
   deriving (Functor)
 
-instance EffCoOp (YieldOps a) where
-  type CoOperation (YieldOps a) = YieldCoOp a
+instance EffOps (YieldEff a) where
+  type Operation (YieldEff a) = YieldOps a
 
-instance EffCoOp (AwaitOps a) where
-  type CoOperation (AwaitOps a) = AwaitCoOp a
+instance EffOps (AwaitEff a) where
+  type Operation (AwaitEff a) = AwaitOps a
+
+instance EffCoOp (YieldEff a) where
+  type CoOperation (YieldEff a) = YieldCoOp a
+
+instance EffCoOp (AwaitEff a) where
+  type CoOperation (AwaitEff a) = AwaitCoOp a
 
 instance EffFunctor (YieldOps a) where
   effmap lifter ops = YieldOps $
@@ -42,16 +51,16 @@ instance EffFunctor (AwaitOps a) where
   effmap lifter ops = AwaitOps $
     lifter $ awaitOp ops
 
-instance FreeOps (YieldOps a) where
+instance FreeOps (YieldEff a) where
   mkFreeOps liftCoOp = YieldOps $
     \x -> liftCoOp $ YieldOp x id
 
-instance FreeOps (AwaitOps a) where
+instance FreeOps (AwaitEff a) where
   mkFreeOps liftCoOp = AwaitOps $
     liftCoOp $ AwaitOp id
 
-instance ImplicitOps (YieldOps a) where
-  type OpsConstraint (YieldOps a) eff =
+instance ImplicitOps (YieldEff a) where
+  type OpsConstraint (YieldEff a) eff =
     (?yieldOps :: YieldOps a eff)
 
   withOps yieldOps comp
@@ -59,8 +68,8 @@ instance ImplicitOps (YieldOps a) where
 
   captureOps = ?yieldOps
 
-instance ImplicitOps (AwaitOps a) where
-  type OpsConstraint (AwaitOps a) eff =
+instance ImplicitOps (AwaitEff a) where
+  type OpsConstraint (AwaitEff a) eff =
     (?awaitOps :: AwaitOps a eff)
 
   withOps awaitOps comp
@@ -68,22 +77,22 @@ instance ImplicitOps (AwaitOps a) where
 
   captureOps = ?awaitOps
 
-yield :: forall a . a -> Eff (YieldOps a) ()
+yield :: forall a . a -> Eff (YieldEff a) ()
 yield = yieldOp ?yieldOps
 
-await :: forall a . Eff (AwaitOps a) a
+await :: forall a . Eff (AwaitEff a) a
 await = awaitOp ?awaitOps
 
 runPipe :: forall a r ops eff1
    . (Effect eff1, BaseOps ops)
-  => Computation ((YieldOps a) ∪ ops) (Return r) eff1
-  -> Computation ((AwaitOps a) ∪ ops) (Return r) eff1
+  => Computation ((YieldEff a) ∪ ops) (Return r) eff1
+  -> Computation ((AwaitEff a) ∪ ops) (Return r) eff1
   -> Computation ops (Return r) eff1
 runPipe producer1 consumer1 = Computation comp
    where
     comp :: forall eff2 . (Effect eff2)
       => LiftEff eff1 eff2
-      -> ops eff2
+      -> Operation ops eff2
       -> Return r eff2
     comp lifter ops = Return $ pipe producer2 consumer2
      where
@@ -133,10 +142,10 @@ copipe consumer producer = runFreeT producer >>= handleProducer
 
 producerComp
   :: forall a .
-  GenericReturn ((YieldOps Int) ∪ (EnvOps Int)) a
+  GenericReturn ((YieldEff Int) ∪ (EnvEff Int)) a
 producerComp = genericReturn comp1
  where
-  comp1 :: Eff (EnvOps Int ∪ YieldOps Int) a
+  comp1 :: Eff (EnvEff Int ∪ YieldEff Int) a
   comp1
    = do
       seed <- ask
@@ -147,7 +156,7 @@ producerComp = genericReturn comp1
           comp2 $ acc + 1
 
 consumerComp
-  :: GenericReturn ((AwaitOps Int) ∪ (EnvOps Int)) Int
+  :: GenericReturn ((AwaitEff Int) ∪ (EnvEff Int)) Int
 consumerComp = genericReturn $
  do
   x <- await
@@ -156,7 +165,7 @@ consumerComp = genericReturn $
   return $ x + y + z
 
 pipedComp :: forall eff . (Effect eff)
-  => Computation (EnvOps Int) (Return Int) eff
+  => Computation (EnvEff Int) (Return Int) eff
 pipedComp = runPipe producerComp consumerComp
 
 pipeTest :: TestTree

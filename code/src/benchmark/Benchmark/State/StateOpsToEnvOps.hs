@@ -23,8 +23,8 @@ import Benchmark.State.Base
 stateOpsToEnvOpsPipeline
   :: forall s a eff1
    . (Effect eff1)
-  => Computation (StateOps s) (Return a) eff1
-  -> Computation (EnvOps s) (Return a) eff1
+  => Computation (StateEff s) (Return a) eff1
+  -> Computation (EnvEff s) (Return a) eff1
 stateOpsToEnvOpsPipeline comp1 = Computation comp2
  where
   comp2 :: forall eff2 . (Effect eff2)
@@ -33,7 +33,7 @@ stateOpsToEnvOpsPipeline comp1 = Computation comp2
     -> Return a eff2
   comp2 lift12 ops = withOps ops $ Return comp5
    where
-    comp3 :: Computation NoOp (Return a) (StateT s eff2)
+    comp3 :: Computation NoEff (Return a) (StateT s eff2)
     comp3 = bindOpsHandler
       stateTHandler
       (liftComputation (joinLift lift12 stateTLiftEff) comp1)
@@ -41,19 +41,19 @@ stateOpsToEnvOpsPipeline comp1 = Computation comp2
     comp4 :: StateT s eff2 a
     comp4 = returnVal $ runComp comp3 idLift NoOp
 
-    comp5 :: (OpsConstraint (EnvOps s) eff2) => eff2 a
+    comp5 :: (OpsConstraint (EnvEff s) eff2) => eff2 a
     comp5 = do
       s <- ask
       evalStateT comp4 s
 
 statePComp1
   :: forall eff . (Effect eff)
-  => Computation (EnvOps Int) (Return ()) eff
+  => Computation (EnvEff Int) (Return ()) eff
 statePComp1 = stateOpsToEnvOpsPipeline stateBaseComp
 
 statePComp2
   :: forall eff . (Effect eff)
-  => Computation NoOp (Return ()) (ReaderT Int eff)
+  => Computation NoEff (Return ()) (ReaderT Int eff)
 statePComp2 = bindOpsHandler
   readerTHandler statePComp1
 

@@ -11,6 +11,7 @@ implicit-effects Overview
 >   , InstanceSigs
 >   , DeriveFunctor
 >   , TypeOperators
+>   , EmptyDataDecls
 >   , ExplicitForAll
 >   , ImplicitParams
 >   , KindSignatures
@@ -46,14 +47,14 @@ implicit-effects Overview
 Hello World
 ===========
 
-- Use the effect operation `IoOps` for IO effects.
+- Use the effect operation `IoEff` for IO effects.
 - Classic-style declaration with `Monad m`.
-- `OpsConstraint IoOps m` lifts an `IoOps m` data into constraint.
-- `liftIo` function provided to function under `OpsConstraint IoOps m`.
+- `OpsConstraint IoEff m` lifts an `IoEff m` data into constraint.
+- `liftIo` function provided to function under `OpsConstraint IoEff m`.
 
 > hello11
 >   :: forall m
->    . (Monad m, OpsConstraint IoOps m)
+>    . (Monad m, OpsConstraint IoEff m)
 >   => m ()
 > hello11 = liftIo $ putStrLn "hello world!"
 
@@ -63,7 +64,7 @@ Hello World
 > -- type Effect = Monad
 > hello12
 >   :: forall eff
->    . (Effect eff, OpsConstraint IoOps eff)
+>    . (Effect eff, OpsConstraint IoEff eff)
 >   => eff ()
 > hello12 = liftIo $ putStrLn "hello world!"
 
@@ -72,14 +73,14 @@ Hello World
 > -- type EffConstraint ops eff = (Effect eff, OpsConstraint ops eff)
 > hello13
 >   :: forall eff
->    . (EffConstraint IoOps eff)
+>    . (EffConstraint IoEff eff)
 >   => eff ()
 > hello13 = liftIo $ putStrLn "hello world!"
 
 - Type alias `Eff` to abstract `forall eff`.
 
 > -- type Eff ops a = forall eff . (EffConstraint ops eff) => eff a
-> hello14 :: Eff IoOps ()
+> hello14 :: Eff IoEff ()
 > hello14 = liftIo $ putStrLn "hello world!"
 
 Multiple Effects
@@ -89,7 +90,7 @@ Multiple Effects
 - `(∪)` or `Union` to combine effect operations.
 
 > hello21
->   :: Eff (EnvOps String ∪ IoOps) ()
+>   :: Eff (EnvEff String ∪ IoEff) ()
 > hello21 = do
 >   name <- ask
 >   liftIo $ putStrLn $ "hello, " <> name <> "!"
@@ -99,6 +100,8 @@ Custom Effects
 
 - Create new effect `teletypeOps` by defining new operation data type
   parameterized by a monad `eff`.
+
+> data TeletypeEff
 
 > data TeletypeOps eff = TeletypeOps
 >  { getLineOp :: eff String
@@ -112,8 +115,11 @@ Custom Effects
   implicit parameter and runs the continuation with the implicit parameter
   constraint discharged.
 
-> instance ImplicitOps TeletypeOps where
->   type OpsConstraint TeletypeOps eff =
+> instance EffOps TeletypeEff where
+>   type Operation TeletypeEff = TeletypeOps
+
+> instance ImplicitOps TeletypeEff where
+>   type OpsConstraint TeletypeEff eff =
 >     ?teletypeOps :: TeletypeOps eff
 >
 >   captureOps
@@ -131,10 +137,10 @@ Custom Effects
 
 - Implement helper functions to access effect operations from implicit parameters.
 
-> getLine :: Eff TeletypeOps String
+> getLine :: Eff TeletypeEff String
 > getLine = getLineOp captureOps
 >
-> putLine :: String -> Eff TeletypeOps ()
+> putLine :: String -> Eff TeletypeEff ()
 > putLine = putLineOp captureOps
 
 Computation
@@ -144,7 +150,7 @@ Computation
 - Concrete semantics depends on the concrete monad type.
 - Computations are abstract and need to be interpreted.
 
-> hello31 :: Eff TeletypeOps ()
+> hello31 :: Eff TeletypeEff ()
 > hello31 = do
 >   name <- getLine
 >   putLine $ "hello, " <> name <> "!"
@@ -167,19 +173,19 @@ Effect Intepretation
 > hello32 = withOps teletypeOps1 hello31
 
 - We also know how to interpret `TeletypeOps` for any monad `eff` that supports the
-  `IoOps` operation.
+  `IoEff` operation.
 
 > teletypeOps2
 >   :: forall eff
->    . (EffConstraint IoOps eff)
+>    . (EffConstraint IoEff eff)
 >   => TeletypeOps eff
 > teletypeOps2 = TeletypeOps
 >   { getLineOp = liftIo $ Prelude.getLine
 >   , putLineOp = liftIo . Prelude.putStrLn
 >   }
 
-- Use the built in `ioOps` to interpret `IoOps` under `IO`.
-- The inner `withOps` captures the `IoOps` constraint and implements a
+- Use the built in `ioOps` to interpret `IoEff` under `IO`.
+- The inner `withOps` captures the `IoEff` constraint and implements a
   concrete `TeletypeOps` that work with `IO`.
 
 > hello33 :: IO ()
@@ -218,7 +224,7 @@ Effect Lifting
 - We can now use our new effect `TeletypeOps` with existing effects such as
   `StateOps`.
 
-> hello41 :: Eff (TeletypeOps ∪ StateOps String) ()
+> hello41 :: Eff (TeletypeEff ∪ StateEff String) ()
 > hello41 = do
 >   name <- get
 >   putLine $ "hello, " <> name <> "!"
@@ -248,14 +254,14 @@ Algebraic Effects
 - Declare `TeletypeOps` to be instance of `EffCoOp`, specifying `TeletypeCoOp`
   as its `CoOperation` type.
 
-> instance EffCoOp TeletypeOps where
->   type CoOperation TeletypeOps = TeletypeCoOp
+> instance EffCoOp TeletypeEff where
+>   type CoOperation TeletypeEff = TeletypeCoOp
 
 - Being an instance of `FreeOps`, we can construct a `TeletypeOps` for any
   given free monad `eff`, provided we know how to inject a `TeletypeCoOp`
   action into `eff`.
 
-> instance FreeOps TeletypeOps where
+> instance FreeOps TeletypeEff where
 >   mkFreeOps
 >     :: forall eff
 >      . (Effect eff)
@@ -270,7 +276,7 @@ Algebraic Effects
   teletype effect in IO.
 
 > teletypeHandler1
->   :: forall a . CoOpHandler TeletypeOps a a IO
+>   :: forall a . CoOpHandler TeletypeEff a a IO
 > teletypeHandler1 = CoOpHandler handleReturn handleOp
 >  where
 >    handleReturn :: a -> IO a
@@ -283,7 +289,7 @@ Algebraic Effects
 - We can interpret a computation by applying the co-op handler using
   `withCoOpHandler`.
 
-> hello51 :: Eff TeletypeOps ()
+> hello51 :: Eff TeletypeEff ()
 > hello51 = do
 >   putLine "Enter first name:"
 >   firstName <- getLine
@@ -305,8 +311,8 @@ Algebraic Effects
 
 > teletypeHandler2
 >   :: forall a eff
->    . (EffConstraint (StateOps [String]) eff)
->   => CoOpHandler TeletypeOps a String eff
+>    . (EffConstraint (StateEff [String]) eff)
+>   => CoOpHandler TeletypeEff a String eff
 > teletypeHandler2 = CoOpHandler handleReturn handleOp
 >  where
 >    handleReturn :: a -> eff String
@@ -353,8 +359,8 @@ Algebraic Effects
 
 > teletypeHandler3
 >   :: forall a eff
->    . (EffConstraint (StateOps [[String]]) eff)
->   => CoOpHandler TeletypeOps a [String] eff
+>    . (EffConstraint (StateEff [[String]]) eff)
+>   => CoOpHandler TeletypeEff a [String] eff
 > teletypeHandler3 = CoOpHandler handleReturn handleOp
 >  where
 >    handleReturn :: a -> eff [String]
@@ -401,3 +407,6 @@ Algebraic Effects
 - But it demonstrates the power of what a single co-op handler can do.
 
 (To be continue...)
+
+> main :: IO ()
+> main = return ()

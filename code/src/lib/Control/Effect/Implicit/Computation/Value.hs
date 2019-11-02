@@ -73,7 +73,7 @@ instance
 type GenericReturn ops a =
   forall eff . (Effect eff) => Computation ops (Return a) eff
 
-type IdentityComputation a = Computation NoOp (Return a) Identity
+type IdentityComputation a = Computation NoEff (Return a) Identity
 
 {-# INLINE genericComputation #-}
 genericComputation

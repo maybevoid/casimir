@@ -11,7 +11,7 @@ import Benchmark.State.Base
 
 stateHComp1
   :: forall eff . (Effect eff)
-  => Computation NoOp (Return ()) (StateT Int eff)
+  => Computation NoEff (Return ()) (StateT Int eff)
 stateHComp1 = bindOpsHandler
   stateTHandler stateBaseComp
 

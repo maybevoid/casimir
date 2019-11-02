@@ -1,3 +1,4 @@
+{-# LANGUAGE PolyKinds #-}
 
 module Control.Effect.Implicit.Free.FreeOps
   ( FreeOps (..)
@@ -12,9 +13,10 @@ import Control.Effect.Implicit.Free.EffCoOp
 -- empty declaration for @ops@ to signify that @ops@ is only used for
 -- tagging effects and are not used at the value level.
 class
-  ( EffCoOp ops
+  ( EffOps ops
+  , EffCoOp ops
   , Functor (CoOperation ops)
-  , EffFunctor ops
+  , EffFunctor (Operation ops)
   )
   => FreeOps ops where
 
@@ -29,4 +31,4 @@ class
       :: forall eff
       . (Effect eff)
       => (forall a . CoOperation ops a -> eff a)
-      -> ops eff
+      -> Operation ops eff

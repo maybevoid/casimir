@@ -1,3 +1,4 @@
+{-# LANGUAGE PolyKinds #-}
 
 module Control.Effect.Implicit.Free.FreeEff
   ( FreeEff (..)
@@ -25,13 +26,14 @@ class
   )
   => FreeEff free
   where
-    freeOps :: forall ops eff .
-      (FreeOps ops, Effect eff)
-      => ops (free ops eff)
+    freeOps :: forall ops eff
+       . (FreeOps ops, Effect eff)
+      => Operation ops (free ops eff)
 
-    liftFree :: forall ops eff a .
-      (FreeOps ops, Effect eff)
-      => eff a -> free ops eff a
+    liftFree :: forall ops eff a
+       . (FreeOps ops, Effect eff)
+      => eff a
+      -> free ops eff a
 
 class
   (FreeEff free)

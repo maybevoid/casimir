@@ -18,7 +18,7 @@ rounds :: Int
 rounds = 5000
 
 applyCurriedComp
-  :: (Int -> Computation NoOp (Return a) Identity)
+  :: (Int -> Computation NoEff (Return a) Identity)
   -> a
 applyCurriedComp comp = runIdentity $ returnVal $
   runComp (comp rounds) idLift NoOp

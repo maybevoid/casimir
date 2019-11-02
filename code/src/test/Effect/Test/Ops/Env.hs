@@ -16,7 +16,7 @@ envTests = testGroup "EnvOps Tests"
 envComp1
   :: forall a
    . (Show a)
-  => Eff (EnvOps a) String
+  => Eff (EnvEff a) String
 envComp1 = do
   env <- ask
   return $ "Env: " ++ show env
@@ -24,7 +24,7 @@ envComp1 = do
 envComp2 ::
   forall a .
   (Show a)
-  => GenericReturn (EnvOps a) String
+  => GenericReturn (EnvEff a) String
 envComp2 = genericReturn envComp1
 
 envOpsTest :: TestTree
@@ -43,7 +43,7 @@ envHandlerTest = testCase "Env handler test" $
   let
     envHandler = mkEnvHandler @Int @IO 4
     envComp3 =
-      bindOpsHandler @NoOp
+      bindOpsHandler @NoEff
         envHandler envComp2
   res <- execComp envComp3
   assertEqual
@@ -59,9 +59,9 @@ envPipelineTest = testCase "Env pipeline test" $
     envPipeline
       = opsHandlerToPipeline envHandler @(Return String)
     envComp3
-      = runPipeline @NoOp
+      = runPipeline @NoEff
         envPipeline envComp2
-  res <- execComp @NoOp envComp3
+  res <- execComp @NoEff envComp3
   assertEqual
     "Computation should read and format '5' from environment"
     "Env: 5"

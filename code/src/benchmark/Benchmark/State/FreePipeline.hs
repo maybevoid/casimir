@@ -17,7 +17,7 @@ import Benchmark.State.Base
 statePipeline1
   :: forall free s eff1 .
   (Effect eff1, FreeHandler free)
-  => GenericPipeline (EnvOps s) (StateOps s) eff1
+  => GenericPipeline (EnvEff s) (StateEff s) eff1
 statePipeline1 = contextualHandlerToPipeline @free $
   Computation handler
    where
@@ -26,11 +26,11 @@ statePipeline1 = contextualHandlerToPipeline @free $
       (Effect eff2)
       => LiftEff eff1 eff2
       -> EnvOps s eff2
-      -> ContextualHandler (CoState s) (StateOps s) eff2
+      -> ContextualHandler (CoState s) (StateEff s) eff2
     handler _ envOps = ContextualHandler coopHandler extract
      where
       coopHandler :: forall a .
-        CoOpHandler (StateOps s) a (CoState s eff2 a) eff2
+        CoOpHandler (StateEff s) a (CoState s eff2 a) eff2
       coopHandler = stateCoOpHandler
 
       extract :: forall a . CoState s eff2 a -> eff2 a
@@ -42,14 +42,14 @@ statePipeline1 = contextualHandlerToPipeline @free $
 stateFreeComp1
   :: forall free eff .
   (FreeHandler free, Effect eff)
-  => Computation (EnvOps Int) (Return ()) eff
+  => Computation (EnvEff Int) (Return ()) eff
 stateFreeComp1 = runPipeline
   (statePipeline1 @free) stateBaseComp
 
 stateFreeComp2
   :: forall free eff .
   (FreeHandler free, Effect eff)
-  => Computation NoOp (Return ()) (ReaderT Int eff)
+  => Computation NoEff (Return ()) (ReaderT Int eff)
 stateFreeComp2 = bindOpsHandler
   readerTHandler
   (stateFreeComp1 @free)
@@ -64,7 +64,7 @@ curriedFreeComp
   :: forall free eff .
   (FreeHandler free, Effect eff)
   => Int
-  -> Computation NoOp (Return ()) eff
+  -> Computation NoEff (Return ()) eff
 curriedFreeComp s = bindOpsHandler
   (mkEnvHandler s)
   (stateFreeComp1 @free)
@@ -79,5 +79,5 @@ curriedFreeIdentityComp
   :: forall free .
   (FreeHandler free)
   => Int
-  -> Computation NoOp (Return ()) Identity
+  -> Computation NoEff (Return ()) Identity
 curriedFreeIdentityComp = curriedFreeComp @free

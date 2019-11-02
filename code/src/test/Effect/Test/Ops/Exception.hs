@@ -24,7 +24,7 @@ newtype Error = Error String
 divideComp1
   :: Int
   -> Int
-  -> Eff (ExceptionOps Error) Int
+  -> Eff (ExceptionEff Error) Int
 divideComp1 x y =
   if y == 0
   then raise (Error "Division by zero")
@@ -61,7 +61,7 @@ test2 = testCase
 
 exceptionHandler
   :: forall eff . (Effect eff)
-  => CoOpHandler (ExceptionOps Error) Int Int eff
+  => CoOpHandler (ExceptionEff Error) Int Int eff
 exceptionHandler = mkExceptionCoOpHandler $
   \_ -> return 0
 

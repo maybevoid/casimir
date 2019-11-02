@@ -4,11 +4,12 @@ where
 
 import Data.Void
 
-import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Higher.CoOp
+import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Higher.Free
-import Control.Effect.Implicit.Higher.EffFunctor
-import Control.Effect.Implicit.Higher.ContraLift
+
+import qualified Control.Effect.Implicit.Base as Base
+
+data ExceptionEff e
 
 data ExceptionOps e inEff eff = ExceptionOps
   { tryOp
@@ -32,12 +33,15 @@ data ExceptionCoOp e f r where
      . e
     -> ExceptionCoOp e f r
 
-instance EffCoOp (ExceptionOps e) where
-  type CoOperation (ExceptionOps e) = ExceptionCoOp e
+instance EffOps (ExceptionEff e) where
+  type Operation (ExceptionEff e) = ExceptionOps e
+
+instance EffCoOp (ExceptionEff e) where
+  type CoOperation (ExceptionEff e) = ExceptionCoOp e
 
 instance
   (Effect inEff)
-  => EffFunctor (ExceptionOps e inEff) where
+  => Base.EffFunctor (ExceptionOps e inEff) where
     effmap
       :: forall eff1 eff2
        . (Effect eff1, Effect eff2)
@@ -54,7 +58,7 @@ instance
       handleTry comp handler = lifter $ tryOp ops1 comp handler
       handleThrow = throwOp ops1
 
-instance HEffFunctor (ExceptionOps e) where
+instance EffFunctor (ExceptionOps e) where
   invEffmap
     :: forall eff1 eff2
      . (Effect eff1, Effect eff2)
@@ -100,7 +104,7 @@ instance
       TryOp (fmap f comp) (fmap (fmap f) handler)
     fmap _ (ThrowOp e) = ThrowOp e
 
-instance CoOpFunctor (ExceptionOps e) where
+instance CoOpFunctor (ExceptionEff e) where
   liftCoOp
     :: forall f1 f2 a
      . (Functor f1, Functor f2)
@@ -114,7 +118,7 @@ instance CoOpFunctor (ExceptionOps e) where
 
   mapCoOp = fmap
 
-instance FreeOps (ExceptionOps e) where
+instance FreeOps (ExceptionEff e) where
   mkFreeOps
     :: forall eff
     . (Effect eff)
@@ -155,7 +159,7 @@ contraEither = handler1
 exceptionCoOpHandler
   :: forall e eff
    . (Effect eff)
-  => CoOpHandler (ExceptionOps e) eff (Either e)
+  => CoOpHandler (ExceptionEff e) eff (Either e)
 exceptionCoOpHandler = CoOpHandler
   (return . Right) handleOp contraEither
  where

@@ -1,17 +1,16 @@
+
 module Control.Effect.Implicit.Higher.CoOp
 where
 
 import Data.Kind
 
-class EffCoOp
-  (ops :: (Type -> Type) -> (Type -> Type) -> Type)
-   where
-    type family CoOperation ops =
-      ( coop
-        :: (Type -> Type)
-        -> Type
-        -> Type
-      ) | coop -> ops
+class EffCoOp ops where
+  type family CoOperation ops =
+    ( coop
+      :: (Type -> Type)
+      -> Type
+      -> Type
+    ) | coop -> ops
 
 class
   ( EffCoOp ops

@@ -10,7 +10,7 @@ import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.ContraLift
 
 data FreeF
-  (ops :: (Type -> Type) -> (Type -> Type) -> Type)
+  ops
   (eff1 :: Type -> Type)
   (eff2 :: Type -> Type)
   a

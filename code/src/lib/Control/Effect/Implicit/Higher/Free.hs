@@ -4,7 +4,7 @@ where
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
@@ -22,7 +22,7 @@ instance
     fmap f (Nest mx) = Nest $ fmap (fmap f) mx
 
 data CoOpHandler
-  (ops :: (Type -> Type) -> (Type -> Type) -> Type)
+  ops
   (eff :: Type -> Type)
   (f :: Type -> Type)
   = CoOpHandler
@@ -42,7 +42,7 @@ data CoOpHandler
 class
   ( EffCoOp ops
   , CoOpFunctor ops
-  , HEffFunctor ops
+  , EffFunctor (Operation ops)
   )
   => FreeOps ops
    where
@@ -50,7 +50,7 @@ class
       :: forall eff
       . (Effect eff)
       => (forall a . CoOperation ops eff a -> eff a)
-      -> ops eff eff
+      -> Operation ops eff eff
 
 class
   ( forall ops eff
@@ -61,7 +61,7 @@ class
    where
     freeOps :: forall ops eff
        . (FreeOps ops, Effect eff)
-      => ops (free ops eff) (free ops eff)
+      => Operation ops (free ops eff) (free ops eff)
 
     liftFree :: forall ops eff a
        . (FreeOps ops, Effect eff)

@@ -28,7 +28,7 @@ resourceTests = testGroup "ResourceEff Tests"
   ]
 
 unliftComp1
-  :: Eff (FixedUnliftIoOps Identity IoOps ∪ IoOps) Int
+  :: Eff (FixedUnliftIoEff Identity IoEff ∪ IoEff) Int
 unliftComp1 = do
   ref <- liftIo$ newIORef (1 :: Int)
   fixedRunInIo $ do
@@ -51,13 +51,13 @@ stateCompTransform
      , BaseOps ops
      )
   => s
-  -> Computation (StateOps s ∪ ops) (Return a) eff
+  -> Computation (StateEff s ∪ ops) (Return a) eff
   -> Computation ops (Return (s, a)) eff
 stateCompTransform s comp1 = Computation comp2
  where
   comp2 :: forall eff2 . (Effect eff2)
     => LiftEff eff eff2
-    -> ops eff2
+    -> Operation ops eff2
     -> Return (s, a) eff2
   comp2 lift ops = Return $ do
     (a, s') <- runStateT comp3 s
@@ -74,7 +74,7 @@ envCompTransform
      , BaseOps ops
      )
   => e
-  -> Computation (EnvOps e ∪ ops) (Return a) eff
+  -> Computation (EnvEff e ∪ ops) (Return a) eff
   -> Computation ops (Return a) eff
 envCompTransform e comp1 = bindOps (mkEnvOps e) comp1
 
@@ -83,7 +83,7 @@ stateEnvIoUnlift
    . e
   -> s
   -> Computation
-      (StateOps s ∪ EnvOps e ∪ IoOps)
+      (StateEff s ∪ EnvEff e ∪ IoEff)
       (Return a)
       IO
   -> IO (s, a)
@@ -99,9 +99,9 @@ stateEnvIoUnlift e s comp1 = returnVal $
 stateEnvIoUnlift2
   :: forall s e a
    . Eff
-      (StateOps s ∪ EnvOps e)
+      (StateEff s ∪ EnvEff e)
       (GenericComp
-          (StateOps s ∪ EnvOps e ∪ IoOps)
+          (StateEff s ∪ EnvEff e ∪ IoEff)
           a
         -> IO (s, a))
 stateEnvIoUnlift2 = do
@@ -113,24 +113,24 @@ stateEnvIoUnlift2 = do
 extractStateRes
   :: forall s a
    . (s, a)
-  -> Eff (StateOps s) a
+  -> Eff (StateEff s) a
 extractStateRes (s, x) = do
   put s
   return x
 
 unliftOps1
   :: forall s e eff
-   . (EffConstraint (StateOps s ∪ EnvOps e) eff)
-  => UnliftIoOps ((,) s) (StateOps s ∪ EnvOps e ∪ IoOps) eff
+   . (EffConstraint (StateEff s ∪ EnvEff e) eff)
+  => UnliftIoOps ((,) s) (StateEff s ∪ EnvEff e ∪ IoEff) eff
 unliftOps1 = mkUnliftIoOps stateEnvIoUnlift2 extractStateRes
 
 unliftOps2
   :: forall s e eff
-   . (EffConstraint (StateOps s ∪ EnvOps e) eff)
-  => FixedUnliftIoOps ((,) s) (StateOps s ∪ EnvOps e ∪ IoOps) eff
-unliftOps2 = mkFixedUnliftIoOps' @(StateOps s ∪ EnvOps e) cast unliftOps1
+   . (EffConstraint (StateEff s ∪ EnvEff e) eff)
+  => FixedUnliftIoOps ((,) s) (StateEff s ∪ EnvEff e ∪ IoEff) eff
+unliftOps2 = mkFixedUnliftIoOps' @(StateEff s ∪ EnvEff e) cast unliftOps1
 
-inc :: Int -> Eff (StateOps Int ∪ EnvOps Int) ()
+inc :: Int -> Eff (StateEff Int ∪ EnvEff Int) ()
 inc x = do
   w <- ask
   s <- get
@@ -139,10 +139,10 @@ inc x = do
 unliftComp2
   :: forall res
    . Eff
-      ( FixedUnliftIoOps
+      ( FixedUnliftIoEff
           res
-          (StateOps Int ∪ EnvOps Int ∪ IoOps)
-      ∪ StateOps Int ∪ EnvOps Int ∪ IoOps
+          (StateEff Int ∪ EnvEff Int ∪ IoEff)
+      ∪ StateEff Int ∪ EnvEff Int ∪ IoEff
       )
       Int
 unliftComp2 = do
@@ -160,7 +160,7 @@ unliftComp2 = do
   return $ x + y
 
 unliftComp3
-  :: Eff (StateOps Int ∪ EnvOps Int ∪ IoOps) Int
+  :: Eff (StateEff Int ∪ EnvEff Int ∪ IoEff) Int
 unliftComp3 = withOps unliftOps2 unliftComp2
 
 unliftComp4 :: IO Int
@@ -179,18 +179,18 @@ testUnliftIo2 = testCase "UnliftIo test 2" $ do
 resourceOps1
   :: forall eff
    . (EffConstraint
-      (FixedUnliftIoOps Identity IoOps ∪ IoOps)
+      (FixedUnliftIoEff Identity IoEff ∪ IoEff)
       eff)
   => ResourceOps
     BracketTask
-    (FixedUnliftIoOps Identity IoOps ∪ IoOps)
+    (FixedUnliftIoEff Identity IoEff ∪ IoEff)
     eff
 resourceOps1 = bracketResourceOps'
 
 resourceOps2
   :: FixedResourceOps
     BracketTask
-    (FixedUnliftIoOps Identity IoOps ∪ IoOps)
+    (FixedUnliftIoEff Identity IoEff ∪ IoEff)
     IO
 resourceOps2 = withOps (ioUnliftIoOps ∪ ioOps) $
   mkFixedResourceOps
@@ -203,9 +203,9 @@ resourceComp1
   :: forall ops
    . (ImplicitOps ops)
   => Eff
-      (FixedResourceOps
+      (FixedResourceEff
         BracketTask
-        (ops ∪ IoOps)
+        (ops ∪ IoEff)
       )
       Int
 resourceComp1 = do
@@ -225,30 +225,30 @@ testResource1 = testCase "Resource test 1" $ do
 
 resourceOps3
   :: forall eff s e
-   . (EffConstraint (StateOps s ∪ EnvOps e ∪ IoOps) eff)
+   . (EffConstraint (StateEff s ∪ EnvEff e ∪ IoEff) eff)
   => ResourceOps
       BracketTask
-      ( FixedUnliftIoOps
+      ( FixedUnliftIoEff
           ((,) s)
-          (StateOps s ∪ EnvOps e ∪ IoOps)
-      ∪ StateOps s ∪ EnvOps e ∪ IoOps
+          (StateEff s ∪ EnvEff e ∪ IoEff)
+      ∪ StateEff s ∪ EnvEff e ∪ IoEff
       )
       eff
 resourceOps3 = withOps unliftOps2 $ bracketResourceOps'
 
 resourceOps4
   :: forall eff s e
-   . (EffConstraint (StateOps s ∪ EnvOps e ∪ IoOps) eff)
+   . (EffConstraint (StateEff s ∪ EnvEff e ∪ IoEff) eff)
   => FixedResourceOps
       BracketTask
-      ( FixedUnliftIoOps
+      ( FixedUnliftIoEff
           ((,) s)
-          (StateOps s ∪ EnvOps e ∪ IoOps)
-      ∪ StateOps s ∪ EnvOps e ∪ IoOps
+          (StateEff s ∪ EnvEff e ∪ IoEff)
+      ∪ StateEff s ∪ EnvEff e ∪ IoEff
       )
       eff
 resourceOps4 = mkFixedResourceOps'
-  @(StateOps s ∪ EnvOps e ∪ IoOps)
+  @(StateEff s ∪ EnvEff e ∪ IoEff)
   cast
   resourceOps3
 
@@ -272,10 +272,10 @@ resourceComp3
    . (ImplicitOps ops)
   => IORef [Int]
   -> Eff
-      ( FixedResourceOps
+      ( FixedResourceEff
           BracketTask
-          (ops ∪ (StateOps Int ∪ EnvOps Int ∪ IoOps))
-      ∪ IoOps
+          (ops ∪ (StateEff Int ∪ EnvEff Int ∪ IoEff))
+      ∪ IoEff
       )
       Int
 resourceComp3 ref = do
@@ -290,21 +290,21 @@ resourceComp3 ref = do
 runResourceComp
   :: forall a
    . Eff
-      ( FixedResourceOps
+      ( FixedResourceEff
           BracketTask
-          ( FixedUnliftIoOps
+          ( FixedUnliftIoEff
               ((,) Int)
-              ( StateOps Int
-              ∪ EnvOps Int
-              ∪ IoOps
+              ( StateEff Int
+              ∪ EnvEff Int
+              ∪ IoEff
               )
-          ∪ StateOps Int
-          ∪ EnvOps Int
-          ∪ IoOps
+          ∪ StateEff Int
+          ∪ EnvEff Int
+          ∪ IoEff
           )
-      ∪ StateOps Int
-      ∪ EnvOps Int
-      ∪ IoOps
+      ∪ StateEff Int
+      ∪ EnvEff Int
+      ∪ IoEff
       )
       a
   -> IO a
@@ -338,10 +338,10 @@ resourceComp5
     . (ImplicitOps ops)
   => IORef [Int]
   -> Eff
-      ( FixedResourceOps
+      ( FixedResourceEff
           BracketTask
-          (ops ∪ (StateOps Int ∪ EnvOps Int ∪ IoOps))
-      ∪ IoOps
+          (ops ∪ (StateEff Int ∪ EnvEff Int ∪ IoEff))
+      ∪ IoEff
       )
       Int
 resourceComp5 ref = do

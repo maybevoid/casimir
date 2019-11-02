@@ -16,6 +16,8 @@ ambivalentTests = testGroup "Ambivalent Tests"
   [ test1
   ]
 
+data AmbEff a
+
 data AmbOps a eff = AmbOps {
   selectOp :: [a] -> eff a
 }
@@ -23,8 +25,11 @@ data AmbOps a eff = AmbOps {
 data AmbCoOp a r
   = SelectOp [a] (a -> r)
 
-instance EffCoOp (AmbOps a) where
-  type CoOperation (AmbOps a) = AmbCoOp a
+instance EffOps (AmbEff a) where
+  type Operation (AmbEff a) = AmbOps a
+
+instance EffCoOp (AmbEff a) where
+  type CoOperation (AmbEff a) = AmbCoOp a
 
 instance Functor (AmbCoOp a) where
   fmap f (SelectOp choice cont) = SelectOp choice (f . cont)
@@ -34,13 +39,13 @@ instance EffFunctor (AmbOps a) where
     selectOp = \choice -> lifter $ selectOp ops choice
   }
 
-instance FreeOps (AmbOps a) where
+instance FreeOps (AmbEff a) where
   mkFreeOps liftCoOp = AmbOps {
     selectOp = \choice -> liftCoOp $ SelectOp choice id
   }
 
-instance ImplicitOps (AmbOps a) where
-  type OpsConstraint (AmbOps a) eff = (?ambOps :: AmbOps a eff)
+instance ImplicitOps (AmbEff a) where
+  type OpsConstraint (AmbEff a) eff = (?ambOps :: AmbOps a eff)
 
   withOps ops comp = let ?ambOps = ops in comp
   captureOps = ?ambOps
@@ -48,7 +53,7 @@ instance ImplicitOps (AmbOps a) where
 select
   :: forall a
    . [a]
-  -> Eff (AmbOps a) a
+  -> Eff (AmbEff a) a
 select = selectOp captureOps
 
 noAttack :: (Int, Int) -> (Int, Int) -> Bool
@@ -60,13 +65,13 @@ availableMoves x qs =
   filter (\y -> all (noAttack (x,y)) qs)
   [1..8]
 
-solveQueen :: Eff (AmbOps Int) [(Int, Int)]
+solveQueen :: Eff (AmbEff Int) [(Int, Int)]
 solveQueen = solveQueen' 1 []
  where
   solveQueen'
     :: Int
     -> [(Int, Int)]
-    -> Eff (AmbOps Int) [(Int, Int)]
+    -> Eff (AmbEff Int) [(Int, Int)]
   solveQueen' x qs =
     if x == 9 then return qs else
     do
@@ -76,7 +81,7 @@ solveQueen = solveQueen' 1 []
 dfsHandler
   :: forall a r eff
    . (Effect eff)
-  => CoOpHandler (AmbOps a) r (Maybe r) eff
+  => CoOpHandler (AmbEff a) r (Maybe r) eff
 dfsHandler = CoOpHandler handleReturn handleCoOp
  where
   handleReturn x = return $ Just x

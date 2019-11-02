@@ -5,7 +5,10 @@ module Control.Effect.Implicit.Freer.EffCoOp
 where
 
 import Data.Kind
+import Control.Effect.Implicit.Base
 
-class EffCoOp (ops :: (Type -> Type) -> Type) where
+class
+  (EffOps ops)
+  => EffCoOp ops where
   type family CoOperation ops
     = (coop :: (Type -> Type)) | coop -> ops

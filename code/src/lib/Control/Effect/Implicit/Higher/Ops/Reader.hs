@@ -2,9 +2,11 @@
 module Control.Effect.Implicit.Higher.Ops.Reader
 where
 
-import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Ops.Env
+import qualified Control.Effect.Implicit.Base as Base
+
+data ReaderEff e
 
 data ReaderOps e inEff eff = ReaderOps
   { innerEnvOps :: EnvOps e inEff
@@ -16,12 +18,15 @@ data ReaderOps e inEff eff = ReaderOps
       -> eff a
   }
 
+instance EffOps (ReaderEff e) where
+  type Operation (ReaderEff e) = ReaderOps e
+
 instance
   (Effect inEff)
-  => EffFunctor (ReaderOps e inEff) where
+  => Base.EffFunctor (ReaderOps e inEff) where
     effmap _ = undefined
 
-instance HEffFunctor (ReaderOps e) where
+instance EffFunctor (ReaderOps e) where
   invEffmap
     :: forall eff1 eff2
      . ( Effect eff1
@@ -33,8 +38,8 @@ instance HEffFunctor (ReaderOps e) where
     -> ReaderOps e eff2 eff2
   invEffmap lifter (ContraLift contraLift1) ops
     = ReaderOps
-        (effmap lifter $ innerEnvOps ops)
-        (effmap lifter $ outerEnvOps ops)
+        (Base.effmap lifter $ innerEnvOps ops)
+        (Base.effmap lifter $ outerEnvOps ops)
         local
     where
       local :: forall a . (e -> e) -> eff2 a -> eff2 a

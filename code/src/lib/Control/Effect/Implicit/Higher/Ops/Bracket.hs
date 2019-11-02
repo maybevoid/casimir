@@ -5,11 +5,12 @@ where
 import Control.Monad.Identity
 import Control.Exception (bracket)
 
-import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Higher.EffFunctor
-import Control.Effect.Implicit.Higher.ContraLift
+import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Higher.Free
-import Control.Effect.Implicit.Higher.CoOp
+
+import qualified Control.Effect.Implicit.Base as Base
+
+data BracketEff
 
 data BracketOps inEff eff = BracketOps {
   bracketOp
@@ -28,12 +29,15 @@ data BracketCoOp f r where
     -> (a -> f r)
     -> BracketCoOp f r
 
+instance EffOps BracketEff where
+  type Operation BracketEff = BracketOps
+
 instance
   (Effect inEff)
-  => EffFunctor (BracketOps inEff) where
+  => Base.EffFunctor (BracketOps inEff) where
     effmap _ = undefined
 
-instance HEffFunctor BracketOps where
+instance EffFunctor BracketOps where
   invEffmap
     :: forall eff1 eff2
       . ( Effect eff1
@@ -68,8 +72,8 @@ instance HEffFunctor BracketOps where
 ioBracketOps :: BracketOps IO IO
 ioBracketOps = BracketOps bracket
 
-instance EffCoOp BracketOps where
-  type CoOperation BracketOps = BracketCoOp
+instance EffCoOp BracketEff where
+  type CoOperation BracketEff = BracketCoOp
 
 instance
   (Functor f)
@@ -77,7 +81,7 @@ instance
     fmap f (BracketOp alloc release comp) =
       BracketOp alloc release (fmap (fmap f) comp)
 
-instance CoOpFunctor BracketOps where
+instance CoOpFunctor BracketEff where
   liftCoOp
     :: forall f1 f2 a
       . (Functor f1, Functor f2)
@@ -89,7 +93,7 @@ instance CoOpFunctor BracketOps where
 
   mapCoOp = fmap
 
-instance FreeOps BracketOps where
+instance FreeOps BracketEff where
   mkFreeOps
     :: forall eff
     . (Effect eff)
@@ -107,7 +111,7 @@ instance FreeOps BracketOps where
       BracketOp alloc release comp
 
 bracketCoOpHandler
-  :: CoOpHandler BracketOps IO Identity
+  :: CoOpHandler BracketEff IO Identity
 bracketCoOpHandler = CoOpHandler
   (return . Identity) handleOp contraIdentity
  where

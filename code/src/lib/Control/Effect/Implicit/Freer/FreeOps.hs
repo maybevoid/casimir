@@ -8,8 +8,9 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Freer.EffCoOp
 
 class
-  ( EffCoOp ops
-  , EffFunctor ops
+  ( EffOps ops
+  , EffCoOp ops
+  , EffFunctor (Operation ops)
   )
   => FreeOps ops
    where
@@ -17,4 +18,4 @@ class
       :: forall eff
         . (Effect eff)
       => (forall a . CoOperation ops a -> eff a)
-      -> ops eff
+      -> Operation ops eff

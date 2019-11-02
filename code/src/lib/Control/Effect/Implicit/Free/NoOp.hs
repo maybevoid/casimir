@@ -14,11 +14,11 @@ import Control.Effect.Implicit.Free.FreeOps
 -- 'CoOperation' can be satisfied.
 data NoCoOp r = NoCoOp
 
-instance EffCoOp NoOp where
-  type CoOperation NoOp = NoCoOp
+instance EffCoOp NoEff where
+  type CoOperation NoEff = NoCoOp
 
 instance Functor NoCoOp where
   fmap _ _ = NoCoOp
 
-instance FreeOps NoOp where
+instance FreeOps NoEff where
   mkFreeOps _ = NoOp

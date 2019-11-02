@@ -1,6 +1,7 @@
 module Control.Effect.Implicit.Ops.UnliftIo
 where
 
+import Data.Kind
 import Control.Monad.Identity
 
 import Control.Effect.Implicit.Cast
@@ -14,6 +15,9 @@ newtype GenericComp ops a = GenericComp {
      . (EffConstraint ops eff)
     => eff a
 }
+
+data UnliftIoEff (res :: Type -> Type) ops
+data FixedUnliftIoEff (res :: Type -> Type) ops
 
 data UnliftIoOps res ops eff = UnliftIoOps {
   unliftIoOp
@@ -40,11 +44,17 @@ data UnliftIoCoOp res ops r where
 
 data FixedUnliftIoOps res ops eff = FixedUnliftIoOps {
   unfixUnliftIoOps
-    :: UnliftIoOps res (FixedUnliftIoOps res ops ∪ ops) eff
+    :: UnliftIoOps res (FixedUnliftIoEff res ops ∪ ops) eff
 }
 
-instance EffCoOp (UnliftIoOps res ops) where
-  type CoOperation (UnliftIoOps res ops) = UnliftIoCoOp res ops
+instance EffOps (UnliftIoEff res ops) where
+  type Operation (UnliftIoEff res ops) = UnliftIoOps res ops
+
+instance EffOps (FixedUnliftIoEff res ops) where
+  type Operation (FixedUnliftIoEff res ops) = FixedUnliftIoOps res ops
+
+instance EffCoOp (UnliftIoEff res ops) where
+  type CoOperation (UnliftIoEff res ops) = UnliftIoCoOp res ops
 
 instance Functor (UnliftIoCoOp res ops) where
   fmap f (UnliftIoOp cont) = UnliftIoOp $ fmap f cont
@@ -60,14 +70,14 @@ instance EffFunctor (FixedUnliftIoOps res ops) where
   effmap lift (FixedUnliftIoOps ops) =
     FixedUnliftIoOps $ effmap lift ops
 
-instance FreeOps (UnliftIoOps res ops) where
+instance FreeOps (UnliftIoEff res ops) where
   mkFreeOps liftCoOp = UnliftIoOps {
     unliftIoOp = liftCoOp $ UnliftIoOp id,
     extractIoResOp = \res -> liftCoOp $ ExtractIoResOp res id
   }
 
-instance ImplicitOps (UnliftIoOps res ops) where
-  type OpsConstraint (UnliftIoOps res ops) eff =
+instance ImplicitOps (UnliftIoEff res ops) where
+  type OpsConstraint (UnliftIoEff res ops) eff =
     (?_Control_Effect_Implicit_Ops_UnliftIo_unliftIoOps
       :: UnliftIoOps res ops eff)
 
@@ -79,8 +89,8 @@ instance ImplicitOps (UnliftIoOps res ops) where
   captureOps =
     ?_Control_Effect_Implicit_Ops_UnliftIo_unliftIoOps
 
-instance ImplicitOps (FixedUnliftIoOps res ops) where
-  type OpsConstraint (FixedUnliftIoOps res ops) eff =
+instance ImplicitOps (FixedUnliftIoEff res ops) where
+  type OpsConstraint (FixedUnliftIoEff res ops) eff =
     (?_Control_Effect_Implicit_Ops_UnliftIo_fixedUnliftIoOps
       :: FixedUnliftIoOps res ops eff)
 
@@ -95,7 +105,7 @@ instance ImplicitOps (FixedUnliftIoOps res ops) where
 unliftIo
   :: forall eff a res ops
    . ( ImplicitOps ops
-     , EffConstraint (UnliftIoOps res ops) eff
+     , EffConstraint (UnliftIoEff res ops) eff
      )
   => (forall eff2 . (EffConstraint ops eff2) => eff2 a)
   -> eff (IO (res a))
@@ -106,7 +116,7 @@ unliftIo comp1 = unliftIoOp captureOps <*> pure comp2
 
 extractIoRes
   :: forall a res ops eff
-   . ( EffConstraint (UnliftIoOps res ops) eff
+   . ( EffConstraint (UnliftIoEff res ops) eff
      )
   => res a
   -> eff a
@@ -115,7 +125,7 @@ extractIoRes = extractIoResOp captureOps
 runInIo
   :: forall res ops eff a
    . ( ImplicitOps ops
-     , EffConstraint (UnliftIoOps res ops ∪ IoOps) eff
+     , EffConstraint (UnliftIoEff res ops ∪ IoEff) eff
      )
   => (forall eff2 . (EffConstraint ops eff2) => eff2 a)
   -> eff a
@@ -155,7 +165,7 @@ mkFixedUnliftIoOps' caster ops1 = ops2
     unlift1
       :: forall a
        . eff2
-          (GenericComp (FixedUnliftIoOps res ops1 ∪ ops1) a
+          (GenericComp (FixedUnliftIoEff res ops1 ∪ ops1) a
             -> IO (res a))
     unlift1 =  do
       unlift2 <- unliftIoOp ops1
@@ -186,10 +196,10 @@ mkFixedUnliftIoOps = mkFixedUnliftIoOps' @ops cast
 unfixUnliftIo
   :: forall res ops eff r
    . ( ImplicitOps ops
-     , EffConstraint (FixedUnliftIoOps res ops) eff
+     , EffConstraint (FixedUnliftIoEff res ops) eff
      )
   => ((OpsConstraint
-        (UnliftIoOps res (FixedUnliftIoOps res ops ∪ ops))
+        (UnliftIoEff res (FixedUnliftIoEff res ops ∪ ops))
         eff)
       => eff r)
   -> eff r
@@ -198,10 +208,10 @@ unfixUnliftIo comp = withOps (unfixUnliftIoOps captureOps) $ comp
 fixedUnliftIo
   :: forall a res ops eff
    . ( ImplicitOps ops
-     , EffConstraint (FixedUnliftIoOps res ops) eff
+     , EffConstraint (FixedUnliftIoEff res ops) eff
      )
   => (forall eff2
-       . (EffConstraint (FixedUnliftIoOps res ops ∪ ops) eff2)
+       . (EffConstraint (FixedUnliftIoEff res ops ∪ ops) eff2)
       => eff2 a)
   -> eff (IO (res a))
 fixedUnliftIo comp = unfixUnliftIo $ unliftIo comp
@@ -210,10 +220,10 @@ fixedRunInIo
   :: forall a res ops eff
    . ( Effect eff
      , ImplicitOps ops
-     , EffConstraint (FixedUnliftIoOps res ops ∪ IoOps) eff
+     , EffConstraint (FixedUnliftIoEff res ops ∪ IoEff) eff
      )
   => (forall eff2
-       . (EffConstraint (FixedUnliftIoOps res ops ∪ ops) eff2)
+       . (EffConstraint (FixedUnliftIoEff res ops ∪ ops) eff2)
       => eff2 a)
   -> eff a
 fixedRunInIo comp = unfixUnliftIo $ runInIo comp
@@ -221,15 +231,15 @@ fixedRunInIo comp = unfixUnliftIo $ runInIo comp
 ioUnliftIoOps
   :: forall eff
    . (Effect eff)
-  => FixedUnliftIoOps Identity IoOps eff
-ioUnliftIoOps = mkFixedUnliftIoOps' @NoOp @IoOps cast ops
+  => FixedUnliftIoOps Identity IoEff eff
+ioUnliftIoOps = mkFixedUnliftIoOps' @NoEff @IoEff cast ops
  where
   ops
     :: forall eff2
      . (Effect eff2)
-    => UnliftIoOps Identity IoOps eff2
+    => UnliftIoOps Identity IoEff eff2
   ops = mkUnliftIoOps (return unlift') (return . runIdentity)
 
-  unlift' :: GenericComp IoOps a -> (IO (Identity a))
+  unlift' :: GenericComp IoEff a -> (IO (Identity a))
   unlift' (GenericComp comp) =
     fmap Identity $ withOps ioOps comp

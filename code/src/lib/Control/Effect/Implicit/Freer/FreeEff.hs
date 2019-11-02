@@ -27,11 +27,12 @@ class
   => FreeEff free where
     freeOps :: forall ops eff
       . (FreeOps ops, Effect eff)
-      => ops (free ops eff)
+      => Operation ops (free ops eff)
 
     liftFree :: forall ops eff a
-      . (FreeOps ops, Effect eff)
-      => eff a -> free ops eff a
+       . (FreeOps ops, Effect eff)
+      => eff a
+      -> free ops eff a
 
     handleFree
       :: forall ops eff a r
