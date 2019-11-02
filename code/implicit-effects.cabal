@@ -136,8 +136,8 @@ library
       Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.Union
       Control.Effect.Implicit.Higher.Free
-      Control.Effect.Implicit.Higher.Free.Church
-      Control.Effect.Implicit.Higher.Free.Free
+      Control.Effect.Implicit.Higher.Monad.Free
+      Control.Effect.Implicit.Higher.Monad.Church
 
   hs-source-dirs:
       src/lib

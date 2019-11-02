@@ -3,9 +3,9 @@ module Control.Effect.Implicit.Higher.Free
 where
 
 import Data.Kind
-import Control.Monad.Identity
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
 
@@ -20,24 +20,6 @@ instance
   => Functor (Nest f g)
    where
     fmap f (Nest mx) = Nest $ fmap (fmap f) mx
-
-type ContraFree eff f =
-  forall a
-   . (forall w
-       . (Functor w)
-     => (forall x . f (eff x) -> eff (w x))
-     -> eff (w (eff (f a))))
-  -> eff (f a)
-
-class EffCoOp
-  (ops :: (Type -> Type) -> (Type -> Type) -> Type)
-   where
-    type family CoOperation ops =
-      ( coop
-        :: (Type -> Type)
-        -> Type
-        -> Type
-      ) | coop -> ops
 
 data CoOpHandler
   (ops :: (Type -> Type) -> (Type -> Type) -> Type)
@@ -56,31 +38,6 @@ data CoOpHandler
     , contraLiftHandler
         :: ContraFree eff f
     }
-
-class
-  ( EffCoOp ops
-  )
-  => CoOpFunctor ops
-  where
-    liftCoOp
-      :: forall f1 f2 a
-       . (Functor f1, Functor f2)
-      => (forall x . f1 x -> f2 x)
-      -> CoOperation ops f1 a
-      -> CoOperation ops f2 a
-
-    -- GHC is unable to deduce the following
-    -- even if we add it as quantified constraints:
-    --
-    --  forall f
-    --   . (Functor f)
-    --  => Functor (CoOperation ops f)
-    mapCoOp
-      :: forall f a b
-       . (Functor f)
-      => (a -> b)
-      -> CoOperation ops f a
-      -> CoOperation ops f b
 
 class
   ( EffCoOp ops
@@ -135,22 +92,6 @@ class
 data CoState s eff a = CoState {
   runCoState :: s -> eff (s, a)
 } deriving (Functor)
-
-contraIdentity
-  :: forall eff
-   . (Effect eff)
-  => ContraFree eff Identity
-contraIdentity = handler1
- where
-  handler1
-    :: forall a
-     . ((forall x . Identity (eff x) -> eff (Identity x))
-        -> eff (Identity (eff (Identity a))))
-    -> eff (Identity a)
-  handler1 cont1 = cont1 contra1 >>= runIdentity
-
-  contra1 :: forall a . Identity (eff a) -> eff (Identity a)
-  contra1 (Identity mx) = mx >>= return . Identity
 
 contraState
   :: forall s eff

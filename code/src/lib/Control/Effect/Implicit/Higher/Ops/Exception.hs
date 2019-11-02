@@ -5,6 +5,7 @@ where
 import Data.Void
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.Free
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
@@ -110,6 +111,8 @@ instance CoOpFunctor (ExceptionOps e) where
     TryOp (lifter comp) (fmap lifter handler)
 
   liftCoOp _ (ThrowOp e) = ThrowOp e
+
+  mapCoOp = fmap
 
 instance FreeOps (ExceptionOps e) where
   mkFreeOps

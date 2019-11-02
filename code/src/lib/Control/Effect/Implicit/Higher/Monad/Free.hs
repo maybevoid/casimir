@@ -1,4 +1,4 @@
-module Control.Effect.Implicit.Higher.Free.Free
+module Control.Effect.Implicit.Higher.Monad.Free
 where
 
 import Data.Kind
@@ -6,6 +6,7 @@ import Control.Monad (ap)
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.Free
+import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.ContraLift
 
 data FreeF
@@ -23,12 +24,13 @@ data FreeF
       -> FreeF ops eff1 eff2 b
 
     ContraF
-      :: forall ops eff1 eff2 a
+      :: forall ops eff1 eff2 a b
        . (forall w
            . (Functor w)
           => (forall x . eff2 x -> eff1 (w x))
-          -> eff1 (w (eff2 a)))
-      -> FreeF ops eff1 eff2 a
+          -> eff1 (w a))
+      -> (a -> eff2 b)
+      -> FreeF ops eff1 eff2 b
 
 newtype FreeMonad ops eff a = FreeMonad {
   runFreerMonad :: eff (FreeF ops eff (FreeMonad ops eff) a)
@@ -63,15 +65,7 @@ instance
       mapper2 (PureF x) = PureF $ f x
       mapper2 (BindF coop cont) = BindF coop $ fmap (fmap f) cont
 
-      mapper2 (ContraF cont1) = ContraF $ cont2
-       where
-        cont2
-          :: forall w
-           . (Functor w)
-          => (forall x . FreeMonad ops eff x -> eff (w x))
-          -> eff (w (FreeMonad ops eff b))
-        cont2 contraLift =
-          fmap (fmap (fmap f)) $ cont1 contraLift
+      mapper2 (ContraF cont1 cont2) = ContraF cont1 $ fmap (fmap f) cont2
 
 instance
   ( Monad eff
@@ -109,18 +103,8 @@ instance
             return $ BindF coop $ \x ->
               cont2 x >>= cont1
 
-          ContraF cont2 ->
-            return $ ContraF cont3
-            where
-              cont3
-                :: forall w
-                 . (Functor w)
-                => (forall x . FreeMonad ops eff x -> eff (w x))
-                -> eff (w (FreeMonad ops eff b))
-              cont3 contraLift =
-                fmap
-                  (fmap $ \mx -> mx >>= cont1) $
-                  cont2 contraLift
+          ContraF cont2 cont3 ->
+            return $ ContraF cont2 $ \x -> cont3 x >>= cont1
 
 contraLiftFree
   :: forall ops eff
@@ -136,11 +120,11 @@ contraLiftFree = ContraLift contraLift1
         -> eff (w a))
     -> FreeMonad ops eff a
   contraLift1 cont1 = FreeMonad $ return $
-    ContraF cont2
+    ContraF cont2 return
      where
       cont2
         :: forall w
          . (Functor w)
         => (forall x . FreeMonad ops eff x -> eff (w x))
-        -> eff (w (FreeMonad ops eff a))
-      cont2 contraLift2 = fmap (fmap return) $ cont1 contraLift2
+        -> eff (w a)
+      cont2 contraLift2 = cont1 contraLift2

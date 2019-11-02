@@ -9,6 +9,7 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
 import Control.Effect.Implicit.Higher.Free
+import Control.Effect.Implicit.Higher.CoOp
 
 data BracketOps inEff eff = BracketOps {
   bracketOp
@@ -85,6 +86,8 @@ instance CoOpFunctor BracketOps where
     -> BracketCoOp f2 a
   liftCoOp lifter (BracketOp alloc release comp) =
     BracketOp alloc release (fmap lifter comp)
+
+  mapCoOp = fmap
 
 instance FreeOps BracketOps where
   mkFreeOps

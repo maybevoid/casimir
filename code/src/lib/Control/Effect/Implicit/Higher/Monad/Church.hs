@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Higher.Free.Church
+module Control.Effect.Implicit.Higher.Monad.Church
 where
 
 import Control.Monad (ap)
@@ -8,6 +8,7 @@ import Data.Kind
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.Free
+import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.ContraLift
 
 newtype ChurchMonad
