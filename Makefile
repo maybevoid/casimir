@@ -16,7 +16,7 @@ external-shell:
 
 clean:
 	nix-shell --pure nix/shell.nix --run \
-		"make -f make/nix.mk clean"
+		"make -f make/cabal.mk clean"
 
 hoogle:
 	nix-shell --pure nix/external.nix --run \
@@ -24,7 +24,7 @@ hoogle:
 
 repl:
 	nix-shell --pure nix/shell.nix --run \
-		"make -f make/nix.mk repl"
+		"make -f make/cabal.mk repl"
 
 demo:
 	nix-shell --pure nix/shell.nix --run \
@@ -32,19 +32,19 @@ demo:
 
 doc:
 	nix-shell --pure nix/shell.nix --run \
-		"make -f make/nix.mk doc"
+		"make -f make/cabal.mk doc"
 
 benchmark:
 	nix-shell --pure nix/shell.nix --run \
-		"make -f make/nix.mk benchmark"
+		"make -f make/cabal.mk benchmark"
 
 test:
 	nix-shell --pure nix/shell.nix --run \
-		"make -f make/nix.mk test"
+		"make -f make/cabal.mk test"
 
 test-repl:
 	nix-shell --pure nix/shell.nix --run \
-		"make -f make/nix.mk test-repl"
+		"make -f make/cabal.mk test-repl"
 
 .PHONY: clean-env release release-doc shell external-shell \
 	hoogle repl demo doc benchmark test test-repl

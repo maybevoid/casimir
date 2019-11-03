@@ -3,7 +3,7 @@ clean:
 	cabal v2-clean implicit-effects
 
 build:
-	cabal v2-build all
+	cabal v2-build --enable-tests --enable-benchmark --enable-documentation all
 
 repl:
 	cabal v2-repl implicit-effects
