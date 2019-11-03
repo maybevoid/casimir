@@ -11,7 +11,7 @@ module Control.Effect.Implicit.Free.FreeEff
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.EffCoOp
+import Control.Effect.Implicit.Free.CoOp
 import Control.Effect.Implicit.Free.FreeOps
 
 data CoOpHandler handler a r eff = CoOpHandler {

@@ -7,7 +7,6 @@ import Control.Concurrent.Async
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Free.Handler
 
 import Control.Effect.Implicit.Ops.Io
 

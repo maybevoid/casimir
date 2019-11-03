@@ -11,9 +11,9 @@ module Control.Effect.Implicit.Freer
   )
 where
 
-import Control.Effect.Implicit.Freer.EffCoOp
+import Control.Effect.Implicit.Freer.CoOp
 import Control.Effect.Implicit.Freer.FreeOps
-import Control.Effect.Implicit.Freer.FreerMonad
-import Control.Effect.Implicit.Freer.ChurchMonad
+import Control.Effect.Implicit.Freer.Monad.Freer
+import Control.Effect.Implicit.Freer.Monad.Church
 import Control.Effect.Implicit.Freer.FreeEff
 import Control.Effect.Implicit.Freer.Handler

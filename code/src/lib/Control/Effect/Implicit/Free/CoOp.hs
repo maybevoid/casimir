@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Free.EffCoOp
+module Control.Effect.Implicit.Free.CoOp
   ( EffCoOp (..)
   )
 where

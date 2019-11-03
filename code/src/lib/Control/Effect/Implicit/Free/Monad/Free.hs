@@ -1,7 +1,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
-module Control.Effect.Implicit.Free.FreeMonad
+module Control.Effect.Implicit.Free.Monad.Free
   ( FreeMonad (..)
   )
 where
@@ -10,7 +10,7 @@ import Control.Monad.Trans.Free
 import Control.Monad.Trans.Class (lift)
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.EffCoOp
+import Control.Effect.Implicit.Free.CoOp
 import Control.Effect.Implicit.Free.FreeOps
 import Control.Effect.Implicit.Free.FreeEff
 

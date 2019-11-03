@@ -7,6 +7,7 @@ import Control.Exception (bracket)
 
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Higher.Free
+import Control.Effect.Implicit.Higher.ContraLift.Identity
 
 import qualified Control.Effect.Implicit.Base as Base
 

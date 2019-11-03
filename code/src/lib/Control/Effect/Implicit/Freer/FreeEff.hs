@@ -8,7 +8,7 @@ where
 
 import Control.Effect.Implicit.Base
 
-import Control.Effect.Implicit.Freer.EffCoOp
+import Control.Effect.Implicit.Freer.CoOp
 import Control.Effect.Implicit.Freer.FreeOps
 
 data CoOpCont ops a where

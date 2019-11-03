@@ -35,7 +35,6 @@ implicit-effects Overview
 
 > import Control.Effect.Implicit
 > import Control.Effect.Implicit.Free
-> import Control.Effect.Implicit.Free.ChurchMonad
 
 - Effect operations are imported from separate modules
 
@@ -298,7 +297,7 @@ Algebraic Effects
 >   putLine $ "Hello, " <> firstName <> " " <> lastName <> "!"
 
 > hello52 :: IO ()
-> hello52 = withCoOpHandler teletypeHandler1 hello51
+> hello52 = withCoOpHandler @ChurchMonad teletypeHandler1 hello51
 
 - There is not much benefit doing algebraic style if all we need is
   to work with the IO version of getLine and putLine.
@@ -340,7 +339,7 @@ Algebraic Effects
 
 > hello53 :: StateT [String] Identity String
 > hello53 = withOps stateTOps $
->   withCoOpHandler teletypeHandler2 hello51
+>   withCoOpHandler @ChurchMonad teletypeHandler2 hello51
 
 > hello54 :: String
 > hello54 = runIdentity $ evalStateT hello53 $
@@ -388,7 +387,7 @@ Algebraic Effects
 > hello55 = runIdentity $ evalStateT comp inputs
 >  where
 >   comp = withOps stateTOps $
->     withCoOpHandler teletypeHandler3 hello51
+>     withCoOpHandler @ChurchMonad teletypeHandler3 hello51
 >
 >   inputs =
 >     [ ["Alice", "Bob", "Carl"]

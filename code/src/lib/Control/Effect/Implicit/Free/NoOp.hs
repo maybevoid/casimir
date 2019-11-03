@@ -6,7 +6,7 @@ module Control.Effect.Implicit.Free.NoOp
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.EffCoOp
+import Control.Effect.Implicit.Free.CoOp
 import Control.Effect.Implicit.Free.FreeOps
 
 -- | @'CoOperation' 'NoOp' r@ is really just @()@ for all return type @r@. We instead define

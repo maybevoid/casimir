@@ -1,50 +1,20 @@
 
-module Control.Effect.Implicit.Free.ChurchMonad
+module Control.Effect.Implicit.Freer.Monad.Church
   ( ChurchMonad (..)
-  , withCoOpHandler
-  , withCoOpHandlerAndOps
   )
 where
 
 import Control.Monad (ap)
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.EffCoOp
-import Control.Effect.Implicit.Free.FreeOps
-import Control.Effect.Implicit.Free.FreeEff
 
-import qualified Control.Effect.Implicit.Free.Handler as Handler
+import Control.Effect.Implicit.Freer.CoOp
+import Control.Effect.Implicit.Freer.FreeOps
+import Control.Effect.Implicit.Freer.FreeEff
 
 newtype ChurchMonad ops eff a = ChurchMonad {
-  runChurchMonad :: forall r . CoOpHandler ops a r eff -> eff r
+  runChurchMonad :: forall r . FreerCoOpHandler ops a r eff -> eff r
 }
-
-withCoOpHandler
-  :: forall handler eff a r
-   . ( Effect eff
-     , FreeOps handler
-     , BaseOps handler
-     )
-  => CoOpHandler handler a r eff
-  -> ((OpsConstraint handler (ChurchMonad handler eff))
-      => ChurchMonad handler eff a)
-  -> eff r
-withCoOpHandler = Handler.withCoOpHandler @ChurchMonad
-
-withCoOpHandlerAndOps
-  :: forall ops handler eff a r
-    . ( BaseOps ops
-      , FreeOps handler
-      , BaseOps handler
-      , EffConstraint ops eff
-      )
-  => CoOpHandler handler a r eff
-  -> (( OpsConstraint handler (ChurchMonad handler eff)
-      , OpsConstraint ops (ChurchMonad handler eff)
-      )
-      => ChurchMonad handler eff a)
-  -> eff r
-withCoOpHandlerAndOps = Handler.withCoOpHandlerAndOps @ChurchMonad @ops
 
 instance
   (Monad eff, FreeOps ops)
@@ -72,10 +42,6 @@ instance
   where
     freeOps = churchOps
     liftFree = liftChurchMonad
-
-instance
-  FreeHandler ChurchMonad
-   where
     handleFree handler eff = runChurchMonad eff handler
 
 liftChurchMonad
@@ -86,7 +52,7 @@ liftChurchMonad
   => eff a
   -> ChurchMonad ops eff a
 liftChurchMonad mx = ChurchMonad $
-  \(CoOpHandler handleReturn _) ->
+  \(FreerCoOpHandler handleReturn _) ->
    do
     x <- mx
     handleReturn x
@@ -101,9 +67,9 @@ liftChurchOps
   -> ChurchMonad ops eff a
 liftChurchOps ops = ChurchMonad cont
  where
-  cont :: forall r . CoOpHandler ops a r eff -> eff r
-  cont (CoOpHandler handleReturn handleCoOp) =
-    handleCoOp $ fmap handleReturn ops
+  cont :: forall r . FreerCoOpHandler ops a r eff -> eff r
+  cont (FreerCoOpHandler handleReturn handleCoOp) =
+    handleCoOp $ CoOpCont ops handleReturn
 {-# INLINE liftChurchOps #-}
 
 churchOps
@@ -123,9 +89,9 @@ mapChurchMonad
   -> ChurchMonad ops eff b
 mapChurchMonad f (ChurchMonad m1) = ChurchMonad m2
  where
-  m2 :: forall r . CoOpHandler ops b r eff -> eff r
-  m2 (CoOpHandler handleReturn handleCoOp) =
-    m1 $ CoOpHandler
+  m2 :: forall r . FreerCoOpHandler ops b r eff -> eff r
+  m2 (FreerCoOpHandler handleReturn handleCoOp) =
+    m1 $ FreerCoOpHandler
       (handleReturn . f)
       handleCoOp
 {-# INLINE mapChurchMonad #-}
@@ -140,12 +106,12 @@ bindChurchMonad
   -> ChurchMonad ops eff b
 bindChurchMonad (ChurchMonad m1) cont1 = ChurchMonad m2
  where
-  m2 :: forall r . CoOpHandler ops b r eff -> eff r
-  m2 handler1@(CoOpHandler _ handleCoOp) =
+  m2 :: forall r . FreerCoOpHandler ops b r eff -> eff r
+  m2 handler1@(FreerCoOpHandler _ handleCoOp) =
     m1 handler2
      where
-      handler2 :: CoOpHandler ops a r eff
-      handler2 = CoOpHandler
+      handler2 :: FreerCoOpHandler ops a r eff
+      handler2 = FreerCoOpHandler
         (\x -> runChurchMonad (cont1 x) handler1)
         handleCoOp
 {-# INLINE bindChurchMonad #-}
@@ -158,6 +124,6 @@ liftPure
   => a
   -> ChurchMonad ops eff a
 liftPure x = ChurchMonad $
-  \(CoOpHandler handleReturn _) ->
+  \(FreerCoOpHandler handleReturn _) ->
     handleReturn x
 {-# INLINE liftPure #-}

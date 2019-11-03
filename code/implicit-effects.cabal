@@ -72,10 +72,6 @@ library
       Control.Effect.Implicit.Cast
       Control.Effect.Implicit.Higher
 
-      Control.Effect.Implicit.Free.Handler
-      Control.Effect.Implicit.Free.FreeMonad
-      Control.Effect.Implicit.Free.ChurchMonad
-
       Control.Effect.Implicit.Ops
       Control.Effect.Implicit.Ops.Label
       Control.Effect.Implicit.Ops.Async
@@ -98,6 +94,10 @@ library
       Control.Effect.Implicit.Higher.Ops.Cont
       Control.Effect.Implicit.Higher.Ops.Exception
 
+      Control.Effect.Implicit.Higher.ContraLift.State
+      Control.Effect.Implicit.Higher.ContraLift.Either
+      Control.Effect.Implicit.Higher.ContraLift.Identity
+
   other-modules:
       Control.Effect.Implicit.Base.Base
       Control.Effect.Implicit.Base.Effect
@@ -114,17 +114,20 @@ library
       Control.Effect.Implicit.Computation.Pipeline
       Control.Effect.Implicit.Computation.Value
 
-      Control.Effect.Implicit.Free.EffCoOp
+      Control.Effect.Implicit.Free.CoOp
       Control.Effect.Implicit.Free.FreeOps
       Control.Effect.Implicit.Free.FreeEff
       Control.Effect.Implicit.Free.NoOp
       Control.Effect.Implicit.Free.Union
       Control.Effect.Implicit.Free.Pipeline
+      Control.Effect.Implicit.Free.Handler
+      Control.Effect.Implicit.Free.Monad.Free
+      Control.Effect.Implicit.Free.Monad.Church
 
-      Control.Effect.Implicit.Freer.EffCoOp
+      Control.Effect.Implicit.Freer.CoOp
       Control.Effect.Implicit.Freer.FreeOps
-      Control.Effect.Implicit.Freer.ChurchMonad
-      Control.Effect.Implicit.Freer.FreerMonad
+      Control.Effect.Implicit.Freer.Monad.Church
+      Control.Effect.Implicit.Freer.Monad.Freer
       Control.Effect.Implicit.Freer.FreeEff
       Control.Effect.Implicit.Freer.Handler
 

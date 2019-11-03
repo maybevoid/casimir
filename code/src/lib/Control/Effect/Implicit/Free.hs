@@ -14,14 +14,18 @@ module Control.Effect.Implicit.Free
   , coopHandlerToPipeline
   , genericCoOpHandlerToPipeline
   , contextualHandlerToPipeline
+  , withCoOpHandler
+  , withCoOpHandlerAndOps
+  , withContextualCoOpHandler
   )
 where
 
-import Control.Effect.Implicit.Free.EffCoOp
-import Control.Effect.Implicit.Free.FreeOps
+import Control.Effect.Implicit.Free.CoOp
 import Control.Effect.Implicit.Free.NoOp
 import Control.Effect.Implicit.Free.Union
+import Control.Effect.Implicit.Free.FreeOps
 import Control.Effect.Implicit.Free.FreeEff
-import Control.Effect.Implicit.Free.ChurchMonad (ChurchMonad (..))
-import Control.Effect.Implicit.Free.FreeMonad (FreeMonad (..))
+import Control.Effect.Implicit.Free.Handler
 import Control.Effect.Implicit.Free.Pipeline
+import Control.Effect.Implicit.Free.Monad.Church (ChurchMonad (..))
+import Control.Effect.Implicit.Free.Monad.Free (FreeMonad (..))

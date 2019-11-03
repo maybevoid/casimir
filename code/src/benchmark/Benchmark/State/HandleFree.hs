@@ -5,7 +5,6 @@ where
 import Control.Effect.Implicit
 
 import qualified Control.Effect.Implicit.Free as Free
-import qualified Control.Effect.Implicit.Free.Handler as Free
 
 import qualified Control.Effect.Implicit.Freer as Freer
 

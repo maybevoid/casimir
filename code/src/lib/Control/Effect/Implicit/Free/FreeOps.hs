@@ -6,7 +6,7 @@ module Control.Effect.Implicit.Free.FreeOps
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.EffCoOp
+import Control.Effect.Implicit.Free.CoOp
 
 -- | A 'FreeOps' @ops@ has associated types that can be used for effect
 -- operations and interpretations. We typically use dummy datatypes with

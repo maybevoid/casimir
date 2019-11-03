@@ -7,7 +7,7 @@ module Control.Effect.Implicit.Free.Union
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.EffCoOp
+import Control.Effect.Implicit.Free.CoOp
 import Control.Effect.Implicit.Free.FreeOps
 
 -- | The 'CoOperation' of @ops1 '∪' ops2@ under return type

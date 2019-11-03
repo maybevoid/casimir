@@ -7,7 +7,6 @@ import Control.Monad.Identity
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Free.Handler
 import Control.Effect.Implicit.Ops
 
 envHandler1 :: forall eff . (Effect eff) => BaseOpsHandler (EnvEff Int) eff
