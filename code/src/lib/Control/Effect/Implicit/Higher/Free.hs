@@ -1,5 +1,4 @@
 module Control.Effect.Implicit.Higher.Free
-
 where
 
 import Data.Kind
@@ -41,7 +40,7 @@ data CoOpHandler
 
 class
   ( EffCoOp ops
-  , CoOpFunctor ops
+  , CoOpFunctor (CoOperation ops)
   , EffFunctor (Operation ops)
   )
   => FreeOps ops

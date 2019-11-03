@@ -7,7 +7,6 @@ import Test.Tasty.HUnit
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Free.Handler
 import Control.Effect.Implicit.Ops.Exception
 
 exceptionTests :: TestTree

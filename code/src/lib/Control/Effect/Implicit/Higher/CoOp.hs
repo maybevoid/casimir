@@ -13,26 +13,11 @@ class EffCoOp ops where
     ) | coop -> ops
 
 class
-  ( EffCoOp ops
-  )
-  => CoOpFunctor ops
-  where
+  (forall f . (Functor f) => Functor (coop f))
+  => CoOpFunctor coop where
     liftCoOp
       :: forall f1 f2 a
-       . (Functor f1, Functor f2)
+        . (Functor f1, Functor f2)
       => (forall x . f1 x -> f2 x)
-      -> CoOperation ops f1 a
-      -> CoOperation ops f2 a
-
-    -- GHC is unable to deduce the following
-    -- even if we add it as quantified constraints:
-    --
-    --  forall f
-    --   . (Functor f)
-    --  => Functor (CoOperation ops f)
-    mapCoOp
-      :: forall f a b
-       . (Functor f)
-      => (a -> b)
-      -> CoOperation ops f a
-      -> CoOperation ops f b
+      -> coop f1 a
+      -> coop f2 a

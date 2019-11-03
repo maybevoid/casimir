@@ -82,7 +82,7 @@ instance
     fmap f (BracketOp alloc release comp) =
       BracketOp alloc release (fmap (fmap f) comp)
 
-instance CoOpFunctor BracketEff where
+instance CoOpFunctor BracketCoOp where
   liftCoOp
     :: forall f1 f2 a
       . (Functor f1, Functor f2)
@@ -91,8 +91,6 @@ instance CoOpFunctor BracketEff where
     -> BracketCoOp f2 a
   liftCoOp lifter (BracketOp alloc release comp) =
     BracketOp alloc release (fmap lifter comp)
-
-  mapCoOp = fmap
 
 instance FreeOps BracketEff where
   mkFreeOps

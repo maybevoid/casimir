@@ -11,7 +11,6 @@ import Control.Monad.Trans.State.Strict
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Free.Handler
 
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.Env

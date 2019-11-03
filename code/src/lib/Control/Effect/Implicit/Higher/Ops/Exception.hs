@@ -105,7 +105,7 @@ instance
       TryOp (fmap f comp) (fmap (fmap f) handler)
     fmap _ (ThrowOp e) = ThrowOp e
 
-instance CoOpFunctor (ExceptionEff e) where
+instance CoOpFunctor (ExceptionCoOp e) where
   liftCoOp
     :: forall f1 f2 a
      . (Functor f1, Functor f2)
@@ -116,8 +116,6 @@ instance CoOpFunctor (ExceptionEff e) where
     TryOp (lifter comp) (fmap lifter handler)
 
   liftCoOp _ (ThrowOp e) = ThrowOp e
-
-  mapCoOp = fmap
 
 instance FreeOps (ExceptionEff e) where
   mkFreeOps

@@ -89,9 +89,10 @@ library
       Control.Effect.Implicit.Transform.State
 
       Control.Effect.Implicit.Higher.Ops
-      Control.Effect.Implicit.Higher.Ops.Bracket
-      Control.Effect.Implicit.Higher.Ops.Reader
       Control.Effect.Implicit.Higher.Ops.Cont
+      Control.Effect.Implicit.Higher.Ops.State
+      Control.Effect.Implicit.Higher.Ops.Reader
+      Control.Effect.Implicit.Higher.Ops.Bracket
       Control.Effect.Implicit.Higher.Ops.Exception
 
       Control.Effect.Implicit.Higher.ContraLift.State
@@ -138,6 +139,7 @@ library
       Control.Effect.Implicit.Higher.CoOp
       Control.Effect.Implicit.Higher.Free
       Control.Effect.Implicit.Higher.Union
+      Control.Effect.Implicit.Higher.Implicit
       Control.Effect.Implicit.Higher.LowerOps
       Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.EffFunctor

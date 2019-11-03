@@ -13,32 +13,33 @@ infixr 7 ⊎
 type (⊎) = Union
 
 data Union ops1 ops2
+
+data UnionOps ops1 ops2
   (eff1 :: Type -> Type)
   (eff2 :: Type -> Type)
-  = Union
-     (Operation ops1 eff1 eff2)
-     (Operation ops2 eff1 eff2)
+  = UnionOps
+     (ops1 eff1 eff2)
+     (ops2 eff1 eff2)
 
 instance
   ( Effect eff
-  , EffOps ops1
-  , EffOps ops2
-  , Base.EffFunctor (Operation ops1 eff)
-  , Base.EffFunctor (Operation ops2 eff)
+  , Base.EffFunctor (ops1 eff)
+  , Base.EffFunctor (ops2 eff)
   )
-  => Base.EffFunctor (Union ops1 ops2 eff)
+  => Base.EffFunctor (UnionOps ops1 ops2 eff)
   where
-    effmap _ = undefined
+    effmap lifter (UnionOps ops1 ops2) =
+      UnionOps
+        (Base.effmap lifter ops1)
+        (Base.effmap lifter ops2)
 
 instance
-  ( EffOps ops1
-  , EffOps ops2
-  , EffFunctor (Operation ops1)
-  , EffFunctor (Operation ops2)
+  ( EffFunctor ops1
+  , EffFunctor ops2
   )
-  => EffFunctor (Union ops1 ops2)
+  => EffFunctor (UnionOps ops1 ops2)
    where
-    invEffmap lifter contraLifter (Union ops1 ops2) =
-      Union
-        (invEffmap lifter contraLifter ops1)
-        (invEffmap lifter contraLifter ops2)
+    invEffmap lifter contraLift (UnionOps ops1 ops2) =
+      UnionOps
+        (invEffmap lifter contraLift ops1)
+        (invEffmap lifter contraLift ops2)
