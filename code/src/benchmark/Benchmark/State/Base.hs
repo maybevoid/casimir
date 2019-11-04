@@ -3,10 +3,9 @@ module Benchmark.State.Base
 where
 
 import Control.Effect.Implicit
-import Control.Effect.Implicit.Free
-import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Ops.State
 
+import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
 
 newtype CoState s eff a = CoState (s -> eff a)
@@ -35,8 +34,8 @@ runCoState i (CoState cont) = cont i
 stateCoOpHandler
   :: forall eff s a .
   (Effect eff)
-  => CoOpHandler (StateEff s) a (CoState s eff a) eff
-stateCoOpHandler = CoOpHandler handleReturn handleOps
+  => Free.CoOpHandler (StateEff s) a (CoState s eff a) eff
+stateCoOpHandler = Free.CoOpHandler handleReturn handleOps
  where
   handleReturn :: a -> eff (CoState s eff a)
   handleReturn x = return $ CoState $ \_ -> return x
@@ -59,8 +58,8 @@ stateCoOpHandler = CoOpHandler handleReturn handleOps
 stateFreerCoOpHandler
   :: forall eff s a .
   (Effect eff)
-  => FreerCoOpHandler (StateEff s) a (CoState s eff a) eff
-stateFreerCoOpHandler = FreerCoOpHandler handleReturn handleOps
+  => Freer.CoOpHandler (StateEff s) a (CoState s eff a) eff
+stateFreerCoOpHandler = Freer.CoOpHandler handleReturn handleOps
  where
   handleReturn :: a -> eff (CoState s eff a)
   handleReturn x = return $ CoState $ \_ -> return x

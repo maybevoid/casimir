@@ -53,7 +53,7 @@ class
 
 class
   ( forall ops eff
-    . (FreeOps ops, Effect eff)
+     . (FreeOps ops, Effect eff)
     => Effect (free ops eff)
   )
   => FreeEff free

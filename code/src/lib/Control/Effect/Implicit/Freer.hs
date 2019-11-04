@@ -5,7 +5,7 @@ module Control.Effect.Implicit.Freer
   , FreerMonad (..)
   , ChurchMonad (..)
   , FreerF (..)
-  , FreerCoOpHandler (..)
+  , CoOpHandler (..)
   , withCoOpHandler
   )
 where

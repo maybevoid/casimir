@@ -18,7 +18,7 @@ withCoOpHandler
      , ImplicitOps handler
      , FreeEff free
      )
-  => FreerCoOpHandler handler a r eff
+  => CoOpHandler handler a r eff
   -> ((OpsConstraint handler (free handler eff))
       => free handler eff a)
   -> eff r
