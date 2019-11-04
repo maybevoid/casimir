@@ -15,7 +15,11 @@ import Control.Effect.Implicit.Freer.FreeEff
 
 data FreerF ops a b where
   PureF :: a -> FreerF ops a b
-  FreeF :: CoOpCont ops b -> FreerF ops a b
+  FreeF
+    :: forall ops a b x
+     . CoOperation ops x
+    -> (x -> b)
+    -> FreerF ops a b
 
 newtype FreerMonad ops eff a = FreerMonad {
   runFreerMonad :: eff (FreerF ops a (FreerMonad ops eff a))
@@ -39,7 +43,7 @@ instance
         :: FreerF ops1 a (FreerMonad ops eff a)
         -> FreerF ops1 b (FreerMonad ops eff b)
       mapper2 (PureF x) = PureF $ f x
-      mapper2 (FreeF (CoOpCont ops cont)) = FreeF $ CoOpCont ops $ fmap mapper1 cont
+      mapper2 (FreeF ops cont) = FreeF ops $ fmap mapper1 cont
     {-# INLINE fmap #-}
 
 instance
@@ -66,8 +70,8 @@ instance
         :: FreerF ops a (FreerMonad ops eff a)
         -> eff (FreerF ops b (FreerMonad ops eff b))
       cont2 (PureF x) = runFreerMonad (cont1 x)
-      cont2 (FreeF (CoOpCont ops cont3))
-        = return $ FreeF $ CoOpCont ops $
+      cont2 (FreeF ops cont3)
+        = return $ FreeF ops $
             cont3 >=> cont1
       {-# INLINE cont2 #-}
     {-# INLINE (>>=) #-}
@@ -100,8 +104,8 @@ doHandleFreer handler = handleFree'
     :: FreerF ops a (FreerMonad ops eff a)
     -> eff r
   handleComp (PureF x) = returnHandler handler x
-  handleComp (FreeF (CoOpCont ops cont))
-    = coOpHandler handler $ CoOpCont ops $
+  handleComp (FreeF ops cont)
+    = coOpHandler handler ops $
         \x -> handleFree' $ cont x
   {-# INLINE handleComp #-}
 {-# INLINE doHandleFreer #-}
@@ -112,6 +116,6 @@ liftFreeOps
   => CoOperation ops a
   -> FreerMonad ops eff a
 liftFreeOps ops =
-  FreerMonad $ return $ FreeF $ CoOpCont ops $
+  FreerMonad $ return $ FreeF ops $
     FreerMonad . return . PureF
 {-# INLINE liftFreeOps #-}

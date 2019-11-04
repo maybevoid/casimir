@@ -7,6 +7,8 @@ import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Ops.State
 
+import qualified Control.Effect.Implicit.Freer as Freer
+
 newtype CoState s eff a = CoState (s -> eff a)
 
 stateBaseFunc :: Eff (StateEff Int) ()
@@ -65,14 +67,16 @@ stateFreerCoOpHandler = FreerCoOpHandler handleReturn handleOps
   {-# INLINE handleReturn #-}
 
   handleOps
-    :: CoOpCont (StateEff s) (eff (CoState s eff a))
+    :: forall x
+     . Freer.CoOperation (StateEff s) x
+    -> (x -> eff (CoState s eff a))
     -> eff (CoState s eff a)
-  handleOps (CoOpCont GetOp' cont1) = return $ CoState $
+  handleOps GetOp' cont1 = return $ CoState $
     \s ->
      do
       (CoState cont3) <- cont1 s
       cont3 s
-  handleOps (CoOpCont (PutOp' s) cont1) = return $ CoState $
+  handleOps (PutOp' s) cont1 = return $ CoState $
     \_ ->
      do
       (CoState cont3) <- cont1 ()

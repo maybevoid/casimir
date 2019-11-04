@@ -69,7 +69,7 @@ liftChurchOps ops = ChurchMonad cont
  where
   cont :: forall r . FreerCoOpHandler ops a r eff -> eff r
   cont (FreerCoOpHandler handleReturn handleCoOp) =
-    handleCoOp $ CoOpCont ops handleReturn
+    handleCoOp ops handleReturn
 {-# INLINE liftChurchOps #-}
 
 churchOps

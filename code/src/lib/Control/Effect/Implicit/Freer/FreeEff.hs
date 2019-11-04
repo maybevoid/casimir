@@ -2,7 +2,6 @@
 module Control.Effect.Implicit.Freer.FreeEff
   ( FreeEff (..)
   , FreerCoOpHandler (..)
-  , CoOpCont (..)
   )
 where
 
@@ -11,15 +10,14 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Freer.CoOp
 import Control.Effect.Implicit.Freer.FreeOps
 
-data CoOpCont ops a where
-  CoOpCont
-    :: forall ops a x
-      . CoOperation ops x -> (x -> a) -> CoOpCont ops a
-
 data FreerCoOpHandler handler a r eff =
   FreerCoOpHandler {
     returnHandler :: a -> eff r,
-    coOpHandler :: CoOpCont handler (eff r) -> eff r
+    coOpHandler
+      :: forall x
+       . CoOperation handler x
+      -> (x -> (eff r))
+      -> eff r
   }
 
 class
