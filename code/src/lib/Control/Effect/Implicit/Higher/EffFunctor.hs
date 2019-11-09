@@ -18,3 +18,9 @@ class
       -> ContraLift eff1 eff2
       -> ops eff1 eff1
       -> ops eff2 eff2
+
+instance
+  (Base.EffFunctor ops)
+  => EffFunctor (HigherOps ops) where
+    invEffmap lifter _ (HigherOps ops) =
+      HigherOps $ Base.effmap lifter ops

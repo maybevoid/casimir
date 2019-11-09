@@ -145,7 +145,7 @@ library
       Control.Effect.Implicit.Higher.NoOp
       Control.Effect.Implicit.Higher.Union
       Control.Effect.Implicit.Higher.Implicit
-      Control.Effect.Implicit.Higher.LowerOps
+      Control.Effect.Implicit.Higher.UnderOps
       Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.EffFunctor
       Control.Effect.Implicit.Higher.ContraLift

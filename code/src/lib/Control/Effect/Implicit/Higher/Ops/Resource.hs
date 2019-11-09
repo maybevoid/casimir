@@ -39,6 +39,11 @@ data BracketResource a = BracketResource
 instance EffOps (ResourceEff t) where
   type Operation (ResourceEff t) = ResourceOps t
 
+instance Base.EffOps (ResourceEff t) where
+  type Operation (ResourceEff t) = LowerOps (ResourceOps t)
+
+instance LowerEffOps (ResourceEff t)
+
 instance ImplicitOps (ResourceEff t) where
   type OpsConstraint (ResourceEff t) eff1 eff2 =
     TaggedParam ResourceTag (ResourceOps t eff1 eff2)

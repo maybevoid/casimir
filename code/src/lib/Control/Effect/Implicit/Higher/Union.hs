@@ -12,6 +12,7 @@ import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.Free
 import Control.Effect.Implicit.Higher.Implicit
 import Control.Effect.Implicit.Higher.EffFunctor
+
 import qualified Control.Effect.Implicit.Base as Base
 
 data UnionOps ops1 ops2
@@ -70,8 +71,6 @@ instance
   (ImplicitOps ops1, ImplicitOps ops2)
   => ImplicitOps (Union ops1 ops2)
    where
-    -- | Reverse the order as the left most constraint
-    -- gets precedence if there is an overlap
     type OpsConstraint (Union ops1 ops2) eff1 eff2 =
       (OpsConstraint ops2 eff1 eff2, OpsConstraint ops1 eff1 eff2)
 

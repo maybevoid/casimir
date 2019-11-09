@@ -1,18 +1,13 @@
 {-# Language UndecidableInstances #-}
 
-module Control.Effect.Implicit.Higher.LowerOps
+module Control.Effect.Implicit.Higher.UnderOps
 where
 
 import Control.Effect.Implicit.Higher.Base
 
 import qualified Control.Effect.Implicit.Base as Base
 
-class
-  ( Base.EffOps ops
-  , EffOps ops
-  , Base.Operation ops ~ UnderOps (Operation ops)
-  )
-  => LowerOps ops where
+data UnderEff ops
 
 data UnderOps ops eff where
   UnderOps
@@ -30,3 +25,8 @@ instance
    where
     effmap lifter (UnderOps ops) =
       UnderOps $ Base.effmap lifter ops
+
+instance
+  (EffOps ops)
+  => Base.EffOps (UnderEff ops) where
+    type Operation (UnderEff ops) = UnderOps (Operation ops)

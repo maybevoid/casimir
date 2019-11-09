@@ -72,18 +72,18 @@ instance ImplicitOps (StateEff s) where
   captureOps = captureTag @StateTag
 
 instance Higher.EffOps (StateEff s) where
-  type Operation (StateEff s) = Higher.UpperOps (StateOps s)
+  type Operation (StateEff s) = Higher.HigherOps (StateOps s)
 
 instance Higher.EffCoOp (StateEff s) where
-  type CoOperation (StateEff s) = Higher.UpperCoOp (FreerStateCoOp s)
+  type CoOperation (StateEff s) = Higher.HigherCoOp (FreerStateCoOp s)
 
-instance Higher.HigherOps (StateEff s)
-instance Higher.HigherCoOp (StateEff s)
+instance Higher.HigherEffOps (StateEff s)
+instance Higher.HigherEffCoOp (StateEff s)
 
 instance Higher.ImplicitOps (StateEff s) where
   type OpsConstraint (StateEff s) eff1 eff2 =
     TaggedParam StateTag
-      (Higher.UpperOps (StateOps s) eff1 eff2)
+      (Higher.HigherOps (StateOps s) eff1 eff2)
 
   withHigherOps = withTag @StateTag
   captureHigherOps = captureTag @StateTag
