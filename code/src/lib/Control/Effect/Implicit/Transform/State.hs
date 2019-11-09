@@ -10,8 +10,8 @@ import Control.Monad.Trans.Class
   (MonadTrans (..))
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Computation
+import Control.Effect.Implicit.Higher (ContraLift (..))
 
 import qualified Control.Effect.Implicit.Base as L
 

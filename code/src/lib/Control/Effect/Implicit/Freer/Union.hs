@@ -1,14 +1,14 @@
 {-# LANGUAGE PolyKinds #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Control.Effect.Implicit.Free.Union
+module Control.Effect.Implicit.Freer.Union
   ( UnionCoOp (..)
   )
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.CoOp
-import Control.Effect.Implicit.Free.FreeOps
+import Control.Effect.Implicit.Freer.CoOp
+import Control.Effect.Implicit.Freer.FreeOps
 
 -- | The 'CoOperation' of @ops1 '∪' ops2@ under return type
 -- @r@ is the sum of the underlying @'CoOperation' ops1 r@ and

@@ -12,6 +12,8 @@ where
 import Control.Implicit.Param
 import Control.Effect.Implicit.Base
 
+import qualified Control.Effect.Implicit.Higher as Higher
+
 import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
 
@@ -68,6 +70,23 @@ instance ImplicitOps (StateEff s) where
 
   withOps = withTag @StateTag
   captureOps = captureTag @StateTag
+
+instance Higher.EffOps (StateEff s) where
+  type Operation (StateEff s) = Higher.UpperOps (StateOps s)
+
+instance Higher.EffCoOp (StateEff s) where
+  type CoOperation (StateEff s) = Higher.UpperCoOp (FreerStateCoOp s)
+
+instance Higher.HigherOps (StateEff s)
+instance Higher.HigherCoOp (StateEff s)
+
+instance Higher.ImplicitOps (StateEff s) where
+  type OpsConstraint (StateEff s) eff1 eff2 =
+    TaggedParam StateTag
+      (Higher.UpperOps (StateOps s) eff1 eff2)
+
+  withHigherOps = withTag @StateTag
+  captureHigherOps = captureTag @StateTag
 
 {-# INLINE get #-}
 get :: forall s . Eff (StateEff s) s

@@ -3,20 +3,30 @@
 module Control.Effect.Implicit.Higher.LowerOps
 where
 
-import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Higher.Base
 
-data LowerOps ops eff where
-  LowerOps
+import qualified Control.Effect.Implicit.Base as Base
+
+class
+  ( Base.EffOps ops
+  , EffOps ops
+  , Base.Operation ops ~ UnderOps (Operation ops)
+  )
+  => LowerOps ops where
+
+data UnderOps ops eff where
+  UnderOps
     :: forall ops inEff eff
      . (Effect eff, Effect inEff)
     => ops inEff eff
-    -> LowerOps ops eff
+    -> UnderOps ops eff
 
 instance
   ( forall inEff
      . (Effect inEff)
-    => EffFunctor (ops inEff)
+    => Base.EffFunctor (ops inEff)
   )
-  => EffFunctor (LowerOps ops)
+  => Base.EffFunctor (UnderOps ops)
    where
-    effmap _ = undefined
+    effmap lifter (UnderOps ops) =
+      UnderOps $ Base.effmap lifter ops

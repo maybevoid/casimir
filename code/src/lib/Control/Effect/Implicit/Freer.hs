@@ -7,6 +7,8 @@ module Control.Effect.Implicit.Freer
   , FreerF (..)
   , CoOpHandler (..)
   , withCoOpHandler
+  , module Control.Effect.Implicit.Freer.NoOp
+  , module Control.Effect.Implicit.Freer.Union
   )
 where
 
@@ -16,3 +18,5 @@ import Control.Effect.Implicit.Freer.Monad.Freer
 import Control.Effect.Implicit.Freer.Monad.Church
 import Control.Effect.Implicit.Freer.FreeEff
 import Control.Effect.Implicit.Freer.Handler
+import Control.Effect.Implicit.Freer.NoOp
+import Control.Effect.Implicit.Freer.Union

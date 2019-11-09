@@ -4,7 +4,7 @@ module Control.Effect.Implicit.Free
   , CoOpHandler (..)
   , FreeEff (..)
   , FreeHandler (..)
-  , NoCoOp (..)
+  , NoCoOp
   , UnionCoOp (..)
   , ChurchMonad (..)
   , FreeMonad (..)

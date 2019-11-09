@@ -1,13 +1,13 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Control.Effect.Implicit.Free.NoOp
+module Control.Effect.Implicit.Freer.NoOp
   ( NoCoOp
   )
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Free.CoOp
-import Control.Effect.Implicit.Free.FreeOps
+import Control.Effect.Implicit.Freer.CoOp
+import Control.Effect.Implicit.Freer.FreeOps
 
 -- | @'CoOperation' 'NoOp' r@ is really just @()@ for all return type @r@. We instead define
 -- 'NoCoOp' with phantom type @r@ so that the injectivity condition for

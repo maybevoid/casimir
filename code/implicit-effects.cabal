@@ -37,6 +37,7 @@ common deps
     GADTs
     Strict
     DataKinds
+    EmptyCase
     StrictData
     RankNTypes
     TypeFamilies
@@ -91,9 +92,9 @@ library
 
       Control.Effect.Implicit.Higher.Ops
       Control.Effect.Implicit.Higher.Ops.Cont
-      Control.Effect.Implicit.Higher.Ops.State
       Control.Effect.Implicit.Higher.Ops.Reader
       Control.Effect.Implicit.Higher.Ops.Bracket
+      Control.Effect.Implicit.Higher.Ops.Resource
       Control.Effect.Implicit.Higher.Ops.Exception
 
       Control.Effect.Implicit.Higher.ContraLift.State
@@ -132,6 +133,8 @@ library
       Control.Effect.Implicit.Freer.Monad.Freer
       Control.Effect.Implicit.Freer.FreeEff
       Control.Effect.Implicit.Freer.Handler
+      Control.Effect.Implicit.Freer.NoOp
+      Control.Effect.Implicit.Freer.Union
 
       Control.Effect.Implicit.Cast.Cast
       Control.Effect.Implicit.Cast.Entail
@@ -139,6 +142,7 @@ library
       Control.Effect.Implicit.Higher.Base
       Control.Effect.Implicit.Higher.CoOp
       Control.Effect.Implicit.Higher.Free
+      Control.Effect.Implicit.Higher.NoOp
       Control.Effect.Implicit.Higher.Union
       Control.Effect.Implicit.Higher.Implicit
       Control.Effect.Implicit.Higher.LowerOps
@@ -198,6 +202,9 @@ test-suite implicit-effects-test
       Effect.Test.Ops.Pipe
       Effect.Test.Ops.Resource
       Effect.Test.Ops.State
+
+      Effect.Test.Higher
+      Effect.Test.Higher.Resource
   hs-source-dirs:
       src/test
   build-depends:

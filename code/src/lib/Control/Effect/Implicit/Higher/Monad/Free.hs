@@ -104,7 +104,8 @@ instance
               cont2 x >>= cont1
 
           ContraF cont2 cont3 ->
-            return $ ContraF cont2 $ \x -> cont3 x >>= cont1
+            return $ ContraF cont2 $ \x ->
+              cont3 x >>= cont1
 
 contraLiftFree
   :: forall ops eff

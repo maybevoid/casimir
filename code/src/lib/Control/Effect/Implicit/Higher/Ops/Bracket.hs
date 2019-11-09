@@ -5,6 +5,7 @@ where
 import Control.Monad.Identity
 import Control.Exception (bracket)
 
+import Control.Implicit.Param
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Higher.Free
 import Control.Effect.Implicit.Higher.ContraLift.Identity
@@ -12,6 +13,7 @@ import Control.Effect.Implicit.Higher.ContraLift.Identity
 import qualified Control.Effect.Implicit.Base as Base
 
 data BracketEff
+data BracketTag
 
 data BracketOps inEff eff = BracketOps {
   bracketOp
@@ -33,10 +35,19 @@ data BracketCoOp f r where
 instance EffOps BracketEff where
   type Operation BracketEff = BracketOps
 
+instance ImplicitOps BracketEff where
+  type OpsConstraint BracketEff eff1 eff2 =
+    TaggedParam BracketTag (BracketOps eff1 eff2)
+
+  withHigherOps = withTag @BracketTag
+  captureHigherOps = captureTag @BracketTag
+
 instance
   (Effect inEff)
   => Base.EffFunctor (BracketOps inEff) where
-    effmap _ = undefined
+    effmap lifter (BracketOps handleBracket) = BracketOps $
+      \alloc release cont ->
+        lifter $ handleBracket alloc release cont
 
 instance EffFunctor BracketOps where
   invEffmap
@@ -69,9 +80,6 @@ instance EffFunctor BracketOps where
            where
             cont3 :: a -> eff1 (w b)
             cont3 x = contraLift2 $ cont1 x
-
-ioBracketOps :: BracketOps IO IO
-ioBracketOps = BracketOps bracket
 
 instance EffCoOp BracketEff where
   type CoOperation BracketEff = BracketCoOp
@@ -109,9 +117,12 @@ instance FreeOps BracketEff where
     handler alloc release comp = lifter $
       BracketOp alloc release comp
 
-bracketCoOpHandler
+ioBracketOps :: BracketOps IO IO
+ioBracketOps = BracketOps bracket
+
+ioBracketCoOpHandler
   :: CoOpHandler BracketEff IO Identity
-bracketCoOpHandler = CoOpHandler
+ioBracketCoOpHandler = CoOpHandler
   (return . Identity) handleOp contraIdentity
  where
   handleOp
