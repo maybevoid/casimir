@@ -31,6 +31,7 @@ common deps
     , reflection
     , constraints
     , transformers
+    , monad-control
     , ghc-prim
   default-extensions:
     GADTs
@@ -146,6 +147,8 @@ library
       Control.Effect.Implicit.Higher.ContraLift
       Control.Effect.Implicit.Higher.Monad.Free
       Control.Effect.Implicit.Higher.Monad.Church
+
+      Control.Effect.Implicit.Transform.Lift
 
   hs-source-dirs:
       src/lib

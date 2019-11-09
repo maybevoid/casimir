@@ -19,6 +19,8 @@ import Control.Effect.Implicit.Ops.Env
 import Control.Effect.Implicit.Ops.State
   (StateEff, StateOps(..))
 
+import Control.Effect.Implicit.Transform.Lift
+
 liftStateT
   :: forall s eff a . (Effect eff)
   => eff a
@@ -58,6 +60,21 @@ stateTContraLift = ContraLift contraLift1
     (s2, x) <- lift $ cont1 contraLift2
     put s2
     return x
+
+stateTContraLift2
+  :: forall eff s
+   . (Effect eff)
+  => ContraLift eff (StateT s eff)
+stateTContraLift2 = transformContraLift
+  (\(x, s) -> (s, x))
+  (\(s, x) -> (x, s))
+
+stateTIoContraLift
+  :: forall s
+   . ContraLift IO (StateT s IO)
+stateTIoContraLift = baseContraLift
+  (\(x, s) -> (s, x))
+  (\(s, x) -> (x, s))
 
 stateTHandler
   :: forall eff s .
