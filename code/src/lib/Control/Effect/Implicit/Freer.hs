@@ -9,6 +9,7 @@ module Control.Effect.Implicit.Freer
   , withCoOpHandler
   , module Control.Effect.Implicit.Freer.NoOp
   , module Control.Effect.Implicit.Freer.Union
+  , module Control.Effect.Implicit.Freer.Codensity
   )
 where
 
@@ -20,3 +21,4 @@ import Control.Effect.Implicit.Freer.FreeEff
 import Control.Effect.Implicit.Freer.Handler
 import Control.Effect.Implicit.Freer.NoOp
 import Control.Effect.Implicit.Freer.Union
+import Control.Effect.Implicit.Freer.Codensity
