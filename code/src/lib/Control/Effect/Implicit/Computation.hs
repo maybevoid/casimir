@@ -18,6 +18,7 @@ module Control.Effect.Implicit.Computation
   , runIdentityComp
   , execComp
   , liftComputation
+  , strengthenComputation
   , bindOps
   , opsHandlerComp
   , withOpsHandler
