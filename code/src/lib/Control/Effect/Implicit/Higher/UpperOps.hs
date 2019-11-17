@@ -27,9 +27,9 @@ instance
 
 instance
   ( Effect eff
-  , Base.EffFunctor ops
+  , EffFunctor ops
   )
-  => Base.EffFunctor (UpperOps ops eff)
+  => EffFunctor (UpperOps ops eff)
   where
     effmap
       :: forall eff1 eff2
@@ -41,8 +41,8 @@ instance
       UpperOps ops1 (Base.effmap lifter ops2)
 
 instance
-  (Base.EffFunctor ops)
-  => EffFunctor (UpperOps ops)
+  (EffFunctor ops)
+  => HigherEffFunctor (UpperOps ops)
    where
     invEffmap
       :: forall eff1 eff2

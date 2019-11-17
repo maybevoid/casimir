@@ -10,7 +10,6 @@ import Control.Effect.Implicit.Base.Union (Union)
 import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.Free
-import Control.Effect.Implicit.Higher.Implicit
 import Control.Effect.Implicit.Higher.EffFunctor
 
 import qualified Control.Effect.Implicit.Base as Base
@@ -46,10 +45,10 @@ instance
 
 instance
   ( Effect eff
-  , Base.EffFunctor (ops1 eff)
-  , Base.EffFunctor (ops2 eff)
+  , EffFunctor (ops1 eff)
+  , EffFunctor (ops2 eff)
   )
-  => Base.EffFunctor (UnionOps ops1 ops2 eff)
+  => EffFunctor (UnionOps ops1 ops2 eff)
   where
     effmap lifter (UnionOps ops1 ops2) =
       UnionOps
@@ -57,27 +56,15 @@ instance
         (Base.effmap lifter ops2)
 
 instance
-  ( EffFunctor ops1
-  , EffFunctor ops2
+  ( HigherEffFunctor ops1
+  , HigherEffFunctor ops2
   )
-  => EffFunctor (UnionOps ops1 ops2)
+  => HigherEffFunctor (UnionOps ops1 ops2)
    where
     invEffmap lifter contraLift (UnionOps ops1 ops2) =
       UnionOps
         (invEffmap lifter contraLift ops1)
         (invEffmap lifter contraLift ops2)
-
-instance
-  (ImplicitOps ops1, ImplicitOps ops2)
-  => ImplicitOps (Union ops1 ops2)
-   where
-    type OpsConstraint (Union ops1 ops2) eff1 eff2 =
-      (OpsConstraint ops2 eff1 eff2, OpsConstraint ops1 eff1 eff2)
-
-    withHigherOps (UnionOps ops1 ops2) comp =
-      withHigherOps ops1 $ withHigherOps ops2 comp
-
-    captureHigherOps = UnionOps captureHigherOps captureHigherOps
 
 instance
   ( Functor f

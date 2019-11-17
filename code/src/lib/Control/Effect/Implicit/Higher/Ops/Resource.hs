@@ -11,12 +11,21 @@ import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Higher.Free
 import Control.Effect.Implicit.Higher.ContraLift.Identity
 
+import Control.Effect.Implicit.Base.Implicit
 import qualified Control.Effect.Implicit.Base as Base
 
 data ResourceEff (t :: Type -> Type)
 data ResourceTag
 
-data ResourceOps t inEff eff = ResourceOps {
+type ResourceOps t = LowerOps (HigherResourceOps t)
+
+pattern ResourceOps
+  :: forall t eff
+   . (forall a b. t a -> (a -> eff b) -> eff b)
+  -> LowerOps (HigherResourceOps t) eff
+pattern ResourceOps t = LowerOps (HigherResourceOps t)
+
+data HigherResourceOps t inEff eff = HigherResourceOps {
   withResourceOp
     :: forall a b
      . t a
@@ -37,28 +46,28 @@ data BracketResource a = BracketResource
   }
 
 instance EffOps (ResourceEff t) where
-  type Operation (ResourceEff t) = ResourceOps t
+  type Operation (ResourceEff t) = HigherResourceOps t
 
 instance Base.EffOps (ResourceEff t) where
-  type Operation (ResourceEff t) = LowerOps (ResourceOps t)
+  type Operation (ResourceEff t) = LowerOps (HigherResourceOps t)
 
 instance LowerEffOps (ResourceEff t)
 
 instance ImplicitOps (ResourceEff t) where
-  type OpsConstraint (ResourceEff t) eff1 eff2 =
-    TaggedParam ResourceTag (ResourceOps t eff1 eff2)
+  type OpsConstraint (ResourceEff t) eff =
+    TaggedParam ResourceTag (LowerOps (HigherResourceOps t) eff)
 
-  withHigherOps = withTag @ResourceTag
-  captureHigherOps = captureTag @ResourceTag
+  withOps = withTag @ResourceTag
+  captureOps = captureTag @ResourceTag
 
 instance
   (Effect inEff)
-  => Base.EffFunctor (ResourceOps t inEff) where
-    effmap lifter (ResourceOps handleResource) = ResourceOps $
+  => EffFunctor (HigherResourceOps t inEff) where
+    effmap lifter (HigherResourceOps handleResource) = HigherResourceOps $
       \resource cont ->
         lifter $ handleResource resource cont
 
-instance EffFunctor (ResourceOps t) where
+instance HigherEffFunctor (HigherResourceOps t) where
   invEffmap
     :: forall eff1 eff2
       . ( Effect eff1
@@ -66,12 +75,12 @@ instance EffFunctor (ResourceOps t) where
         )
     => (forall x . eff1 x -> eff2 x)
     -> ContraLift eff1 eff2
-    -> ResourceOps t eff1 eff1
-    -> ResourceOps t eff2 eff2
+    -> HigherResourceOps t eff1 eff1
+    -> HigherResourceOps t eff2 eff2
   invEffmap _
     (ContraLift contraLift1)
-    (ResourceOps doResource) =
-      ResourceOps ops
+    (HigherResourceOps doResource) =
+      HigherResourceOps ops
        where
         ops
           :: forall a b
@@ -113,8 +122,8 @@ instance FreeOps (ResourceEff t) where
     :: forall eff
     . (Effect eff)
     => (forall a . ResourceCoOp t eff a -> eff a)
-    -> ResourceOps t eff eff
-  mkFreeOps lifter = ResourceOps handler
+    -> HigherResourceOps t eff eff
+  mkFreeOps lifter = HigherResourceOps handler
    where
     handler
       :: forall a b
@@ -124,7 +133,7 @@ instance FreeOps (ResourceEff t) where
     handler resource comp = lifter $
       ResourceOp resource comp
 
-ioBracketOps :: ResourceOps BracketResource IO IO
+ioBracketOps :: ResourceOps BracketResource IO
 ioBracketOps = ResourceOps $
   \(BracketResource alloc release) cont ->
     bracket alloc release cont
@@ -144,9 +153,9 @@ ioBracketCoOpHandler = CoOpHandler
     cont a
 
 withResource
-  :: forall t eff1 eff2 a b
-   . (EffConstraint (ResourceEff t) eff1 eff2)
+  :: forall t eff a b
+   . (EffConstraint (ResourceEff t) eff)
   => t a
-  -> (a -> eff1 b)
-  -> eff2 b
-withResource = withResourceOp captureHigherOps
+  -> (a -> eff b)
+  -> eff b
+withResource = withResourceOp $ unLowerOps captureOps

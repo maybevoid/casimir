@@ -21,15 +21,15 @@ coopHandlerToPipeline
   , BaseOps handler
   , FreeHandler free
   )
-  => Computation ops1 (CoOpHandler handler a b) eff1
-  -> Pipeline ops1 handler (Return a) (Return b) eff1 eff1
+  => BaseComputation ops1 (CoOpHandler handler a b) eff1
+  -> BasePipeline ops1 handler (Return a) (Return b) eff1 eff1
 coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2 .
     (BaseOps ops2)
-    => Computation (handler ∪ ops2) (Return a) eff1
-    -> Computation (ops1 ∪ ops2) (Return b) eff1
+    => BaseComputation (handler ∪ ops2) (Return a) eff1
+    -> BaseComputation (ops1 ∪ ops2) (Return b) eff1
   pipeline comp1 = Computation comp2
    where
     comp2
@@ -45,7 +45,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
 
       comp3 :: free handler eff2 a
       comp3 = returnVal $ runComp comp1
-        (joinLift lift12 freeLiftEff)
+        (joinLiftEff lift12 freeLiftEff)
         (freeOps ∪ effmap liftFree ops2)
 
       comp4 :: eff2 b
@@ -60,8 +60,8 @@ genericCoOpHandlerToPipeline
   , BaseOps handler
   , FreeHandler free
   )
-  => Computation ops1 (GenericCoOpHandler handler) eff1
-  -> GenericPipeline ops1 handler eff1
+  => BaseComputation ops1 (GenericCoOpHandler handler) eff1
+  -> GenericPipeline LiftEff ops1 handler eff1
 genericCoOpHandlerToPipeline handler1
   = transformePipeline $ Computation handler2
  where
@@ -91,8 +91,8 @@ contextualHandlerToPipeline
   , BaseOps handler
   , FreeHandler free
   )
-  => Computation ops1 (ContextualHandler w handler) eff1
-  -> GenericPipeline ops1 handler eff1
+  => BaseComputation ops1 (ContextualHandler w handler) eff1
+  -> GenericPipeline LiftEff ops1 handler eff1
 contextualHandlerToPipeline handler1
   = transformePipeline $ Computation handler2
  where

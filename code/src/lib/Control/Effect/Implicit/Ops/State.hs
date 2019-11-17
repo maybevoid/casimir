@@ -80,14 +80,6 @@ instance Higher.EffCoOp (StateEff s) where
 instance Higher.HigherEffOps (StateEff s)
 instance Higher.HigherEffCoOp (StateEff s)
 
-instance Higher.ImplicitOps (StateEff s) where
-  type OpsConstraint (StateEff s) eff1 eff2 =
-    TaggedParam StateTag
-      (Higher.HigherOps (StateOps s) eff1 eff2)
-
-  withHigherOps = withTag @StateTag
-  captureHigherOps = captureTag @StateTag
-
 {-# INLINE get #-}
 get :: forall s . Eff (StateEff s) s
 get = getOp captureOps

@@ -9,8 +9,6 @@ import Data.IORef
 import Control.Monad.Trans.State.Strict (StateT, execStateT)
 
 import Control.Effect.Implicit.Base
-  (NoEff, (∪), type (∪))
-
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.State
@@ -23,7 +21,7 @@ resourceTests = testGroup "ResourceEff Tests"
   ]
 
 pushRef :: forall a . IORef [a] -> a
-     -> Eff IoEff NoEff ()
+     -> Eff IoEff ()
 pushRef ref x = do
   xs <- liftIo $ readIORef ref
   liftIo $ writeIORef ref $ xs <> [x]
@@ -33,7 +31,7 @@ pushIo = Base.withOps ioOps pushRef
 
 pushState
   :: forall a . a
-  -> Eff (StateEff [a]) NoEff ()
+  -> Eff (StateEff [a]) ()
 pushState x = do
   xs <- get
   put $ xs <> [x]
@@ -55,7 +53,7 @@ makeResource name value ref = BracketResource alloc release
 
 comp1
   :: IORef [String]
-  -> Eff (StateEff [String] ∪ IoEff) (ResourceEff BracketResource) ()
+  -> Eff (StateEff [String] ∪ IoEff ∪ ResourceEff BracketResource) ()
 comp1 ref = do
   push "outer-comp: start"
   res <- withResource resource1 $ \arg -> do
@@ -64,7 +62,7 @@ comp1 ref = do
   push $ "result from inner-comp: " <> res
 
  where
-  push :: String -> Eff (StateEff [String] ∪ IoEff) NoEff ()
+  push :: String -> Eff (StateEff [String] ∪ IoEff) ()
   push x = do
     pushRef ref x
     pushState x
@@ -74,8 +72,10 @@ comp1 ref = do
 
 stateTBracketOps
   :: forall s
-   . ResourceOps BracketResource (StateT s IO) (StateT s IO)
-stateTBracketOps = invEffmap liftStateT stateTContraLift ioBracketOps
+   . ResourceOps BracketResource (StateT s IO)
+stateTBracketOps = LowerOps $
+  invEffmap liftStateT stateTContraLift
+    (unLowerOps ioBracketOps)
 
 stateTIoOps
   :: forall s
@@ -85,8 +85,7 @@ stateTIoOps = Base.effmap liftStateT ioOps
 comp2 :: IORef [String] -> StateT [String] IO ()
 comp2 ref =
   withOps
-    (stateTIoOps ∪ stateTOps)
-    stateTBracketOps $
+    (stateTIoOps ∪ stateTOps ∪ stateTBracketOps) $
       comp1 ref
 
 testResource1 :: TestTree

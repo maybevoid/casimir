@@ -47,6 +47,7 @@ common deps
     ImplicitParams
     ExplicitForAll
     KindSignatures
+    PatternSynonyms
     ConstraintKinds
     TypeApplications
     FlexibleContexts
@@ -93,7 +94,6 @@ library
       Control.Effect.Implicit.Higher.Ops
       Control.Effect.Implicit.Higher.Ops.Cont
       Control.Effect.Implicit.Higher.Ops.Reader
-      Control.Effect.Implicit.Higher.Ops.Bracket
       Control.Effect.Implicit.Higher.Ops.Resource
       Control.Effect.Implicit.Higher.Ops.Exception
 
@@ -145,7 +145,6 @@ library
       Control.Effect.Implicit.Higher.Free
       Control.Effect.Implicit.Higher.NoOp
       Control.Effect.Implicit.Higher.Union
-      Control.Effect.Implicit.Higher.Implicit
       Control.Effect.Implicit.Higher.UnderOps
       Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.EffFunctor

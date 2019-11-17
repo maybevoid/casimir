@@ -76,7 +76,7 @@ ioOps = IoOps {
   liftIoOp = id
 }
 
-ioHandler :: BaseOpsHandler IoEff IO
+ioHandler :: BaseOpsHandler NoEff IoEff IO
 ioHandler = baseOpsHandler IoOps {
   liftIoOp = id
 }

@@ -1,16 +1,15 @@
 module Control.Effect.Implicit.Computation
-  ( Computation (..)
+  ( BaseComputation
+  , Computation (..)
   , OpsHandler
   , FunctorComp (..)
   , Return (..)
   , Arrow (..)
   , ReturnCtx (..)
   , Pipeline (..)
+  , BasePipeline
   , TransformerHandler (..)
-  , GenericReturn
-  , IdentityComputation
   , BaseOpsHandler
-  , GenericOpsHandler
   , SimplePipeline
   , GenericPipeline
   , genericComputation

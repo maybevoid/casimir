@@ -51,8 +51,8 @@ stateCompTransform
      , BaseOps ops
      )
   => s
-  -> Computation (StateEff s ∪ ops) (Return a) eff
-  -> Computation ops (Return (s, a)) eff
+  -> BaseComputation (StateEff s ∪ ops) (Return a) eff
+  -> BaseComputation ops (Return (s, a)) eff
 stateCompTransform s comp1 = Computation comp2
  where
   comp2 :: forall eff2 . (Effect eff2)
@@ -74,15 +74,15 @@ envCompTransform
      , BaseOps ops
      )
   => e
-  -> Computation (EnvEff e ∪ ops) (Return a) eff
-  -> Computation ops (Return a) eff
+  -> BaseComputation (EnvEff e ∪ ops) (Return a) eff
+  -> BaseComputation ops (Return a) eff
 envCompTransform e comp1 = bindOps (mkEnvOps e) comp1
 
 stateEnvIoUnlift
   :: forall s e a
    . e
   -> s
-  -> Computation
+  -> BaseComputation
       (StateEff s ∪ EnvEff e ∪ IoEff)
       (Return a)
       IO

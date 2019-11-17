@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 
 module Control.Effect.Implicit.Base.Implicit
   ( ImplicitOps (..)

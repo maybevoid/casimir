@@ -10,7 +10,6 @@ import Control.Effect.Implicit.Freer.NoOp
 
 import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.CoOp
-import Control.Effect.Implicit.Higher.Implicit
 
 class NoConstraint (eff1 :: Type -> Type) (eff2 :: Type -> Type)
 instance NoConstraint eff1 eff2
@@ -23,11 +22,3 @@ instance EffCoOp NoEff where
 
 instance HigherEffOps NoEff
 instance HigherEffCoOp NoEff
-
-instance ImplicitOps NoEff where
-  type OpsConstraint NoEff eff1 eff2 =
-    NoConstraint eff1 eff2
-
-  withHigherOps _ = id
-
-  captureHigherOps = HigherOps NoOp

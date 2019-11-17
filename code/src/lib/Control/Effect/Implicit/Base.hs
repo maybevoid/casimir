@@ -14,6 +14,7 @@ module Control.Effect.Implicit.Base
   , NoEff
   , NoOp (..)
   , LiftEff
+  , EffLifter (..)
   , type (∪)
   , NoConstraint
   , Union
@@ -23,7 +24,7 @@ module Control.Effect.Implicit.Base
   , rightOps
   , idLift
   , mkLiftEff
-  , liftEff
+  , runLiftEff
   , applyEffmap
   , joinLift
   , module Control.Implicit.Param

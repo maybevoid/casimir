@@ -6,6 +6,6 @@ where
 
 import Data.Kind
 
-class EffOps sig where
-  type family Operation sig
-    = (ops :: (Type -> Type) -> Type) | ops -> sig
+class EffOps ops where
+  type family Operation ops
+    = (operation :: (Type -> Type) -> Type) | operation -> ops

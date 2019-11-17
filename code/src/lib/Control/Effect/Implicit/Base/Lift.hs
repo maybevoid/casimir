@@ -1,9 +1,10 @@
 
 module Control.Effect.Implicit.Base.Lift
   ( LiftEff
+  , EffLifter (..)
   , idLift
   , mkLiftEff
-  , liftEff
+  , runLiftEff
   , applyEffmap
   , joinLift
   )
@@ -13,6 +14,33 @@ import Data.Kind
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
+
+class EffLifter lift where
+  type family Liftable lift
+    (ops :: (Type -> Type) -> Type) :: Constraint
+
+  idLiftEff
+    :: forall eff . (Effect eff) => lift eff eff
+
+  applyLiftEff
+    :: forall eff1 eff2 ops
+     . ( Effect eff1
+       , Effect eff2
+       , Liftable lift ops
+       )
+    => lift eff1 eff2
+    -> ops eff1
+    -> ops eff2
+
+  joinLiftEff
+    :: forall eff1 eff2 eff3
+     . ( Effect eff1
+       , Effect eff2
+       , Effect eff3
+       )
+    => lift eff1 eff2
+    -> lift eff2 eff3
+    -> lift eff1 eff3
 
 -- | An opaque object-ish effect lifter that can apply 'effmap' to an 'EffFunctor'.
 -- We define dedicated datatype instead of using the natural transformation
@@ -27,7 +55,7 @@ data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
   = MkLiftEff {
 
     -- | The base natural transformation that can be extracted
-    liftEff :: forall x . eff1 x -> eff2 x,
+    runLiftEff :: forall x . eff1 x -> eff2 x,
 
     -- | When applying effect lifting to an 'EffFunctor', 'applyEffmap' should
     -- be used instead of calling 'effmap' directly. This could potentially
@@ -63,6 +91,14 @@ data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
       -> LiftEff eff0 eff2
   }
 
+instance EffLifter LiftEff where
+  type Liftable LiftEff ops = EffFunctor ops
+
+  idLiftEff = idLift
+  applyLiftEff = applyEffmap
+  joinLiftEff = joinLift
+
+
 -- | Create a 'LiftEff' from a natural transformation @eff1 ~> eff2@. This assumes
 -- @eff1@ and @eff2@ are different, as otherwise we can use 'idLift' for optimized
 -- version of 'LiftEff'.
@@ -74,7 +110,7 @@ mkLiftEff
 mkLiftEff lifter1 = lifter2
  where
   lifter2 = MkLiftEff {
-    liftEff = lifter1,
+    runLiftEff = lifter1,
 
     applyEffmap = effmap lifter1,
 
@@ -82,7 +118,7 @@ mkLiftEff lifter1 = lifter2
       rightJoinLift lifter3 lifter2,
 
     rightJoinLift = \lifter3 ->
-      mkLiftEff (lifter1 . liftEff lifter3)
+      mkLiftEff (lifter1 . runLiftEff lifter3)
   }
 
 -- | An optimized version of 'LiftEff' when there is no effect lifting required,

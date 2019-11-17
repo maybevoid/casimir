@@ -21,7 +21,8 @@ stateBaseFunc =
       stateBaseFunc
 {-# INLINE stateBaseFunc #-}
 
-stateBaseComp :: GenericReturn (StateEff Int) ()
+stateBaseComp :: forall eff . (Effect eff)
+  => BaseComputation (StateEff Int) (Return ()) eff
 stateBaseComp = genericReturn stateBaseFunc
 
 runCoState

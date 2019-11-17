@@ -6,8 +6,6 @@ import qualified Control.Monad.Trans.Cont as ContT
 
 import Control.Effect.Implicit.Higher
 
-import qualified Control.Effect.Implicit.Base as Base
-
 data ContOps inEff eff = ContOps {
   callCCOp
     :: forall a b
@@ -17,10 +15,10 @@ data ContOps inEff eff = ContOps {
 
 instance
   (Effect inEff)
-  => Base.EffFunctor (ContOps inEff) where
+  => EffFunctor (ContOps inEff) where
     effmap _ = undefined
 
-instance EffFunctor ContOps where
+instance HigherEffFunctor ContOps where
   invEffmap
     :: forall eff1 eff2
       . ( Effect eff1

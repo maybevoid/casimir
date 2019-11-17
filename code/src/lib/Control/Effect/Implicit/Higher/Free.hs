@@ -46,7 +46,7 @@ data CoOpHandler
 class
   ( EffCoOp ops
   , CoOpFunctor (CoOperation ops)
-  , EffFunctor (Operation ops)
+  , HigherEffFunctor (Operation ops)
   )
   => FreeOps ops
    where

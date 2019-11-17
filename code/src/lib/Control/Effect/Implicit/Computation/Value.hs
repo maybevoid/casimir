@@ -4,8 +4,6 @@ module Control.Effect.Implicit.Computation.Value
   , Return (..)
   , Arrow (..)
   , ReturnCtx (..)
-  , GenericReturn
-  , IdentityComputation
   , genericComputation
   , genericReturn
   , runIdentityComp
@@ -70,52 +68,53 @@ instance
     mapComp f (ReturnCtx mx) = ReturnCtx $
       mapComp (fmap f) mx
 
-type GenericReturn ops a =
-  forall eff . (Effect eff) => Computation ops (Return a) eff
-
-type IdentityComputation a = Computation NoEff (Return a) Identity
-
 {-# INLINE genericComputation #-}
 genericComputation
-  :: forall ops comp
+  :: forall ops comp lift
    . (BaseOps ops)
   => (forall eff
         . (EffConstraint ops eff)
        => comp eff)
-  -> (forall eff . (Effect eff) => Computation ops comp eff)
+  -> (forall eff . (Effect eff) => Computation lift ops comp eff)
 genericComputation comp = Computation $
   \ _ ops -> withOps ops comp
 
 {-# INLINE genericReturn #-}
 genericReturn
-  :: forall ops a
+  :: forall ops lift a
    . (BaseOps ops)
   => (forall eff
         . (EffConstraint ops eff)
        => eff a)
-  -> GenericReturn ops a
+  -> (forall eff . (Effect eff)
+      => Computation lift ops (Return a) eff)
 genericReturn comp = genericComputation $ Return comp
 
 arrowComputation
-  :: forall ops a b
+  :: forall ops lift a b
    . (BaseOps ops)
   => (forall eff
         . (EffConstraint ops eff)
        => a
        -> eff b)
   -> (forall eff . (Effect eff)
-       => Computation ops (Arrow a Return b) eff)
+       => Computation lift ops (Arrow a Return b) eff)
 arrowComputation fn = genericComputation $ Arrow $
   \x -> Return $ fn x
 
-runIdentityComp :: forall a . IdentityComputation a -> a
-runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
+runIdentityComp
+  :: forall a lift
+   . (EffLifter lift)
+  => Computation lift NoEff (Return a) Identity
+  -> a
+runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLiftEff NoOp
 
 execComp
-  :: forall ops eff a .
+  :: forall ops lift eff a .
   ( BaseOps ops
   , EffConstraint ops eff
+  , EffLifter lift
   )
-  => Computation ops (Return a) eff
+  => Computation lift ops (Return a) eff
   -> eff a
-execComp comp = returnVal $ runComp comp idLift captureOps
+execComp comp = returnVal $ runComp comp idLiftEff captureOps

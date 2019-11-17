@@ -22,9 +22,9 @@ envComp1 = do
   return $ "Env: " ++ show env
 
 envComp2 ::
-  forall a .
-  (Show a)
-  => GenericReturn (EnvEff a) String
+  forall a eff .
+  (Show a, Effect eff)
+  => BaseComputation (EnvEff a) (Return String) eff
 envComp2 = genericReturn envComp1
 
 envOpsTest :: TestTree

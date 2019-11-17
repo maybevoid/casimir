@@ -15,12 +15,14 @@ import qualified Control.Effect.Implicit.Base as Base
 
 newtype LowerOps ops
   (eff :: Type -> Type)
-  = LowerOps (ops eff eff)
+  = LowerOps
+    { unLowerOps :: ops eff eff }
 
 newtype HigherOps ops
   (eff1 :: Type -> Type)
   (eff2 :: Type -> Type)
-  = HigherOps (ops eff2)
+  = HigherOps
+    { unHigherOps :: ops eff2 }
 
 class EffOps sig where
   type family Operation sig

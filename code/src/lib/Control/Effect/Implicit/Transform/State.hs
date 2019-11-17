@@ -79,7 +79,7 @@ stateTIoContraLift = baseContraLift
 stateTHandler
   :: forall eff s .
   (Effect eff, MonadState s eff)
-  => OpsHandler NoEff (StateEff s) eff
+  => BaseOpsHandler NoEff (StateEff s) eff
 stateTHandler = opsHandlerComp $
   \lifter -> applyEffmap lifter stateTOps
 
@@ -88,7 +88,7 @@ stateTPipeline
   :: forall s eff1 comp .
   (Effect eff1, L.EffFunctor comp)
   => s
-  -> SimplePipeline NoEff (StateEff s) comp eff1
+  -> SimplePipeline LiftEff NoEff (StateEff s) comp eff1
 stateTPipeline i = transformePipeline $ genericComputation handler
  where
   {-# INLINE handler #-}
@@ -102,7 +102,7 @@ stateTPipeline i = transformePipeline $ genericComputation handler
 stateTToEnvOpsPipeline
   :: forall s eff1 comp .
   (Effect eff1, L.EffFunctor comp)
-  => SimplePipeline (EnvEff s) (StateEff s) comp eff1
+  => SimplePipeline LiftEff (EnvEff s) (StateEff s) comp eff1
 stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
  where
   {-# INLINE handler #-}

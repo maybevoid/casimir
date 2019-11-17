@@ -8,8 +8,6 @@ import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Higher.Free
 import Control.Effect.Implicit.Higher.ContraLift.Either
 
-import qualified Control.Effect.Implicit.Base as Base
-
 data ExceptionEff e
 
 data ExceptionOps e inEff eff = ExceptionOps
@@ -42,7 +40,7 @@ instance EffCoOp (ExceptionEff e) where
 
 instance
   (Effect inEff)
-  => Base.EffFunctor (ExceptionOps e inEff) where
+  => EffFunctor (ExceptionOps e inEff) where
     effmap
       :: forall eff1 eff2
        . (Effect eff1, Effect eff2)
@@ -59,7 +57,7 @@ instance
       handleTry comp handler = lifter $ tryOp ops1 comp handler
       handleThrow = throwOp ops1
 
-instance EffFunctor (ExceptionOps e) where
+instance HigherEffFunctor (ExceptionOps e) where
   invEffmap
     :: forall eff1 eff2
      . (Effect eff1, Effect eff2)

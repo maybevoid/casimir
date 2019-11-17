@@ -92,7 +92,7 @@ tryIo m = do
 tryIoHandler
   :: forall e eff
    . (Effect eff, Ex.Exception e)
-  => OpsHandler ((ExceptionEff e) ∪ IoEff) IoEff eff
+  => BaseOpsHandler ((ExceptionEff e) ∪ IoEff) IoEff eff
 tryIoHandler = genericOpsHandler $ IoOps {
   liftIoOp = tryIo
 }
@@ -142,7 +142,7 @@ tryComp
      , BaseOps ops
      , EffConstraint ops eff
      )
-  => Computation ((ExceptionEff e) ∪ ops) (Return a) eff
+  => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) eff
   -> (e -> eff a)
   -> eff a
 tryComp comp1 handler1 = handleFree handler2 comp2
@@ -161,10 +161,10 @@ bracketComp
      , BaseOps ops
      , EffConstraint ops eff
      )
-  => Computation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init
-  -> (a -> Computation ((ExceptionEff e) ∪ ops) (Return ()) eff)  -- cleanup
-  -> (a -> Computation ((ExceptionEff e) ∪ ops) (Return b) eff)   -- between
-  -> Computation ((ExceptionEff e) ∪ ops) (Return b) eff
+  => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init
+  -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return ()) eff)  -- cleanup
+  -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return b) eff)   -- between
+  -> BaseComputation ((ExceptionEff e) ∪ ops) (Return b) eff
 bracketComp initComp cleanupComp betweenComp = Computation comp1
  where
   comp1

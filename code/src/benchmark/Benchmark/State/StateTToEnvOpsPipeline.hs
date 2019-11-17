@@ -19,12 +19,12 @@ import Control.Effect.Implicit.Transform.Reader
 import Benchmark.State.Base
 
 stateTComp1 :: forall eff . (Effect eff)
-  => Computation (EnvEff Int) (Return ()) eff
+  => BaseComputation (EnvEff Int) (Return ()) eff
 stateTComp1 = runPipeline
   stateTToEnvOpsPipeline stateBaseComp
 
 stateTComp2 :: forall eff . (Effect eff)
-  => Computation NoEff (Return ()) (ReaderT Int eff)
+  => BaseComputation NoEff (Return ()) (ReaderT Int eff)
 stateTComp2 = bindOpsHandler
   readerTHandler stateTComp1
 
