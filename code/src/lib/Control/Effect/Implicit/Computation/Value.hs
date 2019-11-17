@@ -71,7 +71,7 @@ instance
 {-# INLINE genericComputation #-}
 genericComputation
   :: forall ops comp lift
-   . (BaseOps ops)
+   . (ImplicitOps ops)
   => (forall eff
         . (EffConstraint ops eff)
        => comp eff)
@@ -82,9 +82,9 @@ genericComputation comp = Computation $
 {-# INLINE genericReturn #-}
 genericReturn
   :: forall ops lift a
-   . (BaseOps ops)
+   . (ImplicitOps ops)
   => (forall eff
-        . (EffConstraint ops eff)
+       . (EffConstraint ops eff)
        => eff a)
   -> (forall eff . (Effect eff)
       => Computation lift ops (Return a) eff)
@@ -92,7 +92,7 @@ genericReturn comp = genericComputation $ Return comp
 
 arrowComputation
   :: forall ops lift a b
-   . (BaseOps ops)
+   . (ImplicitOps ops)
   => (forall eff
         . (EffConstraint ops eff)
        => a
@@ -111,9 +111,10 @@ runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLiftEff NoOp
 
 execComp
   :: forall ops lift eff a .
-  ( BaseOps ops
+  ( ImplicitOps ops
   , EffConstraint ops eff
   , EffLifter lift
+  , Liftable lift ops
   )
   => Computation lift ops (Return a) eff
   -> eff a

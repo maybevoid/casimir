@@ -149,6 +149,7 @@ library
       Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.EffFunctor
       Control.Effect.Implicit.Higher.ContraLift
+      Control.Effect.Implicit.Higher.Computation
       Control.Effect.Implicit.Higher.Monad.Free
       Control.Effect.Implicit.Higher.Monad.Church
 

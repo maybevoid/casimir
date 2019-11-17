@@ -12,12 +12,14 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.State
+import Control.Effect.Implicit.Computation
 import Control.Effect.Implicit.Transform.State
 import Control.Effect.Implicit.Higher.Ops.Resource
 
 resourceTests :: TestTree
 resourceTests = testGroup "ResourceEff Tests"
   [ testResource1
+  , testResource2
   ]
 
 pushRef :: forall a . IORef [a] -> a
@@ -92,6 +94,67 @@ testResource1 :: TestTree
 testResource1 = testCase "Resource test 1" $ do
   ref <- newIORef []
   s1 <- execStateT (comp2 ref) []
+
+  assertEqual "Happy path should update state correctly"
+    [ "outer-comp: start"
+    , "inner-comp with argument: foo"
+    , "result from inner-comp: inner-result"
+    ]
+    s1
+
+  s2 <- readIORef ref
+  assertEqual "Happy path should update IORef correctly"
+    [ "outer-comp: start"
+    , "resource1: alloc"
+    , "inner-comp with argument: foo"
+    , "resource1: release"
+    , "result from inner-comp: inner-result"
+    ]
+    s2
+
+comp3
+  :: forall eff
+   . (Effect eff)
+  => IORef [String]
+  -> HigherComputation
+      (StateEff [String] ∪ IoEff ∪ ResourceEff BracketResource)
+      (Return ())
+      eff
+comp3 ref = genericReturn $ comp1 ref
+
+bracketHandler
+  :: HigherComputation
+      NoEff
+      (Base.Operation (ResourceEff BracketResource))
+      IO
+bracketHandler = baseOpsHandler ioBracketOps
+
+ioHandlerComp
+  :: HigherComputation NoEff IoOps IO
+ioHandlerComp = baseOpsHandler ioOps
+
+stateTHandlerComp
+  :: forall s eff . (Effect eff)
+  => HigherComputation NoEff (StateOps s) (StateT s eff)
+stateTHandlerComp = baseOpsHandler stateTOps
+
+comp4
+  :: IORef [String]
+  -> HigherComputation NoEff (Return ()) (StateT [String] IO)
+comp4 ref = bindOpsHandler stateTHandlerComp $
+  liftComputation
+    (HigherLiftEff liftStateT stateTContraLift)
+    comp5
+ where
+  comp5 :: HigherComputation (StateEff [String]) (Return ()) IO
+  comp5 = bindOpsHandler ioHandlerComp $
+    bindOpsHandler @(StateEff [String] ∪ IoEff) bracketHandler $
+      comp3 ref
+
+testResource2 :: TestTree
+testResource2 = testCase "Resource test 2" $ do
+  ref <- newIORef []
+  s1 <- execStateT (execComp $ comp4 ref) []
 
   assertEqual "Happy path should update state correctly"
     [ "outer-comp: start"

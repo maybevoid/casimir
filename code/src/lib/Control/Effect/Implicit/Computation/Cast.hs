@@ -11,8 +11,8 @@ import Control.Effect.Implicit.Computation.Computation
 castComputation
   :: forall ops1 ops2 lift comp eff .
   ( Effect eff
-  , BaseOps ops1
-  , BaseOps ops2
+  , ImplicitOps ops1
+  , ImplicitOps ops2
   )
   => OpsCast ops1 ops2
   -> Computation lift ops2 comp eff

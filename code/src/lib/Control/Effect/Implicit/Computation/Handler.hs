@@ -23,11 +23,11 @@ import Control.Effect.Implicit.Computation.Computation
 bindOps
   :: forall ops1 ops2 lift comp eff
    . ( Effect eff
-     , BaseOps ops1
-     , BaseOps ops2
+     , ImplicitOps ops1
+     , ImplicitOps ops2
      , EffLifter lift
-     , Liftable lift (Operation ops1)
-     , Liftable lift (Operation ops2)
+     , Liftable lift ops1
+     , Liftable lift ops2
      )
   => Operation ops1 eff
   -> Computation lift (ops1 ∪ ops2) comp eff
@@ -39,8 +39,8 @@ bindOps ops1 comp = Computation $
 
 opsHandlerComp
   :: forall ops lift handler eff1
-   . ( BaseOps ops
-     , BaseOps handler
+   . ( ImplicitOps ops
+     , ImplicitOps handler
      , Effect eff1
      )
   => (forall eff2 .
@@ -54,10 +54,10 @@ opsHandlerComp comp = Computation $
 
 baseOpsHandler
   :: forall lift handler eff
-   . ( BaseOps handler
+   . ( ImplicitOps handler
      , Effect eff
      , EffLifter lift
-     , Liftable lift (Operation handler)
+     , Liftable lift handler
      )
   => Operation handler eff
   -> OpsHandler lift NoEff handler eff
@@ -66,7 +66,7 @@ baseOpsHandler handler = Computation $
 
 genericOpsHandler
   :: forall ops handler lift
-   . ( BaseOps ops, BaseOps handler )
+   . ( ImplicitOps ops, ImplicitOps handler )
   => (forall eff
        . (EffConstraint ops eff)
       => Operation handler eff)
@@ -76,11 +76,11 @@ genericOpsHandler handler = Computation $
 
 bindExactOpsHandler
   :: forall ops lift handler eff1 comp
-   . ( BaseOps ops
-     , BaseOps handler
+   . ( ImplicitOps ops
+     , ImplicitOps handler
      , Effect eff1
      , EffLifter lift
-     , Liftable lift (Operation handler)
+     , Liftable lift handler
      )
   => OpsHandler lift ops handler eff1
   -> Computation lift (handler ∪ ops) comp eff1
@@ -104,9 +104,9 @@ bindExactOpsHandler handler1 comp1
 
 composeExactOpsHandlers
   :: forall ops lift handler1 handler2 eff1
-   . ( BaseOps ops
-     , BaseOps handler1
-     , BaseOps handler2
+   . ( ImplicitOps ops
+     , ImplicitOps handler1
+     , ImplicitOps handler2
      , Effect eff1
      )
   => OpsHandler lift ops handler1 eff1
@@ -132,11 +132,11 @@ composeExactOpsHandlers handler1 handler2
 
 withOpsHandler
   :: forall ops lift handler eff r
-   . ( BaseOps ops
-     , BaseOps handler
+   . ( ImplicitOps ops
+     , ImplicitOps handler
      , EffConstraint ops eff
      , EffLifter lift
-     , Liftable lift (Operation handler)
+     , Liftable lift handler
      )
   => OpsHandler lift ops handler eff
   -> (OpsConstraint handler eff => r)
@@ -148,8 +148,8 @@ withOpsHandler handler =
 castOpsHandler
   :: forall ops1 ops2 lift handler eff
    . ( Effect eff
-     , BaseOps ops1
-     , BaseOps ops2
+     , ImplicitOps ops1
+     , ImplicitOps ops2
      )
   => OpsCast ops1 ops2
   -> OpsHandler lift ops2 handler eff
@@ -158,11 +158,11 @@ castOpsHandler = castComputation
 
 composeOpsHandlersWithCast
   :: forall ops1 ops2 ops3 lift handler1 handler2 eff
-   . ( BaseOps ops1
-     , BaseOps ops2
-     , BaseOps ops3
-     , BaseOps handler1
-     , BaseOps handler2
+   . ( ImplicitOps ops1
+     , ImplicitOps ops2
+     , ImplicitOps ops3
+     , ImplicitOps handler1
+     , ImplicitOps handler2
      , Effect eff
      )
   => OpsCast ops3 ops1
@@ -177,11 +177,11 @@ composeOpsHandlersWithCast cast31 cast32 handler1 handler2 =
 
 composeOpsHandlers
   :: forall ops1 ops2 ops3 lift handler1 handler2 eff
-   . ( BaseOps ops1
-     , BaseOps ops2
-     , BaseOps ops3
-     , BaseOps handler1
-     , BaseOps handler2
+   . ( ImplicitOps ops1
+     , ImplicitOps ops2
+     , ImplicitOps ops3
+     , ImplicitOps handler1
+     , ImplicitOps handler2
      , Effect eff
      , ops3 ⊇ ops1
      , (handler1 ∪ ops3) ⊇ ops2
@@ -196,13 +196,13 @@ composeOpsHandlers = composeOpsHandlersWithCast
 
 bindOpsHandlerWithCast
   :: forall ops3 ops1 ops2 lift handler eff r
-   . ( BaseOps ops1
-     , BaseOps ops2
-     , BaseOps ops3
-     , BaseOps handler
+   . ( ImplicitOps ops1
+     , ImplicitOps ops2
+     , ImplicitOps ops3
+     , ImplicitOps handler
      , Effect eff
      , EffLifter lift
-     , Liftable lift (Operation handler)
+     , Liftable lift handler
      )
   => OpsCast ops3 ops1
   -> OpsCast (handler ∪ ops3) ops2
@@ -217,15 +217,15 @@ bindOpsHandlerWithCast cast31 cast32 handler comp =
 
 bindOpsHandler
   :: forall ops3 ops1 ops2 lift handler eff r
-   . ( BaseOps ops1
-     , BaseOps ops2
-     , BaseOps ops3
+   . ( ImplicitOps ops1
+     , ImplicitOps ops2
+     , ImplicitOps ops3
      , ops3 ⊇ ops1
      , (handler ∪ ops3) ⊇ ops2
-     , BaseOps handler
+     , ImplicitOps handler
      , Effect eff
      , EffLifter lift
-     , Liftable lift (Operation handler)
+     , Liftable lift handler
      )
   => OpsHandler lift ops1 handler eff
   -> Computation lift ops2 r eff

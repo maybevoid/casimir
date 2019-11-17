@@ -3,6 +3,8 @@ module Control.Effect.Implicit.Higher.ContraLift
 where
 
 import Data.Functor.Compose
+import Control.Monad.Identity
+
 import Control.Effect.Implicit.Base (Effect)
 
 newtype ContraLift eff1 eff2 = ContraLift {
@@ -23,7 +25,20 @@ type ContraFree eff f =
      -> eff (w (eff (f a))))
   -> eff (f a)
 
-composeContraLift
+identityContraLift
+  :: forall eff . Effect eff
+  => ContraLift eff eff
+identityContraLift = ContraLift contraLift1
+ where
+  contraLift1
+    :: forall a
+     . ((forall x . eff x -> eff (Identity x))
+        -> eff (Identity a))
+    -> eff a
+  contraLift1 cont =
+    fmap runIdentity $ cont $ fmap Identity
+
+joinContraLift
   :: forall eff1 eff2 eff3
    . ( Effect eff1
      , Effect eff2
@@ -32,7 +47,7 @@ composeContraLift
   => ContraLift eff1 eff2
   -> ContraLift eff2 eff3
   -> ContraLift eff1 eff3
-composeContraLift contraLift1 contraLift2 = ContraLift contraLift3
+joinContraLift contraLift1 contraLift2 = ContraLift contraLift3
  where
   contraLift3
     :: forall a

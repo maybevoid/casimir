@@ -54,7 +54,7 @@ opsHandlerToPipeline
   , BaseOps ops1
   , BaseOps handler
   , EffLifter lift
-  , Liftable lift (Operation handler)
+  , Liftable lift handler
   )
   => OpsHandler lift ops1 handler eff
   -> (forall comp .

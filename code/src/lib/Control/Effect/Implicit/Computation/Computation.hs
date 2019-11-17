@@ -12,7 +12,7 @@ import Control.Effect.Implicit.Base
 
 newtype Computation lift ops comp eff1 = Computation {
   runComp :: forall eff2 .
-    ( BaseOps ops
+    ( EffOps ops
     , Effect eff1
     , Effect eff2
     )

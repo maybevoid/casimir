@@ -12,12 +12,13 @@ where
 
 import Data.Kind
 
+import Control.Effect.Implicit.Base.Base
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
 
 class EffLifter lift where
   type family Liftable lift
-    (ops :: (Type -> Type) -> Type) :: Constraint
+    (ops :: Type) :: Constraint
 
   idLiftEff
     :: forall eff . (Effect eff) => lift eff eff
@@ -26,11 +27,12 @@ class EffLifter lift where
     :: forall eff1 eff2 ops
      . ( Effect eff1
        , Effect eff2
+       , EffOps ops
        , Liftable lift ops
        )
     => lift eff1 eff2
-    -> ops eff1
-    -> ops eff2
+    -> Operation ops eff1
+    -> Operation ops eff2
 
   joinLiftEff
     :: forall eff1 eff2 eff3
@@ -92,7 +94,8 @@ data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
   }
 
 instance EffLifter LiftEff where
-  type Liftable LiftEff ops = EffFunctor ops
+  type Liftable LiftEff ops =
+    ( EffOps ops, EffFunctor (Operation ops) )
 
   idLiftEff = idLift
   applyLiftEff = applyEffmap
