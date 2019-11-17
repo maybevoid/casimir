@@ -8,7 +8,6 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict
 
 import Control.Effect.Implicit
-
 import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
 
@@ -63,6 +62,10 @@ main = defaultMain
     , bench "with CoOpHandler on FreeMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)
         (handleFreeComp @Free.FreeMonad)
+
+    , bench "with Codensity Ops"  $
+        whnf (\comp -> runIdentity $ comp rounds)
+        codensityComp
 
     , bench "with Freer CoOpHandler on FreerMonad"  $
         whnf (\comp -> runIdentity $ comp rounds)

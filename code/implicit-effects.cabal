@@ -135,6 +135,7 @@ library
       Control.Effect.Implicit.Freer.Handler
       Control.Effect.Implicit.Freer.NoOp
       Control.Effect.Implicit.Freer.Union
+      Control.Effect.Implicit.Freer.Codensity
 
       Control.Effect.Implicit.Cast.Cast
       Control.Effect.Implicit.Cast.Entail
@@ -173,6 +174,7 @@ benchmark implicit-effects-benchmark
       Benchmark.State.StateTHandler
       Benchmark.State.StateTToEnvOpsPipeline
       Benchmark.State.WithStateT
+      Benchmark.State.Codensity
   hs-source-dirs:
       src/benchmark
   build-depends:

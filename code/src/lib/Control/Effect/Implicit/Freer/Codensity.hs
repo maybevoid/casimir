@@ -19,7 +19,7 @@ data CoOpCont coop r where
     -> CoOpCont coop r
 
 newtype Codensity h a = Cod {
-  unCod
+  runCodensity
     :: forall x
      . (a -> h x)
     -> h x
@@ -28,6 +28,7 @@ newtype Codensity h a = Cod {
 instance Functor (CoOpCont coop) where
   fmap f (CoOpCont coop cont) =
     CoOpCont coop $ fmap f cont
+  {-# INLINE fmap #-}
 
 instance Functor (Codensity h) where
   fmap
@@ -39,6 +40,7 @@ instance Functor (Codensity h) where
    where
     cont2 :: forall x . (b -> h x) -> h x
     cont2 cont3 = cont1 (\a -> cont3 $ f a)
+  {-# INLINE fmap #-}
 
 instance Applicative (Codensity h) where
   pure = return
@@ -59,7 +61,8 @@ instance Monad (Codensity h) where
      where
 
       cont3 :: a -> h x
-      cont3 x = unCod (cont1 x) cont2
+      cont3 x = runCodensity (cont1 x) cont2
+  {-# INLINE (>>=) #-}
 
 algCod
   :: forall h f a
@@ -74,6 +77,7 @@ algCod alg op = Cod comp1
    where
     cont2 :: Codensity h a -> h x
     cont2 (Cod comp2) = comp2 cont1
+{-# INLINE algCod #-}
 
 rollCod
   :: forall eff f a
@@ -92,6 +96,7 @@ rollCod comp1 = Cod comp2
     comp3 = do
       Cod comp4 <- comp1
       unNest $ comp4 cont1
+{-# INLINE rollCod #-}
 
 codensityOps
   :: forall ops h
@@ -111,6 +116,9 @@ codensityOps handler1 = mkFreeOps handler2
    where
     comp1 :: forall x . (a -> h x) -> h x
     comp1 cont = handler1 coop cont
+  {-# INLINE handler2 #-}
+
+{-# INLINE codensityOps #-}
 
 toCodensity
   :: forall free ops eff f a
@@ -123,6 +131,7 @@ toCodensity
   -> free ops eff a
   -> Codensity (Nest eff f) a
 toCodensity handler1 comp = toCodensity' (coOpHandler handler1) comp
+{-# INLINE toCodensity #-}
 
 toCodensity'
   :: forall free ops eff f a
@@ -170,3 +179,4 @@ toCodensity' handler1 comp1 = rollCod comp2
 
   comp2 :: eff (Codensity (Nest eff f) a)
   comp2 = handleFree handler4 comp1
+{-# INLINE toCodensity' #-}

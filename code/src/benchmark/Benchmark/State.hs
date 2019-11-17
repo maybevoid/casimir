@@ -10,6 +10,7 @@ module Benchmark.State
   , module Benchmark.State.StateOpsToReaderT
   , module Benchmark.State.FreePipeline
   , module Benchmark.State.HandleFree
+  , module Benchmark.State.Codensity
   )
 where
 
@@ -23,3 +24,4 @@ import Benchmark.State.StateOpsToEnvOps
 import Benchmark.State.StateOpsToReaderT
 import Benchmark.State.FreePipeline
 import Benchmark.State.HandleFree
+import Benchmark.State.Codensity
