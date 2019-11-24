@@ -109,6 +109,9 @@ refStatePipeline
   -> GenericPipeline LiftEff IoEff (StateEff a) eff
 refStatePipeline ref = opsHandlerToPipeline $ refStateHandler ref
 
+ioHandler :: BaseOpsHandler NoEff IoEff IO
+ioHandler = baseOpsHandler ioOps
+
 ioPipeline
   :: GenericPipeline LiftEff NoEff IoEff IO
 ioPipeline = opsHandlerToPipeline ioHandler

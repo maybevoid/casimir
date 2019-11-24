@@ -26,7 +26,7 @@ implicit-effects Overview
 > import Prelude hiding (getLine)
 > import Control.Monad.Identity
 > import Data.Traversable
-> import Control.Monad.Trans.State (StateT (..), evalStateT)
+> import Control.Monad.Trans.State.Strict (StateT (..), evalStateT)
 
 > import qualified Prelude
 > import qualified Control.Monad.Trans.Class as MonadTrans

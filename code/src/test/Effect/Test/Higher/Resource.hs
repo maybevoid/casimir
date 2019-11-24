@@ -32,13 +32,13 @@ bracketHandler
   :: HigherOpsHandler NoEff BracketResourceEff IO
 bracketHandler = baseOpsHandler ioBracketOps
 
-ioHandler :: HigherOpsHandler NoEff IoEff IO
+ioHandler :: BaseOpsHandler NoEff IoEff IO
 ioHandler = baseOpsHandler ioOps
 
 stateTHandler
   :: forall s eff
    . (Effect eff)
-  => HigherOpsHandler NoEff (StateEff s) (StateT s eff)
+  => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
 stateTHandler = baseOpsHandler stateTOps
 
 pushRef :: forall a . IORef [a] -> a
@@ -93,17 +93,18 @@ comp1 ref = do
 pipeline1
   :: forall comp
    . (forall eff . (Effect eff)
-      => HigherComputation
+      => BaseComputation
           (StateEff [String] ∪ IoEff ∪ BracketResourceEff)
           comp
           eff)
   -> HigherComputation NoEff comp (StateT [String] IO)
 pipeline1 comp11 =
-  bindOpsHandler stateTHandler $
+  bindOpsHandler (toHigherComputation stateTHandler) $
     liftComputation stateTHigherLiftEff $
-      bindOpsHandler @(StateEff [String]) ioHandler $
-        bindOpsHandler @(StateEff [String] ∪ IoEff) bracketHandler $
-          comp11
+      bindOpsHandler @(StateEff [String]) bracketHandler $
+        toHigherComputation $
+          bindOpsHandler @(StateEff [String] ∪ BracketResourceEff) ioHandler $
+            comp11
 
 comp2
   :: IORef [String]

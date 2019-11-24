@@ -72,3 +72,17 @@ instance EffLifter HigherLiftEff where
     = HigherLiftEff
       (lift2 . lift1)
       (joinContraLift contraLift1 contraLift2)
+
+higherToBaseLiftEff
+  :: forall eff1 eff2
+   . (Effect eff1, Effect eff2)
+  => HigherLiftEff eff1 eff2
+  -> LiftEff eff1 eff2
+higherToBaseLiftEff higherLift = mkLiftEff $ baseLiftEff higherLift
+
+toHigherComputation
+  :: forall ops comp eff
+   . (Base.EffOps ops, Effect eff)
+  => BaseComputation ops comp eff
+  -> HigherComputation ops comp eff
+toHigherComputation = strengthenComputation higherToBaseLiftEff
