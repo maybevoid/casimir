@@ -11,15 +11,13 @@ import Control.Monad.Trans.Class
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
-import Control.Effect.Implicit.Higher (ContraLift (..))
+import Control.Effect.Implicit.Higher
+  (ContraLift (..), HigherLiftEff (..))
 
-import qualified Control.Effect.Implicit.Base as L
+import qualified Control.Effect.Implicit.Base as Base
 
-import Control.Effect.Implicit.Ops.Env
 import Control.Effect.Implicit.Ops.State
   (StateEff, StateOps(..))
-
-import Control.Effect.Implicit.Transform.Lift
 
 liftStateT
   :: forall s eff a . (Effect eff)
@@ -32,11 +30,26 @@ stateTLiftEff
   => LiftEff eff (StateT s eff)
 stateTLiftEff = mkLiftEff liftStateT
 
+stateTHigherLiftEff
+  :: forall s eff . (Effect eff)
+  => HigherLiftEff eff (StateT s eff)
+stateTHigherLiftEff =
+  HigherLiftEff liftStateT stateTContraLift
+
 stateTOps
+  :: forall eff s
+   . (Effect eff)
+  => StateOps s (StateT s eff)
+stateTOps = StateOps {
+  getOp = get,
+  putOp = put
+}
+
+monadStateOps
   :: forall eff s
    . (Effect eff, MonadState s eff)
   => StateOps s eff
-stateTOps = StateOps {
+monadStateOps = StateOps {
   getOp = get,
   putOp = put
 }
@@ -61,32 +74,28 @@ stateTContraLift = ContraLift contraLift1
     put s2
     return x
 
-stateTContraLift2
-  :: forall eff s
-   . (Effect eff)
-  => ContraLift eff (StateT s eff)
-stateTContraLift2 = transformContraLift
-  (\(x, s) -> (s, x))
-  (\(s, x) -> (x, s))
+withStateTAndOps
+  :: forall ops s r eff .
+  ( BaseOps ops
+  , Effect eff
+  )
+  => s
+  -> Base.Operation ops eff
+  -> (Base.Operation (StateEff s ∪ ops) (StateT s eff)
+      -> StateT s eff r)
+  -> eff r
+withStateTAndOps i ops1 comp1 = evalStateT comp2 i
+ where
+  comp2 :: StateT s eff r
+  comp2 = comp1 ops2
 
-stateTIoContraLift
-  :: forall s
-   . ContraLift IO (StateT s IO)
-stateTIoContraLift = baseContraLift
-  (\(x, s) -> (s, x))
-  (\(s, x) -> (x, s))
-
-stateTHandler
-  :: forall eff s .
-  (Effect eff, MonadState s eff)
-  => BaseOpsHandler NoEff (StateEff s) eff
-stateTHandler = opsHandlerComp $
-  \lifter -> applyEffmap lifter stateTOps
+  ops2 :: Base.Operation (StateEff s ∪ ops) (StateT s eff)
+  ops2 = stateTOps ∪ (effmap lift ops1)
 
 {-# INLINE stateTPipeline #-}
 stateTPipeline
   :: forall s eff1 comp .
-  (Effect eff1, L.EffFunctor comp)
+  (Effect eff1, Base.EffFunctor comp)
   => s
   -> SimplePipeline LiftEff NoEff (StateEff s) comp eff1
 stateTPipeline i = transformePipeline $ genericComputation handler
@@ -97,37 +106,3 @@ stateTPipeline i = transformePipeline $ genericComputation handler
     => TransformerHandler (StateT s) (StateEff s) eff
   handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
     \comp -> evalStateT comp i
-
-{-# INLINE stateTToEnvOpsPipeline #-}
-stateTToEnvOpsPipeline
-  :: forall s eff1 comp .
-  (Effect eff1, L.EffFunctor comp)
-  => SimplePipeline LiftEff (EnvEff s) (StateEff s) comp eff1
-stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
- where
-  {-# INLINE handler #-}
-  handler :: forall eff
-   . (EffConstraint (EnvEff s) eff)
-    => TransformerHandler (StateT s) (StateEff s) eff
-  handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
-    \comp -> do
-      i <- ask
-      evalStateT comp i
-
-withStateTAndOps
-  :: forall ops s r eff .
-  ( BaseOps ops
-  , Effect eff
-  )
-  => s
-  -> L.Operation ops eff
-  -> (L.Operation (StateEff s ∪ ops) (StateT s eff)
-      -> StateT s eff r)
-  -> eff r
-withStateTAndOps i ops1 comp1 = evalStateT comp2 i
- where
-  comp2 :: StateT s eff r
-  comp2 = comp1 ops2
-
-  ops2 :: L.Operation (StateEff s ∪ ops) (StateT s eff)
-  ops2 = stateTOps ∪ (effmap lift ops1)

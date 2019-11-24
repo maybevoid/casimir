@@ -5,7 +5,6 @@ where
 import Control.Monad.Trans.State.Strict (StateT)
 
 import Control.Effect.Implicit
-import Control.Effect.Implicit.Transform.State
 
 import Benchmark.State.Base
 

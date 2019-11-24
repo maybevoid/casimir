@@ -6,12 +6,10 @@ module Control.Effect.Implicit.Ops.Io
   , IoCoOp' (..)
   , liftIo
   , ioOps
-  , ioHandler
   )
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation
 
 import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
@@ -73,10 +71,5 @@ liftIo = liftIoOp captureOps
 
 ioOps :: IoOps IO
 ioOps = IoOps {
-  liftIoOp = id
-}
-
-ioHandler :: BaseOpsHandler NoEff IoEff IO
-ioHandler = baseOpsHandler IoOps {
   liftIoOp = id
 }

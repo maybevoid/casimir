@@ -13,6 +13,9 @@ import Control.Effect.Implicit.Higher.ContraLift
 
 import qualified Control.Effect.Implicit.Base as Base
 
+type HigherComputation = Computation HigherLiftEff
+type HigherOpsHandler ops handler eff = OpsHandler HigherLiftEff ops handler eff
+
 data HigherLiftEff
   (eff1 :: Type -> Type)
   (eff2 :: Type -> Type)
@@ -69,5 +72,3 @@ instance EffLifter HigherLiftEff where
     = HigherLiftEff
       (lift2 . lift1)
       (joinContraLift contraLift1 contraLift2)
-
-type HigherComputation = Computation HigherLiftEff

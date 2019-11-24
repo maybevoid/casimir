@@ -1,6 +1,6 @@
 {-# Language UndecidableInstances #-}
 
-module Control.Effect.Implicit.Higher.UnderOps
+module Control.Effect.Implicit.Higher.Ops.UnderOps
 where
 
 import Control.Effect.Implicit.Higher.Base

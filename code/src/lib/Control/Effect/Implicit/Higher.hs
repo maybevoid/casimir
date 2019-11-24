@@ -6,8 +6,6 @@ module Control.Effect.Implicit.Higher
   , module Control.Effect.Implicit.Higher.EffFunctor
   , module Control.Effect.Implicit.Higher.NoOp
   , module Control.Effect.Implicit.Higher.Union
-  , module Control.Effect.Implicit.Higher.UnderOps
-  , module Control.Effect.Implicit.Higher.UpperOps
   , module Control.Effect.Implicit.Higher.Computation
   )
 where
@@ -18,6 +16,4 @@ import Control.Effect.Implicit.Higher.ContraLift
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.NoOp
 import Control.Effect.Implicit.Higher.Union
-import Control.Effect.Implicit.Higher.UnderOps
-import Control.Effect.Implicit.Higher.UpperOps
 import Control.Effect.Implicit.Higher.Computation

@@ -2,8 +2,15 @@
 module Benchmark.State.Base
 where
 
+import Control.Monad.Trans.State.Strict (StateT)
+import Control.Monad.Reader (ReaderT (..))
+
+
 import Control.Effect.Implicit
+import Control.Effect.Implicit.Ops.Env
 import Control.Effect.Implicit.Ops.State
+import Control.Effect.Implicit.Transform.State
+import Control.Effect.Implicit.Transform.Reader
 
 import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
@@ -24,6 +31,20 @@ stateBaseFunc =
 stateBaseComp :: forall eff . (Effect eff)
   => BaseComputation (StateEff Int) (Return ()) eff
 stateBaseComp = genericReturn stateBaseFunc
+
+readerTHandler
+  :: forall a eff .
+  (Effect eff)
+  => BaseOpsHandler NoEff (EnvEff a) (ReaderT a eff)
+readerTHandler = opsHandlerComp $
+  \lifter -> applyEffmap lifter readerTOps
+
+stateTHandler
+  :: forall eff s .
+  (Effect eff)
+  => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
+stateTHandler = opsHandlerComp $
+  \lifter -> applyEffmap lifter stateTOps
 
 runCoState
   :: forall s eff . (Effect eff)

@@ -10,13 +10,28 @@ where
 
 import Control.Monad.Identity
 import Control.Monad.Trans.Reader (ReaderT)
+import Control.Monad.Trans.State.Strict (StateT, evalStateT)
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops.Env
+import Control.Effect.Implicit.Ops.State
 import Control.Effect.Implicit.Transform.State
-import Control.Effect.Implicit.Transform.Reader
 
 import Benchmark.State.Base
+
+stateTToEnvOpsPipeline
+  :: forall s eff1 comp .
+  (Effect eff1, EffFunctor comp)
+  => SimplePipeline LiftEff (EnvEff s) (StateEff s) comp eff1
+stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
+ where
+  handler :: forall eff
+   . (EffConstraint (EnvEff s) eff)
+    => TransformerHandler (StateT s) (StateEff s) eff
+  handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
+    \comp -> do
+      i <- ask
+      evalStateT comp i
 
 stateTComp1 :: forall eff . (Effect eff)
   => BaseComputation (EnvEff Int) (Return ()) eff

@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Higher.UpperOps
+module Control.Effect.Implicit.Higher.Ops.UpperOps
 where
 
 import Data.Kind

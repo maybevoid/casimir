@@ -8,8 +8,7 @@ import Control.Monad.Reader
 import Control.Monad.Trans.Class
   (MonadTrans (..))
 
-import Control.Effect.Implicit.Computation
-import Control.Effect.Implicit.Ops.Env (EnvEff, EnvOps (..))
+import Control.Effect.Implicit.Ops.Env (EnvOps (..))
 
 import Control.Effect.Implicit.Base
 
@@ -31,10 +30,3 @@ readerTOps :: forall a eff . (Effect eff)
 readerTOps = EnvOps {
   askOp = ask
 }
-
-readerTHandler
-  :: forall a eff .
-  (Effect eff)
-  => BaseOpsHandler NoEff (EnvEff a) (ReaderT a eff)
-readerTHandler = opsHandlerComp $
-  \lifter -> applyEffmap lifter readerTOps

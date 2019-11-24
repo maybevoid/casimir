@@ -7,7 +7,7 @@ import Test.Tasty.HUnit
 import Data.IORef
 import Control.Monad.Identity
 import Control.Monad.Trans.State.Strict
-  (StateT, runStateT)
+  (StateT, runStateT, evalStateT)
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Free
@@ -26,6 +26,32 @@ stateTests = testGroup "StateOps Tests"
   , churchStateTest2
   , freeStateTest1
   ]
+
+stateTHandler
+  :: forall eff s .
+  (Effect eff)
+  => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
+stateTHandler = opsHandlerComp $
+  \lifter -> applyEffmap lifter stateTOps
+
+ioHandler :: BaseOpsHandler NoEff IoEff IO
+ioHandler = baseOpsHandler IoOps {
+  liftIoOp = id
+}
+
+stateTToEnvOpsPipeline
+  :: forall s eff1 comp .
+  (Effect eff1, EffFunctor comp)
+  => SimplePipeline LiftEff (EnvEff s) (StateEff s) comp eff1
+stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
+ where
+  handler :: forall eff
+   . (EffConstraint (EnvEff s) eff)
+    => TransformerHandler (StateT s) (StateEff s) eff
+  handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
+    \comp -> do
+      i <- ask
+      evalStateT comp i
 
 type StateCompRes = (Int, Int, Int)
 

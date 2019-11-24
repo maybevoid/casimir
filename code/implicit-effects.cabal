@@ -83,9 +83,7 @@ library
       Control.Effect.Implicit.Ops.Exception
       Control.Effect.Implicit.Ops.Io
       Control.Effect.Implicit.Ops.Log
-      Control.Effect.Implicit.Ops.Resource
       Control.Effect.Implicit.Ops.State
-      Control.Effect.Implicit.Ops.UnliftIo
 
       Control.Effect.Implicit.Transform
       Control.Effect.Implicit.Transform.Reader
@@ -96,6 +94,8 @@ library
       Control.Effect.Implicit.Higher.Ops.Reader
       Control.Effect.Implicit.Higher.Ops.Resource
       Control.Effect.Implicit.Higher.Ops.Exception
+      Control.Effect.Implicit.Higher.Ops.UnderOps
+      Control.Effect.Implicit.Higher.Ops.UpperOps
 
       Control.Effect.Implicit.Higher.ContraLift.State
       Control.Effect.Implicit.Higher.ContraLift.Either
@@ -145,8 +145,6 @@ library
       Control.Effect.Implicit.Higher.Free
       Control.Effect.Implicit.Higher.NoOp
       Control.Effect.Implicit.Higher.Union
-      Control.Effect.Implicit.Higher.UnderOps
-      Control.Effect.Implicit.Higher.UpperOps
       Control.Effect.Implicit.Higher.EffFunctor
       Control.Effect.Implicit.Higher.ContraLift
       Control.Effect.Implicit.Higher.Computation
@@ -202,7 +200,6 @@ test-suite implicit-effects-test
       Effect.Test.Ops.Env
       Effect.Test.Ops.Exception
       Effect.Test.Ops.Pipe
-      Effect.Test.Ops.Resource
       Effect.Test.Ops.State
 
       Effect.Test.Higher
