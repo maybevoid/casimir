@@ -10,6 +10,7 @@ module Control.Effect.Implicit.Computation.Computation
 where
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Computation.Lift
 
 newtype Computation lift ops comp eff1 = Computation {
   runComp :: forall eff2 .
@@ -24,8 +25,8 @@ newtype Computation lift ops comp eff1 = Computation {
 
 type BaseComputation = Computation LiftEff
 
-type OpsHandler lift ops handler eff = Computation lift ops (Operation handler) eff
-type BaseOpsHandler ops handler eff = OpsHandler LiftEff ops handler eff
+type OpsHandler lift ops handler = Computation lift ops (Operation handler)
+type BaseOpsHandler ops handler = OpsHandler LiftEff ops handler
 
 instance
   (BaseOps ops)

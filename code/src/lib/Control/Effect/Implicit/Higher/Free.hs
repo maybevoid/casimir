@@ -5,7 +5,9 @@ where
 
 import Data.Kind
 
+import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Higher.Base
+import Control.Effect.Implicit.Higher.Lift
 import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
@@ -27,8 +29,8 @@ instance
 
 data CoOpHandler
   ops
-  (eff :: Type -> Type)
   (f :: Type -> Type)
+  (eff :: Type -> Type)
   = CoOpHandler
     { returnHandler
         :: forall a . a -> eff (f a)
@@ -72,10 +74,6 @@ class
       => eff a
       -> free ops eff a
 
-class
-  (FreeEff free)
-  => FreeHandler free
-   where
     freeContraLift
       :: forall eff ops
        . ( Effect eff
@@ -83,13 +81,18 @@ class
          )
       => ContraLift eff (free ops eff)
 
+
+class
+  (FreeEff free)
+  => FreeHandler free
+   where
     handleFree
       :: forall ops eff f a
        . ( Effect eff
          , FreeOps ops
          , Functor f
          )
-      => CoOpHandler ops eff f
+      => CoOpHandler ops f eff
       -> free ops eff a
       -> eff (f a)
 
@@ -121,6 +124,34 @@ instance
         -> eff a
       liftCoOp2 op = liftCoOp1 $ HigherOp op
 
+freeHigherLiftEff
+  :: forall free ops eff
+   . (FreeEff free, FreeOps ops, Effect eff)
+  => HigherLiftEff eff (free ops eff)
+freeHigherLiftEff = HigherLiftEff liftFree freeContraLift
+
+{-# INLINE withCoOpHandler #-}
+withCoOpHandler
+  :: forall free ops eff f r
+   . ( Functor f
+     , Effect eff
+     , FreeEff free
+     , FreeHandler free
+     , EffOps ops
+     , FreeOps ops
+     , ImplicitOps ops
+     , LowerEffOps ops
+     )
+  => CoOpHandler ops f eff
+  -> ((OpsConstraint ops (free ops eff))
+      => free ops eff r)
+  -> eff (f r)
+withCoOpHandler handler comp1
+  = handleFree @free handler $
+      withOps ops1 comp1
+ where
+  ops1 :: Base.Operation ops (free ops eff)
+  ops1 = LowerOps freeOps
 
 liftCoOpHandler
   :: forall ops eff f
@@ -130,7 +161,7 @@ liftCoOpHandler
      )
   => (forall a . Base.CoOpHandler ops a (f a) eff)
   -> ContraFree eff f
-  -> CoOpHandler ops eff f
+  -> CoOpHandler ops f eff
 liftCoOpHandler handler1 contraLift =
   CoOpHandler handleReturn handleOps contraLift
   where
@@ -151,7 +182,7 @@ lowerCoOpHandler
      , HigherEffOps ops
      , HigherEffCoOp ops
      )
-  => CoOpHandler ops eff f
+  => CoOpHandler ops f eff
   -> (forall a . Base.CoOpHandler ops a (f a) eff)
 lowerCoOpHandler
   (CoOpHandler handleReturn1 handleOp1 _) =

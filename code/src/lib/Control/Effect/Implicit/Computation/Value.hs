@@ -16,6 +16,7 @@ import Data.Kind
 import Control.Monad.Identity (Identity (..))
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Computation.Lift
 import Control.Effect.Implicit.Computation.Computation
 
 class FunctorComp ret where

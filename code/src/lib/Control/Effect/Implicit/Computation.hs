@@ -41,9 +41,11 @@ module Control.Effect.Implicit.Computation
   , castPipelineOps
   , castPipelineHandler
   , composePipelinesWithCast
+  , module Control.Effect.Implicit.Computation.Lift
   )
 where
 
+import Control.Effect.Implicit.Computation.Lift
 import Control.Effect.Implicit.Computation.Computation
 import Control.Effect.Implicit.Computation.Value
 import Control.Effect.Implicit.Computation.Handler

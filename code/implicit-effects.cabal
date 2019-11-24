@@ -97,6 +97,9 @@ library
       Control.Effect.Implicit.Higher.Ops.UnderOps
       Control.Effect.Implicit.Higher.Ops.UpperOps
 
+      Control.Effect.Implicit.Higher.Free
+      Control.Effect.Implicit.Higher.Monad.Free
+      Control.Effect.Implicit.Higher.Monad.Church
       Control.Effect.Implicit.Higher.ContraLift.State
       Control.Effect.Implicit.Higher.ContraLift.Either
       Control.Effect.Implicit.Higher.ContraLift.Identity
@@ -111,6 +114,7 @@ library
       Control.Effect.Implicit.Base.NoOp
       Control.Effect.Implicit.Base.Union
 
+      Control.Effect.Implicit.Computation.Lift
       Control.Effect.Implicit.Computation.Cast
       Control.Effect.Implicit.Computation.Computation
       Control.Effect.Implicit.Computation.Handler
@@ -142,14 +146,12 @@ library
 
       Control.Effect.Implicit.Higher.Base
       Control.Effect.Implicit.Higher.CoOp
-      Control.Effect.Implicit.Higher.Free
       Control.Effect.Implicit.Higher.NoOp
+      Control.Effect.Implicit.Higher.Lift
       Control.Effect.Implicit.Higher.Union
       Control.Effect.Implicit.Higher.EffFunctor
       Control.Effect.Implicit.Higher.ContraLift
       Control.Effect.Implicit.Higher.Computation
-      Control.Effect.Implicit.Higher.Monad.Free
-      Control.Effect.Implicit.Higher.Monad.Church
 
       Control.Effect.Implicit.Transform.Lift
 
@@ -204,6 +206,7 @@ test-suite implicit-effects-test
 
       Effect.Test.Higher
       Effect.Test.Higher.Resource
+      Effect.Test.Higher.Exception
   hs-source-dirs:
       src/test
   build-depends:

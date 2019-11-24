@@ -14,7 +14,6 @@ module Control.Effect.Implicit.Base
   , NoEff
   , NoOp (..)
   , LiftEff
-  , EffLifter (..)
   , type (∪)
   , NoConstraint
   , Union

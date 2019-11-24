@@ -63,9 +63,10 @@ instance ImplicitOps (ResourceEff t) where
 instance
   (Effect inEff)
   => EffFunctor (HigherResourceOps t inEff) where
-    effmap lifter (HigherResourceOps handleResource) = HigherResourceOps $
-      \resource cont ->
-        lifter $ handleResource resource cont
+    effmap lifter (HigherResourceOps handleResource) =
+      HigherResourceOps $
+        \resource cont ->
+          lifter $ handleResource resource cont
 
 instance HigherEffFunctor (HigherResourceOps t) where
   invEffmap
@@ -139,7 +140,7 @@ ioBracketOps = ResourceOps $
     bracket alloc release cont
 
 ioBracketCoOpHandler
-  :: CoOpHandler (ResourceEff BracketResource) IO Identity
+  :: CoOpHandler (ResourceEff BracketResource) Identity IO
 ioBracketCoOpHandler = CoOpHandler
   (return . Identity) handleOp contraIdentity
  where

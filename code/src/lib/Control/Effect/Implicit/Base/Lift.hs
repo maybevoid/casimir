@@ -1,7 +1,6 @@
 
 module Control.Effect.Implicit.Base.Lift
   ( LiftEff
-  , EffLifter (..)
   , idLift
   , mkLiftEff
   , runLiftEff
@@ -12,37 +11,8 @@ where
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base.Base
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
-
-class EffLifter lift where
-  type family Liftable lift
-    (ops :: Type) :: Constraint
-
-  idLiftEff
-    :: forall eff . (Effect eff) => lift eff eff
-
-  applyLiftEff
-    :: forall eff1 eff2 ops
-     . ( Effect eff1
-       , Effect eff2
-       , EffOps ops
-       , Liftable lift ops
-       )
-    => lift eff1 eff2
-    -> Operation ops eff1
-    -> Operation ops eff2
-
-  joinLiftEff
-    :: forall eff1 eff2 eff3
-     . ( Effect eff1
-       , Effect eff2
-       , Effect eff3
-       )
-    => lift eff1 eff2
-    -> lift eff2 eff3
-    -> lift eff1 eff3
 
 -- | An opaque object-ish effect lifter that can apply 'effmap' to an 'EffFunctor'.
 -- We define dedicated datatype instead of using the natural transformation
@@ -92,15 +62,6 @@ data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
       => LiftEff eff0 eff1
       -> LiftEff eff0 eff2
   }
-
-instance EffLifter LiftEff where
-  type Liftable LiftEff ops =
-    ( EffOps ops, EffFunctor (Operation ops) )
-
-  idLiftEff = idLift
-  applyLiftEff = applyEffmap
-  joinLiftEff = joinLift
-
 
 -- | Create a 'LiftEff' from a natural transformation @eff1 ~> eff2@. This assumes
 -- @eff1@ and @eff2@ are different, as otherwise we can use 'idLift' for optimized
