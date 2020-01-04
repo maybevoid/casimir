@@ -1,11 +1,12 @@
 {
-  nixpkgs ? import ./nixpkgs.nix {}
+  nixpkgs ? import ./nixpkgs.nix {},
+  haskellPackages ? nixpkgs.pkgs.haskellPackages
 }:
 let
   inherit (nixpkgs) pkgs;
 in
 pkgs.haskell.lib.doBenchmark
-  ( pkgs.haskellPackages.callCabal2nix
+  ( haskellPackages.callCabal2nix
       "implicit-effects"
       ../code
       {}

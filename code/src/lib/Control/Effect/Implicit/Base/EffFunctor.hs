@@ -16,8 +16,9 @@ class EffFunctor (comp :: (Type -> Type) -> Type) where
 
   -- | Lift a computation @comp@ from 'Effect' @eff1@ to @eff2@
   -- through the given natural transformation.
-  effmap :: forall eff1 eff2 .
-    (Effect eff1, Effect eff2)
+  effmap
+    :: forall eff1 eff2
+     . (Effect eff1, Effect eff2)
     => (forall x . eff1 x -> eff2 x)
     -> comp eff1
     -> comp eff2

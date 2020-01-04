@@ -14,4 +14,4 @@ where
 -- <https://www.eff-lang.org/handlers-tutorial.pdf Eff language tutorial>,
 -- which does a great job explaning algebraic effects without mentioning the
 -- M-word.
-type Effect eff = Monad eff
+type Effect = Monad

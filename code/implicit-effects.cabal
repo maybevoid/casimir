@@ -1,4 +1,4 @@
-cabal-version: 2.2
+cabal-version: 2.4
 
 name:           implicit-effects
 version:        0.1.0

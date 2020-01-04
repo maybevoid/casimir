@@ -4,11 +4,7 @@ where
 import Data.Kind
 import Control.Effect.Implicit.Base
 
-class
-  (forall ops1 ops2
-    . (Liftable lift ops1, Liftable lift ops2)
-    => Liftable lift (ops1 ∪ ops2))
-  => EffLifter lift where
+class EffLifter lift where
   type family Liftable lift
     (ops :: Type) :: Constraint
 
