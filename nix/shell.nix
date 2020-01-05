@@ -1,4 +1,4 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ nixpkgs ? import ./nixpkgs.nix {} }:
 let
   inherit (nixpkgs) pkgs;
   haskellPackages = pkgs.haskell.packages.ghc881;
