@@ -6,4 +6,6 @@ let
 in
 {
   inherit ghc86 ghc88 ghc810;
+
+  default = ghc88;
 }

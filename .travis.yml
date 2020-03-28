@@ -5,12 +5,13 @@ cache:
   - $HOME/nix.store
 
 script:
+  - make test
   - nix-build nix/release.nix
 
 before_install:
   - sudo mkdir -p /etc/nix
-  - echo "substituters = https://cache.nixos.org/ file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
-  - echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf > /dev/null
+  - echo "substituters = https://cache.nixos.org https://maybevoid.cachix.org file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
+  - echo "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= maybevoid.cachix.org-1:Ffj+i1SPSghfQWDfidVDW+HxeDHOoNfiaKksayZGgkk=" | sudo tee -a /etc/nix/nix.conf > /dev/null
 
 before_cache:
   - mkdir -p $HOME/nix.store
