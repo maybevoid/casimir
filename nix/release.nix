@@ -1,13 +1,8 @@
-{
-  nixpkgs ? import ./nixpkgs.nix {},
-  haskellPackages ? nixpkgs.pkgs.haskellPackages
-}:
+{ nixpkgs ? import ./nixpkgs.nix {} }:
 let
-  inherit (nixpkgs) pkgs;
+  ghc865 = (import ./release/8.6.5.nix { inherit nixpkgs; }).release;
+  ghc883 = (import ./release/8.8.3.nix { inherit nixpkgs; }).release;
 in
-pkgs.haskell.lib.doBenchmark
-  ( haskellPackages.callCabal2nix
-      "implicit-effects"
-      ../code
-      {}
-  )
+{
+  inherit ghc865 ghc883;
+}
