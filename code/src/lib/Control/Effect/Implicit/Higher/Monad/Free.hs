@@ -7,7 +7,6 @@ import Control.Monad (ap)
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher.Free
 import Control.Effect.Implicit.Higher.CoOp
-import Control.Effect.Implicit.Higher.ContraLift
 
 data FreeF
   ops

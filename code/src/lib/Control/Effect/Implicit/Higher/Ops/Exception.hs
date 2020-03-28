@@ -8,6 +8,14 @@ import qualified Control.Exception as Ex
 
 import Control.Implicit.Param
 import Control.Effect.Implicit.Base
+  ( ImplicitOps (..)
+  , ContraLift (..)
+  , EffConstraint
+  , type (∪)
+  , Eff
+  , EffFunctor (..)
+  )
+
 import Control.Effect.Implicit.Ops.Io
 import qualified Control.Effect.Implicit.Base as Base
 import qualified Control.Effect.Implicit.Higher as Higher

@@ -8,7 +8,6 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.Control
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Higher.ContraLift
 
 transformLift
   :: forall t eff

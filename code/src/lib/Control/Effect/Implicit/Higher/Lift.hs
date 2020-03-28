@@ -4,6 +4,10 @@ module Control.Effect.Implicit.Higher.Lift
 where
 
 import Data.Kind
+import Control.Effect.Implicit.Base
+  ( ContraLift (..)
+  , EffFunctor (..)
+  )
 import Control.Effect.Implicit.Base.Union
 
 import Control.Effect.Implicit.Computation

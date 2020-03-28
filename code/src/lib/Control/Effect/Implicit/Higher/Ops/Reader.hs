@@ -2,6 +2,10 @@
 module Control.Effect.Implicit.Higher.Ops.Reader
 where
 
+import Control.Effect.Implicit.Base
+  ( ContraLift (..)
+  , EffFunctor (..)
+  )
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Ops.Env
 import qualified Control.Effect.Implicit.Base as Base

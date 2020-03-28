@@ -7,6 +7,7 @@ module Control.Effect.Implicit.Base
   ( Effect
   , EffOps (..)
   , EffFunctor (..)
+  , HigherEffFunctor (..)
   , ImplicitOps (..)
   , BaseOps
   , Eff
@@ -18,6 +19,7 @@ module Control.Effect.Implicit.Base
   , NoConstraint
   , Union
   , UnionOps (..)
+  , ContraLift (..)
   , (∪)
   , leftOps
   , rightOps
@@ -39,3 +41,4 @@ import Control.Effect.Implicit.Base.BaseOps
 import Control.Effect.Implicit.Base.Union
 import Control.Effect.Implicit.Base.NoOp
 import Control.Effect.Implicit.Base.Lift
+import Control.Effect.Implicit.Base.ContraLift

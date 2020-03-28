@@ -4,9 +4,12 @@ where
 
 import Data.Kind
 
+import Control.Effect.Implicit.Base
+  ( ContraLift (..)
+  , EffFunctor (..)
+  )
 import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.EffFunctor
-import Control.Effect.Implicit.Higher.ContraLift
 
 import qualified Control.Effect.Implicit.Base as Base
 

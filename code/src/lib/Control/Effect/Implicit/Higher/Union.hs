@@ -6,7 +6,10 @@ where
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base.Union (Union)
+import Control.Effect.Implicit.Base
+  ( Union
+  , EffFunctor (..)
+  )
 import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.Free

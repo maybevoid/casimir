@@ -5,6 +5,7 @@ where
 
 import Data.Kind
 
+import Control.Effect.Implicit.Base (ContraLift (..))
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.Lift

@@ -85,6 +85,9 @@ library
       Control.Effect.Implicit.Ops.Log
       Control.Effect.Implicit.Ops.State
 
+      Control.Effect.Implicit.MonadOps.MonadOps
+      Control.Effect.Implicit.MonadOps.Ops
+
       Control.Effect.Implicit.Transform
       Control.Effect.Implicit.Transform.Reader
       Control.Effect.Implicit.Transform.State

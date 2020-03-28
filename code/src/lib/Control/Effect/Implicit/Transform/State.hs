@@ -12,7 +12,7 @@ import Control.Monad.Trans.Class
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Computation
 import Control.Effect.Implicit.Higher
-  (ContraLift (..), HigherLiftEff (..))
+  (HigherLiftEff (..))
 
 import qualified Control.Effect.Implicit.Base as Base
 

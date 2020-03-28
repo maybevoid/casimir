@@ -1,13 +1,15 @@
 
 module Control.Effect.Implicit.Higher.EffFunctor
   ( HigherEffFunctor (..)
-  , EffFunctor (..)
   )
 where
 
-import Control.Effect.Implicit.Base (EffFunctor (..))
+import Control.Effect.Implicit.Base
+  ( EffFunctor (..)
+  , ContraLift (..)
+  )
+
 import Control.Effect.Implicit.Higher.Base
-import Control.Effect.Implicit.Higher.ContraLift
 import qualified Control.Effect.Implicit.Base as Base
 
 class HigherEffFunctor ops where
@@ -22,7 +24,7 @@ class HigherEffFunctor ops where
     -> ops eff2 eff2
 
 instance
-  (Base.EffFunctor ops)
+  (EffFunctor ops)
   => HigherEffFunctor (HigherOps ops) where
     invEffmap lifter _ (HigherOps ops) =
       HigherOps $ Base.effmap lifter ops

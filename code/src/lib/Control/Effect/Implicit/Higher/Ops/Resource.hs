@@ -7,6 +7,11 @@ import Control.Monad.Identity
 import Control.Exception (bracket)
 
 import Control.Implicit.Param
+import Control.Effect.Implicit.Base
+  ( ContraLift (..)
+  , EffFunctor (..)
+  )
+
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Higher.Free
 import Control.Effect.Implicit.Higher.ContraLift.Identity

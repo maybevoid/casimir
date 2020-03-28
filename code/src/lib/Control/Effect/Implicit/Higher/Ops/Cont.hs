@@ -4,6 +4,10 @@ where
 
 import qualified Control.Monad.Trans.Cont as ContT
 
+import Control.Effect.Implicit.Base
+  ( ContraLift (..)
+  , EffFunctor (..)
+  )
 import Control.Effect.Implicit.Higher
 
 data ContOps inEff eff = ContOps {

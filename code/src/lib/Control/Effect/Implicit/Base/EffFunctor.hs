@@ -1,12 +1,15 @@
+{-# LANGUAGE UndecidableInstances #-}
 
 module Control.Effect.Implicit.Base.EffFunctor
   ( EffFunctor (..)
+  , HigherEffFunctor (..)
   )
 where
 
 import Data.Kind
 
 import Control.Effect.Implicit.Base.Effect
+import Control.Effect.Implicit.Base.ContraLift
 
 -- | An 'EffFunctor' @comp@ is parameterized by an 'Effect' @eff1@
 -- and can be lifted to another 'Effect' @eff2@ by providing a natural
@@ -22,3 +25,20 @@ class EffFunctor (comp :: (Type -> Type) -> Type) where
     => (forall x . eff1 x -> eff2 x)
     -> comp eff1
     -> comp eff2
+
+class HigherEffFunctor ops where
+  invEffmap
+    :: forall eff1 eff2
+      . ( Effect eff1
+        , Effect eff2
+        )
+    => (forall x . eff1 x -> eff2 x)
+    -> ContraLift eff1 eff2
+    -> ops eff1
+    -> ops eff2
+
+instance
+  (EffFunctor ops)
+  => HigherEffFunctor ops where
+    invEffmap lifter _ ops =
+      effmap lifter ops
