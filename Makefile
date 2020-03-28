@@ -9,7 +9,7 @@ release-doc: clean-env
 	nix-build -A doc nix/release.nix
 
 shell:
-	nix-shell nix/shell.nix
+	nix-shell -A ghc88 nix/shell.nix
 
 external-shell:
 	nix-shell nix/external.nix
