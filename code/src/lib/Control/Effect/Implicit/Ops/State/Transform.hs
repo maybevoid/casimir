@@ -1,7 +1,10 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Control.Effect.Implicit.Ops.State.Transform
 where
 
+import Data.Kind
 import Data.Tuple (swap)
 import Control.Monad.State.Class (MonadState  (..))
 import Control.Monad.Trans.State.Strict (StateT, evalStateT, runStateT)
@@ -10,41 +13,72 @@ import Control.Monad.Trans.Class
   (MonadTrans (..))
 
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.MonadOps
 import Control.Effect.Implicit.Computation
-import Control.Effect.Implicit.Higher
-  (HigherLiftEff (..))
 
 import qualified Control.Effect.Implicit.Base as Base
 
+import Control.Effect.Implicit.Transform
 import Control.Effect.Implicit.Ops.State.Base
   (StateEff, StateOps(..))
 
-data UseState s t
+data UseStateLift
+  (lift :: (Type -> Type) -> (Type -> Type) -> Type)
+  s t
 
-data UseHigherState s t
-
-instance
-  ( BaseMonadOps t )
-  => MonadOps (UseState s t) where
-    type HasOps (UseState s t) = StateEff s ∪ HasOps t
-
-    type OpsMonad (UseState s t) = StateT s (OpsMonad t)
-
-    monadOps = stateTOps ∪ effmap liftStateT (monadOps @t)
+type UseState = UseStateLift LiftEff
+type UseHigherState = UseStateLift HigherLiftEff
 
 instance
-  ( HigherMonadOps t )
-  => MonadOps (UseHigherState s t) where
-    type HasOps (UseHigherState s t) = StateEff s ∪ HasOps t
+  ( HasOps t )
+  => HasOps (UseStateLift lift s t) where
+    type SupportedOps (UseStateLift lift s t) = StateEff s ∪ SupportedOps t
 
-    type OpsMonad (UseHigherState s t) = StateT s (OpsMonad t)
+instance
+  ( MonadOps t
+  , EffLifter lift
+  , Liftable lift (SupportedOps t)
+  , FreeLifter (StateEff s) lift (OpsMonad t) (StateT s (OpsMonad t))
+  )
+  => MonadOps (UseStateLift lift s t) where
+    type OpsMonad (UseStateLift lift s t) = StateT s (OpsMonad t)
 
-    monadOps = stateTOps
-      ∪ invEffmap liftStateT stateTContraLift (monadOps @t)
+    monadOps = stateTOps ∪
+      applyLiftEff
+        (freeLifter @(StateEff s) @lift)
+        (monadOps @t)
 
+instance
+  ( LiftMonadOps t
+  , MonadOps (UseStateLift lift s t)
+  )
+  => LiftMonadOps (UseStateLift lift s t) where
+    type BaseMonad (UseStateLift lift s t) = BaseMonad t
+
+    liftBase = liftStateT . liftBase @t
+
+instance
+  ( ContraLiftMonadOps t
+  , MonadOps (UseStateLift lift s t)
+  )
+  => ContraLiftMonadOps (UseStateLift lift s t) where
+    contraLiftBase = joinContraLift
+      (contraLiftBase @t)
+      (stateTContraLift @(OpsMonad t) @s)
+
+instance
+  (Effect eff)
+  => FreeLifter (StateEff s) LiftEff eff (StateT s eff) where
+    freeLifter = mkLiftEff liftStateT
+
+instance
+  (Effect eff)
+  => FreeLifter (StateEff s) HigherLiftEff eff (StateT s eff) where
+    freeLifter = HigherLiftEff liftStateT stateTContraLift
 
 liftStateT
-  :: forall s eff a . (Effect eff)
+  :: forall s eff a
+   . (Effect eff)
   => eff a
   -> StateT s eff a
 liftStateT = lift
@@ -97,6 +131,16 @@ stateTContraLift = ContraLift contraLift1
     (s2, x) <- lift $ cont1 contraLift2
     put s2
     return x
+
+-- Show that StateT contra lift can be derived from its
+-- MonadTransControl instance
+stateTContraLift'
+  :: forall eff s
+   . (Effect eff)
+  => ContraLift eff (StateT s eff)
+stateTContraLift' = transformContraLift
+  @eff @(StateT s) @((,) s)
+  swap swap
 
 withStateTAndOps
   :: forall ops s r eff .

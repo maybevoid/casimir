@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Control.Effect.Implicit.Higher.EffFunctor
   ( HigherEffFunctor (..)
@@ -28,3 +29,9 @@ instance
   => HigherEffFunctor (HigherOps ops) where
     invEffmap lifter _ (HigherOps ops) =
       HigherOps $ Base.effmap lifter ops
+
+instance
+  (HigherEffFunctor ops)
+  => Base.HigherEffFunctor (LowerOps ops) where
+    invEffmap lift contraLift (LowerOps ops) =
+      LowerOps $ invEffmap lift contraLift ops

@@ -75,6 +75,8 @@ library
       Control.Effect.Implicit.Cast
       Control.Effect.Implicit.Higher
 
+      Control.Effect.Implicit.MonadOps
+
       Control.Effect.Implicit.Ops
       Control.Effect.Implicit.Ops.Label
       Control.Effect.Implicit.Ops.Async
@@ -128,7 +130,6 @@ library
       Control.Effect.Implicit.Base.ContraLift
       Control.Effect.Implicit.Base.NoOp
       Control.Effect.Implicit.Base.Union
-      Control.Effect.Implicit.Base.MonadOps
 
       Control.Effect.Implicit.Computation.Lift
       Control.Effect.Implicit.Computation.Cast
@@ -163,7 +164,6 @@ library
       Control.Effect.Implicit.Higher.Base
       Control.Effect.Implicit.Higher.CoOp
       Control.Effect.Implicit.Higher.NoOp
-      Control.Effect.Implicit.Higher.Lift
       Control.Effect.Implicit.Higher.Union
       Control.Effect.Implicit.Higher.EffFunctor
       Control.Effect.Implicit.Higher.ContraLift

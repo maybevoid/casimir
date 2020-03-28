@@ -48,6 +48,9 @@ instance NoConstraint eff where
 instance EffFunctor NoOp where
   effmap _ _ = NoOp
 
+instance HigherEffFunctor NoOp where
+  invEffmap _ _ _ = NoOp
+
 -- | As the trivial instance for 'ImplicitOps', @'OpsConstraint' 'NoOp'@ does not
 -- make use of implicit parameters, as its 'Operation' can be trivially be
 -- constructed.

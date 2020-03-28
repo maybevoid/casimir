@@ -8,11 +8,11 @@ import Data.Kind
 import Control.Effect.Implicit.Base (ContraLift (..))
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Higher.Base
-import Control.Effect.Implicit.Higher.Lift
 import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
 
+import Control.Effect.Implicit.Computation.Lift
 import qualified Control.Effect.Implicit.Base as Base
 import qualified Control.Effect.Implicit.Freer as Base
 

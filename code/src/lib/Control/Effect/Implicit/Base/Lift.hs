@@ -1,6 +1,7 @@
 
 module Control.Effect.Implicit.Base.Lift
-  ( LiftEff
+  ( Lift
+  , LiftEff
   , idLift
   , mkLiftEff
   , runLiftEff
@@ -13,6 +14,8 @@ import Data.Kind
 
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
+
+type Lift eff1 eff2 = forall x . eff1 x -> eff2 x
 
 -- | An opaque object-ish effect lifter that can apply 'effmap' to an 'EffFunctor'.
 -- We define dedicated datatype instead of using the natural transformation
@@ -27,7 +30,7 @@ data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
   = MkLiftEff {
 
     -- | The base natural transformation that can be extracted
-    runLiftEff :: forall x . eff1 x -> eff2 x,
+    runLiftEff :: Lift eff1 eff2,
 
     -- | When applying effect lifting to an 'EffFunctor', 'applyEffmap' should
     -- be used instead of calling 'effmap' directly. This could potentially

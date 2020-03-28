@@ -67,6 +67,14 @@ instance
     effmap f (UnionOps x y)
       = UnionOps (effmap f x) (effmap f y)
 
+instance
+  (HigherEffFunctor ops1, HigherEffFunctor ops2)
+  => HigherEffFunctor (UnionOps ops1 ops2) where
+    invEffmap lift contraLift (UnionOps ops1 ops2) =
+      UnionOps
+        (invEffmap lift contraLift ops1)
+        (invEffmap lift contraLift ops2)
+
 -- | @ops1 '∪' ops2@ is a 'ImplicitOps' if both @ops1@ and @ops2@ are instance of
 -- 'ImplicitOps', with @'OpsConstraint' (ops1 '∪' ops2)@ being the **reversed**
 -- order of @'OpsConstraint' ops2@, followed by @'OpsConstraint' ops1@.

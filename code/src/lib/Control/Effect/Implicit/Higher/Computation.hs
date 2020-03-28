@@ -9,7 +9,6 @@ import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Computation
 import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.Free
-import Control.Effect.Implicit.Higher.Lift
 
 import qualified Control.Effect.Implicit.Base as Base
 
@@ -31,7 +30,6 @@ toHigherComputation
   -> HigherComputation ops comp eff
 toHigherComputation = strengthenComputation higherToBaseLiftEff
 
-
 {-# INLINE coopHandlerToPipeline #-}
 coopHandlerToPipeline
   :: forall free ops1 handler eff1 f a .
@@ -50,7 +48,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2
-     . (ImplicitOps ops2, HigherEffFunctor' (Base.Operation ops2))
+     . (ImplicitOps ops2, Base.HigherEffFunctor (Base.Operation ops2))
     => HigherComputation (handler ∪ ops2) (Return a) eff1
     -> HigherComputation (ops1 ∪ ops2) (Return (f a)) eff1
   pipeline comp1 = Computation comp2

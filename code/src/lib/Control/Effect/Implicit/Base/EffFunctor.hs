@@ -38,6 +38,7 @@ class HigherEffFunctor ops where
     -> ops eff2
 
 instance
+  {-# OVERLAPPABLE #-}
   (EffFunctor ops)
   => HigherEffFunctor ops where
     invEffmap lifter _ ops =

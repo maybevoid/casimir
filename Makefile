@@ -23,6 +23,10 @@ repl:
 	nix-shell --pure -A default nix/shell.nix --run \
 		"make -f make/cabal.mk repl"
 
+build:
+	nix-shell --pure -A default nix/shell.nix --run \
+		"make -f make/cabal.mk build"
+
 doc:
 	nix-shell --pure -A default nix/shell.nix --run \
 		"make -f make/cabal.mk doc"
@@ -32,7 +36,10 @@ benchmark:
 		"make -f make/cabal.mk benchmark"
 
 test:
-	nix-shell --pure -A default nix/shell.nix --run \
+	nix-shell --pure -A ghc88 nix/shell.nix --run \
+		"make -f make/cabal.mk test"
+
+	nix-shell --pure -A ghc86 nix/shell.nix --run \
 		"make -f make/cabal.mk test"
 
 .PHONY: release release-doc shell external-shell \
