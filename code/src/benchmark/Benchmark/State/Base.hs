@@ -8,9 +8,12 @@ import Control.Monad.Reader (ReaderT (..))
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops.Env
+import Control.Effect.Implicit.Ops.Env.Transform
 import Control.Effect.Implicit.Ops.State
-import Control.Effect.Implicit.Transform.State
-import Control.Effect.Implicit.Transform.Reader
+import Control.Effect.Implicit.Ops.State.Transform
+
+import qualified Control.Effect.Implicit.Ops.State.Free as Free
+import qualified Control.Effect.Implicit.Ops.State.Freer as Freer
 
 import qualified Control.Effect.Implicit.Free as Free
 import qualified Control.Effect.Implicit.Freer as Freer
@@ -63,13 +66,13 @@ stateCoOpHandler = Free.CoOpHandler handleReturn handleOps
   handleReturn x = return $ CoState $ \_ -> return x
   {-# INLINE handleReturn #-}
 
-  handleOps :: StateCoOp s (eff (CoState s eff a)) -> eff (CoState s eff a)
-  handleOps (GetOp cont1) = return $ CoState $
+  handleOps :: Free.StateCoOp s (eff (CoState s eff a)) -> eff (CoState s eff a)
+  handleOps (Free.GetOp cont1) = return $ CoState $
     \s ->
      do
       (CoState cont2) <- cont1 s
       cont2 s
-  handleOps (PutOp s cont1) = return $ CoState $
+  handleOps (Free.PutOp s cont1) = return $ CoState $
     \_ ->
      do
       (CoState cont2) <- cont1 ()
@@ -92,12 +95,12 @@ stateFreerCoOpHandler = Freer.CoOpHandler handleReturn handleOps
      . Freer.CoOperation (StateEff s) x
     -> (x -> eff (CoState s eff a))
     -> eff (CoState s eff a)
-  handleOps GetOp' cont1 = return $ CoState $
+  handleOps Freer.GetOp cont1 = return $ CoState $
     \s ->
      do
       (CoState cont3) <- cont1 s
       cont3 s
-  handleOps (PutOp' s) cont1 = return $ CoState $
+  handleOps (Freer.PutOp s) cont1 = return $ CoState $
     \_ ->
      do
       (CoState cont3) <- cont1 ()

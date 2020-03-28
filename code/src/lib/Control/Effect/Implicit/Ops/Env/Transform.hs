@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Transform.Reader
+module Control.Effect.Implicit.Ops.Env.Transform
 where
 
 import Control.Monad.Reader
@@ -8,9 +8,10 @@ import Control.Monad.Reader
 import Control.Monad.Trans.Class
   (MonadTrans (..))
 
-import Control.Effect.Implicit.Ops.Env (EnvOps (..))
-
 import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Ops.Env.Base
+  ( EnvOps (..)
+  )
 
 liftReaderT
   :: forall e eff a

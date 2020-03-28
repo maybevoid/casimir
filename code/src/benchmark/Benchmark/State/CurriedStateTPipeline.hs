@@ -5,7 +5,7 @@ module Benchmark.State.CurriedStateTPipeline
 where
 
 import Control.Effect.Implicit
-import Control.Effect.Implicit.Transform.State
+import Control.Effect.Implicit.Ops.State.Transform
 
 import Benchmark.State.Base
 

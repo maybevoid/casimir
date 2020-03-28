@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Transform.State
+module Control.Effect.Implicit.Ops.State.Transform
 where
 
 import Data.Tuple (swap)
@@ -16,8 +16,32 @@ import Control.Effect.Implicit.Higher
 
 import qualified Control.Effect.Implicit.Base as Base
 
-import Control.Effect.Implicit.Ops.State
+import Control.Effect.Implicit.Ops.State.Base
   (StateEff, StateOps(..))
+
+data UseState s t
+
+data UseHigherState s t
+
+instance
+  ( BaseMonadOps t )
+  => MonadOps (UseState s t) where
+    type HasOps (UseState s t) = StateEff s ∪ HasOps t
+
+    type OpsMonad (UseState s t) = StateT s (OpsMonad t)
+
+    monadOps = stateTOps ∪ effmap liftStateT (monadOps @t)
+
+instance
+  ( HigherMonadOps t )
+  => MonadOps (UseHigherState s t) where
+    type HasOps (UseHigherState s t) = StateEff s ∪ HasOps t
+
+    type OpsMonad (UseHigherState s t) = StateT s (OpsMonad t)
+
+    monadOps = stateTOps
+      ∪ invEffmap liftStateT stateTContraLift (monadOps @t)
+
 
 liftStateT
   :: forall s eff a . (Effect eff)

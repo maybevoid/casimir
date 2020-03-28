@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Higher.Ops.Reader
+module Control.Effect.Implicit.Ops.Env.Higher
 where
 
 import Control.Effect.Implicit.Base
@@ -7,7 +7,7 @@ import Control.Effect.Implicit.Base
   , EffFunctor (..)
   )
 import Control.Effect.Implicit.Higher
-import Control.Effect.Implicit.Ops.Env
+import Control.Effect.Implicit.Ops.Env.Base
 import qualified Control.Effect.Implicit.Base as Base
 
 data ReaderEff e

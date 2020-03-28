@@ -15,7 +15,8 @@ import Control.Effect.Implicit.Free
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.Env
 import Control.Effect.Implicit.Ops.State
-import Control.Effect.Implicit.Transform.State
+import Control.Effect.Implicit.Ops.State.Free
+import Control.Effect.Implicit.Ops.State.Transform
 
 stateTests :: TestTree
 stateTests = testGroup "StateOps Tests"

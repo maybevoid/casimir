@@ -16,8 +16,8 @@ import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Ops.Io
 import Control.Effect.Implicit.Ops.State
+import Control.Effect.Implicit.Ops.State.Transform
 import Control.Effect.Implicit.Computation
-import Control.Effect.Implicit.Transform.State
 import Control.Effect.Implicit.Higher.Ops.Resource
 
 resourceTests :: TestTree

@@ -5,6 +5,7 @@ where
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Freer
 import Control.Effect.Implicit.Ops.State
+import Control.Effect.Implicit.Ops.State.Freer
 
 import Benchmark.State.Base
 
@@ -20,12 +21,12 @@ codensityComp s = comp2
      . CoOperation (StateEff Int) x
     -> (x -> CoState Int eff r)
     -> CoState Int eff r
-  handleOps GetOp' cont1 = CoState $
+  handleOps GetOp cont1 = CoState $
     \s' ->
       let
         (CoState cont3) = cont1 s'
       in cont3 s'
-  handleOps (PutOp' s') cont1 = CoState $
+  handleOps (PutOp s') cont1 = CoState $
     \_ ->
       let
         (CoState cont3) = cont1 ()

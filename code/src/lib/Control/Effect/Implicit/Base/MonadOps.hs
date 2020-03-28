@@ -1,11 +1,13 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Control.Effect.Implicit.MonadOps.MonadOps
+module Control.Effect.Implicit.Base.MonadOps
 where
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base
+import Control.Effect.Implicit.Base.Base
+import Control.Effect.Implicit.Base.Implicit
+import Control.Effect.Implicit.Base.EffFunctor
 
 class
   ( Monad (OpsMonad t) )

@@ -28,6 +28,7 @@ module Control.Effect.Implicit.Base
   , runLiftEff
   , applyEffmap
   , joinLift
+  , module Control.Effect.Implicit.Base.MonadOps
   , module Control.Implicit.Param
 )
 where
@@ -42,3 +43,4 @@ import Control.Effect.Implicit.Base.Union
 import Control.Effect.Implicit.Base.NoOp
 import Control.Effect.Implicit.Base.Lift
 import Control.Effect.Implicit.Base.ContraLift
+import Control.Effect.Implicit.Base.MonadOps

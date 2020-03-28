@@ -79,22 +79,33 @@ library
       Control.Effect.Implicit.Ops.Label
       Control.Effect.Implicit.Ops.Async
       Control.Effect.Implicit.Ops.Decide
-      Control.Effect.Implicit.Ops.Env
       Control.Effect.Implicit.Ops.Exception
-      Control.Effect.Implicit.Ops.Io
       Control.Effect.Implicit.Ops.Log
-      Control.Effect.Implicit.Ops.State
 
-      Control.Effect.Implicit.MonadOps.MonadOps
-      Control.Effect.Implicit.MonadOps.Ops
+      Control.Effect.Implicit.Ops.State
+      Control.Effect.Implicit.Ops.State.Base
+      Control.Effect.Implicit.Ops.State.Free
+      Control.Effect.Implicit.Ops.State.Freer
+      Control.Effect.Implicit.Ops.State.Higher
+      Control.Effect.Implicit.Ops.State.Transform
+
+      Control.Effect.Implicit.Ops.Io
+      Control.Effect.Implicit.Ops.Io.Base
+      Control.Effect.Implicit.Ops.Io.Free
+      Control.Effect.Implicit.Ops.Io.Freer
+      Control.Effect.Implicit.Ops.Io.Transform
+
+      Control.Effect.Implicit.Ops.Env
+      Control.Effect.Implicit.Ops.Env.Base
+      Control.Effect.Implicit.Ops.Env.Free
+      Control.Effect.Implicit.Ops.Env.Freer
+      Control.Effect.Implicit.Ops.Env.Higher
+      Control.Effect.Implicit.Ops.Env.Transform
 
       Control.Effect.Implicit.Transform
-      Control.Effect.Implicit.Transform.Reader
-      Control.Effect.Implicit.Transform.State
 
       Control.Effect.Implicit.Higher.Ops
       Control.Effect.Implicit.Higher.Ops.Cont
-      Control.Effect.Implicit.Higher.Ops.Reader
       Control.Effect.Implicit.Higher.Ops.Resource
       Control.Effect.Implicit.Higher.Ops.Exception
       Control.Effect.Implicit.Higher.Ops.UnderOps
@@ -114,8 +125,10 @@ library
       Control.Effect.Implicit.Base.Implicit
       Control.Effect.Implicit.Base.BaseOps
       Control.Effect.Implicit.Base.Lift
+      Control.Effect.Implicit.Base.ContraLift
       Control.Effect.Implicit.Base.NoOp
       Control.Effect.Implicit.Base.Union
+      Control.Effect.Implicit.Base.MonadOps
 
       Control.Effect.Implicit.Computation.Lift
       Control.Effect.Implicit.Computation.Cast

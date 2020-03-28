@@ -11,7 +11,7 @@ import qualified Control.Monad.Trans.Reader as RT
 
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops.State
-import Control.Effect.Implicit.Transform.State
+import Control.Effect.Implicit.Ops.State.Transform
 
 import Benchmark.State.Base
 
