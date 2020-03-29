@@ -25,18 +25,13 @@ let
       (old.overrides or (_: _: {}))
       (self: super: {
         time-compat = haskellLib.appendPatch
-         ( callGitPackage super
+          ( callGitPackage super
               "time-compat"
               "https://github.com/phadej/time-compat.git"
-              "89ef24ecf2b9a7f30bf91ec7cc82edc71c7b29d0")
+              "89ef24ecf2b9a7f30bf91ec7cc82edc71c7b29d0"
+          )
           ../patches/time-compat.patch
         ;
-
-        # base-compat = super.callHackage
-        #     "base-compat"
-        #     "0.10.5"
-        #     {}
-        # ;
       });
     });
 

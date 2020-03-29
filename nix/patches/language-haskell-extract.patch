@@ -1,0 +1,11 @@
+diff --git a/src/Language/Haskell/Extract.hs b/src/Language/Haskell/Extract.hs
+index 3e8958b..49a2a9d 100644
+--- a/src/Language/Haskell/Extract.hs
++++ b/src/Language/Haskell/Extract.hs
+@@ -25,7 +25,7 @@ extractAllFunctions pattern =
+ functionExtractor :: String -> ExpQ
+ functionExtractor pattern =
+   do functions <- extractAllFunctions pattern
+-     let makePair n = TupE [ LitE $ StringL n , VarE $ mkName n]
++     let makePair n = TupE [ Just $ LitE $ StringL n , Just $ VarE $ mkName n]
+      return $ ListE $ map makePair functions

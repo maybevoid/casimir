@@ -32,15 +32,18 @@ doc:
 		"make -f make/cabal.mk doc"
 
 benchmark:
-	nix-shell -- -A default nix/shell.nix --run \
+	nix-shell --pure -A default nix/shell.nix --run \
 		"make -f make/cabal.mk benchmark"
 
 test:
-	nix-shell --pure -A ghc88 nix/shell.nix --run \
+	nix-shell --pure -A default nix/shell.nix --run \
 		"make -f make/cabal.mk test"
 
-	nix-shell --pure -A ghc86 nix/shell.nix --run \
+	nix-shell --pure -A default nix/shell.nix --run \
 		"make -f make/cabal.mk test"
+
+cachix:
+	nix-store -qR --include-outputs $(nix-instantiate nix/shell.nix) | cachix push maybevoid
 
 .PHONY: release release-doc shell external-shell \
-	hoogle repl demo doc benchmark test test-repl
+	hoogle repl demo doc benchmark test cachix

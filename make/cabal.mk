@@ -14,9 +14,6 @@ doc:
 test:
 	cabal v2-run implicit-effects-test
 
-test-repl:
-	cabal v2-repl implicit-effects-test
-
 benchmark:
 	cabal v2-run \
 		implicit-effects-benchmark \

@@ -1,4 +1,5 @@
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Control.Effect.Implicit.Freer.Union

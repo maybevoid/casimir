@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 
 module Control.Effect.Implicit.Higher.Ops.UpperOps
 where
