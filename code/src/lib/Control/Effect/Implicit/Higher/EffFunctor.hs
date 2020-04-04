@@ -8,6 +8,7 @@ where
 import Control.Effect.Implicit.Base
   ( EffFunctor (..)
   , ContraLift (..)
+  , type (~>)
   )
 
 import Control.Effect.Implicit.Higher.Base
@@ -19,7 +20,7 @@ class HigherEffFunctor ops where
       . ( Effect eff1
         , Effect eff2
         )
-    => (forall x . eff1 x -> eff2 x)
+    => eff1 ~> eff2
     -> ContraLift eff1 eff2
     -> ops eff1 eff1
     -> ops eff2 eff2

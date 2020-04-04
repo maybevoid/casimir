@@ -22,7 +22,7 @@ class EffFunctor (comp :: (Type -> Type) -> Type) where
   effmap
     :: forall eff1 eff2
      . (Effect eff1, Effect eff2)
-    => (forall x . eff1 x -> eff2 x)
+    => eff1 ~> eff2
     -> comp eff1
     -> comp eff2
 
@@ -32,7 +32,7 @@ class HigherEffFunctor ops where
       . ( Effect eff1
         , Effect eff2
         )
-    => (forall x . eff1 x -> eff2 x)
+    => eff1 ~> eff2
     -> ContraLift eff1 eff2
     -> ops eff1
     -> ops eff2

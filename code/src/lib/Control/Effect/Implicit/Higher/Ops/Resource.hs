@@ -10,6 +10,7 @@ import Control.Implicit.Param
 import Control.Effect.Implicit.Base
   ( ContraLift (..)
   , EffFunctor (..)
+  , type (~>)
   )
 
 import Control.Effect.Implicit.Higher
@@ -79,7 +80,7 @@ instance HigherEffFunctor (HigherResourceOps t) where
       . ( Effect eff1
         , Effect eff2
         )
-    => (forall x . eff1 x -> eff2 x)
+    => eff1 ~> eff2
     -> ContraLift eff1 eff2
     -> HigherResourceOps t eff1 eff1
     -> HigherResourceOps t eff2 eff2
@@ -117,7 +118,7 @@ instance CoOpFunctor (ResourceCoOp t) where
   liftCoOp
     :: forall f1 f2 a
       . (Functor f1, Functor f2)
-    => (forall x . f1 x -> f2 x)
+    => f1 ~> f2
     -> ResourceCoOp t f1 a
     -> ResourceCoOp t f2 a
   liftCoOp lifter (ResourceOp resource comp) =

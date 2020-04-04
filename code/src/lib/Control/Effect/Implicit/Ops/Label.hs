@@ -34,7 +34,7 @@ instance
    where
     effmap :: forall eff1 eff2 .
       (Effect eff1, Effect eff2)
-      => (forall x . eff1 x -> eff2 x)
+      => eff1 ~> eff2
       -> LabeledOps k label ops eff1
       -> LabeledOps k label ops eff2
     effmap lifter (LabeledOps ops) = LabeledOps $ effmap lifter ops

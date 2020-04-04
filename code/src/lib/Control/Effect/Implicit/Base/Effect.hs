@@ -1,6 +1,7 @@
 
 module Control.Effect.Implicit.Base.Effect
   ( Effect
+  , type (~>)
   )
 where
 
@@ -15,3 +16,5 @@ where
 -- which does a great job explaning algebraic effects without mentioning the
 -- M-word.
 type Effect = Monad
+
+type eff1 ~> eff2 = forall x . eff1 x -> eff2 x

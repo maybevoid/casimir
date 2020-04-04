@@ -3,6 +3,11 @@ module Control.Effect.Implicit.Higher.CoOp
 where
 
 import Data.Kind
+
+import Control.Effect.Implicit.Base
+  ( type (~>)
+  )
+
 import qualified Control.Effect.Implicit.Freer as Base
 
 data HigherCoOp coop (f :: Type -> Type) a =
@@ -20,7 +25,7 @@ class CoOpFunctor coop where
   liftCoOp
     :: forall f1 f2 a
      . (Functor f1, Functor f2)
-    => (forall x . f1 x -> f2 x)
+    => f1 ~> f2
     -> coop f1 a
     -> coop f2 a
 

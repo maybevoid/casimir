@@ -15,7 +15,7 @@ import Control.Monad.Trans.State.Strict (StateT, evalStateT)
 import Control.Effect.Implicit
 import Control.Effect.Implicit.Ops.Env
 import Control.Effect.Implicit.Ops.State
-import Control.Effect.Implicit.Ops.State.Transform
+import Control.Effect.Implicit.Ops.State.Lift
 
 import Benchmark.State.Base
 

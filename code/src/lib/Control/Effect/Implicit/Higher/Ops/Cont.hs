@@ -7,20 +7,27 @@ import qualified Control.Monad.Trans.Cont as ContT
 import Control.Effect.Implicit.Base
   ( ContraLift (..)
   , EffFunctor (..)
+  , type (~>)
   )
 import Control.Effect.Implicit.Higher
 
-data ContOps inEff eff = ContOps {
+data ContOps eff1 eff2 = ContOps {
   callCCOp
     :: forall a b
-     . ((a -> inEff b) -> inEff a)
-    -> eff a
+     . ((a -> eff1 b) -> eff1 a)
+    -> eff2 a
 }
 
 instance
-  (Effect inEff)
-  => EffFunctor (ContOps inEff) where
-    effmap _ = undefined
+  (Effect eff1)
+  => EffFunctor (ContOps eff1) where
+    effmap
+      :: forall eff2 eff3
+       . eff2 ~> eff3
+      -> ContOps eff1 eff2
+      -> ContOps eff1 eff3
+    effmap lift (ContOps callCC) = ContOps $ \cont ->
+      lift $ callCC cont
 
 instance HigherEffFunctor ContOps where
   invEffmap
@@ -28,7 +35,7 @@ instance HigherEffFunctor ContOps where
       . ( Effect eff1
         , Effect eff2
         )
-    => (forall x . eff1 x -> eff2 x)
+    => eff1 ~> eff2
     -> ContraLift eff1 eff2
     -> ContOps eff1 eff1
     -> ContOps eff2 eff2

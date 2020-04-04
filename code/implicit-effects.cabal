@@ -89,6 +89,7 @@ library
       Control.Effect.Implicit.Ops.State.Base
       Control.Effect.Implicit.Ops.State.Free
       Control.Effect.Implicit.Ops.State.Freer
+      Control.Effect.Implicit.Ops.State.Lift
       Control.Effect.Implicit.Ops.State.Higher
       Control.Effect.Implicit.Ops.State.Transform
 

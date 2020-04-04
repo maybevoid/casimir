@@ -5,7 +5,6 @@ module Control.Effect.Implicit.Base.Lift
   , LiftOps (..)
   , FreeLift (..)
   , HigherLift (..)
-  , type (~>)
   )
 where
 
@@ -16,8 +15,6 @@ import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.ContraLift
 import Control.Effect.Implicit.Base.EffFunctor
-
-type eff1 ~> eff2 = forall x . eff1 x -> eff2 x
 
 data IdLift
   (eff1 :: Type -> Type)
@@ -32,7 +29,7 @@ data HigherLift
   (eff1 :: Type -> Type)
   (eff2 :: Type -> Type)
   = HigherLift
-    { hlBaseLift :: forall x . eff1 x -> eff2 x
+    { hlBaseLift :: eff1 ~> eff2
     , hlContraLift :: ContraLift eff1 eff2
     }
 

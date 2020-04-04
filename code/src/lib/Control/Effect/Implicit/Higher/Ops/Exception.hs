@@ -8,12 +8,13 @@ import qualified Control.Exception as Ex
 
 import Control.Implicit.Param
 import Control.Effect.Implicit.Base
-  ( ImplicitOps (..)
-  , ContraLift (..)
+  ( Eff
   , EffConstraint
-  , type (∪)
-  , Eff
+  , ContraLift (..)
   , EffFunctor (..)
+  , ImplicitOps (..)
+  , type (∪)
+  , type (~>)
   )
 
 import Control.Effect.Implicit.Ops.Io
@@ -81,7 +82,7 @@ instance
     effmap
       :: forall eff1 eff2
        . (Effect eff1, Effect eff2)
-      => (forall x . eff1 x -> eff2 x)
+      => eff1 ~> eff2
       -> HigherExceptionOps e inEff eff1
       -> HigherExceptionOps e inEff eff2
     effmap lifter ops1 =
@@ -99,7 +100,7 @@ instance HigherEffFunctor (HigherExceptionOps e) where
   invEffmap
     :: forall eff1 eff2
      . (Effect eff1, Effect eff2)
-    => (forall x . eff1 x -> eff2 x)
+    => eff1 ~> eff2
     -> ContraLift eff1 eff2
     -> HigherExceptionOps e eff1 eff1
     -> HigherExceptionOps e eff2 eff2
@@ -141,7 +142,7 @@ instance CoOpFunctor (ExceptionCoOp e) where
   liftCoOp
     :: forall f1 f2 a
      . (Functor f1, Functor f2)
-    => (forall x . f1 x -> f2 x)
+    => f1 ~> f2
     -> ExceptionCoOp e f1 a
     -> ExceptionCoOp e f2 a
   liftCoOp lifter (TryOp comp) =

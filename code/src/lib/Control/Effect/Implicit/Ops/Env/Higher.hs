@@ -5,7 +5,9 @@ where
 import Control.Effect.Implicit.Base
   ( ContraLift (..)
   , EffFunctor (..)
+  , type (~>)
   )
+
 import Control.Effect.Implicit.Higher
 import Control.Effect.Implicit.Ops.Env.Base
 import qualified Control.Effect.Implicit.Base as Base
@@ -36,7 +38,7 @@ instance HigherEffFunctor (ReaderOps e) where
      . ( Effect eff1
        , Effect eff2
        )
-    => (forall x . eff1 x -> eff2 x)
+    => eff1 ~> eff2
     -> ContraLift eff1 eff2
     -> ReaderOps e eff1 eff1
     -> ReaderOps e eff2 eff2
