@@ -84,26 +84,29 @@ await :: forall a . Eff (AwaitEff a) a
 await = awaitOp ?awaitOps
 
 runPipe :: forall a r ops eff1
-   . (Effect eff1, BaseOps ops)
+   . ( Effect eff1
+   , EffOps ops
+   , EffFunctor (Operation ops)
+   )
   => BaseComputation ((YieldEff a) ∪ ops) (Return r) eff1
   -> BaseComputation ((AwaitEff a) ∪ ops) (Return r) eff1
   -> BaseComputation ops (Return r) eff1
 runPipe producer1 consumer1 = Computation comp
    where
     comp :: forall eff2 . (Effect eff2)
-      => LiftEff eff1 eff2
+      => Lift eff1 eff2
       -> Operation ops eff2
       -> Return r eff2
     comp lifter ops = Return $ pipe producer2 consumer2
      where
       producer2 :: FreeT (YieldCoOp a) eff2 r
       producer2 = returnVal $ runComp producer1
-        (joinLift lifter (mkLiftEff lift)) $
+        (joinLift lifter (Lift lift)) $
         (mkFreeOps liftF) ∪ (effmap lift ops)
 
       consumer2 :: FreeT (AwaitCoOp a) eff2 r
       consumer2 = returnVal $ runComp consumer1
-        (joinLift lifter (mkLiftEff lift)) $
+        (joinLift lifter (Lift lift)) $
         (mkFreeOps liftF) ∪ (effmap lift ops)
 
 pipe

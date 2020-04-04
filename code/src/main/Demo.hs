@@ -108,14 +108,14 @@ refStatePipeline
   :: forall eff a .
   (Effect eff)
   => IORef a
-  -> GenericPipeline LiftEff IoEff (StateEff a) eff
+  -> GenericPipeline Lift IoEff (StateEff a) eff
 refStatePipeline ref = opsHandlerToPipeline $ refStateHandler ref
 
 ioHandler :: BaseOpsHandler NoEff IoEff IO
 ioHandler = baseOpsHandler ioOps
 
 ioPipeline
-  :: GenericPipeline LiftEff NoEff IoEff IO
+  :: GenericPipeline Lift NoEff IoEff IO
 ioPipeline = opsHandlerToPipeline ioHandler
 
 ioAndStateHandler
@@ -131,7 +131,7 @@ ioAndStateHandler ref = handler
 stateIoPipeline
   :: forall a .
   IORef a
-  -> GenericPipeline LiftEff NoEff (Union IoEff (StateEff a)) IO
+  -> GenericPipeline Lift NoEff (Union IoEff (StateEff a)) IO
 stateIoPipeline ref = composePipelines
   (refStatePipeline ref)
   ioPipeline

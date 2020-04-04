@@ -56,6 +56,7 @@ common deps
     DerivingStrategies
     AllowAmbiguousTypes
     ScopedTypeVariables
+    UndecidableInstances
     QuantifiedConstraints
     MultiParamTypeClasses
     FunctionalDependencies
@@ -121,17 +122,15 @@ library
       Control.Effect.Implicit.Higher.ContraLift.Identity
 
   other-modules:
-      Control.Effect.Implicit.Base.Base
+      Control.Effect.Implicit.Base.EffOps
       Control.Effect.Implicit.Base.Effect
       Control.Effect.Implicit.Base.EffFunctor
       Control.Effect.Implicit.Base.Implicit
-      Control.Effect.Implicit.Base.BaseOps
       Control.Effect.Implicit.Base.Lift
       Control.Effect.Implicit.Base.ContraLift
       Control.Effect.Implicit.Base.NoOp
       Control.Effect.Implicit.Base.Union
 
-      Control.Effect.Implicit.Computation.Lift
       Control.Effect.Implicit.Computation.Cast
       Control.Effect.Implicit.Computation.Computation
       Control.Effect.Implicit.Computation.Handler

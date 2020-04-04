@@ -9,14 +9,16 @@ module Control.Effect.Implicit.Base
   , EffFunctor (..)
   , HigherEffFunctor (..)
   , ImplicitOps (..)
-  , BaseOps
   , Eff
   , EffConstraint
   , NoEff
   , NoOp (..)
-  , Lift
-  , LiftEff
+  , Lift (..)
+  , LiftOps (..)
+  , FreeLift (..)
+  , HigherLift (..)
   , type (∪)
+  , type (~>)
   , NoConstraint
   , Union
   , UnionOps (..)
@@ -24,11 +26,6 @@ module Control.Effect.Implicit.Base
   , (∪)
   , leftOps
   , rightOps
-  , idLift
-  , mkLiftEff
-  , runLiftEff
-  , applyEffmap
-  , joinLift
   , joinContraLift
   , identityContraLift
   , module Control.Implicit.Param
@@ -36,11 +33,10 @@ module Control.Effect.Implicit.Base
 where
 
 import Control.Implicit.Param
-import Control.Effect.Implicit.Base.Base
+import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.Effect
 import Control.Effect.Implicit.Base.EffFunctor
 import Control.Effect.Implicit.Base.Implicit
-import Control.Effect.Implicit.Base.BaseOps
 import Control.Effect.Implicit.Base.Union
 import Control.Effect.Implicit.Base.NoOp
 import Control.Effect.Implicit.Base.Lift

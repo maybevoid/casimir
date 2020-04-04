@@ -32,7 +32,7 @@ class
     type family BaseMonad t :: Type -> Type
 
     liftBase
-      :: Lift (BaseMonad t) (OpsMonad t)
+      :: (BaseMonad t) ~> (OpsMonad t)
 
 class
   ( LiftMonadOps t

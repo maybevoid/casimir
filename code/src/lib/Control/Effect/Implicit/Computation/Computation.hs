@@ -10,7 +10,6 @@ module Control.Effect.Implicit.Computation.Computation
 where
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation.Lift
 
 newtype Computation lift ops comp eff1 = Computation {
   runComp
@@ -24,23 +23,22 @@ newtype Computation lift ops comp eff1 = Computation {
     -> comp eff2
 }
 
-type BaseComputation = Computation LiftEff
+type BaseComputation = Computation Lift
 
 type OpsHandler lift ops handler = Computation lift ops (Operation handler)
-type BaseOpsHandler ops handler = OpsHandler LiftEff ops handler
+type BaseOpsHandler ops handler = OpsHandler Lift ops handler
 
 instance
-  (BaseOps ops)
+  (EffOps ops)
   => EffFunctor (BaseComputation ops comp) where
-    effmap lifter =
-      liftComputation (mkLiftEff lifter)
+    effmap lift = liftComputation (Lift lift)
 
 liftComputation
   :: forall lift ops comp eff1 eff2
    . ( EffOps ops
      , Effect eff1
      , Effect eff2
-     , EffLifter lift
+     , LiftOps lift
      )
   => lift eff1 eff2
   -> Computation lift ops comp eff1
@@ -53,14 +51,14 @@ liftComputation lift12 comp1 = Computation comp2
       => lift eff2 eff3
       -> Operation ops eff3
       -> comp eff3
-    comp2 lift23 = runComp comp1 $ joinLiftEff lift12 lift23
+    comp2 lift23 = runComp comp1 $ joinLift lift12 lift23
 
 strengthenComputation
   :: forall lift1 lift2 ops comp eff
    . ( EffOps ops
      , Effect eff
-     , EffLifter lift1
-     , EffLifter lift2
+     , LiftOps lift1
+     , LiftOps lift2
      )
   => (forall eff1 eff2
        . (Effect eff1, Effect eff2)

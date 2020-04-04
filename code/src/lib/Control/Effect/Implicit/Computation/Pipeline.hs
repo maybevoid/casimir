@@ -19,7 +19,6 @@ where
 
 import Control.Effect.Implicit.Base
 import Control.Effect.Implicit.Cast
-import Control.Effect.Implicit.Computation.Lift
 import Control.Effect.Implicit.Computation.Cast
 import Control.Effect.Implicit.Computation.Handler
 import Control.Effect.Implicit.Computation.Computation
@@ -35,12 +34,12 @@ newtype Pipeline lift ops1 handler comp1 comp2 eff1 eff2
         -> Computation lift (ops1 ∪ ops2) comp2 eff2
   }
 
-type BasePipeline = Pipeline LiftEff
+type BasePipeline = Pipeline Lift
 
 data TransformerHandler t handler eff = TransformerHandler {
   tCoOpHandler :: Operation handler (t eff),
-  tLiftEff :: LiftEff eff (t eff),
-  tUnliftEff :: LiftEff (t eff) eff
+  tLift :: Lift eff (t eff),
+  tUnliftEff :: Lift (t eff) eff
 }
 
 type SimplePipeline lift ops handler comp eff
@@ -56,7 +55,7 @@ opsHandlerToPipeline
    . ( Effect eff
      , ImplicitOps ops1
      , ImplicitOps handler
-     , EffLifter lift
+     , LiftOps lift
      , Liftable lift handler
      )
   => OpsHandler lift ops1 handler eff
@@ -82,7 +81,7 @@ transformePipeline
   , (forall eff . (Effect eff) => Effect (t eff))
   )
   => BaseComputation ops1 (TransformerHandler t handler) eff1
-  -> GenericPipeline LiftEff ops1 handler eff1
+  -> GenericPipeline Lift ops1 handler eff1
 transformePipeline handler1 = Pipeline pipeline
  where
   {-# INLINE pipeline #-}
@@ -97,17 +96,17 @@ transformePipeline handler1 = Pipeline pipeline
    where
     comp2
       :: forall eff2 . (Effect eff2)
-      => LiftEff eff1 eff2
+      => Lift eff1 eff2
       -> Operation (ops1 ∪ ops2) eff2
       -> comp eff2
-    comp2 lift12 (UnionOps ops1 ops2) = applyEffmap unliftT comp3
+    comp2 lift12 (UnionOps ops1 ops2) = effmap unliftT comp3
      where
-      TransformerHandler coopHandler liftT unliftT
+      TransformerHandler coopHandler liftT (Lift unliftT)
         = runComp handler1 lift12 ops1
 
       comp3 :: comp (t eff2)
-      comp3 = runComp comp1 (joinLiftEff lift12 liftT) $
-        UnionOps coopHandler $ applyLiftEff liftT ops2
+      comp3 = runComp comp1 (joinLift lift12 liftT) $
+        UnionOps coopHandler $ applyLift liftT ops2
 
 castPipelineOps
   :: forall ops1 ops2 lift handler comp1 comp2 eff1 eff2  .
@@ -146,7 +145,7 @@ castPipelineHandler
      , ImplicitOps ops1
      , ImplicitOps handler1
      , ImplicitOps handler2
-     , EffLifter lift
+     , LiftOps lift
      , Liftable lift handler1
      )
   => OpsCast handler1 handler2
@@ -175,7 +174,7 @@ composeExactPipelines
   ( Effect eff1
   , Effect eff2
   , Effect eff3
-  , EffLifter lift
+  , LiftOps lift
   , ImplicitOps ops1
   , ImplicitOps ops2
   , ImplicitOps handler1
@@ -264,7 +263,7 @@ composePipelinesWithCast
    . ( Effect eff1
      , Effect eff2
      , Effect eff3
-     , EffLifter lift
+     , LiftOps lift
      , ImplicitOps ops1
      , ImplicitOps ops2
      , ImplicitOps ops3
@@ -298,7 +297,7 @@ composePipelines
    . ( Effect eff1
      , Effect eff2
      , Effect eff3
-     , EffLifter lift
+     , LiftOps lift
      , ImplicitOps ops1
      , ImplicitOps ops2
      , ImplicitOps ops3

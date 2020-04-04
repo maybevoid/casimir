@@ -26,8 +26,8 @@ data UseStateLift
   (lift :: (Type -> Type) -> (Type -> Type) -> Type)
   s t
 
-type UseState = UseStateLift LiftEff
-type UseHigherState = UseStateLift HigherLiftEff
+type UseState = UseStateLift Lift
+type UseHigherState = UseStateLift HigherLift
 
 instance
   ( HasOps t )
@@ -36,16 +36,16 @@ instance
 
 instance
   ( MonadOps t
-  , EffLifter lift
+  , LiftOps lift
   , Liftable lift (SupportedOps t)
-  , FreeLifter (StateEff s) lift (OpsMonad t) (StateT s (OpsMonad t))
+  , FreeLift (StateEff s) lift (OpsMonad t) (StateT s (OpsMonad t))
   )
   => MonadOps (UseStateLift lift s t) where
     type OpsMonad (UseStateLift lift s t) = StateT s (OpsMonad t)
 
     monadOps = stateTOps ∪
-      applyLiftEff
-        (freeLifter @(StateEff s) @lift)
+      applyLift
+        (freeLift @(StateEff s) @lift)
         (monadOps @t)
 
 instance
@@ -68,13 +68,13 @@ instance
 
 instance
   (Effect eff)
-  => FreeLifter (StateEff s) LiftEff eff (StateT s eff) where
-    freeLifter = mkLiftEff liftStateT
+  => FreeLift (StateEff s) Lift eff (StateT s eff) where
+    freeLift = Lift liftStateT
 
 instance
   (Effect eff)
-  => FreeLifter (StateEff s) HigherLiftEff eff (StateT s eff) where
-    freeLifter = HigherLiftEff liftStateT stateTContraLift
+  => FreeLift (StateEff s) HigherLift eff (StateT s eff) where
+    freeLift = HigherLift liftStateT stateTContraLift
 
 liftStateT
   :: forall s eff a
@@ -83,16 +83,16 @@ liftStateT
   -> StateT s eff a
 liftStateT = lift
 
-stateTLiftEff
+stateTLift
   :: forall s eff . (Effect eff)
-  => LiftEff eff (StateT s eff)
-stateTLiftEff = mkLiftEff liftStateT
+  => Lift eff (StateT s eff)
+stateTLift = Lift liftStateT
 
-stateTHigherLiftEff
+stateTHigherLift
   :: forall s eff . (Effect eff)
-  => HigherLiftEff eff (StateT s eff)
-stateTHigherLiftEff =
-  HigherLiftEff liftStateT stateTContraLift
+  => HigherLift eff (StateT s eff)
+stateTHigherLift =
+  HigherLift liftStateT stateTContraLift
 
 stateTOps
   :: forall eff s
@@ -144,7 +144,8 @@ stateTContraLift' = transformContraLift
 
 withStateTAndOps
   :: forall ops s r eff .
-  ( BaseOps ops
+  ( EffOps ops
+  , EffFunctor (Operation ops)
   , Effect eff
   )
   => s
@@ -165,12 +166,12 @@ stateTPipeline
   :: forall s eff1 comp .
   (Effect eff1, Base.EffFunctor comp)
   => s
-  -> SimplePipeline LiftEff NoEff (StateEff s) comp eff1
+  -> SimplePipeline Lift NoEff (StateEff s) comp eff1
 stateTPipeline i = transformePipeline $ genericComputation handler
  where
   {-# INLINE handler #-}
   handler :: forall eff
     . (Effect eff)
     => TransformerHandler (StateT s) (StateEff s) eff
-  handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
+  handler = TransformerHandler stateTOps stateTLift $ Lift $
     \comp -> evalStateT comp i

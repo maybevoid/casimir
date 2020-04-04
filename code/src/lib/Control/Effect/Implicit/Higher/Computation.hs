@@ -12,23 +12,23 @@ import Control.Effect.Implicit.Higher.Free
 
 import qualified Control.Effect.Implicit.Base as Base
 
-type HigherComputation = Computation HigherLiftEff
-type HigherOpsHandler ops handler = OpsHandler HigherLiftEff ops handler
-type HigherPipeline = Pipeline HigherLiftEff
+type HigherComputation = Computation HigherLift
+type HigherOpsHandler ops handler = OpsHandler HigherLift ops handler
+type HigherPipeline = Pipeline HigherLift
 
-higherToBaseLiftEff
+higherToBaseLift
   :: forall eff1 eff2
    . (Effect eff1, Effect eff2)
-  => HigherLiftEff eff1 eff2
-  -> LiftEff eff1 eff2
-higherToBaseLiftEff higherLift = mkLiftEff $ baseLiftEff higherLift
+  => HigherLift eff1 eff2
+  -> Lift eff1 eff2
+higherToBaseLift higherLift = Lift $ hlBaseLift higherLift
 
 toHigherComputation
   :: forall ops comp eff
    . (Base.EffOps ops, Effect eff)
   => BaseComputation ops comp eff
   -> HigherComputation ops comp eff
-toHigherComputation = strengthenComputation higherToBaseLiftEff
+toHigherComputation = strengthenComputation higherToBaseLift
 
 {-# INLINE coopHandlerToPipeline #-}
 coopHandlerToPipeline
@@ -56,7 +56,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
     comp2
       :: forall eff2
        . (Effect eff2)
-      => HigherLiftEff eff1 eff2
+      => HigherLift eff1 eff2
       -> Base.Operation (ops1 ∪ ops2) eff2
       -> Return (f a) eff2
     comp2 lift12 (UnionOps ops1 ops2) =
@@ -67,8 +67,8 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
 
       comp3 :: free handler eff2 a
       comp3 = returnVal $ runComp comp1
-        (joinLiftEff lift12 freeHigherLiftEff)
-        (LowerOps freeOps ∪ applyLiftEff freeHigherLiftEff ops2)
+        (joinLift lift12 freeHigherLift)
+        (LowerOps freeOps ∪ applyLift freeHigherLift ops2)
 
       comp4 :: eff2 (f a)
       comp4 = handleFree handler2 comp3

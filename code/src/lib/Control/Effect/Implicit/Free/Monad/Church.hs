@@ -22,8 +22,9 @@ newtype ChurchMonad ops eff a = ChurchMonad {
 withCoOpHandler
   :: forall handler eff a r
    . ( Effect eff
+     , EffOps handler
      , FreeOps handler
-     , BaseOps handler
+     , ImplicitOps handler
      )
   => CoOpHandler handler a r eff
   -> ((OpsConstraint handler (ChurchMonad handler eff))
@@ -33,10 +34,13 @@ withCoOpHandler = Handler.withCoOpHandler @ChurchMonad
 
 withCoOpHandlerAndOps
   :: forall ops handler eff a r
-    . ( BaseOps ops
+    . ( EffOps ops
+      , EffOps handler
       , FreeOps handler
-      , BaseOps handler
+      , ImplicitOps ops
+      , ImplicitOps handler
       , EffConstraint ops eff
+      , EffFunctor (Operation ops)
       )
   => CoOpHandler handler a r eff
   -> (( OpsConstraint handler (ChurchMonad handler eff)

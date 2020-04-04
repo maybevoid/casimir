@@ -16,14 +16,14 @@ import Benchmark.State.Base
 statePipeline1
   :: forall free s eff1 .
   (Effect eff1, FreeHandler free)
-  => GenericPipeline LiftEff (EnvEff s) (StateEff s) eff1
+  => GenericPipeline Lift (EnvEff s) (StateEff s) eff1
 statePipeline1 = contextualHandlerToPipeline @free $
   Computation handler
    where
     handler
       :: forall eff2 .
       (Effect eff2)
-      => LiftEff eff1 eff2
+      => Lift eff1 eff2
       -> EnvOps s eff2
       -> ContextualHandler (CoState s) (StateEff s) eff2
     handler _ envOps = ContextualHandler coopHandler extract

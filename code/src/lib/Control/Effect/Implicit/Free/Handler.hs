@@ -15,9 +15,10 @@ import Control.Effect.Implicit.Free.FreeOps
 withCoOpHandler
   :: forall free handler eff a r
    . ( Effect eff
+     , EffOps handler
      , FreeOps handler
-     , BaseOps handler
      , FreeHandler free
+     , ImplicitOps handler
      )
   => CoOpHandler handler a r eff
   -> ((OpsConstraint handler (free handler eff))
@@ -30,11 +31,14 @@ withCoOpHandler handler comp1
 {-# INLINE withCoOpHandlerAndOps #-}
 withCoOpHandlerAndOps
   :: forall free ops handler eff a r
-    . ( BaseOps ops
+    . ( EffOps ops
+      , EffOps handler
       , FreeOps handler
-      , BaseOps handler
+      , ImplicitOps ops
       , FreeHandler free
+      , ImplicitOps handler
       , EffConstraint ops eff
+      , EffFunctor (Operation ops)
       )
   => CoOpHandler handler a r eff
   -> (( OpsConstraint handler (free handler eff)
@@ -54,9 +58,10 @@ withCoOpHandlerAndOps handler comp1
 withContextualCoOpHandler
   :: forall free handler eff a r
    . ( Effect eff
+     , EffOps handler
      , FreeOps handler
-     , BaseOps handler
      , FreeHandler free
+     , ImplicitOps handler
      )
   => CoOpHandler handler a r eff
   -> (r -> eff a)

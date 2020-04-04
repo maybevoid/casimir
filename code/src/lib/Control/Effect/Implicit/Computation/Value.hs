@@ -16,7 +16,6 @@ import Data.Kind
 import Control.Monad.Identity (Identity (..))
 
 import Control.Effect.Implicit.Base
-import Control.Effect.Implicit.Computation.Lift
 import Control.Effect.Implicit.Computation.Computation
 
 class FunctorComp ret where
@@ -105,18 +104,18 @@ arrowComputation fn = genericComputation $ Arrow $
 
 runIdentityComp
   :: forall a lift
-   . (EffLifter lift)
+   . (LiftOps lift)
   => Computation lift NoEff (Return a) Identity
   -> a
-runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLiftEff NoOp
+runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
 
 execComp
   :: forall ops lift eff a .
   ( ImplicitOps ops
   , EffConstraint ops eff
-  , EffLifter lift
+  , LiftOps lift
   , Liftable lift ops
   )
   => Computation lift ops (Return a) eff
   -> eff a
-execComp comp = returnVal $ runComp comp idLiftEff captureOps
+execComp comp = returnVal $ runComp comp idLift captureOps

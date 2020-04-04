@@ -1,5 +1,5 @@
 
-module Control.Effect.Implicit.Base.Base
+module Control.Effect.Implicit.Base.EffOps
   ( EffOps (..)
   )
 where

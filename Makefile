@@ -43,7 +43,7 @@ test:
 		"make -f make/cabal.mk test"
 
 cachix:
-	nix-store -qR --include-outputs $(nix-instantiate nix/shell.nix) | cachix push maybevoid
+	nix-store -qR --include-outputs `nix-instantiate nix/shell.nix` | cachix push maybevoid
 
 .PHONY: release release-doc shell external-shell \
 	hoogle repl demo doc benchmark test cachix

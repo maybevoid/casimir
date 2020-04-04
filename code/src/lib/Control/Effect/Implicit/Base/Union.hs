@@ -12,7 +12,7 @@ where
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base.Base
+import Control.Effect.Implicit.Base.EffOps
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Base.EffFunctor
 

@@ -60,5 +60,5 @@ data ContextualHandler w handler eff = ContextualHandler {
 freeLiftEff
   :: forall free ops eff
    . (FreeEff free, FreeOps ops, Effect eff)
-  => LiftEff eff (free ops eff)
-freeLiftEff = mkLiftEff liftFree
+  => Lift eff (free ops eff)
+freeLiftEff = Lift liftFree

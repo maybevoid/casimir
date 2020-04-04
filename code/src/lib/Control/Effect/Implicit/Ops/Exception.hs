@@ -131,8 +131,10 @@ tryFinally comp handler1 =
 tryComp
   :: forall free eff ops e a
    . ( FreeHandler free
-     , BaseOps ops
+     , EffOps ops
+     , ImplicitOps ops
      , EffConstraint ops eff
+     , EffFunctor (Operation ops)
      )
   => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) eff
   -> (e -> eff a)
@@ -150,8 +152,10 @@ tryComp comp1 handler1 = handleFree handler2 comp2
 bracketComp
   :: forall free eff ops e a b
    . ( FreeHandler free
-     , BaseOps ops
+     , EffOps ops
+     , ImplicitOps ops
      , EffConstraint ops eff
+     , EffFunctor (Operation ops)
      )
   => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init
   -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return ()) eff)  -- cleanup
@@ -162,7 +166,7 @@ bracketComp initComp cleanupComp betweenComp = Computation comp1
   comp1
     :: forall eff2
      . (Effect eff2)
-    => LiftEff eff eff2
+    => Lift eff eff2
     -> Operation ((ExceptionEff e) ∪ ops) eff2
     -> Return b eff2
   comp1 lift12 ops@(UnionOps eOps ops1) = Return comp5

@@ -33,7 +33,7 @@ stateTHandler
   (Effect eff)
   => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
 stateTHandler = opsHandlerComp $
-  \lifter -> applyEffmap lifter stateTOps
+  \lifter -> applyLift lifter stateTOps
 
 ioHandler :: BaseOpsHandler NoEff IoEff IO
 ioHandler = baseOpsHandler IoOps {
@@ -43,13 +43,13 @@ ioHandler = baseOpsHandler IoOps {
 stateTToEnvOpsPipeline
   :: forall s eff1 comp .
   (Effect eff1, EffFunctor comp)
-  => SimplePipeline LiftEff (EnvEff s) (StateEff s) comp eff1
+  => SimplePipeline Lift (EnvEff s) (StateEff s) comp eff1
 stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
  where
   handler :: forall eff
    . (EffConstraint (EnvEff s) eff)
     => TransformerHandler (StateT s) (StateEff s) eff
-  handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
+  handler = TransformerHandler stateTOps stateTLift $ Lift $
     \comp -> do
       i <- ask
       evalStateT comp i
@@ -196,14 +196,14 @@ churchStateTest1 = testCase "Church state test 1" $
 statePipeline1
   :: forall s eff1 .
   (Effect eff1)
-  => GenericPipeline LiftEff (EnvEff s) (StateEff s) eff1
+  => GenericPipeline Lift (EnvEff s) (StateEff s) eff1
 statePipeline1 = contextualHandlerToPipeline @ChurchMonad $
   Computation handler
    where
     handler
       :: forall eff2 .
       (Effect eff2)
-      => LiftEff eff1 eff2
+      => Lift eff1 eff2
       -> EnvOps s eff2
       -> ContextualHandler (CoState s) (StateEff s) eff2
     handler _ envOps = ContextualHandler coopHandler extract

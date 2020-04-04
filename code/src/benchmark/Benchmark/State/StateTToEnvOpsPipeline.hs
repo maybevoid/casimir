@@ -22,13 +22,13 @@ import Benchmark.State.Base
 stateTToEnvOpsPipeline
   :: forall s eff1 comp .
   (Effect eff1, EffFunctor comp)
-  => SimplePipeline LiftEff (EnvEff s) (StateEff s) comp eff1
+  => SimplePipeline Lift (EnvEff s) (StateEff s) comp eff1
 stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
  where
   handler :: forall eff
    . (EffConstraint (EnvEff s) eff)
     => TransformerHandler (StateT s) (StateEff s) eff
-  handler = TransformerHandler stateTOps stateTLiftEff $ mkLiftEff $
+  handler = TransformerHandler stateTOps stateTLift $ Lift $
     \comp -> do
       i <- ask
       evalStateT comp i

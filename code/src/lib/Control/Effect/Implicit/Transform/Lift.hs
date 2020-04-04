@@ -15,8 +15,8 @@ transformLift
      , MonadTrans t
      , Effect (t eff)
      )
-  => LiftEff eff (t eff)
-transformLift = mkLiftEff lift
+  => Lift eff (t eff)
+transformLift = Lift lift
 
 transformContraLift
   :: forall eff t w

@@ -27,7 +27,7 @@ stateOpsToEnvOpsPipeline
 stateOpsToEnvOpsPipeline comp1 = Computation comp2
  where
   comp2 :: forall eff2 . (Effect eff2)
-    => LiftEff eff1 eff2
+    => Lift eff1 eff2
     -> EnvOps s eff2
     -> Return a eff2
   comp2 lift12 ops = withOps ops $ Return comp5
@@ -35,7 +35,7 @@ stateOpsToEnvOpsPipeline comp1 = Computation comp2
     comp3 :: BaseComputation NoEff (Return a) (StateT s eff2)
     comp3 = bindOpsHandler
       stateTHandler
-      (liftComputation (joinLift lift12 stateTLiftEff) comp1)
+      (liftComputation (joinLift lift12 stateTLift) comp1)
 
     comp4 :: StateT s eff2 a
     comp4 = returnVal $ runComp comp3 idLift NoOp

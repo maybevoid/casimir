@@ -100,7 +100,7 @@ pipeline1
   -> HigherComputation NoEff comp (StateT [String] IO)
 pipeline1 comp11 =
   bindOpsHandler (toHigherComputation stateTHandler) $
-    liftComputation stateTHigherLiftEff $
+    liftComputation stateTHigherLift $
       bindOpsHandler @(StateEff [String]) bracketHandler $
         toHigherComputation $
           bindOpsHandler @(StateEff [String] ∪ BracketResourceEff) ioHandler $

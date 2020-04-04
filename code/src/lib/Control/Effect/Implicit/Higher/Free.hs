@@ -5,14 +5,14 @@ where
 
 import Data.Kind
 
-import Control.Effect.Implicit.Base (ContraLift (..))
+import Control.Effect.Implicit.Base
+  (ContraLift (..), HigherLift (..))
 import Control.Effect.Implicit.Base.Implicit
 import Control.Effect.Implicit.Higher.Base
 import Control.Effect.Implicit.Higher.CoOp
 import Control.Effect.Implicit.Higher.EffFunctor
 import Control.Effect.Implicit.Higher.ContraLift
 
-import Control.Effect.Implicit.Computation.Lift
 import qualified Control.Effect.Implicit.Base as Base
 import qualified Control.Effect.Implicit.Freer as Base
 
@@ -125,11 +125,11 @@ instance
         -> eff a
       liftCoOp2 op = liftCoOp1 $ HigherOp op
 
-freeHigherLiftEff
+freeHigherLift
   :: forall free ops eff
    . (FreeEff free, FreeOps ops, Effect eff)
-  => HigherLiftEff eff (free ops eff)
-freeHigherLiftEff = HigherLiftEff liftFree freeContraLift
+  => HigherLift eff (free ops eff)
+freeHigherLift = HigherLift liftFree freeContraLift
 
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler

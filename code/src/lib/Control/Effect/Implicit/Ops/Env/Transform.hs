@@ -20,11 +20,11 @@ liftReaderT
   -> ReaderT e eff a
 liftReaderT = lift
 
-readerTLiftEff
+readerTLift
   :: forall a eff
    . (Effect eff)
-  => LiftEff eff (ReaderT a eff)
-readerTLiftEff = mkLiftEff lift
+  => Lift eff (ReaderT a eff)
+readerTLift = Lift lift
 
 readerTOps :: forall a eff . (Effect eff)
   => EnvOps a (ReaderT a eff)

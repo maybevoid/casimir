@@ -1,97 +1,114 @@
 
 module Control.Effect.Implicit.Base.Lift
-  ( Lift
-  , LiftEff
-  , idLift
-  , mkLiftEff
-  , runLiftEff
-  , applyEffmap
-  , joinLift
+  ( IdLift (..)
+  , Lift (..)
+  , LiftOps (..)
+  , FreeLift (..)
+  , HigherLift (..)
+  , type (~>)
   )
 where
 
 import Data.Kind
 
+import Control.Effect.Implicit.Base.Union
 import Control.Effect.Implicit.Base.Effect
+import Control.Effect.Implicit.Base.EffOps
+import Control.Effect.Implicit.Base.ContraLift
 import Control.Effect.Implicit.Base.EffFunctor
 
-type Lift eff1 eff2 = forall x . eff1 x -> eff2 x
+type eff1 ~> eff2 = forall x . eff1 x -> eff2 x
 
--- | An opaque object-ish effect lifter that can apply 'effmap' to an 'EffFunctor'.
--- We define dedicated datatype instead of using the natural transformation
--- @(~>)@ so that in the case of identity, we can construct a special 'idLift'
--- that skip calling @'effmap' id@ and return the original 'EffFunctor'. This may
--- save a bit on creating redundant
--- 'Control.Effect.Implicit.Base.Operation' and
--- 'Control.Effect.Implicit.Base.CoOperation' objects during @'effmap' id@,
--- particularly when they are used together with
--- 'Control.Effect.Implicit.Computation.Computation'.
-data LiftEff (eff1 :: (Type -> Type)) (eff2 :: (Type -> Type))
-  = MkLiftEff {
+data IdLift
+  (eff1 :: Type -> Type)
+  (eff2 :: Type -> Type)
+  where
+    IdLift :: IdLift eff eff
 
-    -- | The base natural transformation that can be extracted
-    runLiftEff :: Lift eff1 eff2,
+newtype Lift eff1 eff2 = Lift
+  { runLift :: eff1 ~> eff2 }
 
-    -- | When applying effect lifting to an 'EffFunctor', 'applyEffmap' should
-    -- be used instead of calling 'effmap' directly. This could potentially
-    -- save some unnecesssary objects recreation in the case of 'idLift'.
-    applyEffmap
-      :: forall comp
-      . (EffFunctor comp)
-      => comp eff1
-      -> comp eff2,
+data HigherLift
+  (eff1 :: Type -> Type)
+  (eff2 :: Type -> Type)
+  = HigherLift
+    { hlBaseLift :: forall x . eff1 x -> eff2 x
+    , hlContraLift :: ContraLift eff1 eff2
+    }
 
-    -- | An optimizable composition of two natural transformations. This makes sure
-    -- the no new 'LiftEff' is created when either side is 'idLift'. The behavior
-    -- for 'joinLift' is as follow:
-    --
-    -- @
-    --   'joinLift' idLift idLift === idLift
-    --   'joinLift' idLift lift2 === lift2
-    --   'joinLift' lift1 idLift === lift1
-    --   'joinLift' lift1 lift2 === 'mkLiftEff' $ (liftEff lift2) . (liftEff lift1)
-    -- @
-    joinLift
-      :: forall eff3
-      . (Effect eff3)
-      => LiftEff eff2 eff3
-      -> LiftEff eff1 eff3,
+class
+  (LiftOps lift)
+  => FreeLift t lift eff1 eff2 where
+    freeLift :: lift eff1 eff2
 
-    -- | Auxliary helper used by 'joinLift' so that @joinLift lift1 idLift@
-    -- would return @lift1@.
-    rightJoinLift
-      :: forall eff0
-      . (Effect eff0)
-      => LiftEff eff0 eff1
-      -> LiftEff eff0 eff2
-  }
+class LiftOps lift where
+  type family Liftable lift
+    (ops :: Type) :: Constraint
 
--- | Create a 'LiftEff' from a natural transformation @eff1 ~> eff2@. This assumes
--- @eff1@ and @eff2@ are different, as otherwise we can use 'idLift' for optimized
--- version of 'LiftEff'.
-mkLiftEff
-  :: forall eff1 eff2
-   . (Effect eff1, Effect eff2)
-  => (forall x . eff1 x -> eff2 x)
-  -> LiftEff eff1 eff2
-mkLiftEff lifter1 = lifter2
- where
-  lifter2 = MkLiftEff {
-    runLiftEff = lifter1,
+  idLift
+    :: forall eff . (Effect eff) => lift eff eff
 
-    applyEffmap = effmap lifter1,
+  applyLift
+    :: forall eff1 eff2 ops
+     . ( Effect eff1
+       , Effect eff2
+       , EffOps ops
+       , Liftable lift ops
+       )
+    => lift eff1 eff2
+    -> Operation ops eff1
+    -> Operation ops eff2
 
-    joinLift = \lifter3 ->
-      rightJoinLift lifter3 lifter2,
+  joinLift
+    :: forall eff1 eff2 eff3
+     . ( Effect eff1
+       , Effect eff2
+       , Effect eff3
+       )
+    => lift eff1 eff2
+    -> lift eff2 eff3
+    -> lift eff1 eff3
 
-    rightJoinLift = \lifter3 ->
-      mkLiftEff (lifter1 . runLiftEff lifter3)
-  }
+  -- Workaround as quantified constraints does not
+  -- allow the derived constraints to be used automatically
+  withUnionLifts
+    :: forall ops1 ops2 r
+     . (Liftable lift ops1, Liftable lift ops2)
+    => (Liftable lift (ops1 ∪ ops2) => r)
+    -> r
 
--- | An optimized version of 'LiftEff' when there is no effect lifting required,
--- e.g. when we want to execute a
--- 'Control.Effect.Implicit.Computation.Computation' with its original effect.
-idLift
-  :: forall eff . (Effect eff)
-  => LiftEff eff eff
-idLift = MkLiftEff id id id id
+instance LiftOps IdLift where
+  type Liftable IdLift ops = ()
+
+  idLift = IdLift
+  applyLift IdLift ops = ops
+  joinLift IdLift IdLift = IdLift
+  withUnionLifts cont = cont
+
+instance LiftOps Lift where
+  type Liftable Lift ops =
+    ( EffOps ops, EffFunctor (Operation ops) )
+
+  idLift = Lift id
+  applyLift (Lift lift) = effmap lift
+  joinLift (Lift lift1) (Lift lift2) = Lift $ lift2 . lift1
+
+  withUnionLifts cont = cont
+
+instance LiftOps HigherLift where
+  type Liftable HigherLift ops =
+    ( EffOps ops, HigherEffFunctor (Operation ops) )
+
+  idLift = HigherLift id identityContraLift
+
+  applyLift (HigherLift lift contraLift) ops =
+    invEffmap lift contraLift ops
+
+  joinLift
+    (HigherLift lift1 contraLift1)
+    (HigherLift lift2 contraLift2)
+    = HigherLift
+      (lift2 . lift1)
+      (joinContraLift contraLift1 contraLift2)
+
+  withUnionLifts cont = cont
