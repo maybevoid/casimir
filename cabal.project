@@ -4,5 +4,5 @@ write-ghc-environment-files: never
 source-repository-package
   type: git
   location: https://github.com/maybevoid/quasi-params.git
-  tag: f48258acb9c0fa4cc456e08996abd1578edcd09f
+  tag: 8eedfff99898a57c664ad7f2f9348ff255e87764
   subdir: quasi-params

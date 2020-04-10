@@ -18,7 +18,7 @@ jobs:
 
       before_cache:
         - mkdir -p $HOME/nix.store
-        - nix copy --to file://$HOME/nix.store -f nix/release.nix --all
+        - nix copy --to file://$HOME/nix.store -f nix/release.nix
 
     - language: haskell
 
@@ -35,6 +35,17 @@ jobs:
 
       cabal: "3.0"
       ghc: "8.6.5"
+
+      install:
+        - make build
+
+      script:
+        - make test
+
+    - language: haskell
+
+      cabal: "3.0"
+      ghc: "8.10.1"
 
       install:
         - make build
