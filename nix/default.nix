@@ -17,7 +17,7 @@ let
     let
       build = release.builds.casimir;
       shell = release.shells.casimir;
-      manual-shell = release.shell.manual;
+      manual-shell = release.shells.manual;
     in
     { inherit build shell manual-shell; }
   ;

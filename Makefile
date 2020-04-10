@@ -19,16 +19,6 @@ benchmark:
 test:
 	cabal run casimir-test
 
-test-nix:
-
-test-88:
-	nix-shell --pure -A ghc88.shell --run \
-		"cabal run casimir-test"
-
-test-86:
-	nix-shell --pure -A ghc86.shell --run \
-		"cabal run casimir-test"
-
 cachix:
 	nix-store -qR --include-outputs `nix-instantiate -A ghc88.shell` | cachix push maybevoid
 	nix-store -qR --include-outputs `nix-instantiate -A ghc86.shell` | cachix push maybevoid
