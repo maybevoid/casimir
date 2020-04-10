@@ -3,8 +3,8 @@ jobs:
     - language: nix
 
       script:
-        - nix-shell --pure -A ghc86.shell --run "make test"
-        - nix-shell --pure -A ghc88.shell --run "make test"
+        - nix-shell --pure -A ghc86.shell --run "make test-nix"
+        - nix-shell --pure -A ghc88.shell --run "make test-nix"
         - nix-build nix/release.nix
 
       before_install:

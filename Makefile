@@ -19,7 +19,10 @@ benchmark:
 test:
 	cabal run casimir-test
 
+test-nix:
+	cabal --project-file=cabal-nix.project run casimir-test
+
 cachix:
 	nix-store -qR --include-outputs `nix-instantiate nix/shell.nix` | cachix push maybevoid
 
-.PHONY: release shell clean build benchmark test cachix
+.PHONY: release shell clean build benchmark test test-nix cachix
