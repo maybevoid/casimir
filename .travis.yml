@@ -1,18 +1,29 @@
-language: nix
+jobs:
+  include:
+    - language: nix
 
-cache:
-  directories:
-  - $HOME/nix.store
+      cache:
+        directories:
+        - $HOME/nix.store
 
-script:
-  - make test
-  - nix-build nix/release.nix
+      script:
+        - nix-shell --pure -A ghc86.shell --run "make test"
+        - nix-shell --pure -A ghc88.shell --run "make test"
+        - nix-build nix/release.nix
 
-before_install:
-  - sudo mkdir -p /etc/nix
-  - echo "substituters = https://cache.nixos.org https://maybevoid.cachix.org file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
-  - echo "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= maybevoid.cachix.org-1:Ffj+i1SPSghfQWDfidVDW+HxeDHOoNfiaKksayZGgkk=" | sudo tee -a /etc/nix/nix.conf > /dev/null
+      before_install:
+        - sudo mkdir -p /etc/nix
+        - echo "substituters = https://cache.nixos.org https://maybevoid.cachix.org file://$HOME/nix.store" | sudo tee -a /etc/nix/nix.conf > /dev/null
+        - echo "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= maybevoid.cachix.org-1:Ffj+i1SPSghfQWDfidVDW+HxeDHOoNfiaKksayZGgkk=" | sudo tee -a /etc/nix/nix.conf > /dev/null
 
-before_cache:
-  - mkdir -p $HOME/nix.store
-  - nix copy --to file://$HOME/nix.store -f nix/release.nix buildInputs
+      before_cache:
+        - mkdir -p $HOME/nix.store
+        - nix copy --to file://$HOME/nix.store -f nix/release.nix buildInputs
+
+    - language: haskell
+
+      cabal: "3.0"
+
+      ghc:
+        - "8.6.5"
+        - "8.8.3"

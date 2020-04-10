@@ -16,7 +16,10 @@ benchmark:
 		casimir-benchmark \
 		-- --output '../benchmarks/$(shell date).html'
 
-test: test-88 test-86
+test:
+	cabal run casimir-test
+
+test-nix:
 
 test-88:
 	nix-shell --pure -A ghc88.shell --run \
