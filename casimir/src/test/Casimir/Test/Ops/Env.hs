@@ -1,4 +1,4 @@
-module Effect.Test.Ops.Env where
+module Casimir.Test.Ops.Env where
 
 import Test.Tasty
 import Test.Tasty.HUnit

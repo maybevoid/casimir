@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 
-module Effect.Test.Ops.Pipe where
+module Casimir.Test.Ops.Pipe where
 
 import Test.Tasty
 import Test.Tasty.HUnit

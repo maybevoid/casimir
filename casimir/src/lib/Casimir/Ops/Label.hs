@@ -6,6 +6,7 @@ where
 
 import Data.Kind (Type)
 import GHC.Types (Symbol)
+import Data.QuasiParam.Label
 
 import Casimir.Base
 
@@ -44,13 +45,13 @@ instance
   => ImplicitOps (LabeledEff k (label :: k) ops)
    where
     type OpsConstraint (LabeledEff k (label :: k) ops) eff =
-      ImplicitParam k label (LabeledOps k label (Operation ops) eff)
+      Param k label (LabeledOps k label (Operation ops) eff)
 
     withOps
       :: forall eff r
        . (Effect eff)
       => LabeledOps k label (Operation ops) eff
-      -> (ImplicitParam k label (LabeledOps k label (Operation ops) eff)
+      -> (Param k label (LabeledOps k label (Operation ops) eff)
           => r)
       -> r
     withOps = withParam @k @label
@@ -58,7 +59,7 @@ instance
     captureOps
       :: forall eff
        . ( Effect eff
-         , ImplicitParam k label (LabeledOps k label (Operation ops) eff)
+         , Param k label (LabeledOps k label (Operation ops) eff)
          )
       => LabeledOps k label (Operation ops) eff
     captureOps = captureParam @k @label

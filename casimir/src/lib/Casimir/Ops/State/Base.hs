@@ -8,7 +8,7 @@ module Casimir.Ops.State.Base
   )
 where
 
-import Data.QuasiParam
+import Data.QuasiParam.Tag
 import Casimir.Base
 
 data StateTag
@@ -30,10 +30,10 @@ instance EffFunctor (StateOps a) where
 
 instance ImplicitOps (StateEff s) where
   type OpsConstraint (StateEff s) eff =
-    TaggedParam StateTag (StateOps s eff)
+    Param StateTag (StateOps s eff)
 
-  withOps = withTag @StateTag
-  captureOps = captureTag @StateTag
+  withOps = withParam @StateTag
+  captureOps = captureParam @StateTag
 
 {-# INLINE get #-}
 get :: forall s . Eff (StateEff s) s

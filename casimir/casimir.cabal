@@ -195,37 +195,27 @@ benchmark casimir-benchmark
       casimir
     , criterion
 
-executable casimir-demo2
-  import: deps
-  main-is: Main.hs
-  other-modules:
-      Demo
-  hs-source-dirs:
-      src/main
-  build-depends:
-      casimir
-
 test-suite casimir-test
   import: deps
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Effect.Test.Main
-      Effect.Test.Ops
-      Effect.Test.Ops.Ambivalent
-      Effect.Test.Ops.Env
-      Effect.Test.Ops.Exception
-      Effect.Test.Ops.Pipe
-      Effect.Test.Ops.State
+    Casimir.Test.Main
+    Casimir.Test.Ops
+    Casimir.Test.Ops.Ambivalent
+    Casimir.Test.Ops.Env
+    Casimir.Test.Ops.Exception
+    Casimir.Test.Ops.Pipe
+    Casimir.Test.Ops.State
 
-      Effect.Test.Higher
-      Effect.Test.Higher.Resource
-      Effect.Test.Higher.Exception
+    Casimir.Test.Higher
+    Casimir.Test.Higher.Resource
+    Casimir.Test.Higher.Exception
+
   hs-source-dirs:
       src/test
   build-depends:
-      QuickCheck
-    , casimir
+      casimir
     , tasty
     , tasty-hunit
     , tasty-quickcheck

@@ -20,7 +20,6 @@ test:
 	cabal run casimir-test
 
 cachix:
-	nix-store -qR --include-outputs `nix-instantiate -A ghc88.shell` | cachix push maybevoid
-	nix-store -qR --include-outputs `nix-instantiate -A ghc86.shell` | cachix push maybevoid
+	nix-store -qR --include-outputs `nix-instantiate nix/shell.nix` | cachix push maybevoid
 
 .PHONY: release shell clean build benchmark test cachix

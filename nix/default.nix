@@ -1,5 +1,5 @@
 { useLocal ? false
-, nixpkgs ? import ./nixpkgs.nix {inherit useLocal; }
+, nixpkgs ? import ./nixpkgs.nix { inherit useLocal; }
 }:
 let
   inherit (nixpkgs) pkgs;

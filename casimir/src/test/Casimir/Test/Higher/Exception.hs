@@ -1,4 +1,4 @@
-module Effect.Test.Higher.Exception
+module Casimir.Test.Higher.Exception
   ( exceptionTests
   )
 where

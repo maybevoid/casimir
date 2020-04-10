@@ -1,5 +1,5 @@
 
-module Effect.Test.Ops.State where
+module Casimir.Test.Ops.State where
 
 import Test.Tasty
 import Test.Tasty.HUnit

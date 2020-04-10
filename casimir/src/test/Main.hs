@@ -1,3 +1,3 @@
 module Main (main) where
 
-import Effect.Test.Main
+import Casimir.Test.Main

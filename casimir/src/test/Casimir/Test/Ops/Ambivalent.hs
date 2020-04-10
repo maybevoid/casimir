@@ -1,5 +1,5 @@
 
-module Effect.Test.Ops.Ambivalent
+module Casimir.Test.Ops.Ambivalent
 where
 
 import Control.Monad.Identity

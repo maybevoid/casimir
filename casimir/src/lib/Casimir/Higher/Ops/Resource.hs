@@ -6,7 +6,8 @@ import Data.Kind
 import Control.Monad.Identity
 import Control.Exception (bracket)
 
-import Data.QuasiParam
+import Data.QuasiParam.Tag
+
 import Casimir.Base
   ( ContraLift (..)
   , EffFunctor (..)
@@ -61,10 +62,10 @@ instance LowerEffOps (ResourceEff t)
 
 instance ImplicitOps (ResourceEff t) where
   type OpsConstraint (ResourceEff t) eff =
-    TaggedParam ResourceTag (LowerOps (HigherResourceOps t) eff)
+    Param ResourceTag (LowerOps (HigherResourceOps t) eff)
 
-  withOps = withTag @ResourceTag
-  captureOps = captureTag @ResourceTag
+  withOps = withParam @ResourceTag
+  captureOps = captureParam @ResourceTag
 
 instance
   (Effect inEff)

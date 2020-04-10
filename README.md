@@ -1,6 +1,6 @@
-# Implicit Effects: Algebraic Effects in Haskell using Implicit Parameters
+# Casimir: Algebraic Effects in Haskell using Implicit Parameters
 
-[![Build Status](https://travis-ci.org/maybevoid/implicit-effects.svg?branch=master)](https://travis-ci.org/maybevoid/implicit-effects)
+[![Build Status](https://travis-ci.org/maybevoid/casimir.svg?branch=master)](https://travis-ci.org/maybevoid/implicit-effects)
 
 
 <i>

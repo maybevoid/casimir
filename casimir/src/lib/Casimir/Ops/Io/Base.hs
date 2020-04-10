@@ -1,6 +1,8 @@
 module Casimir.Ops.Io.Base
 where
 
+import Data.QuasiParam.Tag
+
 import Casimir.Base
 
 data IoTag
@@ -20,10 +22,10 @@ instance EffFunctor IoOps where
 
 instance ImplicitOps IoEff where
   type OpsConstraint IoEff eff =
-    TaggedParam IoTag (IoOps eff)
+    Param IoTag (IoOps eff)
 
-  withOps = withTag @IoTag
-  captureOps = captureTag @IoTag
+  withOps = withParam @IoTag
+  captureOps = captureParam @IoTag
 
 liftIo :: forall a . IO a -> Eff IoEff a
 liftIo = liftIoOp captureOps

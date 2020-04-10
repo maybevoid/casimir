@@ -6,7 +6,8 @@ import Data.Void
 
 import qualified Control.Exception as Ex
 
-import Data.QuasiParam
+import Data.QuasiParam.Tag
+
 import Casimir.Base
   ( Eff
   , EffConstraint
@@ -71,10 +72,10 @@ instance LowerEffOps (ExceptionEff e)
 
 instance ImplicitOps (ExceptionEff e) where
   type OpsConstraint (ExceptionEff e) eff =
-    TaggedParam ExceptionTag (LowerOps (HigherExceptionOps e) eff)
+    Param ExceptionTag (LowerOps (HigherExceptionOps e) eff)
 
-  withOps = withTag @ExceptionTag
-  captureOps = captureTag @ExceptionTag
+  withOps = withParam @ExceptionTag
+  captureOps = captureParam @ExceptionTag
 
 instance
   (Effect inEff)

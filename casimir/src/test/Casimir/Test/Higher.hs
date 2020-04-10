@@ -1,9 +1,9 @@
-module Effect.Test.Higher where
+module Casimir.Test.Higher where
 
 import Test.Tasty
 
-import Effect.Test.Higher.Resource
-import Effect.Test.Higher.Exception
+import Casimir.Test.Higher.Resource
+import Casimir.Test.Higher.Exception
 
 higherOpsTests :: TestTree
 higherOpsTests = testGroup "Higher Ops Tests"

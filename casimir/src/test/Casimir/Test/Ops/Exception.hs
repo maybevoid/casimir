@@ -1,5 +1,5 @@
 
-module Effect.Test.Ops.Exception
+module Casimir.Test.Ops.Exception
 where
 
 import Test.Tasty

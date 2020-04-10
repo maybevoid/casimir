@@ -28,11 +28,9 @@ module Casimir.Base
   , rightOps
   , joinContraLift
   , identityContraLift
-  , module Data.QuasiParam
 )
 where
 
-import Data.QuasiParam
 import Casimir.Base.EffOps
 import Casimir.Base.Effect
 import Casimir.Base.EffFunctor

@@ -2,6 +2,8 @@
 module Casimir.Ops.Env.Base
 where
 
+import Data.QuasiParam.Tag
+
 import Casimir.Base
 import Casimir.Computation
 
@@ -22,10 +24,10 @@ instance EffFunctor (EnvOps e) where
 
 instance ImplicitOps (EnvEff e) where
   type OpsConstraint (EnvEff e) eff =
-    TaggedParam EnvTag (EnvOps e eff)
+    Param EnvTag (EnvOps e eff)
 
-  withOps = withTag @EnvTag
-  captureOps = captureTag @EnvTag
+  withOps = withParam @EnvTag
+  captureOps = captureParam @EnvTag
 
 ask :: forall e . Eff (EnvEff e) e
 ask = askOp captureOps

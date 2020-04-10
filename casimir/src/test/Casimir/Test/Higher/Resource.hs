@@ -1,4 +1,4 @@
-module Effect.Test.Higher.Resource
+module Casimir.Test.Higher.Resource
   ( resourceTests
   )
 where
