@@ -1,9 +1,10 @@
-{ nixpkgs ? import ./nixpkgs.nix {} }:
+{ useLocal ? false
+, nixpkgs ? import ./nixpkgs.nix {inherit useLocal; }
+}:
 let
-  ghc86 = (import ./release/8.6.nix { inherit nixpkgs; }).release;
-  ghc88 = (import ./release/8.8.nix { inherit nixpkgs; }).release;
-  ghc810 = (import ./release/8.10.nix { inherit nixpkgs; }).release;
+  release = import ./default.nix
+    { inherit useLocal nixpkgs; };
 in
-{
-  inherit ghc86 ghc88 ghc810;
+{ ghc86 = release.ghc86.build;
+  ghc88 = release.ghc88.build;
 }

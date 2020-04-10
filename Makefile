@@ -2,48 +2,29 @@
 release:
 	nix-build nix/release.nix
 
-release-doc:
-	nix-build -A doc nix/release.nix
-
 shell:
-	nix-shell -A ghc88 nix/shell.nix
-
-external-shell:
-	nix-shell nix/external.nix
+	nix-shell -A ghc88.shell
 
 clean:
-	nix-shell --pure -A default nix/shell.nix --run \
-		"make -f make/cabal.mk clean"
-
-hoogle:
-	nix-shell --pure -A default nix/external.nix --run \
-		"cd code && hoogle server --local --host 0.0.0.0 -p 8333"
-
-repl:
-	nix-shell --pure -A default nix/shell.nix --run \
-		"make -f make/cabal.mk repl"
+	cabal clean
 
 build:
-	nix-shell --pure -A default nix/shell.nix --run \
-		"make -f make/cabal.mk build"
-
-doc:
-	nix-shell --pure -A default nix/shell.nix --run \
-		"make -f make/cabal.mk doc"
+	cabal build --enable-tests --enable-benchmark --enable-documentation all
 
 benchmark:
-	nix-shell --pure -A default nix/shell.nix --run \
-		"make -f make/cabal.mk benchmark"
+	cabal run \
+		casimir-benchmark \
+		-- --output '../benchmarks/$(shell date).html'
 
 test:
-	nix-shell --pure -A default nix/shell.nix --run \
+	nix-shell --pure -A ghc88.shell --run \
 		"make -f make/cabal.mk test"
 
-	nix-shell --pure -A default nix/shell.nix --run \
+	nix-shell --pure -A ghc86.shell --run \
 		"make -f make/cabal.mk test"
 
 cachix:
-	nix-store -qR --include-outputs `nix-instantiate nix/shell.nix` | cachix push maybevoid
+	nix-store -qR --include-outputs `nix-instantiate -A ghc88.shell` | cachix push maybevoid
+	nix-store -qR --include-outputs `nix-instantiate -A ghc86.shell` | cachix push maybevoid
 
-.PHONY: release release-doc shell external-shell \
-	hoogle repl demo doc benchmark test cachix
+.PHONY: release shell clean build benchmark test cachix

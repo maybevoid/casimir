@@ -33,15 +33,15 @@ implicit-effects Overview
 
 - The main module for implicit-effects.
 
-> import Control.Effect.Implicit
-> import Control.Effect.Implicit.Free
+> import Casimir
+> import Casimir.Free
 
 - Effect operations are imported from separate modules
 
-> import Control.Effect.Implicit.Ops.Io
-> import Control.Effect.Implicit.Ops.Env
-> import Control.Effect.Implicit.Ops.State
-> import Control.Effect.Implicit.Ops.State.Transform
+> import Casimir.Ops.Io
+> import Casimir.Ops.Env
+> import Casimir.Ops.State
+> import Casimir.Ops.State.Transform
 
 Hello World
 ===========

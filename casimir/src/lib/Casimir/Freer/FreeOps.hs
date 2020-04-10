@@ -1,0 +1,21 @@
+
+module Casimir.Freer.FreeOps
+  ( FreeOps (..)
+  )
+where
+
+import Casimir.Base
+import Casimir.Freer.CoOp
+
+class
+  ( EffOps ops
+  , EffCoOp ops
+  , EffFunctor (Operation ops)
+  )
+  => FreeOps ops
+   where
+    mkFreeOps
+      :: forall eff
+        . (Effect eff)
+      => (forall a . CoOperation ops a -> eff a)
+      -> Operation ops eff
