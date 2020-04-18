@@ -15,9 +15,9 @@ data IoOps eff = IoOps {
 instance EffOps IoEff where
   type Operation IoEff = IoOps
 
-instance EffFunctor IoOps where
-  effmap lifter ops = IoOps {
-    liftIoOp = lifter . liftIoOp ops
+instance EffFunctor Lift IoOps where
+  effmap (Lift lift) ops = IoOps {
+    liftIoOp = lift . liftIoOp ops
   }
 
 instance ImplicitOps IoEff where

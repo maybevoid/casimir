@@ -15,8 +15,6 @@ import Casimir.Higher.CoOp
 import Casimir.Higher.Free
 import Casimir.Higher.EffFunctor
 
-import qualified Casimir.Base as Base
-
 data HUnionOps ops1 ops2
   (eff1 :: Type -> Type)
   (eff2 :: Type -> Type)
@@ -48,26 +46,26 @@ instance
 
 instance
   ( Effect eff
-  , EffFunctor (ops1 eff)
-  , EffFunctor (ops2 eff)
+  , EffFunctor lift (ops1 eff)
+  , EffFunctor lift (ops2 eff)
   )
-  => EffFunctor (HUnionOps ops1 ops2 eff)
+  => EffFunctor lift (HUnionOps ops1 ops2 eff)
   where
     effmap lifter (HUnionOps ops1 ops2) =
       HUnionOps
-        (Base.effmap lifter ops1)
-        (Base.effmap lifter ops2)
+        (effmap lifter ops1)
+        (effmap lifter ops2)
 
 instance
-  ( HigherEffFunctor ops1
-  , HigherEffFunctor ops2
+  ( HigherEffFunctor lift ops1
+  , HigherEffFunctor lift ops2
   )
-  => HigherEffFunctor (HUnionOps ops1 ops2)
+  => HigherEffFunctor lift (HUnionOps ops1 ops2)
    where
-    invEffmap lifter contraLift (HUnionOps ops1 ops2) =
+    higherEffmap lift (HUnionOps ops1 ops2) =
       HUnionOps
-        (invEffmap lifter contraLift ops1)
-        (invEffmap lifter contraLift ops2)
+        (higherEffmap lift ops1)
+        (higherEffmap lift ops2)
 
 instance
   ( Functor f

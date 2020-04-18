@@ -20,9 +20,9 @@ instance EffOps (DecideEff s) where
 instance EffCoOp (DecideEff s) where
   type CoOperation (DecideEff s) = DecideCoOp s
 
-instance EffFunctor (DecideOps s) where
-  effmap lifter ops = DecideOps {
-    decideOp = lifter $ decideOp ops
+instance EffFunctor Lift (DecideOps s) where
+  effmap (Lift lift) ops = DecideOps {
+    decideOp = lift $ decideOp ops
   }
 
 instance FreeOps (DecideEff s) where

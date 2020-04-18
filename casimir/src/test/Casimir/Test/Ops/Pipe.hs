@@ -43,13 +43,13 @@ instance EffCoOp (YieldEff a) where
 instance EffCoOp (AwaitEff a) where
   type CoOperation (AwaitEff a) = AwaitCoOp a
 
-instance EffFunctor (YieldOps a) where
-  effmap lifter ops = YieldOps $
-    \x -> lifter $ yieldOp ops x
+instance EffFunctor Lift (YieldOps a) where
+  effmap (Lift lift2) ops = YieldOps $
+    \x -> lift2 $ yieldOp ops x
 
-instance EffFunctor (AwaitOps a) where
-  effmap lifter ops = AwaitOps $
-    lifter $ awaitOp ops
+instance EffFunctor Lift (AwaitOps a) where
+  effmap (Lift lift2) ops = AwaitOps $
+    lift2 $ awaitOp ops
 
 instance FreeOps (YieldEff a) where
   mkFreeOps liftCoOp = YieldOps $
@@ -86,7 +86,7 @@ await = awaitOp ?awaitOps
 runPipe :: forall a r ops eff1
    . ( Effect eff1
    , EffOps ops
-   , EffFunctor (Operation ops)
+   , EffFunctor Lift (Operation ops)
    )
   => BaseComputation ((YieldEff a) ∪ ops) (Return r) eff1
   -> BaseComputation ((AwaitEff a) ∪ ops) (Return r) eff1
@@ -102,12 +102,12 @@ runPipe producer1 consumer1 = Computation comp
       producer2 :: FreeT (YieldCoOp a) eff2 r
       producer2 = returnVal $ runComp producer1
         (joinLift lifter (Lift lift)) $
-        (mkFreeOps liftF) ∪ (effmap lift ops)
+        (mkFreeOps liftF) ∪ (effmap (Lift lift) ops)
 
       consumer2 :: FreeT (AwaitCoOp a) eff2 r
       consumer2 = returnVal $ runComp consumer1
         (joinLift lifter (Lift lift)) $
-        (mkFreeOps liftF) ∪ (effmap lift ops)
+        (mkFreeOps liftF) ∪ (effmap (Lift lift) ops)
 
 pipe
   :: forall a r eff

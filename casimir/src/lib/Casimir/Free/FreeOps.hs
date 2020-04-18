@@ -16,7 +16,6 @@ class
   ( EffOps ops
   , EffCoOp ops
   , Functor (CoOperation ops)
-  , EffFunctor (Operation ops)
   )
   => FreeOps ops where
 

@@ -9,7 +9,14 @@ clean:
 	cabal clean
 
 build:
-	cabal build --enable-tests --enable-benchmark --enable-documentation all
+	cabal build \
+		--enable-tests --enable-benchmark \
+		--enable-documentation all
+
+build-nix:
+	cabal build --project-file cabal-nix.project \
+		--enable-tests --enable-benchmark \
+		--enable-documentation all
 
 benchmark:
 	cabal run \

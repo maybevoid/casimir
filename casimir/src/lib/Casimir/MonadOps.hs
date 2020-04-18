@@ -51,19 +51,19 @@ withMonadOps
 withMonadOps cont = withOps (monadOps @t) cont
 
 class
-  ( EffFunctor (Operation (SupportedOps t))
+  ( EffFunctor Lift (Operation (SupportedOps t))
   ) => HasBaseOps t
 
 instance
-  ( EffFunctor (Operation (SupportedOps t))
+  ( EffFunctor Lift (Operation (SupportedOps t))
   ) => HasBaseOps t
 
 class
-  ( HigherEffFunctor (Operation (SupportedOps t))
+  ( EffFunctor HigherLift (Operation (SupportedOps t))
   ) => HasHigherOps t
 
 instance
-  ( HigherEffFunctor (Operation (SupportedOps t))
+  ( EffFunctor HigherLift (Operation (SupportedOps t))
   ) => HasHigherOps t
 
 instance HasOps (UseBase m) where

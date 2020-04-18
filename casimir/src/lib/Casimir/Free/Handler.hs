@@ -38,7 +38,7 @@ withCoOpHandlerAndOps
       , FreeHandler free
       , ImplicitOps handler
       , EffConstraint ops eff
-      , EffFunctor (Operation ops)
+      , EffFunctor Lift (Operation ops)
       )
   => CoOpHandler handler a r eff
   -> (( OpsConstraint handler (free handler eff)
@@ -50,7 +50,7 @@ withCoOpHandlerAndOps handler comp1
   = handleFree @free handler $
       withOps
         ( freeOps @free @handler @eff
-        ∪ effmap (liftFree @free) (captureOps @ops)
+        ∪ effmap (Lift $ liftFree @free) (captureOps @ops)
         )
         comp1
 

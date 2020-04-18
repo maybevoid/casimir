@@ -10,7 +10,6 @@ import Casimir.Base
 import Casimir.Base.Implicit
 import Casimir.Higher.Base
 import Casimir.Higher.CoOp
-import Casimir.Higher.EffFunctor
 import Casimir.Higher.ContraLift
 
 import qualified Casimir.Base as Base
@@ -49,7 +48,6 @@ data CoOpHandler
 class
   ( EffCoOp ops
   , CoOpFunctor (CoOperation ops)
-  , HigherEffFunctor (Operation ops)
   )
   => FreeOps ops
    where

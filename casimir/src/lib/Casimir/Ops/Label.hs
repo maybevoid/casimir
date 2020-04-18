@@ -30,15 +30,11 @@ instance
     LabeledOps k label (Operation ops)
 
 instance
-  (EffFunctor ops)
-  => EffFunctor (LabeledOps k (label :: k) ops)
+  (EffFunctor lift ops)
+  => EffFunctor lift (LabeledOps k (label :: k) ops)
    where
-    effmap :: forall eff1 eff2 .
-      (Effect eff1, Effect eff2)
-      => eff1 ~> eff2
-      -> LabeledOps k label ops eff1
-      -> LabeledOps k label ops eff2
-    effmap lifter (LabeledOps ops) = LabeledOps $ effmap lifter ops
+    effmap lifter (LabeledOps ops) =
+      LabeledOps $ effmap lifter ops
 
 instance
   (EffOps ops)

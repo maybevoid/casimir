@@ -5,12 +5,13 @@ where
 import Casimir.Base
   ( ContraLift (..)
   , EffFunctor (..)
-  , type (~>)
+  , HigherLift (..)
+  , ContraLift (..)
+  , Lift (..)
   )
 
 import Casimir.Higher
 import Casimir.Ops.Env.Base
-import qualified Casimir.Base as Base
 
 data ReaderEff e
 
@@ -29,23 +30,23 @@ instance EffOps (ReaderEff e) where
 
 instance
   (Effect inEff)
-  => EffFunctor (ReaderOps e inEff) where
+  => EffFunctor Lift (ReaderOps e inEff) where
     effmap _ = undefined
 
-instance HigherEffFunctor (ReaderOps e) where
-  invEffmap
+instance HigherEffFunctor HigherLift (ReaderOps e) where
+  higherEffmap
     :: forall eff1 eff2
      . ( Effect eff1
        , Effect eff2
        )
-    => eff1 ~> eff2
-    -> ContraLift eff1 eff2
+    => HigherLift eff1 eff2
     -> ReaderOps e eff1 eff1
     -> ReaderOps e eff2 eff2
-  invEffmap lifter (ContraLift contraLift1) ops
+  higherEffmap
+    (HigherLift lift (ContraLift contraLift1)) ops
     = ReaderOps
-        (Base.effmap lifter $ innerEnvOps ops)
-        (Base.effmap lifter $ outerEnvOps ops)
+        (effmap (Lift lift) $ innerEnvOps ops)
+        (effmap (Lift lift) $ outerEnvOps ops)
         local
     where
       local :: forall a . (e -> e) -> eff2 a -> eff2 a

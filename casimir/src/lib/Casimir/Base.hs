@@ -7,14 +7,15 @@ module Casimir.Base
   ( Effect
   , EffOps (..)
   , EffFunctor (..)
-  , HigherEffFunctor (..)
   , ImplicitOps (..)
   , Eff
   , EffConstraint
   , NoEff
   , NoOp (..)
   , Lift (..)
-  , LiftOps (..)
+  , MaybeLift (..)
+  , LiftMonoid (..)
+  , LiftFunctor (..)
   , FreeLift (..)
   , HigherLift (..)
   , type (∪)

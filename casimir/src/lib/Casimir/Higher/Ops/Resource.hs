@@ -11,6 +11,8 @@ import Data.QuasiParam.Tag
 import Casimir.Base
   ( ContraLift (..)
   , EffFunctor (..)
+  , HigherLift (..)
+  , Lift (..)
   , type (~>)
   )
 
@@ -69,24 +71,23 @@ instance ImplicitOps (ResourceEff t) where
 
 instance
   (Effect inEff)
-  => EffFunctor (HigherResourceOps t inEff) where
-    effmap lifter (HigherResourceOps handleResource) =
+  => EffFunctor Lift (HigherResourceOps t inEff) where
+    effmap (Lift lift) (HigherResourceOps handleResource) =
       HigherResourceOps $
         \resource cont ->
-          lifter $ handleResource resource cont
+          lift $ handleResource resource cont
 
-instance HigherEffFunctor (HigherResourceOps t) where
-  invEffmap
+instance HigherEffFunctor HigherLift (HigherResourceOps t) where
+  higherEffmap
     :: forall eff1 eff2
       . ( Effect eff1
         , Effect eff2
         )
-    => eff1 ~> eff2
-    -> ContraLift eff1 eff2
+    => HigherLift eff1 eff2
     -> HigherResourceOps t eff1 eff1
     -> HigherResourceOps t eff2 eff2
-  invEffmap _
-    (ContraLift contraLift1)
+  higherEffmap
+    (HigherLift _ (ContraLift contraLift1))
     (HigherResourceOps doResource) =
       HigherResourceOps ops
        where

@@ -40,14 +40,14 @@ readerTHandler
   (Effect eff)
   => BaseOpsHandler NoEff (EnvEff a) (ReaderT a eff)
 readerTHandler = opsHandlerComp $
-  \lifter -> applyLift lifter readerTOps
+  \lifter -> effmap lifter readerTOps
 
 stateTHandler
   :: forall eff s .
   (Effect eff)
   => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
 stateTHandler = opsHandlerComp $
-  \lifter -> applyLift lifter stateTOps
+  \lifter -> effmap lifter stateTOps
 
 runCoState
   :: forall s eff . (Effect eff)

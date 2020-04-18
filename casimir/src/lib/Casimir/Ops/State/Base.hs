@@ -22,10 +22,10 @@ data StateOps s eff = StateOps {
 instance EffOps (StateEff s) where
   type Operation (StateEff s) = StateOps s
 
-instance EffFunctor (StateOps a) where
-  effmap lifter stateOps = StateOps {
-    getOp = lifter $ getOp stateOps,
-    putOp = lifter . putOp stateOps
+instance EffFunctor Lift (StateOps a) where
+  effmap (Lift lift) stateOps = StateOps {
+    getOp = lift $ getOp stateOps,
+    putOp = lift . putOp stateOps
   }
 
 instance ImplicitOps (StateEff s) where

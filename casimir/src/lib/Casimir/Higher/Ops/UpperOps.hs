@@ -6,8 +6,7 @@ where
 import Data.Kind
 
 import Casimir.Base
-  ( ContraLift (..)
-  , EffFunctor (..)
+  ( EffFunctor (..)
   )
 import Casimir.Higher.Base
 import Casimir.Higher.EffFunctor
@@ -31,29 +30,17 @@ instance
 
 instance
   ( Effect eff
-  , EffFunctor ops
+  , EffFunctor lift ops
   )
-  => EffFunctor (UpperOps ops eff)
+  => EffFunctor lift (UpperOps ops eff)
   where
-    effmap
-      :: forall eff1 eff2
-       . (Effect eff1, Effect eff2)
-      => (forall x. eff1 x -> eff2 x)
-      -> UpperOps ops eff eff1
-      -> UpperOps ops eff eff2
-    effmap lifter (UpperOps ops1 ops2) =
-      UpperOps ops1 (Base.effmap lifter ops2)
+    effmap lift (UpperOps ops1 ops2) =
+      UpperOps ops1 (effmap lift ops2)
+
 
 instance
-  (EffFunctor ops)
-  => HigherEffFunctor (UpperOps ops)
+  (EffFunctor lift ops)
+  => HigherEffFunctor lift (UpperOps ops)
    where
-    invEffmap
-      :: forall eff1 eff2
-       . (Effect eff1, Effect eff2)
-      => (forall x. eff1 x -> eff2 x)
-      -> ContraLift eff1 eff2
-      -> UpperOps ops eff1 eff1
-      -> UpperOps ops eff2 eff2
-    invEffmap lifter _ (UpperOps ops1 ops2) =
-      UpperOps (Base.effmap lifter ops1) (Base.effmap lifter ops2)
+    higherEffmap lift (UpperOps ops1 ops2) =
+      UpperOps (effmap lift ops1) (effmap lift ops2)

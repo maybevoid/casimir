@@ -17,9 +17,9 @@ data EnvOps e eff = EnvOps {
 instance EffOps (EnvEff e) where
   type Operation (EnvEff e) = EnvOps e
 
-instance EffFunctor (EnvOps e) where
-  effmap lifter envOps = EnvOps {
-    askOp = lifter $ askOp envOps
+instance EffFunctor Lift (EnvOps e) where
+  effmap (Lift lift) envOps = EnvOps {
+    askOp = lift $ askOp envOps
   }
 
 instance ImplicitOps (EnvEff e) where

@@ -33,15 +33,15 @@ instance
 
 instance
   ( MonadOps t
-  , LiftOps lift
-  , Liftable lift (SupportedOps t)
+  , LiftMonoid lift
+  , EffFunctor lift (Operation (SupportedOps t))
   , FreeLift (StateEff s) lift (OpsMonad t) (StateT s (OpsMonad t))
   )
   => MonadOps (UseStateLift lift s t) where
     type OpsMonad (UseStateLift lift s t) = StateT s (OpsMonad t)
 
     monadOps = stateTOps ∪
-      applyLift
+      effmap
         (freeLift @(StateEff s) @lift)
         (monadOps @t)
 
@@ -94,7 +94,7 @@ monadStateOps = StateOps {
 withStateTAndOps
   :: forall ops s r eff .
   ( EffOps ops
-  , EffFunctor (Operation ops)
+  , EffFunctor Lift (Operation ops)
   , Effect eff
   )
   => s
@@ -108,12 +108,12 @@ withStateTAndOps i ops1 comp1 = evalStateT comp2 i
   comp2 = comp1 ops2
 
   ops2 :: Base.Operation (StateEff s ∪ ops) (StateT s eff)
-  ops2 = stateTOps ∪ (effmap lift ops1)
+  ops2 = stateTOps ∪ (effmap (Lift lift) ops1)
 
 {-# INLINE stateTPipeline #-}
 stateTPipeline
   :: forall s eff1 comp .
-  (Effect eff1, Base.EffFunctor comp)
+  (Effect eff1, EffFunctor Lift comp)
   => s
   -> SimplePipeline Lift NoEff (StateEff s) comp eff1
 stateTPipeline i = transformePipeline $ genericComputation handler

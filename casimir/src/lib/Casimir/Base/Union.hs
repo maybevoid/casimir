@@ -58,22 +58,14 @@ instance
     type Operation (Union ops1 ops2) =
       UnionOps (Operation ops1) (Operation ops2)
 
-instance
-  ( EffFunctor ops1
-  , EffFunctor ops2
+instance {-# INCOHERENT #-}
+  ( EffFunctor lift ops1
+  , EffFunctor lift ops2
   )
-  => EffFunctor (UnionOps ops1 ops2)
+  => EffFunctor lift (UnionOps ops1 ops2)
   where
     effmap f (UnionOps x y)
       = UnionOps (effmap f x) (effmap f y)
-
-instance
-  (HigherEffFunctor ops1, HigherEffFunctor ops2)
-  => HigherEffFunctor (UnionOps ops1 ops2) where
-    invEffmap lift contraLift (UnionOps ops1 ops2) =
-      UnionOps
-        (invEffmap lift contraLift ops1)
-        (invEffmap lift contraLift ops2)
 
 -- | @ops1 '∪' ops2@ is a 'ImplicitOps' if both @ops1@ and @ops2@ are instance of
 -- 'ImplicitOps', with @'OpsConstraint' (ops1 '∪' ops2)@ being the **reversed**

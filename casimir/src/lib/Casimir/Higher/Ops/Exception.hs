@@ -10,8 +10,10 @@ import Data.QuasiParam.Tag
 
 import Casimir.Base
   ( Eff
+  , Lift (..)
   , EffConstraint
   , ContraLift (..)
+  , HigherLift (..)
   , EffFunctor (..)
   , ImplicitOps (..)
   , type (∪)
@@ -79,34 +81,33 @@ instance ImplicitOps (ExceptionEff e) where
 
 instance
   (Effect inEff)
-  => EffFunctor (HigherExceptionOps e inEff) where
+  => EffFunctor Lift (HigherExceptionOps e inEff) where
     effmap
       :: forall eff1 eff2
        . (Effect eff1, Effect eff2)
-      => eff1 ~> eff2
+      => Lift eff1 eff2
       -> HigherExceptionOps e inEff eff1
       -> HigherExceptionOps e inEff eff2
-    effmap lifter ops1 =
+    effmap (Lift lift) ops1 =
       HigherExceptionOps handleTry handleThrow
      where
       handleTry
         :: forall a
          . inEff a
         -> eff2 (Either e a)
-      handleTry comp = lifter $ tryOp ops1 comp
+      handleTry comp = lift $ tryOp ops1 comp
 
       handleThrow = throwOp ops1
 
-instance HigherEffFunctor (HigherExceptionOps e) where
-  invEffmap
+instance HigherEffFunctor HigherLift (HigherExceptionOps e) where
+  higherEffmap
     :: forall eff1 eff2
      . (Effect eff1, Effect eff2)
-    => eff1 ~> eff2
-    -> ContraLift eff1 eff2
+    => HigherLift eff1 eff2
     -> HigherExceptionOps e eff1 eff1
     -> HigherExceptionOps e eff2 eff2
-  invEffmap
-    lifter contraLift1
+  higherEffmap
+    (HigherLift lifter contraLift1)
     (HigherExceptionOps handleTry1 handleThrow1) =
       HigherExceptionOps handleTry2 handleThrow2
    where

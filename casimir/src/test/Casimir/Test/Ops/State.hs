@@ -34,7 +34,7 @@ stateTHandler
   (Effect eff)
   => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
 stateTHandler = opsHandlerComp $
-  \lifter -> applyLift lifter stateTOps
+  \lifter -> effmap lifter stateTOps
 
 ioHandler :: BaseOpsHandler NoEff IoEff IO
 ioHandler = baseOpsHandler IoOps {
@@ -43,7 +43,9 @@ ioHandler = baseOpsHandler IoOps {
 
 stateTToEnvOpsPipeline
   :: forall s eff1 comp .
-  (Effect eff1, EffFunctor comp)
+  ( Effect eff1
+  , EffFunctor Lift comp
+  )
   => SimplePipeline Lift (EnvEff s) (StateEff s) comp eff1
 stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
  where

@@ -10,7 +10,6 @@ import Casimir.Freer.CoOp
 class
   ( EffOps ops
   , EffCoOp ops
-  , EffFunctor (Operation ops)
   )
   => FreeOps ops
    where

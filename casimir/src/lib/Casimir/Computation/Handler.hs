@@ -25,9 +25,9 @@ bindOps
    . ( Effect eff
      , ImplicitOps ops1
      , ImplicitOps ops2
-     , LiftOps lift
-     , Liftable lift ops1
-     , Liftable lift ops2
+     , LiftMonoid lift
+     , EffFunctor lift (Operation ops1)
+     , EffFunctor lift (Operation ops2)
      )
   => Operation ops1 eff
   -> Computation lift (ops1 ∪ ops2) comp eff
@@ -35,7 +35,7 @@ bindOps
 bindOps ops1 comp = Computation $
   \lift ops2 ->
     runComp comp lift $
-      (applyLift lift ops1) ∪ ops2
+      (effmap lift ops1) ∪ ops2
 
 opsHandlerComp
   :: forall ops lift handler eff1
@@ -56,13 +56,13 @@ baseOpsHandler
   :: forall lift handler eff
    . ( ImplicitOps handler
      , Effect eff
-     , LiftOps lift
-     , Liftable lift handler
+     , LiftMonoid lift
+     , EffFunctor lift (Operation handler)
      )
   => Operation handler eff
   -> OpsHandler lift NoEff handler eff
 baseOpsHandler handler = Computation $
-  \ lift12 _ -> applyLift lift12 handler
+  \ lift12 _ -> effmap lift12 handler
 
 genericOpsHandler
   :: forall ops handler lift
@@ -79,8 +79,8 @@ bindExactOpsHandler
    . ( ImplicitOps ops
      , ImplicitOps handler
      , Effect eff1
-     , LiftOps lift
-     , Liftable lift handler
+     , LiftMonoid lift
+     , EffFunctor lift (Operation handler)
      )
   => OpsHandler lift ops handler eff1
   -> Computation lift (handler ∪ ops) comp eff1
@@ -135,8 +135,8 @@ withOpsHandler
    . ( ImplicitOps ops
      , ImplicitOps handler
      , EffConstraint ops eff
-     , LiftOps lift
-     , Liftable lift handler
+     , LiftMonoid lift
+     , EffFunctor lift (Operation handler)
      )
   => OpsHandler lift ops handler eff
   -> (OpsConstraint handler eff => r)
@@ -201,8 +201,8 @@ bindOpsHandlerWithCast
      , ImplicitOps ops3
      , ImplicitOps handler
      , Effect eff
-     , LiftOps lift
-     , Liftable lift handler
+     , LiftMonoid lift
+     , EffFunctor lift (Operation handler)
      )
   => OpsCast ops3 ops1
   -> OpsCast (handler ∪ ops3) ops2
@@ -224,8 +224,8 @@ bindOpsHandler
      , (handler ∪ ops3) ⊇ ops2
      , ImplicitOps handler
      , Effect eff
-     , LiftOps lift
-     , Liftable lift handler
+     , LiftMonoid lift
+     , EffFunctor lift (Operation handler)
      )
   => OpsHandler lift ops1 handler eff
   -> Computation lift ops2 r eff

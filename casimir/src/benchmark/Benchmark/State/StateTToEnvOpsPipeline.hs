@@ -22,7 +22,7 @@ import Benchmark.State.Base
 
 stateTToEnvOpsPipeline
   :: forall s eff1 comp .
-  (Effect eff1, EffFunctor comp)
+  (Effect eff1, EffFunctor Lift comp)
   => SimplePipeline Lift (EnvEff s) (StateEff s) comp eff1
 stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
  where

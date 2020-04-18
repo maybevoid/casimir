@@ -25,9 +25,9 @@ instance EffOps (ExceptionEff e) where
 instance EffCoOp (ExceptionEff e) where
   type CoOperation (ExceptionEff e) = ExceptionCoOp e
 
-instance EffFunctor (ExceptionOps e) where
-  effmap lifter ops = ExceptionOps {
-    raiseOp = \e -> lifter $ raiseOp ops e
+instance EffFunctor Lift (ExceptionOps e) where
+  effmap (Lift lift) ops = ExceptionOps {
+    raiseOp = \e -> lift $ raiseOp ops e
   }
 
 instance Functor (ExceptionCoOp e) where
@@ -134,16 +134,16 @@ tryComp
      , EffOps ops
      , ImplicitOps ops
      , EffConstraint ops eff
-     , EffFunctor (Operation ops)
+     , EffFunctor Lift (Operation ops)
      )
-  => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) eff
+  => Computation Lift ((ExceptionEff e) ∪ ops) (Return a) eff
   -> (e -> eff a)
   -> eff a
 tryComp comp1 handler1 = handleFree handler2 comp2
  where
   comp2 :: free (ExceptionEff e) eff a
   comp2 = returnVal $ runComp comp1 freeLiftEff $
-    UnionOps freeOps $ effmap liftFree captureOps
+    UnionOps freeOps $ effmap (Lift liftFree) captureOps
 
   handler2 :: CoOpHandler (ExceptionEff e) a a eff
   handler2 = CoOpHandler return $
@@ -155,7 +155,7 @@ bracketComp
      , EffOps ops
      , ImplicitOps ops
      , EffConstraint ops eff
-     , EffFunctor (Operation ops)
+     , EffFunctor Lift (Operation ops)
      )
   => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init
   -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return ()) eff)  -- cleanup
@@ -180,7 +180,7 @@ bracketComp initComp cleanupComp betweenComp = Computation comp1
         runComp (betweenComp x)
           (joinLift lift12 freeLiftEff) $
           UnionOps freeOps $
-            effmap liftFree ops1
+            effmap (Lift liftFree) ops1
 
     comp4 :: a -> eff2 ()
     comp4 x = returnVal $ runComp (cleanupComp x) lift12 ops

@@ -29,16 +29,19 @@ type OpsHandler lift ops handler = Computation lift ops (Operation handler)
 type BaseOpsHandler ops handler = OpsHandler Lift ops handler
 
 instance
-  (EffOps ops)
-  => EffFunctor (BaseComputation ops comp) where
-    effmap lift = liftComputation (Lift lift)
+  ( EffOps ops
+  , LiftMonoid lift
+  , EffFunctor lift (Operation ops)
+  )
+  => EffFunctor lift (Computation lift ops comp) where
+    effmap = liftComputation
 
 liftComputation
   :: forall lift ops comp eff1 eff2
    . ( EffOps ops
      , Effect eff1
      , Effect eff2
-     , LiftOps lift
+     , LiftMonoid lift
      )
   => lift eff1 eff2
   -> Computation lift ops comp eff1
@@ -57,8 +60,8 @@ strengthenComputation
   :: forall lift1 lift2 ops comp eff
    . ( EffOps ops
      , Effect eff
-     , LiftOps lift1
-     , LiftOps lift2
+     , LiftMonoid lift1
+     , LiftMonoid lift2
      )
   => (forall eff1 eff2
        . (Effect eff1, Effect eff2)

@@ -10,7 +10,8 @@ module Casimir.Higher.Base
 where
 
 import Data.Kind
-import Casimir.Base (Effect)
+
+import Casimir.Base (Effect, EffFunctor (..))
 import qualified Casimir.Base as Base
 
 newtype LowerOps ops
@@ -43,7 +44,7 @@ class
   => HigherEffOps ops
 
 instance
-  (Base.EffFunctor ops)
-  => Base.EffFunctor (HigherOps ops eff) where
-    effmap lifter (HigherOps ops) = HigherOps $
-      Base.effmap lifter ops
+  (EffFunctor lift ops)
+  => EffFunctor lift (HigherOps ops eff) where
+    effmap lift (HigherOps ops) = HigherOps $
+      effmap lift ops

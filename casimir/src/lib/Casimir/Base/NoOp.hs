@@ -7,6 +7,7 @@ module Casimir.Base.NoOp
 where
 
 import Data.Kind
+import Casimir.Base.Lift
 import Casimir.Base.EffOps
 import Casimir.Base.Implicit
 import Casimir.Base.EffFunctor
@@ -45,11 +46,8 @@ class NoConstraint (eff :: Type -> Type) where
 -- satisfied.
 instance NoConstraint eff where
 
-instance EffFunctor NoOp where
+instance EffFunctor Lift NoOp where
   effmap _ _ = NoOp
-
-instance HigherEffFunctor NoOp where
-  invEffmap _ _ _ = NoOp
 
 -- | As the trivial instance for 'ImplicitOps', @'OpsConstraint' 'NoOp'@ does not
 -- make use of implicit parameters, as its 'Operation' can be trivially be

@@ -2,9 +2,16 @@
 module Casimir.Higher.Computation
 where
 
-import Casimir.Base.Lift
-import Casimir.Base.Union
-import Casimir.Base.Implicit
+import Casimir.Base
+  ( Lift (..)
+  , HigherLift (..)
+  , EffFunctor (..)
+  , ImplicitOps
+  , UnionOps (..)
+  , LiftMonoid (..)
+  , type (∪)
+  , (∪)
+  )
 
 import Casimir.Computation
 import Casimir.Higher.Base
@@ -48,7 +55,8 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2
-     . (ImplicitOps ops2, Base.HigherEffFunctor (Base.Operation ops2))
+     . ( ImplicitOps ops2
+       , EffFunctor HigherLift (Base.Operation ops2))
     => HigherComputation (handler ∪ ops2) (Return a) eff1
     -> HigherComputation (ops1 ∪ ops2) (Return (f a)) eff1
   pipeline comp1 = Computation comp2
@@ -68,7 +76,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
       comp3 :: free handler eff2 a
       comp3 = returnVal $ runComp comp1
         (joinLift lift12 freeHigherLift)
-        (LowerOps freeOps ∪ applyLift freeHigherLift ops2)
+        (LowerOps freeOps ∪ effmap freeHigherLift ops2)
 
       comp4 :: eff2 (f a)
       comp4 = handleFree handler2 comp3

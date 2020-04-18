@@ -7,32 +7,30 @@ where
 
 import Casimir.Base
   ( EffFunctor (..)
-  , ContraLift (..)
-  , type (~>)
+  , HigherLift
   )
 
 import Casimir.Higher.Base
 import qualified Casimir.Base as Base
 
-class HigherEffFunctor ops where
-  invEffmap
+class HigherEffFunctor lift ops where
+  higherEffmap
     :: forall eff1 eff2
       . ( Effect eff1
         , Effect eff2
         )
-    => eff1 ~> eff2
-    -> ContraLift eff1 eff2
+    => lift eff1 eff2
     -> ops eff1 eff1
     -> ops eff2 eff2
 
-instance
-  (EffFunctor ops)
-  => HigherEffFunctor (HigherOps ops) where
-    invEffmap lifter _ (HigherOps ops) =
-      HigherOps $ Base.effmap lifter ops
+instance {-# OVERLAPPABLE #-}
+  (EffFunctor lift ops)
+  => HigherEffFunctor lift (HigherOps ops) where
+    higherEffmap lift (HigherOps ops) =
+      HigherOps $ Base.effmap lift ops
 
-instance
-  (HigherEffFunctor ops)
-  => Base.HigherEffFunctor (LowerOps ops) where
-    invEffmap lift contraLift (LowerOps ops) =
-      LowerOps $ invEffmap lift contraLift ops
+instance {-# OVERLAPPABLE #-}
+  (HigherEffFunctor HigherLift ops)
+  => EffFunctor HigherLift (LowerOps ops) where
+    effmap lift (LowerOps ops) =
+      LowerOps $ higherEffmap lift ops

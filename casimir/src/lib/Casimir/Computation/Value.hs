@@ -38,16 +38,16 @@ newtype ReturnCtx f ret a (eff :: Type -> Type) = ReturnCtx {
   returnCtx :: ret (f a) eff
 }
 
-instance EffFunctor (Return a) where
-  effmap lifter (Return mx) = Return $ lifter mx
+instance EffFunctor Lift (Return a) where
+  effmap (Lift lift) (Return mx) = Return $ lift mx
 
-instance (EffFunctor (ret b)) => EffFunctor (Arrow a ret b) where
+instance (EffFunctor lift (ret b)) => EffFunctor lift (Arrow a ret b) where
   effmap lifter (Arrow fn) = Arrow $
     \x -> effmap lifter $ fn x
 
 instance
-  (EffFunctor (ret (f a)))
-  => EffFunctor (ReturnCtx f ret a)
+  (EffFunctor lift (ret (f a)))
+  => EffFunctor lift (ReturnCtx f ret a)
    where
     effmap lifter (ReturnCtx mx) = ReturnCtx $ effmap lifter mx
 
@@ -104,7 +104,7 @@ arrowComputation fn = genericComputation $ Arrow $
 
 runIdentityComp
   :: forall a lift
-   . (LiftOps lift)
+   . (LiftMonoid lift)
   => Computation lift NoEff (Return a) Identity
   -> a
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
@@ -113,8 +113,8 @@ execComp
   :: forall ops lift eff a .
   ( ImplicitOps ops
   , EffConstraint ops eff
-  , LiftOps lift
-  , Liftable lift ops
+  , LiftMonoid lift
+  , EffFunctor lift (Operation ops)
   )
   => Computation lift ops (Return a) eff
   -> eff a

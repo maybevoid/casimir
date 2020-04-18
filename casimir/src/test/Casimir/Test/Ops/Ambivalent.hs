@@ -33,9 +33,9 @@ instance EffCoOp (AmbEff a) where
 instance Functor (AmbCoOp a) where
   fmap f (SelectOp choice cont) = SelectOp choice (f . cont)
 
-instance EffFunctor (AmbOps a) where
-  effmap lifter ops = AmbOps {
-    selectOp = \choice -> lifter $ selectOp ops choice
+instance EffFunctor Lift (AmbOps a) where
+  effmap (Lift lift) ops = AmbOps {
+    selectOp = \choice -> lift $ selectOp ops choice
   }
 
 instance FreeOps (AmbEff a) where

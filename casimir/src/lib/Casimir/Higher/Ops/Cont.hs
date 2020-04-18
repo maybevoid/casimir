@@ -7,7 +7,9 @@ import qualified Control.Monad.Trans.Cont as ContT
 import Casimir.Base
   ( ContraLift (..)
   , EffFunctor (..)
-  , type (~>)
+  , Lift (..)
+  , HigherLift (..)
+  , ContraLift (..)
   )
 import Casimir.Higher
 
@@ -20,27 +22,28 @@ data ContOps eff1 eff2 = ContOps {
 
 instance
   (Effect eff1)
-  => EffFunctor (ContOps eff1) where
+  => EffFunctor Lift (ContOps eff1) where
     effmap
       :: forall eff2 eff3
-       . eff2 ~> eff3
+       . Lift eff2 eff3
       -> ContOps eff1 eff2
       -> ContOps eff1 eff3
-    effmap lift (ContOps callCC) = ContOps $ \cont ->
+    effmap (Lift lift) (ContOps callCC) = ContOps $ \cont ->
       lift $ callCC cont
 
-instance HigherEffFunctor ContOps where
-  invEffmap
+instance HigherEffFunctor HigherLift ContOps where
+  higherEffmap
     :: forall eff1 eff2
       . ( Effect eff1
         , Effect eff2
         )
-    => eff1 ~> eff2
-    -> ContraLift eff1 eff2
+    => HigherLift eff1 eff2
     -> ContOps eff1 eff1
     -> ContOps eff2 eff2
-  invEffmap lifter (ContraLift contraLift1) ops =
-    ContOps callCC2
+  higherEffmap
+    (HigherLift lift (ContraLift contraLift1))
+    ops =
+      ContOps callCC2
    where
     callCC1
       :: forall a b
@@ -67,7 +70,7 @@ instance HigherEffFunctor ContOps where
           cont5 = cont1 cont6
 
           cont6 :: a -> eff2 b
-          cont6 x1 = lifter $ do
+          cont6 x1 = lift $ do
             x2 :: w a <- contraLift2 $ return x1
             cont4 x2
 
