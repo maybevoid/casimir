@@ -11,6 +11,7 @@ import Casimir.Base
   , LiftMonoid (..)
   , type (∪)
   , (∪)
+  , pattern UnionOps
   )
 
 import Casimir.Computation

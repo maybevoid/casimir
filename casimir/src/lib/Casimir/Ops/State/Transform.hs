@@ -15,7 +15,13 @@ import Casimir.Computation
 
 import qualified Casimir.Base as Base
 
-import Casimir.Ops.State.Base (StateEff, StateOps(..))
+import Casimir.Ops.State.Default
+  ( StateEff
+  , StateOps(..)
+  , pattern StateOps
+  , getOp
+  , putOp
+  )
 
 import Casimir.Ops.State.Lift
 

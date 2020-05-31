@@ -1,7 +1,7 @@
 
 module Casimir.Ops.Env
-  ( module Casimir.Ops.Env.Base
+  ( module Casimir.Ops.Env.Default
   )
 where
 
-import Casimir.Ops.Env.Base
+import Casimir.Ops.Env.Default

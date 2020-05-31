@@ -7,8 +7,9 @@ module Casimir.Base
   ( Effect
   , EffOps (..)
   , EffFunctor (..)
-  , ImplicitOps (..)
+  , ImplicitOps
   , Eff
+  , OpsConstraint
   , EffConstraint
   , NoEff
   , NoOp (..)
@@ -20,20 +21,30 @@ module Casimir.Base
   , HigherLift (..)
   , type (∪)
   , type (~>)
-  , NoConstraint
   , Union
   , UnionOps (..)
   , ContraLift (..)
+  , LabeledEff
+  , LabeledOps (..)
+  , NamedEff
+  , TaggedEff
+  , NamedOps
+  , TaggedOps
   , (∪)
+  , withOps
+  , captureOps
   , leftOps
   , rightOps
   , joinContraLift
   , identityContraLift
+  , pattern NoOp
+  , pattern UnionOps
 )
 where
 
 import Casimir.Base.EffOps
 import Casimir.Base.Effect
+import Casimir.Base.Label
 import Casimir.Base.EffFunctor
 import Casimir.Base.Implicit
 import Casimir.Base.Union

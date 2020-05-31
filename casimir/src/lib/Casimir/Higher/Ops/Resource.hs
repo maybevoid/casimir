@@ -9,12 +9,7 @@ import Control.Exception (bracket)
 import Data.QuasiParam.Tag
 
 import Casimir.Base
-  ( ContraLift (..)
-  , EffFunctor (..)
-  , HigherLift (..)
-  , Lift (..)
-  , type (~>)
-  )
+  hiding ( EffOps )
 
 import Casimir.Higher
 import Casimir.Higher.Free
@@ -23,16 +18,19 @@ import Casimir.Higher.ContraLift.Identity
 import Casimir.Base.Implicit
 import qualified Casimir.Base as Base
 
-data ResourceEff (t :: Type -> Type)
+data ResourceEff' (t :: Type -> Type)
 data ResourceTag
 
-type ResourceOps t = LowerOps (HigherResourceOps t)
+type ResourceEff t = TaggedEff ResourceTag (ResourceEff' t)
+
+type ResourceOps t =
+  TaggedOps ResourceTag (LowerOps (HigherResourceOps t))
 
 pattern ResourceOps
   :: forall t eff
    . (forall a b. t a -> (a -> eff b) -> eff b)
-  -> LowerOps (HigherResourceOps t) eff
-pattern ResourceOps t = LowerOps (HigherResourceOps t)
+  -> ResourceOps t eff
+pattern ResourceOps t = LabeledOps (LowerOps (HigherResourceOps t))
 
 data HigherResourceOps t inEff eff = HigherResourceOps {
   withResourceOp
@@ -54,20 +52,13 @@ data BracketResource a = BracketResource
   , releaseOp :: (a -> IO ())
   }
 
-instance EffOps (ResourceEff t) where
-  type Operation (ResourceEff t) = HigherResourceOps t
+instance EffOps (ResourceEff' t) where
+  type Operation (ResourceEff' t) = HigherResourceOps t
 
-instance Base.EffOps (ResourceEff t) where
-  type Operation (ResourceEff t) = LowerOps (HigherResourceOps t)
+instance Base.EffOps (ResourceEff' t) where
+  type Operation (ResourceEff' t) = LowerOps (HigherResourceOps t)
 
-instance LowerEffOps (ResourceEff t)
-
-instance ImplicitOps (ResourceEff t) where
-  type OpsConstraint (ResourceEff t) eff =
-    Param ResourceTag (LowerOps (HigherResourceOps t) eff)
-
-  withOps = withParam @ResourceTag
-  captureOps = captureParam @ResourceTag
+instance LowerEffOps (ResourceEff' t)
 
 instance
   (Effect inEff)
@@ -107,8 +98,8 @@ instance HigherEffFunctor HigherLift (HigherResourceOps t) where
             cont3 :: a -> eff1 (w b)
             cont3 x = contraLift2 $ cont1 x
 
-instance EffCoOp (ResourceEff t) where
-  type CoOperation (ResourceEff t) = ResourceCoOp t
+instance EffCoOp (ResourceEff' t) where
+  type CoOperation (ResourceEff' t) = ResourceCoOp t
 
 instance
   (Functor f)
@@ -126,7 +117,7 @@ instance CoOpFunctor (ResourceCoOp t) where
   liftCoOp lifter (ResourceOp resource comp) =
     ResourceOp resource (fmap lifter comp)
 
-instance FreeOps (ResourceEff t) where
+instance FreeOps (ResourceEff' t) where
   mkFreeOps
     :: forall eff
     . (Effect eff)
@@ -148,7 +139,7 @@ ioBracketOps = ResourceOps $
     bracket alloc release cont
 
 ioBracketCoOpHandler
-  :: CoOpHandler (ResourceEff BracketResource) Identity IO
+  :: CoOpHandler (ResourceEff' BracketResource) Identity IO
 ioBracketCoOpHandler = CoOpHandler
   (return . Identity) handleOp contraIdentity
  where
@@ -167,4 +158,6 @@ withResource
   => t a
   -> (a -> eff b)
   -> eff b
-withResource = withResourceOp $ unLowerOps captureOps
+withResource = ops
+ where
+  (ResourceOps ops) = captureOps
