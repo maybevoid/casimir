@@ -22,20 +22,38 @@ import Casimir.Base.EffOps
 import qualified Data.QuasiParam.Multi as Multi
 
 class
+  ( forall m . Coercible (ops1 m) (ops2 m)
+  , forall m . Coercible (ops2 m) (ops1 m)
+  )
+  => AllCoercible
+      (ops1 :: (Type -> Type) -> Type)
+      (ops2 :: (Type -> Type) -> Type)
+  where
+    coerceTo :: forall m . ops1 m -> ops2 m
+
+    coerceFrom :: forall m . ops2 m -> ops1 m
+
+instance
+  ( forall m . Coercible (ops1 m) (ops2 m)
+  , forall m . Coercible (ops2 m) (ops1 m)
+  )
+  => AllCoercible
+      (ops1 :: (Type -> Type) -> Type)
+      (ops2 :: (Type -> Type) -> Type)
+  where
+    coerceTo :: forall m . ops1 m -> ops2 m
+    coerceTo = coerce
+
+    coerceFrom :: forall m . ops2 m -> ops1 m
+    coerceFrom = coerce
+
+class
   ( Multi.MultiParam (Type -> Type) (AsMultiParam ops)
+  , AllCoercible ops (AsMultiParam ops)
   )
   => ParamOps ops where
     type family AsMultiParam ops
-      = (param :: (Type -> Type) -> Type) | param -> ops
-
-    coerceTo
-      :: forall m
-       . ops m -> AsMultiParam ops m
-
-    coerceFrom
-      :: forall m
-       . AsMultiParam ops m
-      -> ops m
+      :: (Type -> Type) -> Type
 
 type OpsParam ops m =
   Multi.ParamConstraint
@@ -46,9 +64,6 @@ type OpsParam ops m =
 instance ParamOps NoOp where
   type AsMultiParam NoOp = Multi.Empty (Type -> Type)
 
-  coerceTo = coerce
-  coerceFrom = coerce
-
 instance ParamOps (LabeledOps k label ops) where
   type AsMultiParam (LabeledOps k label ops) =
     Multi.Elem k (Type -> Type) label ops
@@ -56,6 +71,10 @@ instance ParamOps (LabeledOps k label ops) where
 instance
   ( ParamOps ops1
   , ParamOps ops2
+  , AsMultiParam ops1 ~ ops1'
+  , AsMultiParam ops2 ~ ops2'
+  , Multi.Cons (Type -> Type) ops1' ops2' ~ ops3
+  , AllCoercible (UnionOps ops1 ops2) (ops3)
   )
   => ParamOps (UnionOps ops1 ops2) where
     type AsMultiParam (UnionOps ops1 ops2) =
@@ -63,6 +82,56 @@ instance
         (Type -> Type)
         (AsMultiParam ops1)
         (AsMultiParam ops2)
+
+class
+  ( EffOps eff
+  , ParamOps (CanonOps eff)
+  , AllCoercible (Operation eff) (CanonOps eff)
+  )
+  => ImplicitOps eff where
+    type family CanonOps eff
+      :: (Type -> Type) -> Type
+
+instance
+  ( EffOps eff )
+  => ImplicitOps (LabeledEff k label eff) where
+    type CanonOps (LabeledEff k label eff)
+      = LabeledOps k label (Operation eff)
+
+instance ImplicitOps NoEff where
+  type CanonOps NoEff = NoOp
+
+instance
+  ( ImplicitOps eff1
+  , ImplicitOps eff2
+  , Operation eff1 ~ ops11
+  , CanonOps eff1 ~ ops12
+  , Operation eff2 ~ ops21
+  , CanonOps eff2 ~ ops22
+  , AsMultiParam ops12 ~ ops13
+  , AsMultiParam ops22 ~ ops23
+  , Multi.Cons (Type -> Type) ops13 ops23 ~ ops3
+  , AllCoercible
+      (UnionOps ops12 ops22)
+      (ops3)
+  , AllCoercible
+      (UnionOps ops11 ops21)
+      (UnionOps ops12 ops22)
+  )
+  => ImplicitOps (Union eff1 eff2) where
+    type CanonOps (Union eff1 eff2) =
+      UnionOps
+        (CanonOps eff1)
+        (CanonOps eff2)
+
+type OpsConstraint ops m =
+  ( ImplicitOps ops
+  , OpsParam (CanonOps ops) m
+  )
+
+type EffConstraint ops m = (Monad m, OpsConstraint ops m)
+
+type Eff ops a = forall m . (EffConstraint ops m) => m a
 
 withOps'
   :: forall ops m r
@@ -88,87 +157,21 @@ captureOps' = coerceFrom ops'
 
 withOps
   :: forall ops m r
-   . ( ImplicitOps ops )
+   . ( ImplicitOps ops
+     )
   => Operation ops m
   -> (OpsConstraint ops m => r)
   -> r
-withOps = withOps'
+withOps ops1 = withOps' ops2
+ where
+  ops2 :: CanonOps ops m
+  ops2 = coerceTo ops1
 
 captureOps
   :: forall ops m
    . ( OpsConstraint ops m )
   => Operation ops m
-captureOps = captureOps'
-
-type ImplicitOps ops =
-  ( EffOps ops
-  , ParamOps (Operation ops)
-  )
-
-type OpsConstraint ops m =
-  ( ImplicitOps ops
-  , OpsParam (Operation ops) m
-  )
-
-type EffConstraint ops m = (Monad m, OpsConstraint ops m)
-
-type Eff ops a = forall m . (EffConstraint ops m) => m a
-
-
--- | 'ParamOps' gives computations access to mect operations of an
--- operation through implicit parameter constraints. It hides the machinery
--- of implicit parameters and make them appear like regular constraints except
--- with local scope.
---
--- The law for 'ParamOps' is
---
--- @
--- forall ops . 'withOps' ops 'captureOps' === ops
--- @
---
--- This means any non-trivial instance for 'ParamOps' must somehow make use of
--- implicit parameters for the law to hold.
---
--- The definition for 'ParamOps' for most mect operations can typically
--- be derived mechanically. We may look into using template Haskell to generate
--- instances for 'ParamOps' in future to reduce some boilerplate.
--- class
---   (EffOps ops)
---   => ParamOps ops where
-
---     -- | The constraint kind for the mect operation under 'Monad' @m@.
---     -- This is typically an implicit parameter with a unique name, e.g.
---     -- @type OpsParam FooOps m = (?fooOps :: FooOps m)@.
---     --
---     -- Note that there is a injective type families condition, and given that
---     -- implicit parameters have a single namespace, users must come out with
---     -- naming conventions for their custom mects to avoid name clashing
---     -- that would result in compile-time injectivity violation error.
---     type family OpsParam ops (m :: Type -> Type)
---       = (c :: Constraint) | c -> ops m
-
---     -- | Takes an mect operation @'Operation' ops m@ and bind it to the
---     -- implicit parameter specified in @'OpsParam' ops m@ for the
---     -- continuation @r@. The expression @r@ can then use the mect operations
---     -- without having to explicitly pass them around as function arguments.
---     -- For the example @FooEff@, the body for 'withOps' can be defined as
---     -- @withOps fooOps cont = let ?fooOps = fooOps in cont @.
---     withOps
---       :: forall m r
---        . (Monad m)
---       => Operation ops m
---       -> (OpsParam ops m => r)
---       -> r
-
---     -- | If an implicit parameter for the mect operation is available in the
---     -- context, capture it and return the operation as a value. For the example
---     -- @FooEff@, the body for 'captureOps' can be defined as @captureOps = ?fooOps@.
---     captureOps
---       :: forall m
---        . (Monad m, OpsParam ops m)
---       => Operation ops m
-
--- -- | This is a type alias for the implicit parameter constraint for @ops@,
--- -- in addition to requiring @m@ to be an 'Monad'. This helps reducing
--- -- boilerplate in generic computations so that we do not have to keep
--- -- repeating the @(Monad m)@ constraint in our type signatures.
+captureOps = coerceFrom ops
+ where
+  ops :: CanonOps ops m
+  ops = captureOps'

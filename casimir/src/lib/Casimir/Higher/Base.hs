@@ -11,7 +11,7 @@ where
 
 import Data.Kind
 
-import Casimir.Base (Monad, EffFunctor (..))
+import Casimir.Base (EffFunctor (..))
 import qualified Casimir.Base as Base
 
 newtype LowerOps ops
