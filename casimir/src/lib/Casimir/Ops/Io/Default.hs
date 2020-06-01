@@ -13,9 +13,9 @@ type IoEff = TaggedEff IoTag Base.IoEff
 type IoOps = TaggedOps IoTag Base.IoOps
 
 pattern IoOps
-  :: forall eff
-   . (forall a . IO a -> eff a)
-  -> IoOps eff
+  :: forall m
+   . (forall a . IO a -> m a)
+  -> IoOps m
 pattern IoOps { liftIoOp } = LabeledOps (Base.IoOps liftIoOp)
 
 liftIo :: forall a . IO a -> Eff IoEff a

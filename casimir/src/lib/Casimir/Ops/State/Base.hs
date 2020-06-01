@@ -10,17 +10,17 @@ import Casimir.Base
 
 data StateEff s
 
-data StateOps s eff
+data StateOps s m
   = StateOps
-    { getOp :: eff s
-    , putOp :: s -> eff ()
+    { getOp :: m s
+    , putOp :: s -> m ()
     }
 
 instance EffOps (StateEff s) where
   type Operation (StateEff s) = StateOps s
 
 instance EffFunctor Lift (StateOps a) where
-  effmap (Lift lift) stateOps = StateOps
+  mmap (Lift lift) stateOps = StateOps
     { getOp = lift $ getOp stateOps
     , putOp = lift . putOp stateOps
     }

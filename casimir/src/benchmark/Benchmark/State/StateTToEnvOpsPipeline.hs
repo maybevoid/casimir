@@ -21,31 +21,31 @@ import Casimir.Ops.State.Transform
 import Benchmark.State.Base
 
 stateTToEnvOpsPipeline
-  :: forall s eff1 comp .
-  (Effect eff1, EffFunctor Lift comp)
-  => SimplePipeline Lift (EnvEff s) (StateEff s) comp eff1
+  :: forall s m1 comp .
+  (Monad m1, EffFunctor Lift comp)
+  => SimplePipeline Lift (EnvEff s) (StateEff s) comp m1
 stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
  where
-  handler :: forall eff
-   . (EffConstraint (EnvEff s) eff)
-    => TransformerHandler (StateT s) (StateEff s) eff
+  handler :: forall m
+   . (EffConstraint (EnvEff s) m)
+    => TransformerHandler (StateT s) (StateEff s) m
   handler = TransformerHandler stateTOps stateTLift $ Lift $
     \comp -> do
       i <- ask
       evalStateT comp i
 
-stateTComp1 :: forall eff . (Effect eff)
-  => BaseComputation (EnvEff Int) (Return ()) eff
+stateTComp1 :: forall m . (Monad m)
+  => BaseComputation (EnvEff Int) (Return ()) m
 stateTComp1 = runPipeline
   stateTToEnvOpsPipeline stateBaseComp
 
-stateTComp2 :: forall eff . (Effect eff)
-  => BaseComputation NoEff (Return ()) (ReaderT Int eff)
+stateTComp2 :: forall m . (Monad m)
+  => BaseComputation NoEff (Return ()) (ReaderT Int m)
 stateTComp2 = bindOpsHandler
   readerTHandler stateTComp1
 
-stateToReaderComp :: forall eff . (Effect eff)
-  => ReaderT Int eff ()
+stateToReaderComp :: forall m . (Monad m)
+  => ReaderT Int m ()
 stateToReaderComp = returnVal $ runComp stateTComp2 idLift NoOp
 
 stateToReaderIdentityComp :: ReaderT Int Identity ()

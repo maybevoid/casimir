@@ -12,19 +12,19 @@ import Casimir.Base
 import Casimir.Cast.Cast
 
 class
-  (Effect eff, ImplicitOps ops1, ImplicitOps ops2)
-  => EntailOps' ops1 ops2 eff
+  (Monad m, ImplicitOps ops1, ImplicitOps ops2)
+  => EntailOps' ops1 ops2 m
   where
-    entailOps' :: OpsCast' ops1 ops2 eff
+    entailOps' :: OpsCast' ops1 ops2 m
 
 instance
-  ( Effect eff, ImplicitOps ops1, ImplicitOps ops2
-  , (p ~ OpsConstraint ops1 eff, q ~ OpsConstraint ops2 eff)
+  ( Monad m, ImplicitOps ops1, ImplicitOps ops2
+  , (p ~ OpsConstraint ops1 m, q ~ OpsConstraint ops2 m)
   , (p => q)
   )
-  => EntailOps' ops1 ops2 eff
+  => EntailOps' ops1 ops2 m
   where
-    entailOps' :: OpsCast' ops1 ops2 eff
+    entailOps' :: OpsCast' ops1 ops2 m
     entailOps' = Dict
 
 class
@@ -35,9 +35,9 @@ class
 
 instance
   ( ImplicitOps ops1, ImplicitOps ops2
-  , forall eff . Effect eff => EntailOps' ops1 ops2 eff
-  , forall eff . Effect eff => EntailOps' ops1 ops1 eff
-  , forall eff . Effect eff => EntailOps' ops2 ops2 eff
+  , forall m . Monad m => EntailOps' ops1 ops2 m
+  , forall m . Monad m => EntailOps' ops1 ops1 m
+  , forall m . Monad m => EntailOps' ops2 ops2 m
   )
   => EntailOps ops1 ops2
   where

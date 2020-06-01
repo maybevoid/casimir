@@ -16,14 +16,14 @@ import Data.Kind
 import Casimir.Base.EffOps
 import Casimir.Base.EffFunctor
 
--- | Combines two effect operations into a new effect operation. Union can
--- be used multiple times to combine multiple effect operations into one.
+-- | Combines two mect operations into a new mect operation. Union can
+-- be used multiple times to combine multiple mect operations into one.
 
 data Union ops1 ops2
 
-newtype UnionOps ops1 ops2 (eff :: Type -> Type)
+newtype UnionOps ops1 ops2 (m :: Type -> Type)
   = MkUnionOps
-    { unUnionOps :: ( ops1 eff, ops2 eff ) }
+    { unUnionOps :: ( ops1 m, ops2 m ) }
 
 {-# COMPLETE UnionOps #-}
 pattern UnionOps ops1 ops2 = MkUnionOps (ops1, ops2)
@@ -45,10 +45,10 @@ type (∪) = Union
 -- forall ops1 ops2 ops3 .
 --   ops1 ∪ ops2 ∪ ops3 === Union ops1 (Union ops2 ops3)
 -- @
-(∪) :: forall ops1 ops2 eff
-     . ops1 eff
-    -> ops2 eff
-    -> UnionOps ops1 ops2 eff
+(∪) :: forall ops1 ops2 m
+     . ops1 m
+    -> ops2 m
+    -> UnionOps ops1 ops2 m
 ops1 ∪ ops2 = UnionOps ops1 ops2
 
 instance
@@ -64,19 +64,19 @@ instance {-# INCOHERENT #-}
   )
   => EffFunctor lift (UnionOps ops1 ops2)
   where
-    effmap f (UnionOps x y)
-      = UnionOps (effmap f x) (effmap f y)
+    mmap f (UnionOps x y)
+      = UnionOps (mmap f x) (mmap f y)
 
 -- | Get the left operation of the @'Operation' (ops1 '∪' ops2)@ product.
 leftOps
-  :: forall ops1 ops2 eff
-   . UnionOps ops1 ops2 eff
-  -> ops1 eff
+  :: forall ops1 ops2 m
+   . UnionOps ops1 ops2 m
+  -> ops1 m
 leftOps (UnionOps ops _) = ops
 
 -- | Get the right operation of the @'Operation' (ops1 '∪' ops2)@ product.
 rightOps
-  :: forall ops1 ops2 eff
-   . UnionOps ops1 ops2 eff
-  -> ops2 eff
+  :: forall ops1 ops2 m
+   . UnionOps ops1 ops2 m
+  -> ops2 m
 rightOps (UnionOps _ ops) = ops

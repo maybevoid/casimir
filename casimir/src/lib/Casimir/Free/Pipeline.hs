@@ -14,16 +14,16 @@ import Casimir.Free.FreeOps
 
 {-# INLINE coopHandlerToPipeline #-}
 coopHandlerToPipeline
-  :: forall free ops1 handler eff1 a b .
-  ( Effect eff1
+  :: forall free ops1 handler m1 a b .
+  ( Monad m1
   , EffOps ops1
   , EffOps handler
   , FreeOps handler
   , FreeHandler free
   , EffFunctor Lift (Operation ops1)
   )
-  => Computation Lift ops1 (CoOpHandler handler a b) eff1
-  -> Pipeline Lift ops1 handler (Return a) (Return b) eff1 eff1
+  => Computation Lift ops1 (CoOpHandler handler a b) m1
+  -> Pipeline Lift ops1 handler (Return a) (Return b) m1 m1
 coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
@@ -31,33 +31,33 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
      . ( EffOps ops2
        , EffFunctor Lift (Operation ops2)
        )
-    => Computation Lift (handler ∪ ops2) (Return a) eff1
-    -> Computation Lift (ops1 ∪ ops2) (Return b) eff1
+    => Computation Lift (handler ∪ ops2) (Return a) m1
+    -> Computation Lift (ops1 ∪ ops2) (Return b) m1
   pipeline comp1 = Computation comp2
    where
     comp2
-      :: forall eff2
-       . (Effect eff2)
-      => Lift eff1 eff2
-      -> Operation (ops1 ∪ ops2) eff2
-      -> Return b eff2
+      :: forall m2
+       . (Monad m2)
+      => Lift m1 m2
+      -> Operation (ops1 ∪ ops2) m2
+      -> Return b m2
     comp2 lift12 (UnionOps ops1 ops2) = Return comp4
      where
-      handler2 :: CoOpHandler handler a b eff2
+      handler2 :: CoOpHandler handler a b m2
       handler2 = runComp handler1 lift12 ops1
 
-      comp3 :: free handler eff2 a
+      comp3 :: free handler m2 a
       comp3 = returnVal $ runComp comp1
         (joinLift lift12 freeLiftEff)
-        (freeOps ∪ effmap (Lift liftFree) ops2)
+        (freeOps ∪ mmap (Lift liftFree) ops2)
 
-      comp4 :: eff2 b
+      comp4 :: m2 b
       comp4 = handleFree handler2 comp3
 
 {-# INLINE genericCoOpHandlerToPipeline #-}
 genericCoOpHandlerToPipeline
-  :: forall free ops1 handler eff1 .
-  ( Effect eff1
+  :: forall free ops1 handler m1 .
+  ( Monad m1
   , EffOps ops1
   , EffOps handler
   , FreeOps handler
@@ -65,17 +65,17 @@ genericCoOpHandlerToPipeline
   , ImplicitOps handler
   , FreeHandler free
   )
-  => BaseComputation ops1 (GenericCoOpHandler handler) eff1
-  -> GenericPipeline Lift ops1 handler eff1
+  => BaseComputation ops1 (GenericCoOpHandler handler) m1
+  -> GenericPipeline Lift ops1 handler m1
 genericCoOpHandlerToPipeline handler1
   = transformePipeline $ Computation handler2
  where
   handler2
-    :: forall eff2 .
-    (Effect eff2)
-    => Lift eff1 eff2
-    -> Operation ops1 eff2
-    -> TransformerHandler (free handler) handler eff2
+    :: forall m2 .
+    (Monad m2)
+    => Lift m1 m2
+    -> Operation ops1 m2
+    -> TransformerHandler (free handler) handler m2
   handler2 lift12 ops1
     = TransformerHandler freeOps freeLiftEff (Lift unliftFree)
     where
@@ -83,14 +83,14 @@ genericCoOpHandlerToPipeline handler1
 
       unliftFree
         :: forall a .
-        free handler eff2 a
-        -> eff2 a
+        free handler m2 a
+        -> m2 a
       unliftFree = handleFree handler3
 
 {-# INLINE contextualHandlerToPipeline #-}
 contextualHandlerToPipeline
-  :: forall free w ops1 handler eff1 .
-  ( Effect eff1
+  :: forall free w ops1 handler m1 .
+  ( Monad m1
   , EffOps ops1
   , EffOps handler
   , FreeOps handler
@@ -98,17 +98,17 @@ contextualHandlerToPipeline
   , ImplicitOps ops1
   , ImplicitOps handler
   )
-  => BaseComputation ops1 (ContextualHandler w handler) eff1
-  -> GenericPipeline Lift ops1 handler eff1
+  => BaseComputation ops1 (ContextualHandler w handler) m1
+  -> GenericPipeline Lift ops1 handler m1
 contextualHandlerToPipeline handler1
   = transformePipeline $ Computation handler2
  where
   handler2
-    :: forall eff2 .
-    (Effect eff2)
-    => Lift eff1 eff2
-    -> Operation ops1 eff2
-    -> TransformerHandler (free handler) handler eff2
+    :: forall m2 .
+    (Monad m2)
+    => Lift m1 m2
+    -> Operation ops1 m2
+    -> TransformerHandler (free handler) handler m2
   handler2 lift12 ops1
     = TransformerHandler freeOps freeLiftEff (Lift unliftFree)
    where
@@ -116,8 +116,8 @@ contextualHandlerToPipeline handler1
 
     unliftFree
       :: forall a .
-      free handler eff2 a
-      -> eff2 a
-    unliftFree eff = do
-      wx <- handleFree handler3 eff
+      free handler m2 a
+      -> m2 a
+    unliftFree m = do
+      wx <- handleFree handler3 m
       extract wx

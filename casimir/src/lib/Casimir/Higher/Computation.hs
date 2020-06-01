@@ -25,24 +25,24 @@ type HigherOpsHandler ops handler = OpsHandler HigherLift ops handler
 type HigherPipeline = Pipeline HigherLift
 
 higherToBaseLift
-  :: forall eff1 eff2
-   . (Effect eff1, Effect eff2)
-  => HigherLift eff1 eff2
-  -> Lift eff1 eff2
+  :: forall m1 m2
+   . (Monad m1, Monad m2)
+  => HigherLift m1 m2
+  -> Lift m1 m2
 higherToBaseLift higherLift = Lift $ hlBaseLift higherLift
 
 toHigherComputation
-  :: forall ops comp eff
-   . (Base.EffOps ops, Effect eff)
-  => BaseComputation ops comp eff
-  -> HigherComputation ops comp eff
+  :: forall ops comp m
+   . (Base.EffOps ops, Monad m)
+  => BaseComputation ops comp m
+  -> HigherComputation ops comp m
 toHigherComputation = strengthenComputation higherToBaseLift
 
 {-# INLINE coopHandlerToPipeline #-}
 coopHandlerToPipeline
-  :: forall free ops1 handler eff1 f a .
+  :: forall free ops1 handler m1 f a .
   ( Functor f
-  , Effect eff1
+  , Monad m1
   , Base.EffOps ops1
   , EffOps handler
   , ImplicitOps handler
@@ -50,34 +50,34 @@ coopHandlerToPipeline
   , FreeOps handler
   , FreeHandler free
   )
-  => HigherComputation ops1 (CoOpHandler handler f) eff1
-  -> HigherPipeline ops1 handler (Return a) (Return (f a)) eff1 eff1
+  => HigherComputation ops1 (CoOpHandler handler f) m1
+  -> HigherPipeline ops1 handler (Return a) (Return (f a)) m1 m1
 coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2
      . ( ImplicitOps ops2
        , EffFunctor HigherLift (Base.Operation ops2))
-    => HigherComputation (handler ∪ ops2) (Return a) eff1
-    -> HigherComputation (ops1 ∪ ops2) (Return (f a)) eff1
+    => HigherComputation (handler ∪ ops2) (Return a) m1
+    -> HigherComputation (ops1 ∪ ops2) (Return (f a)) m1
   pipeline comp1 = Computation comp2
    where
     comp2
-      :: forall eff2
-       . (Effect eff2)
-      => HigherLift eff1 eff2
-      -> Base.Operation (ops1 ∪ ops2) eff2
-      -> Return (f a) eff2
+      :: forall m2
+       . (Monad m2)
+      => HigherLift m1 m2
+      -> Base.Operation (ops1 ∪ ops2) m2
+      -> Return (f a) m2
     comp2 lift12 (UnionOps ops1 ops2) =
       Return comp4
      where
-      handler2 :: CoOpHandler handler f eff2
+      handler2 :: CoOpHandler handler f m2
       handler2 = runComp handler1 lift12 ops1
 
-      comp3 :: free handler eff2 a
+      comp3 :: free handler m2 a
       comp3 = returnVal $ runComp comp1
         (joinLift lift12 freeHigherLift)
-        (LowerOps freeOps ∪ effmap freeHigherLift ops2)
+        (LowerOps freeOps ∪ mmap freeHigherLift ops2)
 
-      comp4 :: eff2 (f a)
+      comp4 :: m2 (f a)
       comp4 = handleFree handler2 comp3

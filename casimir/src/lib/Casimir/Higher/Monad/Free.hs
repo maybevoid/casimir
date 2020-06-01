@@ -10,87 +10,87 @@ import Casimir.Higher.CoOp
 
 data FreeF
   ops
-  (eff1 :: Type -> Type)
-  (eff2 :: Type -> Type)
+  (m1 :: Type -> Type)
+  (m2 :: Type -> Type)
   a
   where
-    PureF :: a -> FreeF ops eff1 eff2 a
+    PureF :: a -> FreeF ops m1 m2 a
 
     BindF
-      :: forall ops eff1 eff2 a b
-       . CoOperation ops eff2 a
-      -> (a -> eff2 b)
-      -> FreeF ops eff1 eff2 b
+      :: forall ops m1 m2 a b
+       . CoOperation ops m2 a
+      -> (a -> m2 b)
+      -> FreeF ops m1 m2 b
 
     ContraF
-      :: forall ops eff1 eff2 a b
+      :: forall ops m1 m2 a b
        . (forall w
            . (Functor w)
-          => (forall x . eff2 x -> eff1 (w x))
-          -> eff1 (w a))
-      -> (a -> eff2 b)
-      -> FreeF ops eff1 eff2 b
+          => (forall x . m2 x -> m1 (w x))
+          -> m1 (w a))
+      -> (a -> m2 b)
+      -> FreeF ops m1 m2 b
 
-newtype FreeMonad ops eff a = FreeMonad {
-  runFreerMonad :: eff (FreeF ops eff (FreeMonad ops eff) a)
+newtype FreeMonad ops m a = FreeMonad {
+  runFreerMonad :: m (FreeF ops m (FreeMonad ops m) a)
 }
 
 liftPure
-  :: forall ops eff a
-   . ( Monad eff
+  :: forall ops m a
+   . ( Monad m
      , FreeOps ops)
   => a
-  -> FreeMonad ops eff a
+  -> FreeMonad ops m a
 liftPure = FreeMonad . return . PureF
 
 instance
-  ( Monad eff
+  ( Monad m
   , FreeOps ops)
-  => Functor (FreeMonad ops eff)
+  => Functor (FreeMonad ops m)
    where
     fmap
       :: forall a b
        . (a -> b)
-      -> FreeMonad ops eff a
-      -> FreeMonad ops eff b
+      -> FreeMonad ops m a
+      -> FreeMonad ops m b
     fmap f = mapper1
      where
-      mapper1 :: FreeMonad ops eff a -> FreeMonad ops eff b
+      mapper1 :: FreeMonad ops m a -> FreeMonad ops m b
       mapper1 (FreeMonad m) = FreeMonad $ fmap mapper2 m
 
       mapper2
-        :: FreeF ops eff (FreeMonad ops eff) a
-        -> FreeF ops eff (FreeMonad ops eff) b
+        :: FreeF ops m (FreeMonad ops m) a
+        -> FreeF ops m (FreeMonad ops m) b
       mapper2 (PureF x) = PureF $ f x
       mapper2 (BindF coop cont) = BindF coop $ fmap (fmap f) cont
 
       mapper2 (ContraF cont1 cont2) = ContraF cont1 $ fmap (fmap f) cont2
 
 instance
-  ( Monad eff
+  ( Monad m
   , FreeOps ops
   )
-  => Applicative (FreeMonad ops eff)
+  => Applicative (FreeMonad ops m)
    where
     pure = liftPure
     (<*>) = ap
 
 instance
-  ( Monad eff
+  ( Monad m
   , FreeOps ops
   )
-  => Monad (FreeMonad ops eff)
+  => Monad (FreeMonad ops m)
    where
     return = liftPure
 
     (>>=)
       :: forall a b
-       . FreeMonad ops eff a
-      -> (a -> FreeMonad ops eff b)
-      -> FreeMonad ops eff b
+       . FreeMonad ops m a
+      -> (a -> FreeMonad ops m b)
+      -> FreeMonad ops m b
     (FreeMonad m1) >>= cont1 = FreeMonad m2
      where
-      m2 :: eff (FreeF ops eff (FreeMonad ops eff) b)
+      m2 :: m (FreeF ops m (FreeMonad ops m) b)
       m2 = do
         m3 <- m1
         case m3 of
@@ -107,24 +107,24 @@ instance
               cont3 x >>= cont1
 
 contraLiftFree
-  :: forall ops eff
-   . (FreeOps ops, Effect eff)
-  => ContraLift eff (FreeMonad ops eff)
+  :: forall ops m
+   . (FreeOps ops, Monad m)
+  => ContraLift m (FreeMonad ops m)
 contraLiftFree = ContraLift contraLift1
  where
   contraLift1
     :: forall a
      . (forall w
          . (Functor w)
-        => (forall x . FreeMonad ops eff x -> eff (w x))
-        -> eff (w a))
-    -> FreeMonad ops eff a
+        => (forall x . FreeMonad ops m x -> m (w x))
+        -> m (w a))
+    -> FreeMonad ops m a
   contraLift1 cont1 = FreeMonad $ return $
     ContraF cont2 return
      where
       cont2
         :: forall w
          . (Functor w)
-        => (forall x . FreeMonad ops eff x -> eff (w x))
-        -> eff (w a)
+        => (forall x . FreeMonad ops m x -> m (w x))
+        -> m (w a)
       cont2 contraLift2 = cont1 contraLift2

@@ -9,13 +9,13 @@ import Casimir.Computation
 
 data EnvEff e
 
-data EnvOps e eff = EnvOps
-  { askOp :: eff e }
+data EnvOps e m = EnvOps
+  { askOp :: m e }
 
 instance EffOps (EnvEff e) where
   type Operation (EnvEff e) = EnvOps e
 
 instance EffFunctor Lift (EnvOps e) where
-  effmap (Lift lift) envOps = EnvOps
+  mmap (Lift lift) envOps = EnvOps
     { askOp = lift $ askOp envOps
     }

@@ -30,10 +30,10 @@ divideComp1 x y =
   else return $ quot x y
 
 testComp1
-  :: forall eff . (Effect eff)
+  :: forall m . (Monad m)
   => Int
   -> Int
-  -> eff (Either Error Int)
+  -> m (Either Error Int)
 testComp1 x y =
   withCoOpHandler @ChurchMonad exceptionToEitherHandler $
     divideComp1 x y
@@ -59,16 +59,16 @@ test2 = testCase
       res
 
 exceptionHandler
-  :: forall eff . (Effect eff)
-  => CoOpHandler (ExceptionEff Error) Int Int eff
+  :: forall m . (Monad m)
+  => CoOpHandler (ExceptionEff Error) Int Int m
 exceptionHandler = mkExceptionCoOpHandler $
   \_ -> return 0
 
 testComp2
-  :: forall eff . (Effect eff)
+  :: forall m . (Monad m)
   => Int
   -> Int
-  -> eff Int
+  -> m Int
 testComp2 x y =
   withCoOpHandler @ChurchMonad exceptionHandler $
     divideComp1 x y

@@ -7,67 +7,69 @@ module Casimir.Base.Lift
   , FreeLift (..)
   , HigherLift (..)
   , LiftFunctor (..)
+  , type (~>)
   )
 where
 
 import Data.Kind
 import Data.Functor.Identity
 
-import Casimir.Base.Effect
 import Casimir.Base.ContraLift
+
+type m1 ~> m2 = forall x . m1 x -> m2 x
 
 class LiftFunctor
   (lift1 :: (Type -> Type) -> (Type -> Type) -> Type)
   (lift2 :: (Type -> Type) -> (Type -> Type) -> Type)
   where
     transformLift
-      :: forall eff1 eff2
-       . (Effect eff1, Effect eff2)
-      => lift1 eff1 eff2
-      -> lift2 eff1 eff2
+      :: forall m1 m2
+       . (Monad m1, Monad m2)
+      => lift1 m1 m2
+      -> lift2 m1 m2
 
 data IdLift
-  (eff1 :: Type -> Type)
-  (eff2 :: Type -> Type)
+  (m1 :: Type -> Type)
+  (m2 :: Type -> Type)
   where
-    IdLift :: IdLift eff eff
+    IdLift :: IdLift m m
 
-newtype Lift eff1 eff2 = Lift
-  { runLift :: eff1 ~> eff2 }
+newtype Lift m1 m2 = Lift
+  { runLift :: m1 ~> m2 }
 
 data HigherLift
-  (eff1 :: Type -> Type)
-  (eff2 :: Type -> Type)
+  (m1 :: Type -> Type)
+  (m2 :: Type -> Type)
   = HigherLift
-    { hlBaseLift :: eff1 ~> eff2
-    , hlContraLift :: ContraLift eff1 eff2
+    { hlBaseLift :: m1 ~> m2
+    , hlContraLift :: ContraLift m1 m2
     }
 
 data MaybeLift
   (lift :: (Type -> Type) -> (Type -> Type) -> Type)
-  eff1 eff2
+  m1 m2
   where
-    NoLift :: MaybeLift lift eff eff
-    JustLift :: lift eff1 eff2 -> MaybeLift lift eff1 eff2
+    NoLift :: MaybeLift lift m m
+    JustLift :: lift m1 m2 -> MaybeLift lift m1 m2
 
 class
   (LiftMonoid lift)
-  => FreeLift t lift eff1 eff2 where
-    freeLift :: lift eff1 eff2
+  => FreeLift t lift m1 m2 where
+    freeLift :: lift m1 m2
 
 class LiftMonoid lift where
   idLift
-    :: forall eff . (Effect eff) => lift eff eff
+    :: forall m . (Monad m) => lift m m
 
   joinLift
-    :: forall eff1 eff2 eff3
-     . ( Effect eff1
-       , Effect eff2
-       , Effect eff3
+    :: forall m1 m2 m3
+     . ( Monad m1
+       , Monad m2
+       , Monad m3
        )
-    => lift eff1 eff2
-    -> lift eff2 eff3
-    -> lift eff1 eff3
+    => lift m1 m2
+    -> lift m2 m3
+    -> lift m1 m3
 
 instance LiftMonoid IdLift where
   idLift = IdLift
@@ -103,41 +105,41 @@ instance LiftFunctor IdLift Lift where
 
 instance LiftFunctor IdLift HigherLift where
   transformLift
-    :: forall eff1 eff2
-      . (Effect eff1, Effect eff2)
-    => IdLift eff1 eff2
-    -> HigherLift eff1 eff2
+    :: forall m1 m2
+      . (Monad m1, Monad m2)
+    => IdLift m1 m2
+    -> HigherLift m1 m2
   transformLift IdLift = HigherLift id $
     ContraLift contraLift
    where
     contraLift
       :: forall a
-       . ((forall x . eff1 x -> eff1 (Identity x))
-          -> eff1 (Identity a))
-      -> eff1 a
+       . ((forall x . m1 x -> m1 (Identity x))
+          -> m1 (Identity a))
+      -> m1 a
     contraLift cont =
       fmap runIdentity $ cont $ fmap Identity
 
 instance
   LiftFunctor IdLift (MaybeLift lift) where
     transformLift
-      :: forall eff1 eff2
-       . IdLift eff1 eff2
-      -> MaybeLift lift eff1 eff2
+      :: forall m1 m2
+       . IdLift m1 m2
+      -> MaybeLift lift m1 m2
     transformLift IdLift = NoLift
 
 instance {-# OVERLAPPABLE #-}
   LiftFunctor lift (MaybeLift lift) where
     transformLift
-      :: forall eff1 eff2
-       . lift eff1 eff2
-      -> MaybeLift lift eff1 eff2
+      :: forall m1 m2
+       . lift m1 m2
+      -> MaybeLift lift m1 m2
     transformLift = JustLift
 
 instance
   LiftFunctor HigherLift Lift where
     transformLift
-      :: forall eff1 eff2
-       . HigherLift eff1 eff2
-      -> Lift eff1 eff2
+      :: forall m1 m2
+       . HigherLift m1 m2
+      -> Lift m1 m2
     transformLift (HigherLift lift _) = Lift lift

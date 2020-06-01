@@ -12,9 +12,9 @@ import Casimir.Ops.Io
 
 data AsyncEff (t :: Type -> Type)
 
-data AsyncOps t eff = AsyncOps {
-  awaitOp :: forall a . t a -> eff a,
-  awaitAllOp :: forall a . [t a] -> eff [a]
+data AsyncOps t m = AsyncOps {
+  awaitOp :: forall a . t a -> m a,
+  awaitAllOp :: forall a . [t a] -> m [a]
 }
 
 data AsyncCoOp t r where
@@ -32,7 +32,7 @@ instance Functor (AsyncCoOp t) where
   fmap f (AwaitAllOp tasks cont) = AwaitAllOp tasks $ f . cont
 
 instance EffFunctor Lift (AsyncOps t) where
-  effmap (Lift lift) ops = AsyncOps {
+  mmap (Lift lift) ops = AsyncOps {
     awaitOp = lift . (awaitOp ops),
     awaitAllOp = lift . (awaitAllOp ops)
   }
@@ -43,53 +43,53 @@ instance FreeOps (AsyncEff t) where
     awaitAllOp = \tasks -> liftCoOp $ AwaitAllOp tasks id
   }
 
-type AsyncConstraint t eff =
-  (?_Control_Effect_Implicit_Ops_Async_asyncOps :: AsyncOps t eff)
+type AsyncConstraint t m =
+  (?_Control_Monad_Implicit_Ops_Async_asyncOps :: AsyncOps t m)
 
 instance ImplicitOps (AsyncEff t) where
-  type OpsConstraint (AsyncEff t) eff = AsyncConstraint t eff
+  type OpsConstraint (AsyncEff t) m = AsyncConstraint t m
 
   captureOps =
-    ?_Control_Effect_Implicit_Ops_Async_asyncOps
+    ?_Control_Monad_Implicit_Ops_Async_asyncOps
 
   withOps ops comp =
     let
-      ?_Control_Effect_Implicit_Ops_Async_asyncOps
+      ?_Control_Monad_Implicit_Ops_Async_asyncOps
         = ops in comp
 
 await
-  :: forall a t eff
-   . (Effect eff, AsyncConstraint t eff)
+  :: forall a t m
+   . (Monad m, AsyncConstraint t m)
   => t a
-  -> eff a
+  -> m a
 await = awaitOp captureOps
 
 awaitAll
-  :: forall a t eff
-   . (Effect eff, AsyncConstraint t eff)
+  :: forall a t m
+   . (Monad m, AsyncConstraint t m)
   => [t a]
-  -> eff [a]
+  -> m [a]
 awaitAll = awaitAllOp captureOps
 
 handleAsync
-  :: forall free eff a t
+  :: forall free m a t
    . ( FreeHandler free
-     , EffConstraint IoEff eff
+     , EffConstraint IoEff m
      )
   => (forall x
       . (AsyncConstraint t (free (AsyncEff t) IO))
      => t x
      -> free (AsyncEff t) IO x)
-  -> ((AsyncConstraint t (free (AsyncEff t) eff))
-      => free (AsyncEff t) eff a)
-  -> eff a
+  -> ((AsyncConstraint t (free (AsyncEff t) m))
+      => free (AsyncEff t) m a)
+  -> m a
 handleAsync taskRunner comp1 =
   withCoOpHandler @free handler2 comp1
    where
-    handler2 :: CoOpHandler (AsyncEff t) a a eff
+    handler2 :: CoOpHandler (AsyncEff t) a a m
     handler2 = CoOpHandler return handler3
      where
-      handler3 :: AsyncCoOp t (eff a) -> eff a
+      handler3 :: AsyncCoOp t (m a) -> m a
       handler3 (AwaitOp task cont) = do
         x <- liftIo $ handleTask task
         cont x

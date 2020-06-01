@@ -11,8 +11,8 @@ import Casimir.Freer.NoOp
 import Casimir.Higher.Base
 import Casimir.Higher.CoOp
 
-class NoConstraint (eff1 :: Type -> Type) (eff2 :: Type -> Type)
-instance NoConstraint eff1 eff2
+class NoConstraint (m1 :: Type -> Type) (m2 :: Type -> Type)
+instance NoConstraint m1 m2
 
 instance EffOps NoEff where
   type Operation NoEff = HigherOps NoOp

@@ -7,15 +7,15 @@ import Casimir.Base
 
 data IoEff
 
-data IoOps eff = IoOps
-  { liftIoOp :: forall a . IO a -> eff a
+data IoOps m = IoOps
+  { liftIoOp :: forall a . IO a -> m a
   }
 
 instance EffOps IoEff where
   type Operation IoEff = IoOps
 
 instance EffFunctor Lift IoOps where
-  effmap (Lift lift) ops = IoOps
+  mmap (Lift lift) ops = IoOps
     { liftIoOp = lift . liftIoOp ops
     }
 

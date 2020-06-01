@@ -13,33 +13,33 @@ import Casimir.Base
   )
 import Casimir.Higher
 
-data ContOps eff1 eff2 = ContOps {
+data ContOps m1 m2 = ContOps {
   callCCOp
     :: forall a b
-     . ((a -> eff1 b) -> eff1 a)
-    -> eff2 a
+     . ((a -> m1 b) -> m1 a)
+    -> m2 a
 }
 
 instance
-  (Effect eff1)
-  => EffFunctor Lift (ContOps eff1) where
-    effmap
-      :: forall eff2 eff3
-       . Lift eff2 eff3
-      -> ContOps eff1 eff2
-      -> ContOps eff1 eff3
-    effmap (Lift lift) (ContOps callCC) = ContOps $ \cont ->
+  (Monad m1)
+  => EffFunctor Lift (ContOps m1) where
+    mmap
+      :: forall m2 m3
+       . Lift m2 m3
+      -> ContOps m1 m2
+      -> ContOps m1 m3
+    mmap (Lift lift) (ContOps callCC) = ContOps $ \cont ->
       lift $ callCC cont
 
 instance HigherEffFunctor HigherLift ContOps where
   higherEffmap
-    :: forall eff1 eff2
-      . ( Effect eff1
-        , Effect eff2
+    :: forall m1 m2
+      . ( Monad m1
+        , Monad m2
         )
-    => HigherLift eff1 eff2
-    -> ContOps eff1 eff1
-    -> ContOps eff2 eff2
+    => HigherLift m1 m2
+    -> ContOps m1 m1
+    -> ContOps m2 m2
   higherEffmap
     (HigherLift lift (ContraLift contraLift1))
     ops =
@@ -47,34 +47,34 @@ instance HigherEffFunctor HigherLift ContOps where
    where
     callCC1
       :: forall a b
-      . ((a -> eff1 b) -> eff1 a)
-      -> eff1 a
+      . ((a -> m1 b) -> m1 a)
+      -> m1 a
     callCC1 = callCCOp ops
 
     callCC2
       :: forall a b
-       . ((a -> eff2 b) -> eff2 a)
-      -> eff2 a
+       . ((a -> m2 b) -> m2 a)
+      -> m2 a
     callCC2 cont1 = contraLift1 cont2
      where
       cont2
         :: forall w
-         . (forall x . eff2 x -> eff1 (w x))
-        -> eff1 (w a)
+         . (forall x . m2 x -> m1 (w x))
+        -> m1 (w a)
       cont2 contraLift2 = callCC1 cont3
        where
-        cont3 :: (w a -> eff1 b) -> eff1 (w a)
+        cont3 :: (w a -> m1 b) -> m1 (w a)
         cont3 cont4 = contraLift2 cont5
          where
-          cont5 :: eff2 a
+          cont5 :: m2 a
           cont5 = cont1 cont6
 
-          cont6 :: a -> eff2 b
+          cont6 :: a -> m2 b
           cont6 x1 = lift $ do
             x2 :: w a <- contraLift2 $ return x1
             cont4 x2
 
 contTOps
-  :: forall eff r . (Effect eff)
-  => ContOps (ContT.ContT r eff) (ContT.ContT r eff)
+  :: forall m r . (Monad m)
+  => ContOps (ContT.ContT r m) (ContT.ContT r m)
 contTOps = ContOps ContT.callCC

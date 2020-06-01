@@ -6,9 +6,9 @@ import Control.Monad.State.Class (MonadState (..))
 import Control.Monad.Trans.State.Strict (StateT)
 
 stateMTLFunc
-  :: forall eff
-   . (Monad eff)
-  => StateT Int eff ()
+  :: forall m
+   . (Monad m)
+  => StateT Int m ()
 stateMTLFunc =
  do
   s <- get

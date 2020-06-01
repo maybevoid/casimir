@@ -15,22 +15,22 @@ import qualified Casimir.Base as Base
 
 class HigherEffFunctor lift ops where
   higherEffmap
-    :: forall eff1 eff2
-      . ( Effect eff1
-        , Effect eff2
+    :: forall m1 m2
+      . ( Monad m1
+        , Monad m2
         )
-    => lift eff1 eff2
-    -> ops eff1 eff1
-    -> ops eff2 eff2
+    => lift m1 m2
+    -> ops m1 m1
+    -> ops m2 m2
 
 instance {-# OVERLAPPABLE #-}
   (EffFunctor lift ops)
   => HigherEffFunctor lift (HigherOps ops) where
     higherEffmap lift (HigherOps ops) =
-      HigherOps $ Base.effmap lift ops
+      HigherOps $ Base.mmap lift ops
 
 instance {-# OVERLAPPABLE #-}
   (HigherEffFunctor HigherLift ops)
   => EffFunctor HigherLift (LowerOps ops) where
-    effmap lift (LowerOps ops) =
+    mmap lift (LowerOps ops) =
       LowerOps $ higherEffmap lift ops

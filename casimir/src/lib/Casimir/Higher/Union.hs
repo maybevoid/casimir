@@ -16,11 +16,11 @@ import Casimir.Higher.Free
 import Casimir.Higher.EffFunctor
 
 data HUnionOps ops1 ops2
-  (eff1 :: Type -> Type)
-  (eff2 :: Type -> Type)
+  (m1 :: Type -> Type)
+  (m2 :: Type -> Type)
   = HUnionOps
-     (ops1 eff1 eff2)
-     (ops2 eff1 eff2)
+     (ops1 m1 m2)
+     (ops2 m1 m2)
 
 data HUnionCoOp coop1 coop2
   (f :: Type -> Type)
@@ -45,16 +45,16 @@ instance
       HUnionCoOp (CoOperation ops1) (CoOperation ops2)
 
 instance
-  ( Effect eff
-  , EffFunctor lift (ops1 eff)
-  , EffFunctor lift (ops2 eff)
+  ( Monad m
+  , EffFunctor lift (ops1 m)
+  , EffFunctor lift (ops2 m)
   )
-  => EffFunctor lift (HUnionOps ops1 ops2 eff)
+  => EffFunctor lift (HUnionOps ops1 ops2 m)
   where
-    effmap lifter (HUnionOps ops1 ops2) =
+    mmap lifter (HUnionOps ops1 ops2) =
       HUnionOps
-        (effmap lifter ops1)
-        (effmap lifter ops2)
+        (mmap lifter ops1)
+        (mmap lifter ops2)
 
 instance
   ( HigherEffFunctor lift ops1

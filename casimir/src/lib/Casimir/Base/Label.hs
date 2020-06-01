@@ -22,9 +22,9 @@ newtype LabeledOps
   k
   ( label :: k )
   ( ops :: (Type -> Type) -> Type )
-  ( eff :: Type -> Type )
+  ( m :: Type -> Type )
   = LabeledOps
-    { unLabelOps :: ops eff }
+    { unLabelOps :: ops m }
 
 type NamedEff label ops = LabeledEff Symbol label ops
 type TaggedEff label ops = LabeledEff Type label ops
@@ -43,5 +43,5 @@ instance
   (EffFunctor lift ops)
   => EffFunctor lift (LabeledOps k (label :: k) ops)
    where
-    effmap lifter (LabeledOps ops) =
-      LabeledOps $ effmap lifter ops
+    mmap lifter (LabeledOps ops) =
+      LabeledOps $ mmap lifter ops

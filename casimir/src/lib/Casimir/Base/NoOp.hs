@@ -13,7 +13,7 @@ import Casimir.Base.EffFunctor
 
 data NoEff
 
-newtype NoOp (eff :: Type -> Type) = MkNoOp ()
+newtype NoOp (m :: Type -> Type) = MkNoOp ()
 
 pattern NoOp = MkNoOp ()
 
@@ -21,4 +21,4 @@ instance EffOps NoEff where
   type Operation NoEff = NoOp
 
 instance EffFunctor lift NoOp where
-  effmap _ _ = NoOp
+  mmap _ _ = NoOp

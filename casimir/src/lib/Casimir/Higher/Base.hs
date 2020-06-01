@@ -5,25 +5,25 @@ module Casimir.Higher.Base
   , LowerOps (..)
   , HigherEffOps
   , LowerEffOps
-  , Effect
+  , Monad
   )
 where
 
 import Data.Kind
 
-import Casimir.Base (Effect, EffFunctor (..))
+import Casimir.Base (Monad, EffFunctor (..))
 import qualified Casimir.Base as Base
 
 newtype LowerOps ops
-  (eff :: Type -> Type)
+  (m :: Type -> Type)
   = LowerOps
-    { unLowerOps :: ops eff eff }
+    { unLowerOps :: ops m m }
 
 newtype HigherOps ops
-  (eff1 :: Type -> Type)
-  (eff2 :: Type -> Type)
+  (m1 :: Type -> Type)
+  (m2 :: Type -> Type)
   = HigherOps
-    { unHigherOps :: ops eff2 }
+    { unHigherOps :: ops m2 }
 
 class EffOps sig where
   type family Operation sig
@@ -45,6 +45,6 @@ class
 
 instance
   (EffFunctor lift ops)
-  => EffFunctor lift (HigherOps ops eff) where
-    effmap lift (HigherOps ops) = HigherOps $
-      effmap lift ops
+  => EffFunctor lift (HigherOps ops m) where
+    mmap lift (HigherOps ops) = HigherOps $
+      mmap lift ops

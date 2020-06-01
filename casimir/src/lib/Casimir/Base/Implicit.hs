@@ -18,7 +18,6 @@ import Casimir.Base.NoOp
 import Casimir.Base.Union
 import Casimir.Base.Label
 import Casimir.Base.EffOps
-import Casimir.Base.Effect
 
 import qualified Data.QuasiParam.Multi as Multi
 
@@ -30,19 +29,19 @@ class
       = (param :: (Type -> Type) -> Type) | param -> ops
 
     coerceTo
-      :: forall eff
-       . ops eff -> AsMultiParam ops eff
+      :: forall m
+       . ops m -> AsMultiParam ops m
 
     coerceFrom
-      :: forall eff
-       . AsMultiParam ops eff
-      -> ops eff
+      :: forall m
+       . AsMultiParam ops m
+      -> ops m
 
-type OpsParam ops eff =
+type OpsParam ops m =
   Multi.ParamConstraint
     (Type -> Type)
     (AsMultiParam ops)
-    eff
+    m
 
 instance ParamOps NoOp where
   type AsMultiParam NoOp = Multi.Empty (Type -> Type)
@@ -66,39 +65,39 @@ instance
         (AsMultiParam ops2)
 
 withOps'
-  :: forall ops eff r
+  :: forall ops m r
    . ( ParamOps ops )
-  => ops eff
-  -> (OpsParam ops eff => r)
+  => ops m
+  -> (OpsParam ops m => r)
   -> r
 withOps' ops cont = Multi.withParam ops' cont
  where
-  ops' :: AsMultiParam ops eff
+  ops' :: AsMultiParam ops m
   ops' = coerceTo ops
 
 captureOps'
-  :: forall ops eff
+  :: forall ops m
    . ( ParamOps ops
-     , OpsParam ops eff
+     , OpsParam ops m
      )
-  => ops eff
+  => ops m
 captureOps' = coerceFrom ops'
  where
-  ops' :: AsMultiParam ops eff
+  ops' :: AsMultiParam ops m
   ops' = Multi.captureParam @(Type -> Type) @(AsMultiParam ops)
 
 withOps
-  :: forall ops eff r
+  :: forall ops m r
    . ( ImplicitOps ops )
-  => Operation ops eff
-  -> (OpsConstraint ops eff => r)
+  => Operation ops m
+  -> (OpsConstraint ops m => r)
   -> r
 withOps = withOps'
 
 captureOps
-  :: forall ops eff
-   . ( OpsConstraint ops eff )
-  => Operation ops eff
+  :: forall ops m
+   . ( OpsConstraint ops m )
+  => Operation ops m
 captureOps = captureOps'
 
 type ImplicitOps ops =
@@ -106,17 +105,17 @@ type ImplicitOps ops =
   , ParamOps (Operation ops)
   )
 
-type OpsConstraint ops eff =
+type OpsConstraint ops m =
   ( ImplicitOps ops
-  , OpsParam (Operation ops) eff
+  , OpsParam (Operation ops) m
   )
 
-type EffConstraint ops eff = (Effect eff, OpsConstraint ops eff)
+type EffConstraint ops m = (Monad m, OpsConstraint ops m)
 
-type Eff ops a = forall eff . (EffConstraint ops eff) => eff a
+type Eff ops a = forall m . (EffConstraint ops m) => m a
 
 
--- | 'ParamOps' gives computations access to effect operations of an
+-- | 'ParamOps' gives computations access to mect operations of an
 -- operation through implicit parameter constraints. It hides the machinery
 -- of implicit parameters and make them appear like regular constraints except
 -- with local scope.
@@ -130,46 +129,46 @@ type Eff ops a = forall eff . (EffConstraint ops eff) => eff a
 -- This means any non-trivial instance for 'ParamOps' must somehow make use of
 -- implicit parameters for the law to hold.
 --
--- The definition for 'ParamOps' for most effect operations can typically
+-- The definition for 'ParamOps' for most mect operations can typically
 -- be derived mechanically. We may look into using template Haskell to generate
 -- instances for 'ParamOps' in future to reduce some boilerplate.
 -- class
 --   (EffOps ops)
 --   => ParamOps ops where
 
---     -- | The constraint kind for the effect operation under 'Effect' @eff@.
+--     -- | The constraint kind for the mect operation under 'Monad' @m@.
 --     -- This is typically an implicit parameter with a unique name, e.g.
---     -- @type OpsParam FooOps eff = (?fooOps :: FooOps eff)@.
+--     -- @type OpsParam FooOps m = (?fooOps :: FooOps m)@.
 --     --
 --     -- Note that there is a injective type families condition, and given that
 --     -- implicit parameters have a single namespace, users must come out with
---     -- naming conventions for their custom effects to avoid name clashing
+--     -- naming conventions for their custom mects to avoid name clashing
 --     -- that would result in compile-time injectivity violation error.
---     type family OpsParam ops (eff :: Type -> Type)
---       = (c :: Constraint) | c -> ops eff
+--     type family OpsParam ops (m :: Type -> Type)
+--       = (c :: Constraint) | c -> ops m
 
---     -- | Takes an effect operation @'Operation' ops eff@ and bind it to the
---     -- implicit parameter specified in @'OpsParam' ops eff@ for the
---     -- continuation @r@. The expression @r@ can then use the effect operations
+--     -- | Takes an mect operation @'Operation' ops m@ and bind it to the
+--     -- implicit parameter specified in @'OpsParam' ops m@ for the
+--     -- continuation @r@. The expression @r@ can then use the mect operations
 --     -- without having to explicitly pass them around as function arguments.
 --     -- For the example @FooEff@, the body for 'withOps' can be defined as
 --     -- @withOps fooOps cont = let ?fooOps = fooOps in cont @.
 --     withOps
---       :: forall eff r
---        . (Effect eff)
---       => Operation ops eff
---       -> (OpsParam ops eff => r)
+--       :: forall m r
+--        . (Monad m)
+--       => Operation ops m
+--       -> (OpsParam ops m => r)
 --       -> r
 
---     -- | If an implicit parameter for the effect operation is available in the
+--     -- | If an implicit parameter for the mect operation is available in the
 --     -- context, capture it and return the operation as a value. For the example
 --     -- @FooEff@, the body for 'captureOps' can be defined as @captureOps = ?fooOps@.
 --     captureOps
---       :: forall eff
---        . (Effect eff, OpsParam ops eff)
---       => Operation ops eff
+--       :: forall m
+--        . (Monad m, OpsParam ops m)
+--       => Operation ops m
 
 -- -- | This is a type alias for the implicit parameter constraint for @ops@,
--- -- in addition to requiring @eff@ to be an 'Effect'. This helps reducing
+-- -- in addition to requiring @m@ to be an 'Monad'. This helps reducing
 -- -- boilerplate in generic computations so that we do not have to keep
--- -- repeating the @(Effect eff)@ constraint in our type signatures.
+-- -- repeating the @(Monad m)@ constraint in our type signatures.

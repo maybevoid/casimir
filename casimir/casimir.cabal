@@ -5,7 +5,7 @@ version:        0.1.0
 synopsis:       Algebraic Effects in Haskell using Implicit Parameters
 description:    casimir is a experimental effect library to support
                 algebraic effects in Haskell.
-category:       Effect
+category:       Monad
 stability:      experimental
 homepage:       https://github.com/maybevoid/casimir
 bug-reports:    https://github.com/maybevoid/casimir/issues
@@ -122,7 +122,6 @@ library
 
   other-modules:
       Casimir.Base.EffOps
-      Casimir.Base.Effect
       Casimir.Base.EffFunctor
       Casimir.Base.Implicit
       Casimir.Base.Lift

@@ -15,9 +15,9 @@ type EnvEff e = TaggedEff EnvTag (Base.EnvEff e)
 type EnvOps e = TaggedOps EnvTag (Base.EnvOps e)
 
 pattern EnvOps
-  :: forall e eff
-   . eff e
-  -> EnvOps e eff
+  :: forall e m
+   . m e
+  -> EnvOps e m
 pattern EnvOps { askOp }
   = LabeledOps (Base.EnvOps askOp)
 
@@ -27,21 +27,21 @@ ask = ops
   (EnvOps ops) = captureOps
 
 withEnv
-  :: forall r e eff
-   . (Effect eff)
+  :: forall r e m
+   . (Monad m)
   => e
-  -> (EnvOps e eff -> eff r)
-  -> eff r
+  -> (EnvOps e m -> m r)
+  -> m r
 withEnv x cont = cont (mkEnvOps x)
 
-mkEnvOps :: forall e eff . (Effect eff) => e -> EnvOps e eff
+mkEnvOps :: forall e m . (Monad m) => e -> EnvOps e m
 mkEnvOps x = EnvOps {
   askOp = return x
 }
 
 mkEnvHandler
-  :: forall e eff .
-  (Effect eff)
+  :: forall e m .
+  (Monad m)
   => e
-  -> BaseOpsHandler NoEff (EnvEff e) eff
+  -> BaseOpsHandler NoEff (EnvEff e) m
 mkEnvHandler = baseOpsHandler . mkEnvOps

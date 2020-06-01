@@ -11,16 +11,16 @@ where
 
 import Casimir.Base
 
-newtype Computation lift ops comp eff1 = Computation {
+newtype Computation lift ops comp m1 = Computation {
   runComp
-    :: forall eff2
+    :: forall m2
      . ( EffOps ops
-       , Effect eff1
-       , Effect eff2
+       , Monad m1
+       , Monad m2
        )
-    => lift eff1 eff2
-    -> Operation ops eff2
-    -> comp eff2
+    => lift m1 m2
+    -> Operation ops m2
+    -> comp m2
 }
 
 type BaseComputation = Computation Lift
@@ -34,48 +34,48 @@ instance
   , EffFunctor lift (Operation ops)
   )
   => EffFunctor lift (Computation lift ops comp) where
-    effmap = liftComputation
+    mmap = liftComputation
 
 liftComputation
-  :: forall lift ops comp eff1 eff2
+  :: forall lift ops comp m1 m2
    . ( EffOps ops
-     , Effect eff1
-     , Effect eff2
+     , Monad m1
+     , Monad m2
      , LiftMonoid lift
      )
-  => lift eff1 eff2
-  -> Computation lift ops comp eff1
-  -> Computation lift ops comp eff2
+  => lift m1 m2
+  -> Computation lift ops comp m1
+  -> Computation lift ops comp m2
 liftComputation lift12 comp1 = Computation comp2
   where
-    comp2 :: forall eff3 .
-      ( Effect eff3
+    comp2 :: forall m3 .
+      ( Monad m3
       )
-      => lift eff2 eff3
-      -> Operation ops eff3
-      -> comp eff3
+      => lift m2 m3
+      -> Operation ops m3
+      -> comp m3
     comp2 lift23 = runComp comp1 $ joinLift lift12 lift23
 
 strengthenComputation
-  :: forall lift1 lift2 ops comp eff
+  :: forall lift1 lift2 ops comp m
    . ( EffOps ops
-     , Effect eff
+     , Monad m
      , LiftMonoid lift1
      , LiftMonoid lift2
      )
-  => (forall eff1 eff2
-       . (Effect eff1, Effect eff2)
-      => lift2 eff1 eff2
-      -> lift1 eff1 eff2)
-  -> Computation lift1 ops comp eff
-  -> Computation lift2 ops comp eff
+  => (forall m1 m2
+       . (Monad m1, Monad m2)
+      => lift2 m1 m2
+      -> lift1 m1 m2)
+  -> Computation lift1 ops comp m
+  -> Computation lift2 ops comp m
 strengthenComputation strengthenLift comp1 =
   Computation comp2
  where
-  comp2 :: forall eff2 .
-    ( Effect eff2
+  comp2 :: forall m2 .
+    ( Monad m2
     )
-    => lift2 eff eff2
-    -> Operation ops eff2
-    -> comp eff2
+    => lift2 m m2
+    -> Operation ops m2
+    -> comp m2
   comp2 lift = runComp comp1 $ strengthenLift lift

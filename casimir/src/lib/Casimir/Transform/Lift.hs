@@ -10,74 +10,74 @@ import Control.Monad.Trans.Control
 import Casimir.Base
 
 transformLift
-  :: forall t eff
-   . ( Effect eff
+  :: forall t m
+   . ( Monad m
      , MonadTrans t
-     , Effect (t eff)
+     , Monad (t m)
      )
-  => Lift eff (t eff)
+  => Lift m (t m)
 transformLift = Lift lift
 
 transformContraLift
-  :: forall eff t w
-   . ( Effect eff
-     , Effect (t eff)
+  :: forall m t w
+   . ( Monad m
+     , Monad (t m)
      , MonadTransControl t
      , Functor w
      )
   => (forall x . StT t x -> w x)
   -> (forall x . w x -> StT t x)
-  -> ContraLift eff (t eff)
+  -> ContraLift m (t m)
 transformContraLift id1 id2 = ContraLift contraLift1
  where
   contraLift1
     :: forall a
-     . ((forall x . t eff x -> eff (w x))
-        -> eff (w a))
-    -> t eff a
+     . ((forall x . t m x -> m (w x))
+        -> m (w a))
+    -> t m a
   contraLift1 cont1 = liftWith cont2 >>= restoreT . return
    where
     cont2
-      :: (forall x . t eff x -> eff (StT t x))
-      -> eff (StT t a)
+      :: (forall x . t m x -> m (StT t x))
+      -> m (StT t a)
     cont2 contraLift2 = do
       wx <- cont1 contraLift3
       return $ id2 wx
      where
       contraLift3
-        :: forall x . t eff x -> eff (w x)
+        :: forall x . t m x -> m (w x)
       contraLift3 mx = do
         wx <- contraLift2 mx
         return $ id1 wx
 
 baseContraLift
-  :: forall eff1 eff2 w
-   . ( Effect eff1
-     , Effect eff2
+  :: forall m1 m2 w
+   . ( Monad m1
+     , Monad m2
      , Functor w
-     , MonadBaseControl eff1 eff2
+     , MonadBaseControl m1 m2
      )
-  => (forall x . StM eff2 x -> w x)
-  -> (forall x . w x -> StM eff2 x)
-  -> ContraLift eff1 eff2
+  => (forall x . StM m2 x -> w x)
+  -> (forall x . w x -> StM m2 x)
+  -> ContraLift m1 m2
 baseContraLift id1 id2 = ContraLift contraLift1
  where
   contraLift1
     :: forall a
-     . ((forall x . eff2 x -> eff1 (w x))
-        -> eff1 (w a))
-    -> eff2 a
+     . ((forall x . m2 x -> m1 (w x))
+        -> m1 (w a))
+    -> m2 a
   contraLift1 cont1 = control cont2
    where
     cont2
-      :: (forall x . eff2 x -> eff1 (StM eff2 x))
-      -> eff1 (StM eff2 a)
+      :: (forall x . m2 x -> m1 (StM m2 x))
+      -> m1 (StM m2 a)
     cont2 contraLift2 = do
       wx <- cont1 contraLift3
       return $ id2 wx
      where
       contraLift3
-        :: forall x . eff2 x -> eff1 (w x)
+        :: forall x . m2 x -> m1 (w x)
       contraLift3 mx = do
         wx <- contraLift2 mx
         return $ id1 wx
