@@ -39,17 +39,17 @@ newtype ReturnCtx f ret a (m :: Type -> Type) = ReturnCtx {
 }
 
 instance EffFunctor Lift (Return a) where
-  mmap (Lift lift) (Return mx) = Return $ lift mx
+  effmap (Lift lift) (Return mx) = Return $ lift mx
 
 instance (EffFunctor lift (ret b)) => EffFunctor lift (Arrow a ret b) where
-  mmap lifter (Arrow fn) = Arrow $
-    \x -> mmap lifter $ fn x
+  effmap lifter (Arrow fn) = Arrow $
+    \x -> effmap lifter $ fn x
 
 instance
   (EffFunctor lift (ret (f a)))
   => EffFunctor lift (ReturnCtx f ret a)
    where
-    mmap lifter (ReturnCtx mx) = ReturnCtx $ mmap lifter mx
+    effmap lifter (ReturnCtx mx) = ReturnCtx $ effmap lifter mx
 
 instance FunctorComp Return where
   mapComp f (Return mx) = Return $

@@ -34,7 +34,7 @@ stateTHandler
   (Monad m)
   => BaseOpsHandler NoEff (StateEff s) (StateT s m)
 stateTHandler = opsHandlerComp $
-  \lifter -> mmap lifter stateTOps
+  \lifter -> effmap lifter stateTOps
 
 ioHandler :: BaseOpsHandler NoEff IoEff IO
 ioHandler = baseOpsHandler IoOps {

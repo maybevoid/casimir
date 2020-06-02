@@ -77,7 +77,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
       comp3 :: free handler m2 a
       comp3 = returnVal $ runComp comp1
         (joinLift lift12 freeHigherLift)
-        (LowerOps freeOps ∪ mmap freeHigherLift ops2)
+        (LowerOps freeOps ∪ effmap freeHigherLift ops2)
 
       comp4 :: m2 (f a)
       comp4 = handleFree handler2 comp3

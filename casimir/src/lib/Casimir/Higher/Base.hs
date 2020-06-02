@@ -46,5 +46,5 @@ class
 instance
   (EffFunctor lift ops)
   => EffFunctor lift (HigherOps ops m) where
-    mmap lift (HigherOps ops) = HigherOps $
-      mmap lift ops
+    effmap lift (HigherOps ops) = HigherOps $
+      effmap lift ops

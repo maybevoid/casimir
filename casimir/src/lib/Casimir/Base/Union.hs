@@ -64,8 +64,8 @@ instance {-# INCOHERENT #-}
   )
   => EffFunctor lift (UnionOps ops1 ops2)
   where
-    mmap f (UnionOps x y)
-      = UnionOps (mmap f x) (mmap f y)
+    effmap f (UnionOps x y)
+      = UnionOps (effmap f x) (effmap f y)
 
 -- | Get the left operation of the @'Operation' (ops1 '∪' ops2)@ product.
 leftOps

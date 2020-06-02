@@ -6,7 +6,7 @@
 module Casimir.Base
   ( EffOps (..)
   , EffFunctor (..)
-  , ImplicitOps
+  , ImplicitOps (..)
   , Eff
   , OpsConstraint
   , EffConstraint
@@ -29,6 +29,9 @@ module Casimir.Base
   , TaggedEff
   , NamedOps
   , TaggedOps
+  , EntailOps (..)
+  , AllCoercible (..)
+  , type (⊇)
   , (∪)
   , withOps
   , captureOps

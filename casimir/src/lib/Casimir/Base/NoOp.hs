@@ -21,4 +21,4 @@ instance EffOps NoEff where
   type Operation NoEff = NoOp
 
 instance EffFunctor lift NoOp where
-  mmap _ _ = NoOp
+  effmap _ _ = NoOp

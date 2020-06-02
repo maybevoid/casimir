@@ -34,7 +34,7 @@ instance Functor (AmbCoOp a) where
   fmap f (SelectOp choice cont) = SelectOp choice (f . cont)
 
 instance EffFunctor Lift (AmbOps a) where
-  mmap (Lift lift) ops = AmbOps {
+  effmap (Lift lift) ops = AmbOps {
     selectOp = \choice -> lift $ selectOp ops choice
   }
 

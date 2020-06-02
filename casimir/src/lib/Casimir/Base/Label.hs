@@ -43,5 +43,5 @@ instance
   (EffFunctor lift ops)
   => EffFunctor lift (LabeledOps k (label :: k) ops)
    where
-    mmap lifter (LabeledOps ops) =
-      LabeledOps $ mmap lifter ops
+    effmap lifter (LabeledOps ops) =
+      LabeledOps $ effmap lifter ops

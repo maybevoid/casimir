@@ -40,14 +40,14 @@ readerTHandler
   (Monad m)
   => BaseOpsHandler NoEff (EnvEff a) (ReaderT a m)
 readerTHandler = opsHandlerComp $
-  \lifter -> mmap lifter readerTOps
+  \lifter -> effmap lifter readerTOps
 
 stateTHandler
   :: forall m s .
   (Monad m)
   => BaseOpsHandler NoEff (StateEff s) (StateT s m)
 stateTHandler = opsHandlerComp $
-  \lifter -> mmap lifter stateTOps
+  \lifter -> effmap lifter stateTOps
 
 runCoState
   :: forall s m . (Monad m)

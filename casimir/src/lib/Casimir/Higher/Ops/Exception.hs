@@ -82,13 +82,13 @@ instance ImplicitOps (ExceptionEff e) where
 instance
   (Monad inEff)
   => EffFunctor Lift (HigherExceptionOps e inEff) where
-    mmap
+    effmap
       :: forall m1 m2
        . (Monad m1, Monad m2)
       => Lift m1 m2
       -> HigherExceptionOps e inEff m1
       -> HigherExceptionOps e inEff m2
-    mmap (Lift lift) ops1 =
+    effmap (Lift lift) ops1 =
       HigherExceptionOps handleTry handleThrow
      where
       handleTry

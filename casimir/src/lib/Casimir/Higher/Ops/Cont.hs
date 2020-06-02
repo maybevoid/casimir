@@ -23,12 +23,12 @@ data ContOps m1 m2 = ContOps {
 instance
   (Monad m1)
   => EffFunctor Lift (ContOps m1) where
-    mmap
+    effmap
       :: forall m2 m3
        . Lift m2 m3
       -> ContOps m1 m2
       -> ContOps m1 m3
-    mmap (Lift lift) (ContOps callCC) = ContOps $ \cont ->
+    effmap (Lift lift) (ContOps callCC) = ContOps $ \cont ->
       lift $ callCC cont
 
 instance HigherEffFunctor HigherLift ContOps where

@@ -32,7 +32,7 @@ instance Functor (AsyncCoOp t) where
   fmap f (AwaitAllOp tasks cont) = AwaitAllOp tasks $ f . cont
 
 instance EffFunctor Lift (AsyncOps t) where
-  mmap (Lift lift) ops = AsyncOps {
+  effmap (Lift lift) ops = AsyncOps {
     awaitOp = lift . (awaitOp ops),
     awaitAllOp = lift . (awaitAllOp ops)
   }

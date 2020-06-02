@@ -16,6 +16,6 @@ instance EffOps (EnvEff e) where
   type Operation (EnvEff e) = EnvOps e
 
 instance EffFunctor Lift (EnvOps e) where
-  mmap (Lift lift) envOps = EnvOps
+  effmap (Lift lift) envOps = EnvOps
     { askOp = lift $ askOp envOps
     }

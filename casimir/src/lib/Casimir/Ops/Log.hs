@@ -34,7 +34,7 @@ instance Freer.EffCoOp (LogEff l) where
   type CoOperation (LogEff l) = LogCoOp' l
 
 instance EffFunctor Lift (LogOps l) where
-  mmap (Lift lift) ops = LogOps $
+  effmap (Lift lift) ops = LogOps $
     lift . logOp ops
 
 instance Free.FreeOps (LogEff l) where

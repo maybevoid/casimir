@@ -34,7 +34,7 @@ instance
   , EffFunctor lift (Operation ops)
   )
   => EffFunctor lift (Computation lift ops comp) where
-    mmap = liftComputation
+    effmap = liftComputation
 
 liftComputation
   :: forall lift ops comp m1 m2

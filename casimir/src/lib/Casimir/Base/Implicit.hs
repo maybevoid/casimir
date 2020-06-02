@@ -2,10 +2,13 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Casimir.Base.Implicit
-  ( ImplicitOps
+  ( ImplicitOps (..)
   , OpsConstraint
   , EffConstraint
   , Eff
+  , EntailOps (..)
+  , AllCoercible (..)
+  , type (⊇)
   , withOps
   , captureOps
   )
@@ -33,6 +36,13 @@ class
 
     coerceFrom :: forall m . ops2 m -> ops1 m
 
+    entailCoercible
+      :: forall m r
+       . ( (Coercible (ops1 m) (ops2 m)
+           , Coercible (ops2 m) (ops1 m)
+           ) => r)
+      -> r
+
 instance
   ( forall m . Coercible (ops1 m) (ops2 m)
   , forall m . Coercible (ops2 m) (ops1 m)
@@ -46,6 +56,8 @@ instance
 
     coerceFrom :: forall m . ops2 m -> ops1 m
     coerceFrom = coerce
+
+    entailCoercible cont = cont
 
 class
   ( Multi.MultiParam (Type -> Type) (AsMultiParam ops)
@@ -124,6 +136,47 @@ instance
         (CanonOps eff1)
         (CanonOps eff2)
 
+class
+  ( ImplicitOps eff1
+  , ImplicitOps eff2
+  )
+  => EntailOps eff1 eff2 where
+    castOps
+      :: forall m
+       . Operation eff1 m
+      -> Operation eff2 m
+
+instance
+  ( ImplicitOps eff1
+  , ImplicitOps eff2
+  , CanonOps eff1 ~ ops11
+  , CanonOps eff2 ~ ops21
+  , AsMultiParam ops11 ~ ops12
+  , AsMultiParam ops21 ~ ops22
+  , Multi.CastParam (Type -> Type) ops12 ops22
+  )
+  => EntailOps eff1 eff2 where
+    castOps
+      :: forall m
+       . Operation eff1 m
+      -> Operation eff2 m
+    castOps ops1 = coerceFrom ops5
+     where
+      ops2 :: ops11 m
+      ops2 = coerceTo ops1
+
+      ops3 :: ops12 m
+      ops3 = coerceTo ops2
+
+      ops4 :: ops22 m
+      ops4 = Multi.castValue ops3
+
+      ops5 :: ops21 m
+      ops5 = coerceFrom ops4
+
+infixl 6 ⊇
+type ops1 ⊇ ops2 = EntailOps ops1 ops2
+
 type OpsConstraint ops m =
   ( ImplicitOps ops
   , OpsParam (CanonOps ops) m
@@ -156,7 +209,7 @@ captureOps' = coerceFrom ops'
   ops' = Multi.captureParam @(Type -> Type) @(AsMultiParam ops)
 
 withOps
-  :: forall ops m r
+  :: forall m ops r
    . ( ImplicitOps ops
      )
   => Operation ops m

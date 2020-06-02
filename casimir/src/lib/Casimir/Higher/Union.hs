@@ -51,10 +51,10 @@ instance
   )
   => EffFunctor lift (HUnionOps ops1 ops2 m)
   where
-    mmap lifter (HUnionOps ops1 ops2) =
+    effmap lifter (HUnionOps ops1 ops2) =
       HUnionOps
-        (mmap lifter ops1)
-        (mmap lifter ops2)
+        (effmap lifter ops1)
+        (effmap lifter ops2)
 
 instance
   ( HigherEffFunctor lift ops1

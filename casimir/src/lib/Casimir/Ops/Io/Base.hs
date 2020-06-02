@@ -15,7 +15,7 @@ instance EffOps IoEff where
   type Operation IoEff = IoOps
 
 instance EffFunctor Lift IoOps where
-  mmap (Lift lift) ops = IoOps
+  effmap (Lift lift) ops = IoOps
     { liftIoOp = lift . liftIoOp ops
     }
 

@@ -31,7 +31,7 @@ instance EffOps (ReaderEff e) where
 instance
   (Monad inEff)
   => EffFunctor Lift (ReaderOps e inEff) where
-    mmap _ = undefined
+    effmap _ = undefined
 
 instance HigherEffFunctor HigherLift (ReaderOps e) where
   higherEffmap
@@ -45,8 +45,8 @@ instance HigherEffFunctor HigherLift (ReaderOps e) where
   higherEffmap
     (HigherLift lift (ContraLift contraLift1)) ops
     = ReaderOps
-        (mmap (Lift lift) $ innerEnvOps ops)
-        (mmap (Lift lift) $ outerEnvOps ops)
+        (effmap (Lift lift) $ innerEnvOps ops)
+        (effmap (Lift lift) $ outerEnvOps ops)
         local
     where
       local :: forall a . (e -> e) -> m2 a -> m2 a

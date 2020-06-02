@@ -22,8 +22,8 @@ instance
   (EffFunctor lift (ops inEff))
   => EffFunctor lift (UnderOps ops inEff)
    where
-    mmap lift (UnderOps ops) =
-      UnderOps $ mmap lift ops
+    effmap lift (UnderOps ops) =
+      UnderOps $ effmap lift ops
 
 instance
   (EffOps ops)

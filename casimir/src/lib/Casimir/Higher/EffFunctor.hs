@@ -27,10 +27,10 @@ instance {-# OVERLAPPABLE #-}
   (EffFunctor lift ops)
   => HigherEffFunctor lift (HigherOps ops) where
     higherEffmap lift (HigherOps ops) =
-      HigherOps $ Base.mmap lift ops
+      HigherOps $ Base.effmap lift ops
 
 instance {-# OVERLAPPABLE #-}
   (HigherEffFunctor HigherLift ops)
   => EffFunctor HigherLift (LowerOps ops) where
-    mmap lift (LowerOps ops) =
+    effmap lift (LowerOps ops) =
       LowerOps $ higherEffmap lift ops

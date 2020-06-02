@@ -21,7 +21,7 @@ instance EffCoOp (DecideEff s) where
   type CoOperation (DecideEff s) = DecideCoOp s
 
 instance EffFunctor Lift (DecideOps s) where
-  mmap (Lift lift) ops = DecideOps {
+  effmap (Lift lift) ops = DecideOps {
     decideOp = lift $ decideOp ops
   }
 

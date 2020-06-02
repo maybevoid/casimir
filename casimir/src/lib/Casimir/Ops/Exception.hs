@@ -26,7 +26,7 @@ instance EffCoOp (ExceptionEff e) where
   type CoOperation (ExceptionEff e) = ExceptionCoOp e
 
 instance EffFunctor Lift (ExceptionOps e) where
-  mmap (Lift lift) ops = ExceptionOps {
+  effmap (Lift lift) ops = ExceptionOps {
     raiseOp = \e -> lift $ raiseOp ops e
   }
 
@@ -143,7 +143,7 @@ tryComp comp1 handler1 = handleFree handler2 comp2
  where
   comp2 :: free (ExceptionEff e) m a
   comp2 = returnVal $ runComp comp1 freeLiftEff $
-    UnionOps freeOps $ mmap (Lift liftFree) captureOps
+    UnionOps freeOps $ effmap (Lift liftFree) captureOps
 
   handler2 :: CoOpHandler (ExceptionEff e) a a m
   handler2 = CoOpHandler return $
@@ -180,7 +180,7 @@ bracketComp initComp cleanupComp betweenComp = Computation comp1
         runComp (betweenComp x)
           (joinLift lift12 freeLiftEff) $
           UnionOps freeOps $
-            mmap (Lift liftFree) ops1
+            effmap (Lift liftFree) ops1
 
     comp4 :: a -> m2 ()
     comp4 x = returnVal $ runComp (cleanupComp x) lift12 ops

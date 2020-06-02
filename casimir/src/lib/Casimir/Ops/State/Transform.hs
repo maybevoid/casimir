@@ -47,7 +47,7 @@ instance
     type OpsMonad (UseStateLift lift s t) = StateT s (OpsMonad t)
 
     monadOps = stateTOps ∪
-      mmap
+      effmap
         (freeLift @(StateEff s) @lift)
         (monadOps @t)
 
@@ -114,7 +114,7 @@ withStateTAndOps i ops1 comp1 = evalStateT comp2 i
   comp2 = comp1 ops2
 
   ops2 :: Base.Operation (StateEff s ∪ ops) (StateT s m)
-  ops2 = stateTOps ∪ (mmap (Lift lift) ops1)
+  ops2 = stateTOps ∪ (effmap (Lift lift) ops1)
 
 {-# INLINE stateTPipeline #-}
 stateTPipeline

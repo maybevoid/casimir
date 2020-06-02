@@ -6,6 +6,8 @@ module Casimir.Free.Handler
   )
 where
 
+import Data.Coerce
+
 import Casimir.Base
 
 import Casimir.Free.FreeEff
@@ -39,6 +41,12 @@ withCoOpHandlerAndOps
       , ImplicitOps handler
       , EffConstraint ops m
       , EffFunctor Lift (Operation ops)
+      , Coercible
+          (Operation ops m)
+          (CanonOps ops m)
+      , Coercible
+          (CanonOps ops m)
+          (Operation ops m)
       )
   => CoOpHandler handler a r m
   -> (( OpsConstraint handler (free handler m)
@@ -48,9 +56,9 @@ withCoOpHandlerAndOps
   -> m r
 withCoOpHandlerAndOps handler comp1
   = handleFree @free handler $
-      withOps
+      withOps @m
         ( freeOps @free @handler @m
-        ∪ mmap (Lift $ liftFree @free) (captureOps @ops)
+        ∪ effmap (Lift $ liftFree @free) (captureOps @ops)
         )
         comp1
 

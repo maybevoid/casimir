@@ -63,7 +63,7 @@ instance LowerEffOps (ResourceEff' t)
 instance
   (Monad inEff)
   => EffFunctor Lift (HigherResourceOps t inEff) where
-    mmap (Lift lift) (HigherResourceOps handleResource) =
+    effmap (Lift lift) (HigherResourceOps handleResource) =
       HigherResourceOps $
         \resource cont ->
           lift $ handleResource resource cont
