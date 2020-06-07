@@ -106,7 +106,6 @@ library casimir-base
 
   exposed-modules:
     Casimir.Base
-    Casimir.Cast
 
   other-modules:
     Casimir.Base.Effect
@@ -116,9 +115,7 @@ library casimir-base
     Casimir.Base.ContraLift
     Casimir.Base.NoOp
     Casimir.Base.Union
-
-    Casimir.Cast.Cast
-    Casimir.Cast.Entail
+    Casimir.Base.Cast
 
 library casimir-computation
   import: deps
