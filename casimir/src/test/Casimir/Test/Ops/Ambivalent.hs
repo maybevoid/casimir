@@ -24,8 +24,8 @@ data AmbOps a m = AmbOps {
 data AmbCoOp a r
   = SelectOp [a] (a -> r)
 
-instance Effect (AmbEff a) where
-  type Operation (AmbEff a) = AmbOps a
+instance Effects (AmbEff a) where
+  type Operations (AmbEff a) = AmbOps a
 
 instance EffCoOp (AmbEff a) where
   type CoOperation (AmbEff a) = AmbCoOp a

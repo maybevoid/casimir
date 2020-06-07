@@ -10,7 +10,7 @@ import Casimir.Base
 data UseBase (m :: Type -> Type)
 
 class
-  ( Effect (SupportedOps t) )
+  ( Effects (SupportedOps t) )
   => HasOps t where
     type family SupportedOps t :: Type
 
@@ -22,7 +22,7 @@ class
     type family OpsMonad t :: Type -> Type
 
     monadOps
-      :: Operation (SupportedOps t) (OpsMonad t)
+      :: Operations (SupportedOps t) (OpsMonad t)
 
 class
   ( MonadOps t
@@ -51,19 +51,19 @@ withMonadOps
 withMonadOps cont = withOps (monadOps @t) cont
 
 class
-  ( EffFunctor Lift (Operation (SupportedOps t))
+  ( EffFunctor Lift (Operations (SupportedOps t))
   ) => HasBaseOps t
 
 instance
-  ( EffFunctor Lift (Operation (SupportedOps t))
+  ( EffFunctor Lift (Operations (SupportedOps t))
   ) => HasBaseOps t
 
 class
-  ( EffFunctor HigherLift (Operation (SupportedOps t))
+  ( EffFunctor HigherLift (Operations (SupportedOps t))
   ) => HasHigherOps t
 
 instance
-  ( EffFunctor HigherLift (Operation (SupportedOps t))
+  ( EffFunctor HigherLift (Operations (SupportedOps t))
   ) => HasHigherOps t
 
 instance HasOps (UseBase m) where

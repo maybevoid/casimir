@@ -100,7 +100,7 @@ rollCod comp1 = Cod comp2
 
 codensityOps
   :: forall ops h
-   . ( Effect ops
+   . ( Effects ops
      , EffCoOp ops
      , FreeOps ops
      )
@@ -108,7 +108,7 @@ codensityOps
        . CoOperation ops x
       -> (x -> h r)
       -> h r)
-  -> Operation ops (Codensity h)
+  -> Operations ops (Codensity h)
 codensityOps handler1 = mkFreeOps handler2
  where
   handler2 :: forall a . CoOperation ops a -> Codensity h a

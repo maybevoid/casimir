@@ -24,8 +24,8 @@ data LogCoOp l r =
 data LogCoOp' l r where
   LogOp' :: l -> LogCoOp' l ()
 
-instance Effect (LogEff l) where
-  type Operation (LogEff l) = LogOps l
+instance Effects (LogEff l) where
+  type Operations (LogEff l) = LogOps l
 
 instance Free.EffCoOp (LogEff l) where
   type CoOperation (LogEff l) = LogCoOp l

@@ -48,8 +48,8 @@ castOps
   , ImplicitOps ops2
   )
   => OpsCast ops1 ops2
-  -> Operation ops1 m
-  -> Operation ops2 m
+  -> Operations ops1 m
+  -> Operations ops2 m
 castOps caster ops = withOps ops $
   withCast @m @ops1 @ops2
     caster captureOps

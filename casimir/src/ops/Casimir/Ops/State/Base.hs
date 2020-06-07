@@ -19,8 +19,8 @@ data StateOps s m = StateOps {
   putOp :: s -> m ()
 }
 
-instance Effect (State s) where
-  type Operation (State s) = StateOps s
+instance Effects (State s) where
+  type Operations (State s) = StateOps s
 
 instance EffFunctor Lift (StateOps a) where
   effmap (Lift lift) stateOps = StateOps {

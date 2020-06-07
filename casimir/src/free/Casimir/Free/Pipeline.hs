@@ -16,11 +16,11 @@ import Casimir.Free.FreeOps
 coopHandlerToPipeline
   :: forall free ops1 handler m1 a b .
   ( Monad m1
-  , Effect ops1
-  , Effect handler
+  , Effects ops1
+  , Effects handler
   , FreeOps handler
   , FreeHandler free
-  , EffFunctor Lift (Operation ops1)
+  , EffFunctor Lift (Operations ops1)
   )
   => Computation Lift ops1 (CoOpHandler handler a b) m1
   -> Pipeline Lift ops1 handler (Return a) (Return b) m1 m1
@@ -28,8 +28,8 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall ops2
-     . ( Effect ops2
-       , EffFunctor Lift (Operation ops2)
+     . ( Effects ops2
+       , EffFunctor Lift (Operations ops2)
        )
     => Computation Lift (handler ∪ ops2) (Return a) m1
     -> Computation Lift (ops1 ∪ ops2) (Return b) m1
@@ -39,7 +39,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
       :: forall m2
        . (Monad m2)
       => Lift m1 m2
-      -> Operation (ops1 ∪ ops2) m2
+      -> Operations (ops1 ∪ ops2) m2
       -> Return b m2
     comp2 lift12 (UnionOps ops1 ops2) = Return comp4
      where
@@ -58,8 +58,8 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
 genericCoOpHandlerToPipeline
   :: forall free ops1 handler m1 .
   ( Monad m1
-  , Effect ops1
-  , Effect handler
+  , Effects ops1
+  , Effects handler
   , FreeOps handler
   , ImplicitOps ops1
   , ImplicitOps handler
@@ -74,7 +74,7 @@ genericCoOpHandlerToPipeline handler1
     :: forall m2 .
     (Monad m2)
     => Lift m1 m2
-    -> Operation ops1 m2
+    -> Operations ops1 m2
     -> TransformerHandler (free handler) handler m2
   handler2 lift12 ops1
     = TransformerHandler freeOps freeLiftEff (Lift unliftFree)
@@ -91,8 +91,8 @@ genericCoOpHandlerToPipeline handler1
 contextualHandlerToPipeline
   :: forall free w ops1 handler m1 .
   ( Monad m1
-  , Effect ops1
-  , Effect handler
+  , Effects ops1
+  , Effects handler
   , FreeOps handler
   , FreeHandler free
   , ImplicitOps ops1
@@ -107,7 +107,7 @@ contextualHandlerToPipeline handler1
     :: forall m2 .
     (Monad m2)
     => Lift m1 m2
-    -> Operation ops1 m2
+    -> Operations ops1 m2
     -> TransformerHandler (free handler) handler m2
   handler2 lift12 ops1
     = TransformerHandler freeOps freeLiftEff (Lift unliftFree)

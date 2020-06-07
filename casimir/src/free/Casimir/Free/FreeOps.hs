@@ -13,7 +13,7 @@ import Casimir.Free.CoOp
 -- empty declaration for @ops@ to signify that @ops@ is only used for
 -- tagging mects and are not used at the value level.
 class
-  ( Effect ops
+  ( Effects ops
   , EffCoOp ops
   , Functor (CoOperation ops)
   )
@@ -30,4 +30,4 @@ class
       :: forall m
       . (Monad m)
       => (forall a . CoOperation ops a -> m a)
-      -> Operation ops m
+      -> Operations ops m

@@ -21,8 +21,8 @@ data AsyncCoOp t r where
   AwaitOp :: forall t r a . t a -> (a -> r) -> AsyncCoOp t r
   AwaitAllOp :: forall t r a . [t a] -> ([a] -> r) -> AsyncCoOp t r
 
-instance Effect (AsyncEff t) where
-  type Operation (AsyncEff t) = AsyncOps t
+instance Effects (AsyncEff t) where
+  type Operations (AsyncEff t) = AsyncOps t
 
 instance EffCoOp (AsyncEff t) where
   type CoOperation (AsyncEff t) = AsyncCoOp t

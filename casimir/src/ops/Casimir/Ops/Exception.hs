@@ -19,8 +19,8 @@ data ExceptionOps e m = ExceptionOps {
 data ExceptionCoOp e r =
   RaiseOp e
 
-instance Effect (ExceptionEff e) where
-  type Operation (ExceptionEff e) = ExceptionOps e
+instance Effects (ExceptionEff e) where
+  type Operations (ExceptionEff e) = ExceptionOps e
 
 instance EffCoOp (ExceptionEff e) where
   type CoOperation (ExceptionEff e) = ExceptionCoOp e
@@ -131,10 +131,10 @@ tryFinally comp handler1 =
 tryComp
   :: forall free m ops e a
    . ( FreeHandler free
-     , Effect ops
+     , Effects ops
      , ImplicitOps ops
      , EffConstraint ops m
-     , EffFunctor Lift (Operation ops)
+     , EffFunctor Lift (Operations ops)
      )
   => Computation Lift ((ExceptionEff e) ∪ ops) (Return a) m
   -> (e -> m a)
@@ -152,10 +152,10 @@ tryComp comp1 handler1 = handleFree handler2 comp2
 bracketComp
   :: forall free m ops e a b
    . ( FreeHandler free
-     , Effect ops
+     , Effects ops
      , ImplicitOps ops
      , EffConstraint ops m
-     , EffFunctor Lift (Operation ops)
+     , EffFunctor Lift (Operations ops)
      )
   => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) m          -- init
   -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return ()) m)  -- cleanup
@@ -167,7 +167,7 @@ bracketComp initComp cleanupComp betweenComp = Computation comp1
     :: forall m2
      . (Monad m2)
     => Lift m m2
-    -> Operation ((ExceptionEff e) ∪ ops) m2
+    -> Operations ((ExceptionEff e) ∪ ops) m2
     -> Return b m2
   comp1 lift12 ops@(UnionOps eOps ops1) = Return comp5
    where

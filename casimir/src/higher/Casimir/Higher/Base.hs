@@ -1,6 +1,6 @@
 
 module Casimir.Higher.Base
-  ( Effect (..)
+  ( Effects (..)
   , HigherOps (..)
   , LowerOps (..)
   , HigherEffect
@@ -24,21 +24,21 @@ newtype HigherOps ops
   = HigherOps
     { unHigherOps :: ops m2 }
 
-class Effect sig where
-  type family Operation sig
+class Effects sig where
+  type family Operations sig
     = (ops :: (Type -> Type) -> (Type -> Type) -> Type) | ops -> sig
 
 class
-  ( Effect ops
-  , Base.Effect ops
-  , Base.Operation ops ~ LowerOps (Operation ops)
+  ( Effects ops
+  , Base.Effects ops
+  , Base.Operations ops ~ LowerOps (Operations ops)
   )
   => LowerEffect ops
 
 class
-  ( Effect ops
-  , Base.Effect ops
-  , Operation ops ~ HigherOps (Base.Operation ops)
+  ( Effects ops
+  , Base.Effects ops
+  , Operations ops ~ HigherOps (Base.Operations ops)
   )
   => HigherEffect ops
 

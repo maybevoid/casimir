@@ -33,8 +33,8 @@ data NoEff
 -- 'Operation' can be satisfied.
 data NoOp (m :: Type -> Type) = NoOp
 
-instance Effect NoEff where
-  type Operation NoEff = NoOp
+instance Effects NoEff where
+  type Operations NoEff = NoOp
 
 -- | @'OpsConstraint' 'NoOp' m@ is just the empty constraint @()@ for all
 -- 'Monad' @m@. We instead define the empty class 'NoConstraint' with

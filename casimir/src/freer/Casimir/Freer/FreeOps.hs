@@ -8,7 +8,7 @@ import Casimir.Base
 import Casimir.Freer.CoOp
 
 class
-  ( Effect ops
+  ( Effects ops
   , EffCoOp ops
   )
   => FreeOps ops
@@ -17,4 +17,4 @@ class
       :: forall m
         . (Monad m)
       => (forall a . CoOperation ops a -> m a)
-      -> Operation ops m
+      -> Operations ops m

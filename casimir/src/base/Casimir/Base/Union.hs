@@ -52,11 +52,11 @@ type (∪) = Union
 (∪) = UnionOps
 
 instance
-  (Effect ops1, Effect ops2)
-  => Effect (Union ops1 ops2)
+  (Effects ops1, Effects ops2)
+  => Effects (Union ops1 ops2)
   where
-    type Operation (Union ops1 ops2) =
-      UnionOps (Operation ops1) (Operation ops2)
+    type Operations (Union ops1 ops2) =
+      UnionOps (Operations ops1) (Operations ops2)
 
 instance {-# INCOHERENT #-}
   ( EffFunctor lift ops1

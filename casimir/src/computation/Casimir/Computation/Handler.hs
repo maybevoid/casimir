@@ -26,10 +26,10 @@ bindOps
      , ImplicitOps ops1
      , ImplicitOps ops2
      , LiftMonoid lift
-     , EffFunctor lift (Operation ops1)
-     , EffFunctor lift (Operation ops2)
+     , EffFunctor lift (Operations ops1)
+     , EffFunctor lift (Operations ops2)
      )
-  => Operation ops1 m
+  => Operations ops1 m
   -> Computation lift (ops1 ∪ ops2) comp m
   -> Computation lift ops2 comp m
 bindOps ops1 comp = Computation $
@@ -46,7 +46,7 @@ opsHandlerComp
   => (forall m2 .
        (EffConstraint ops m2)
        => lift m1 m2
-       -> Operation handler m2
+       -> Operations handler m2
      )
   -> OpsHandler lift ops handler m1
 opsHandlerComp comp = Computation $
@@ -57,9 +57,9 @@ baseOpsHandler
    . ( ImplicitOps handler
      , Monad m
      , LiftMonoid lift
-     , EffFunctor lift (Operation handler)
+     , EffFunctor lift (Operations handler)
      )
-  => Operation handler m
+  => Operations handler m
   -> OpsHandler lift NoEff handler m
 baseOpsHandler handler = Computation $
   \ lift12 _ -> effmap lift12 handler
@@ -69,7 +69,7 @@ genericOpsHandler
    . ( ImplicitOps ops, ImplicitOps handler )
   => (forall m
        . (EffConstraint ops m)
-      => Operation handler m)
+      => Operations handler m)
   -> (forall m . OpsHandler lift ops handler m)
 genericOpsHandler handler = Computation $
   \ _ ops -> withOps ops handler
@@ -80,7 +80,7 @@ bindExactOpsHandler
      , ImplicitOps handler
      , Monad m1
      , LiftMonoid lift
-     , EffFunctor lift (Operation handler)
+     , EffFunctor lift (Operations handler)
      )
   => OpsHandler lift ops handler m1
   -> Computation lift (handler ∪ ops) comp m1
@@ -92,12 +92,12 @@ bindExactOpsHandler handler1 comp1
       :: forall m2
        . (Monad m2)
       => lift m1 m2
-      -> Operation ops m2
+      -> Operations ops m2
       -> comp m2
     comp2 lift12 ops
       = runComp comp1 lift12 (handler2 ∪ ops)
        where
-        handler2 :: Operation handler m2
+        handler2 :: Operations handler m2
         handler2 = runComp handler1 lift12 ops
     {-# INLINE comp2 #-}
 {-# INLINE bindExactOpsHandler #-}
@@ -119,15 +119,15 @@ composeExactOpsHandlers handler1 handler2
       :: forall m2
        . (Monad m2)
       => lift m1 m2
-      -> Operation ops m2
-      -> Operation (handler1 ∪ handler2) m2
+      -> Operations ops m2
+      -> Operations (handler1 ∪ handler2) m2
     comp1 lift12 ops
       = handler3 ∪ handler4
        where
-        handler3 :: Operation handler1 m2
+        handler3 :: Operations handler1 m2
         handler3 = runComp handler1 lift12 ops
 
-        handler4 :: Operation handler2 m2
+        handler4 :: Operations handler2 m2
         handler4 = runComp handler2 lift12 (handler3 ∪ ops)
 
 withOpsHandler
@@ -136,7 +136,7 @@ withOpsHandler
      , ImplicitOps handler
      , EffConstraint ops m
      , LiftMonoid lift
-     , EffFunctor lift (Operation handler)
+     , EffFunctor lift (Operations handler)
      )
   => OpsHandler lift ops handler m
   -> (OpsConstraint handler m => r)
@@ -202,7 +202,7 @@ bindOpsHandlerWithCast
      , ImplicitOps handler
      , Monad m
      , LiftMonoid lift
-     , EffFunctor lift (Operation handler)
+     , EffFunctor lift (Operations handler)
      )
   => OpsCast ops3 ops1
   -> OpsCast (handler ∪ ops3) ops2
@@ -225,7 +225,7 @@ bindOpsHandler
      , ImplicitOps handler
      , Monad m
      , LiftMonoid lift
-     , EffFunctor lift (Operation handler)
+     , EffFunctor lift (Operations handler)
      )
   => OpsHandler lift ops1 handler m
   -> Computation lift ops2 r m

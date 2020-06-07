@@ -29,7 +29,7 @@ import Casimir.Base.Effect
 -- be derived mechanically. We may look into using template Haskell to generate
 -- instances for 'ImplicitOps' in future to reduce some boilerplate.
 class
-  (Effect ops)
+  (Effects ops)
   => ImplicitOps ops where
 
     -- | The constraint kind for the mect operation under 'Monad' @m@.
@@ -52,7 +52,7 @@ class
     withOps
       :: forall m r
        . (Monad m)
-      => Operation ops m
+      => Operations ops m
       -> (OpsConstraint ops m => r)
       -> r
 
@@ -62,7 +62,7 @@ class
     captureOps
       :: forall m
        . (Monad m, OpsConstraint ops m)
-      => Operation ops m
+      => Operations ops m
 
 -- | This is a type alias for the implicit parameter constraint for @ops@,
 -- in addition to requiring @m@ to be an 'Monad'. This helps reducing

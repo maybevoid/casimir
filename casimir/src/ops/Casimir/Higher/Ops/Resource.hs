@@ -55,11 +55,11 @@ data BracketResource a = BracketResource
   , releaseOp :: (a -> IO ())
   }
 
-instance Effect (ResourceEff t) where
-  type Operation (ResourceEff t) = HigherResourceOps t
+instance Effects (ResourceEff t) where
+  type Operations (ResourceEff t) = HigherResourceOps t
 
-instance Base.Effect (ResourceEff t) where
-  type Operation (ResourceEff t) = LowerOps (HigherResourceOps t)
+instance Base.Effects (ResourceEff t) where
+  type Operations (ResourceEff t) = LowerOps (HigherResourceOps t)
 
 instance LowerEffect (ResourceEff t)
 

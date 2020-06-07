@@ -15,7 +15,7 @@ import Casimir.Free.FreeOps
 withCoOpHandler
   :: forall free handler m a r
    . ( Monad m
-     , Effect handler
+     , Effects handler
      , FreeOps handler
      , FreeHandler free
      , ImplicitOps handler
@@ -31,14 +31,14 @@ withCoOpHandler handler comp1
 {-# INLINE withCoOpHandlerAndOps #-}
 withCoOpHandlerAndOps
   :: forall free ops handler m a r
-    . ( Effect ops
-      , Effect handler
+    . ( Effects ops
+      , Effects handler
       , FreeOps handler
       , ImplicitOps ops
       , FreeHandler free
       , ImplicitOps handler
       , EffConstraint ops m
-      , EffFunctor Lift (Operation ops)
+      , EffFunctor Lift (Operations ops)
       )
   => CoOpHandler handler a r m
   -> (( OpsConstraint handler (free handler m)
@@ -58,7 +58,7 @@ withCoOpHandlerAndOps handler comp1
 withContextualCoOpHandler
   :: forall free handler m a r
    . ( Monad m
-     , Effect handler
+     , Effects handler
      , FreeOps handler
      , FreeHandler free
      , ImplicitOps handler

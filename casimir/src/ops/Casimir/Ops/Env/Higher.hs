@@ -25,8 +25,8 @@ data ReaderOps e inEff m = ReaderOps
       -> m a
   }
 
-instance Effect (ReaderEff e) where
-  type Operation (ReaderEff e) = ReaderOps e
+instance Effects (ReaderEff e) where
+  type Operations (ReaderEff e) = ReaderOps e
 
 instance
   (Monad inEff)
