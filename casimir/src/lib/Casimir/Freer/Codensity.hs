@@ -100,7 +100,7 @@ rollCod comp1 = Cod comp2
 
 codensityOps
   :: forall ops h
-   . ( EffOps ops
+   . ( Effect ops
      , EffCoOp ops
      , FreeOps ops
      )

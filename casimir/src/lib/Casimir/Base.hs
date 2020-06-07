@@ -4,7 +4,7 @@
   Base module that defines the basic datatypes for implicit-mects.
 -}
 module Casimir.Base
-  ( EffOps (..)
+  ( Effect (..)
   , EffFunctor (..)
   , ImplicitOps (..)
   , Eff
@@ -31,7 +31,7 @@ module Casimir.Base
 )
 where
 
-import Casimir.Base.EffOps
+import Casimir.Base.Effect
 import Casimir.Base.EffFunctor
 import Casimir.Base.Implicit
 import Casimir.Base.Union

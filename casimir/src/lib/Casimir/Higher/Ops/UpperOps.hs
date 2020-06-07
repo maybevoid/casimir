@@ -24,8 +24,8 @@ data UpperOps ops
     }
 
 instance
-  (Base.EffOps ops)
-  => EffOps (UpperEff ops) where
+  (Base.Effect ops)
+  => Effect (UpperEff ops) where
     type Operation (UpperEff ops) = UpperOps (Base.Operation ops)
 
 instance

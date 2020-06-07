@@ -24,8 +24,8 @@ newtype LabeledOps
   }
 
 instance
-  (EffOps ops)
-  => EffOps (LabeledEff k label ops) where
+  (Effect ops)
+  => Effect (LabeledEff k label ops) where
   type Operation (LabeledEff k label ops) =
     LabeledOps k label (Operation ops)
 
@@ -37,7 +37,7 @@ instance
       LabeledOps $ effmap lifter ops
 
 instance
-  (EffOps ops)
+  (Effect ops)
   => ImplicitOps (LabeledEff k (label :: k) ops)
    where
     type OpsConstraint (LabeledEff k (label :: k) ops) m =

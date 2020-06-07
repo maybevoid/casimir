@@ -8,7 +8,7 @@ where
 
 import Data.Kind
 import Casimir.Base.Lift
-import Casimir.Base.EffOps
+import Casimir.Base.Effect
 import Casimir.Base.Implicit
 import Casimir.Base.EffFunctor
 
@@ -33,7 +33,7 @@ data NoEff
 -- 'Operation' can be satisfied.
 data NoOp (m :: Type -> Type) = NoOp
 
-instance EffOps NoEff where
+instance Effect NoEff where
   type Operation NoEff = NoOp
 
 -- | @'OpsConstraint' 'NoOp' m@ is just the empty constraint @()@ for all

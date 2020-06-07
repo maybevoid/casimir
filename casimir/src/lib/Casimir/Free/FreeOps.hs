@@ -13,7 +13,7 @@ import Casimir.Free.CoOp
 -- empty declaration for @ops@ to signify that @ops@ is only used for
 -- tagging mects and are not used at the value level.
 class
-  ( EffOps ops
+  ( Effect ops
   , EffCoOp ops
   , Functor (CoOperation ops)
   )

@@ -9,7 +9,7 @@ where
 
 import Data.Kind
 
-import Casimir.Base.EffOps
+import Casimir.Base.Effect
 
 -- | 'ImplicitOps' gives computations access to mect operations of an
 -- operation through implicit parameter constraints. It hides the machinery
@@ -29,7 +29,7 @@ import Casimir.Base.EffOps
 -- be derived mechanically. We may look into using template Haskell to generate
 -- instances for 'ImplicitOps' in future to reduce some boilerplate.
 class
-  (EffOps ops)
+  (Effect ops)
   => ImplicitOps ops where
 
     -- | The constraint kind for the mect operation under 'Monad' @m@.

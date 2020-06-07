@@ -93,7 +93,7 @@ monadStateOps = StateOps {
 
 withStateTAndOps
   :: forall ops s r m .
-  ( EffOps ops
+  ( Effect ops
   , EffFunctor Lift (Operation ops)
   , Monad m
   )

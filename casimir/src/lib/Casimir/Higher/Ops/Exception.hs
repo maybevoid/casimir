@@ -61,16 +61,16 @@ data ExceptionCoOp e f r where
      . e
     -> ExceptionCoOp e f r
 
-instance Base.EffOps (ExceptionEff e) where
+instance Base.Effect (ExceptionEff e) where
   type Operation (ExceptionEff e) = ExceptionOps e
 
-instance Higher.EffOps (ExceptionEff e) where
+instance Higher.Effect (ExceptionEff e) where
   type Operation (ExceptionEff e) = HigherExceptionOps e
 
 instance EffCoOp (ExceptionEff e) where
   type CoOperation (ExceptionEff e) = ExceptionCoOp e
 
-instance LowerEffOps (ExceptionEff e)
+instance LowerEffect (ExceptionEff e)
 
 instance ImplicitOps (ExceptionEff e) where
   type OpsConstraint (ExceptionEff e) m =

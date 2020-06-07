@@ -97,7 +97,7 @@ class
 
 instance
   {-# OVERLAPPABLE #-}
-  ( HigherEffOps ops
+  ( HigherEffect ops
   , HigherEffCoOp ops
   , EffCoOp ops
   , Functor (Base.CoOperation ops)
@@ -136,10 +136,10 @@ withCoOpHandler
      , Monad m
      , FreeEff free
      , FreeHandler free
-     , EffOps ops
+     , Effect ops
      , FreeOps ops
      , ImplicitOps ops
-     , LowerEffOps ops
+     , LowerEffect ops
      )
   => CoOpHandler ops f m
   -> ((OpsConstraint ops (free ops m))
@@ -155,7 +155,7 @@ withCoOpHandler handler comp1
 liftCoOpHandler
   :: forall ops m f
    . ( Monad m
-     , HigherEffOps ops
+     , HigherEffect ops
      , HigherEffCoOp ops
      )
   => (forall a . Base.CoOpHandler ops a (f a) m)
@@ -178,7 +178,7 @@ liftCoOpHandler handler1 contraLift =
 lowerCoOpHandler
   :: forall ops m f
    . ( Monad m
-     , HigherEffOps ops
+     , HigherEffect ops
      , HigherEffCoOp ops
      )
   => CoOpHandler ops f m

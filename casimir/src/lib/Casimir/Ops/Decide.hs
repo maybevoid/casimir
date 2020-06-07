@@ -14,7 +14,7 @@ data DecideOps s m = DecideOps {
 data DecideCoOp s a = DecideOp (s -> a)
   deriving (Functor)
 
-instance EffOps (DecideEff s) where
+instance Effect (DecideEff s) where
   type Operation (DecideEff s) = DecideOps s
 
 instance EffCoOp (DecideEff s) where

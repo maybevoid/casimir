@@ -19,7 +19,7 @@ data ExceptionOps e m = ExceptionOps {
 data ExceptionCoOp e r =
   RaiseOp e
 
-instance EffOps (ExceptionEff e) where
+instance Effect (ExceptionEff e) where
   type Operation (ExceptionEff e) = ExceptionOps e
 
 instance EffCoOp (ExceptionEff e) where
@@ -131,7 +131,7 @@ tryFinally comp handler1 =
 tryComp
   :: forall free m ops e a
    . ( FreeHandler free
-     , EffOps ops
+     , Effect ops
      , ImplicitOps ops
      , EffConstraint ops m
      , EffFunctor Lift (Operation ops)
@@ -152,7 +152,7 @@ tryComp comp1 handler1 = handleFree handler2 comp2
 bracketComp
   :: forall free m ops e a b
    . ( FreeHandler free
-     , EffOps ops
+     , Effect ops
      , ImplicitOps ops
      , EffConstraint ops m
      , EffFunctor Lift (Operation ops)

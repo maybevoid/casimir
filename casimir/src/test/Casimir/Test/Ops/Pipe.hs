@@ -31,10 +31,10 @@ data AwaitCoOp a r =
   AwaitOp (a -> r)
   deriving (Functor)
 
-instance EffOps (YieldEff a) where
+instance Effect (YieldEff a) where
   type Operation (YieldEff a) = YieldOps a
 
-instance EffOps (AwaitEff a) where
+instance Effect (AwaitEff a) where
   type Operation (AwaitEff a) = AwaitOps a
 
 instance EffCoOp (YieldEff a) where
@@ -85,7 +85,7 @@ await = awaitOp ?awaitOps
 
 runPipe :: forall a r ops m1
    . ( Monad m1
-   , EffOps ops
+   , Effect ops
    , EffFunctor Lift (Operation ops)
    )
   => BaseComputation ((YieldEff a) ∪ ops) (Return r) m1

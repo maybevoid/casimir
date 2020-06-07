@@ -14,7 +14,7 @@ data EnvOps e m = EnvOps {
   askOp :: m e
 }
 
-instance EffOps (EnvEff e) where
+instance Effect (EnvEff e) where
   type Operation (EnvEff e) = EnvOps e
 
 instance EffFunctor Lift (EnvOps e) where

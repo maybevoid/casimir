@@ -12,7 +12,7 @@ where
 
 import Data.Kind
 
-import Casimir.Base.EffOps
+import Casimir.Base.Effect
 import Casimir.Base.Implicit
 import Casimir.Base.EffFunctor
 
@@ -52,8 +52,8 @@ type (∪) = Union
 (∪) = UnionOps
 
 instance
-  (EffOps ops1, EffOps ops2)
-  => EffOps (Union ops1 ops2)
+  (Effect ops1, Effect ops2)
+  => Effect (Union ops1 ops2)
   where
     type Operation (Union ops1 ops2) =
       UnionOps (Operation ops1) (Operation ops2)

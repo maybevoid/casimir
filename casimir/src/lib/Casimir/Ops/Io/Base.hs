@@ -12,7 +12,7 @@ data IoOps m = IoOps {
   liftIoOp :: forall a . IO a -> m a
 }
 
-instance EffOps IoEff where
+instance Effect IoEff where
   type Operation IoEff = IoOps
 
 instance EffFunctor Lift IoOps where

@@ -25,7 +25,7 @@ data ReaderOps e inEff m = ReaderOps
       -> m a
   }
 
-instance EffOps (ReaderEff e) where
+instance Effect (ReaderEff e) where
   type Operation (ReaderEff e) = ReaderOps e
 
 instance

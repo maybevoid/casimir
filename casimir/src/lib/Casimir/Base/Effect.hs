@@ -1,11 +1,11 @@
 
-module Casimir.Base.EffOps
-  ( EffOps (..)
+module Casimir.Base.Effect
+  ( Effect (..)
   )
 where
 
 import Data.Kind
 
-class EffOps ops where
+class Effect ops where
   type family Operation ops
     = (operation :: (Type -> Type) -> Type) | operation -> ops

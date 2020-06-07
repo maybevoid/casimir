@@ -29,10 +29,10 @@ data HUnionCoOp coop1 coop2
   | RightOp (coop2 f r)
 
 instance
-  ( EffOps ops1
-  , EffOps ops2
+  ( Effect ops1
+  , Effect ops2
   )
-  => EffOps (Union ops1 ops2) where
+  => Effect (Union ops1 ops2) where
     type Operation (Union ops1 ops2) =
       HUnionOps (Operation ops1) (Operation ops2)
 

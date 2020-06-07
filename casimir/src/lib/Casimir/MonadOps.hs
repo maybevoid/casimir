@@ -10,7 +10,7 @@ import Casimir.Base
 data UseBase (m :: Type -> Type)
 
 class
-  ( EffOps (SupportedOps t) )
+  ( Effect (SupportedOps t) )
   => HasOps t where
     type family SupportedOps t :: Type
 

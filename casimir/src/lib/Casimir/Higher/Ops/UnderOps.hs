@@ -26,7 +26,7 @@ instance
       UnderOps $ effmap lift ops
 
 instance
-  (EffOps ops)
-  => Base.EffOps (UnderEff ops m) where
+  (Effect ops)
+  => Base.Effect (UnderEff ops m) where
     type Operation (UnderEff ops m) =
       UnderOps (Operation ops) m

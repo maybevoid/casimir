@@ -8,7 +8,7 @@ import Casimir.Base
 import Casimir.Freer.CoOp
 
 class
-  ( EffOps ops
+  ( Effect ops
   , EffCoOp ops
   )
   => FreeOps ops

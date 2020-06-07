@@ -32,7 +32,7 @@ higherToBaseLift higherLift = Lift $ hlBaseLift higherLift
 
 toHigherComputation
   :: forall ops comp m
-   . (Base.EffOps ops, Monad m)
+   . (Base.Effect ops, Monad m)
   => BaseComputation ops comp m
   -> HigherComputation ops comp m
 toHigherComputation = strengthenComputation higherToBaseLift
@@ -42,10 +42,10 @@ coopHandlerToPipeline
   :: forall free ops1 handler m1 f a .
   ( Functor f
   , Monad m1
-  , Base.EffOps ops1
-  , EffOps handler
+  , Base.Effect ops1
+  , Effect handler
   , ImplicitOps handler
-  , LowerEffOps handler
+  , LowerEffect handler
   , FreeOps handler
   , FreeHandler free
   )
