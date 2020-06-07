@@ -27,9 +27,13 @@ module Casimir.Base
   , UnionOps
   , Cons
   , EffectList (..)
+
   , ContraLift (..)
+
   , CastOps
   , EntailOps
+  , CastDict
+  , EntailDict
 
   , type (:+)
   , type (∪)
@@ -40,11 +44,23 @@ module Casimir.Base
   , pattern Cons
   , pattern NoOp
   , pattern Union
-  , castOps
+
+  , withOp
+  , withOps
+  , captureOp
+  , captureOps
   , leftOps
   , rightOps
   , joinContraLift
   , identityContraLift
+
+  , castOps
+  , castDict
+  , entailDict
+  , extendCast
+  , composeCast
+  , castOpsWithDict
+
 )
 where
 

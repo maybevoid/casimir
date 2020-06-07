@@ -1,22 +1,14 @@
 
 module Casimir.Computation.Handler
   ( bindOps
-  , opsHandlerComp
-  , withOpsHandler
-  , baseOpsHandler
-  , genericOpsHandler
   , bindExactOpsHandler
   , composeExactOpsHandlers
-  , castOpsHandler
   , composeOpsHandlers
-  , composeOpsHandlersWithCast
   , bindOpsHandler
-  , bindOpsHandlerWithCast
   )
 where
 
 import Casimir.Base
-import Casimir.Cast
 import Casimir.Computation.Cast
 import Casimir.Computation.Computation
 
@@ -36,43 +28,6 @@ bindOps ops1 comp = Computation $
   \lift ops2 ->
     runComp comp lift $
       (effmap lift ops1) ∪ ops2
-
-opsHandlerComp
-  :: forall ops lift handler m1
-   . ( ImplicitOps ops
-     , ImplicitOps handler
-     , Monad m1
-     )
-  => (forall m2 .
-       (EffConstraint ops m2)
-       => lift m1 m2
-       -> Operations handler m2
-     )
-  -> OpsHandler lift ops handler m1
-opsHandlerComp comp = Computation $
-  \ lift12 ops -> withOps ops $ comp lift12
-
-baseOpsHandler
-  :: forall lift handler m
-   . ( ImplicitOps handler
-     , Monad m
-     , LiftMonoid lift
-     , EffFunctor lift (Operations handler)
-     )
-  => Operations handler m
-  -> OpsHandler lift NoEff handler m
-baseOpsHandler handler = Computation $
-  \ lift12 _ -> effmap lift12 handler
-
-genericOpsHandler
-  :: forall ops handler lift
-   . ( ImplicitOps ops, ImplicitOps handler )
-  => (forall m
-       . (EffConstraint ops m)
-      => Operations handler m)
-  -> (forall m . OpsHandler lift ops handler m)
-genericOpsHandler handler = Computation $
-  \ _ ops -> withOps ops handler
 
 bindExactOpsHandler
   :: forall ops lift handler m1 comp
@@ -130,51 +85,6 @@ composeExactOpsHandlers handler1 handler2
         handler4 :: Operations handler2 m2
         handler4 = runComp handler2 lift12 (handler3 ∪ ops)
 
-withOpsHandler
-  :: forall ops lift handler m r
-   . ( ImplicitOps ops
-     , ImplicitOps handler
-     , EffConstraint ops m
-     , LiftMonoid lift
-     , EffFunctor lift (Operations handler)
-     )
-  => OpsHandler lift ops handler m
-  -> (OpsConstraint handler m => r)
-  -> r
-withOpsHandler handler =
-  withOps (runComp handler idLift captureOps)
-{-# INLINE withOpsHandler #-}
-
-castOpsHandler
-  :: forall ops1 ops2 lift handler m
-   . ( Monad m
-     , ImplicitOps ops1
-     , ImplicitOps ops2
-     )
-  => OpsCast ops1 ops2
-  -> OpsHandler lift ops2 handler m
-  -> OpsHandler lift ops1 handler m
-castOpsHandler = castComputation
-
-composeOpsHandlersWithCast
-  :: forall ops1 ops2 ops3 lift handler1 handler2 m
-   . ( ImplicitOps ops1
-     , ImplicitOps ops2
-     , ImplicitOps ops3
-     , ImplicitOps handler1
-     , ImplicitOps handler2
-     , Monad m
-     )
-  => OpsCast ops3 ops1
-  -> OpsCast (handler1 ∪ ops3) ops2
-  -> OpsHandler lift ops1 handler1 m
-  -> OpsHandler lift ops2 handler2 m
-  -> OpsHandler lift ops3 (handler1 ∪ handler2) m
-composeOpsHandlersWithCast cast31 cast32 handler1 handler2 =
-  composeExactOpsHandlers
-    (castOpsHandler cast31 handler1)
-    (castOpsHandler cast32 handler2)
-
 composeOpsHandlers
   :: forall ops1 ops2 ops3 lift handler1 handler2 m
    . ( ImplicitOps ops1
@@ -189,31 +99,10 @@ composeOpsHandlers
   => OpsHandler lift ops1 handler1 m
   -> OpsHandler lift ops2 handler2 m
   -> OpsHandler lift ops3 (handler1 ∪ handler2) m
-composeOpsHandlers = composeOpsHandlersWithCast
-  @ops1 @ops2 @ops3
-  (entailOps @ops3 @ops1)
-  (entailOps @(handler1 ∪ ops3) @ops2)
-
-bindOpsHandlerWithCast
-  :: forall ops3 ops1 ops2 lift handler m r
-   . ( ImplicitOps ops1
-     , ImplicitOps ops2
-     , ImplicitOps ops3
-     , ImplicitOps handler
-     , Monad m
-     , LiftMonoid lift
-     , EffFunctor lift (Operations handler)
-     )
-  => OpsCast ops3 ops1
-  -> OpsCast (handler ∪ ops3) ops2
-  -> OpsHandler lift ops1 handler m
-  -> Computation lift ops2 r m
-  -> Computation lift ops3 r m
-bindOpsHandlerWithCast cast31 cast32 handler comp =
-  bindExactOpsHandler
-    (castOpsHandler cast31 handler)
-    (castComputation cast32 comp)
-{-# INLINE bindOpsHandlerWithCast #-}
+composeOpsHandlers handler1 handler2 =
+  composeExactOpsHandlers
+    (castComputation handler1)
+    (castComputation handler2)
 
 bindOpsHandler
   :: forall ops3 ops1 ops2 lift handler m r
@@ -230,7 +119,7 @@ bindOpsHandler
   => OpsHandler lift ops1 handler m
   -> Computation lift ops2 r m
   -> Computation lift ops3 r m
-bindOpsHandler =
-  bindOpsHandlerWithCast
-    (entailOps @ops3 @ops1)
-    (entailOps @(handler ∪ ops3) @ops2)
+bindOpsHandler handler comp =
+  bindExactOpsHandler
+    (castComputation handler)
+    (castComputation comp)

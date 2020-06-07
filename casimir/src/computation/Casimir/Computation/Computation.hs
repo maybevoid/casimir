@@ -9,19 +9,24 @@ module Casimir.Computation.Computation
   )
 where
 
+import Data.Kind
 import Casimir.Base
 
-newtype Computation lift ops comp m1 = Computation {
-  runComp
-    :: forall m2
-     . ( Effects ops
-       , Monad m1
-       , Monad m2
-       )
-    => lift m1 m2
-    -> Operations ops m2
-    -> comp m2
-}
+newtype Computation
+  (lift :: (Type -> Type) -> (Type -> Type) -> Type)
+  (eff :: Type)
+  (comp :: (Type -> Type) -> Type)
+  (m1 :: Type -> Type)
+  = Computation
+    { runComp
+        :: forall m2
+         . ( Effects eff
+           , Monad m2
+           )
+        => lift m1 m2
+        -> Operations eff m2
+        -> comp m2
+    }
 
 type BaseComputation = Computation Lift
 
