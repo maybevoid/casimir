@@ -2,8 +2,6 @@
 module Benchmark.State.HandleFree
 where
 
-import Casimir
-
 import qualified Casimir.Free as Free
 
 import qualified Casimir.Freer as Freer

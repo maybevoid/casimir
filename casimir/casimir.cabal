@@ -106,6 +106,7 @@ library casimir-base
 
   exposed-modules:
     Casimir.Base
+    Casimir.Cast
 
   other-modules:
     Casimir.Base.Effect
@@ -116,27 +117,122 @@ library casimir-base
     Casimir.Base.NoOp
     Casimir.Base.Union
 
-library
+    Casimir.Cast.Cast
+    Casimir.Cast.Entail
+
+library casimir-computation
   import: deps
 
   hs-source-dirs:
-    src/lib
+    src/computation
 
   build-depends:
     casimir-base
 
-  reexported-modules:
-    Casimir.Base
+  exposed-modules:
+    Casimir.Computation
+
+  other-modules:
+    Casimir.Computation.Cast
+    Casimir.Computation.Computation
+    Casimir.Computation.Handler
+    Casimir.Computation.Pipeline
+    Casimir.Computation.Value
+
+library casimir-free
+  import: deps
+
+  hs-source-dirs:
+    src/free
+
+  build-depends:
+      casimir-base
+    , casimir-computation
 
   exposed-modules:
-    Casimir
-    Casimir.Computation
     Casimir.Free
-    Casimir.Freer
-    Casimir.Cast
-    Casimir.Higher
 
+  other-modules:
+    Casimir.Free.CoOp
+    Casimir.Free.FreeOps
+    Casimir.Free.FreeEff
+    Casimir.Free.NoOp
+    Casimir.Free.Union
+    Casimir.Free.Pipeline
+    Casimir.Free.Handler
+    Casimir.Free.Monad.Free
+    Casimir.Free.Monad.Church
+
+library casimir-freer
+  import: deps
+
+  hs-source-dirs:
+    src/freer
+
+  build-depends:
+    casimir-base
+
+  exposed-modules:
+    Casimir.Freer
+
+  other-modules:
+    Casimir.Freer.CoOp
+    Casimir.Freer.FreeOps
+    Casimir.Freer.Monad.Church
+    Casimir.Freer.Monad.Freer
+    Casimir.Freer.FreeEff
+    Casimir.Freer.Handler
+    Casimir.Freer.NoOp
+    Casimir.Freer.Union
+    Casimir.Freer.Codensity
+
+library casimir-higher
+  import: deps
+
+  hs-source-dirs:
+    src/higher
+
+  build-depends:
+      casimir-base
+    , casimir-freer
+    , casimir-computation
+
+  exposed-modules:
+    Casimir.Higher
+    Casimir.Higher.Free
+
+    Casimir.Higher.ContraLift
+    Casimir.Higher.ContraLift.State
+    Casimir.Higher.ContraLift.Either
+    Casimir.Higher.ContraLift.Identity
+
+    Casimir.Higher.Monad.Free
+    Casimir.Higher.Monad.Church
+
+  other-modules:
+    Casimir.Higher.Base
+    Casimir.Higher.CoOp
+    Casimir.Higher.NoOp
+    Casimir.Higher.Union
+    Casimir.Higher.EffFunctor
+    Casimir.Higher.Computation
+
+library casimir-ops
+  import: deps
+
+  hs-source-dirs:
+    src/ops
+
+  build-depends:
+      casimir-base
+    , casimir-free
+    , casimir-freer
+    , casimir-higher
+    , casimir-computation
+
+  exposed-modules:
     Casimir.MonadOps
+    Casimir.Transform
 
     Casimir.Ops
     Casimir.Ops.Label
@@ -166,7 +262,6 @@ library
     Casimir.Ops.Env.Higher
     Casimir.Ops.Env.Transform
 
-    Casimir.Transform
 
     Casimir.Higher.Ops
     Casimir.Higher.Ops.Cont
@@ -175,52 +270,32 @@ library
     Casimir.Higher.Ops.UnderOps
     Casimir.Higher.Ops.UpperOps
 
-    Casimir.Higher.Free
-    Casimir.Higher.Monad.Free
-    Casimir.Higher.Monad.Church
-    Casimir.Higher.ContraLift.State
-    Casimir.Higher.ContraLift.Either
-    Casimir.Higher.ContraLift.Identity
-
   other-modules:
-    Casimir.Computation.Cast
-    Casimir.Computation.Computation
-    Casimir.Computation.Handler
-    Casimir.Computation.Pipeline
-    Casimir.Computation.Value
-
-    Casimir.Free.CoOp
-    Casimir.Free.FreeOps
-    Casimir.Free.FreeEff
-    Casimir.Free.NoOp
-    Casimir.Free.Union
-    Casimir.Free.Pipeline
-    Casimir.Free.Handler
-    Casimir.Free.Monad.Free
-    Casimir.Free.Monad.Church
-
-    Casimir.Freer.CoOp
-    Casimir.Freer.FreeOps
-    Casimir.Freer.Monad.Church
-    Casimir.Freer.Monad.Freer
-    Casimir.Freer.FreeEff
-    Casimir.Freer.Handler
-    Casimir.Freer.NoOp
-    Casimir.Freer.Union
-    Casimir.Freer.Codensity
-
-    Casimir.Cast.Cast
-    Casimir.Cast.Entail
-
-    Casimir.Higher.Base
-    Casimir.Higher.CoOp
-    Casimir.Higher.NoOp
-    Casimir.Higher.Union
-    Casimir.Higher.EffFunctor
-    Casimir.Higher.ContraLift
-    Casimir.Higher.Computation
-
     Casimir.Transform.Lift
+
+library
+  import: deps
+
+  hs-source-dirs:
+    src/lib
+
+  build-depends:
+      casimir-base
+    , casimir-free
+    , casimir-freer
+    , casimir-higher
+    , casimir-computation
+    , casimir-ops
+
+  reexported-modules:
+      Casimir.Base
+    , Casimir.Free
+    , Casimir.Freer
+    , Casimir.Higher
+    , Casimir.Computation
+
+  exposed-modules:
+    Casimir
 
 benchmark casimir-benchmark
   import: deps
@@ -246,6 +321,7 @@ benchmark casimir-benchmark
 
   build-depends:
       casimir
+    , casimir-ops
     , criterion
 
 test-suite casimir-test
@@ -269,6 +345,8 @@ test-suite casimir-test
       src/test
   build-depends:
       casimir
+    , casimir-ops
+    , casimir-higher
     , tasty
     , tasty-hunit
     , tasty-quickcheck

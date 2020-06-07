@@ -8,8 +8,7 @@ import Data.Kind
 import Casimir.Base
   ( EffFunctor (..)
   )
-import Casimir.Higher.Base
-import Casimir.Higher.EffFunctor
+import Casimir.Higher
 
 import qualified Casimir.Base as Base
 

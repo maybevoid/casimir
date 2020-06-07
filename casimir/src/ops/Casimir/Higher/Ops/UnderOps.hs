@@ -3,7 +3,7 @@
 module Casimir.Higher.Ops.UnderOps
 where
 
-import Casimir.Higher.Base
+import Casimir.Higher
 
 import Data.Kind
 import Casimir.Base (EffFunctor (..))
