@@ -11,10 +11,10 @@ import qualified Casimir.Freer as Freer
 import Benchmark.State.Base
 
 handleFreeComp
-  :: forall free eff
-   . (Free.FreeHandler free, Monad eff)
+  :: forall free m
+   . (Free.FreeHandler free, Monad m)
   => Int
-  -> eff ()
+  -> m ()
 handleFreeComp s
   = Free.withContextualCoOpHandler @free
     stateCoOpHandler
@@ -22,10 +22,10 @@ handleFreeComp s
     stateBaseFunc
 
 handleFreerComp
-  :: forall free eff
-   . (Freer.FreeEff free, Monad eff)
+  :: forall free m
+   . (Freer.FreeEff free, Monad m)
   => Int
-  -> eff ()
+  -> m ()
 handleFreerComp s =
   Freer.withCoOpHandler @free
     stateFreerCoOpHandler

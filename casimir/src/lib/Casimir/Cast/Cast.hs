@@ -15,11 +15,11 @@ import Data.Constraint
 
 import Casimir.Base
 
-type OpsCast' ops1 ops2 eff =
-  (EffConstraint ops1 eff) => Dict (OpsConstraint ops2 eff)
+type OpsCast' ops1 ops2 m =
+  (EffConstraint ops1 m) => Dict (OpsConstraint ops2 m)
 
 type OpsCast ops1 ops2 =
-  forall eff . OpsCast' ops1 ops2 eff
+  forall m . OpsCast' ops1 ops2 m
 
 cast :: forall p . p => Dict p
 cast = Dict
@@ -32,26 +32,26 @@ mergeDict
 mergeDict Dict Dict = Dict
 
 withCast
-  :: forall eff ops1 ops2 r
-   . ( EffConstraint ops1 eff )
+  :: forall m ops1 ops2 r
+   . ( EffConstraint ops1 m )
   => OpsCast ops1 ops2
-  -> (OpsConstraint ops2 eff => r)
+  -> (OpsConstraint ops2 m => r)
   -> r
 withCast caster res =
-  case caster @eff of
+  case caster @m of
     Dict -> res
 
 castOps
-  :: forall eff ops1 ops2 .
-  ( Monad eff
+  :: forall m ops1 ops2 .
+  ( Monad m
   , ImplicitOps ops1
   , ImplicitOps ops2
   )
   => OpsCast ops1 ops2
-  -> Operation ops1 eff
-  -> Operation ops2 eff
+  -> Operation ops1 m
+  -> Operation ops2 m
 castOps caster ops = withOps ops $
-  withCast @eff @ops1 @ops2
+  withCast @m @ops1 @ops2
     caster captureOps
 
 extendCast
@@ -65,10 +65,10 @@ extendCast
 extendCast caster1 = caster2
  where
   caster2
-    :: forall eff .
-    (EffConstraint (ops1 ∪ ops3) eff)
-    => Dict (OpsConstraint (ops2 ∪ ops3) eff)
-  caster2 = case caster1 @eff of
+    :: forall m .
+    (EffConstraint (ops1 ∪ ops3) m)
+    => Dict (OpsConstraint (ops2 ∪ ops3) m)
+  caster2 = case caster1 @m of
     Dict -> Dict
 
 composeCast
@@ -83,8 +83,8 @@ composeCast
 composeCast cast1 cast2 = cast3
   where
     cast3
-      :: forall eff .
-      (EffConstraint ops1 eff)
-      => Dict (OpsConstraint ops3 eff)
-    cast3 = withCast @eff @ops1 @ops2 cast1 $
-      withCast @eff @ops2 @ops3 cast2 Dict
+      :: forall m .
+      (EffConstraint ops1 m)
+      => Dict (OpsConstraint ops3 m)
+    cast3 = withCast @m @ops1 @ops2 cast1 $
+      withCast @m @ops2 @ops3 cast2 Dict

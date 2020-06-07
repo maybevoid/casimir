@@ -17,10 +17,10 @@ data UpperEff ops
 
 data UpperOps ops
   (inEff :: Type -> Type)
-  (eff :: Type -> Type)
+  (m :: Type -> Type)
   = UpperOps
     { innerOps' :: ops inEff
-    , outerOps' :: ops eff
+    , outerOps' :: ops m
     }
 
 instance
@@ -29,10 +29,10 @@ instance
     type Operation (UpperEff ops) = UpperOps (Base.Operation ops)
 
 instance
-  ( Monad eff
+  ( Monad m
   , EffFunctor lift ops
   )
-  => EffFunctor lift (UpperOps ops eff)
+  => EffFunctor lift (UpperOps ops m)
   where
     effmap lift (UpperOps ops1 ops2) =
       UpperOps ops1 (effmap lift ops2)

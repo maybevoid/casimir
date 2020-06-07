@@ -9,12 +9,12 @@ import Casimir
 import Benchmark.State.Base
 
 stateHComp1
-  :: forall eff . (Monad eff)
-  => BaseComputation NoEff (Return ()) (StateT Int eff)
+  :: forall m . (Monad m)
+  => BaseComputation NoEff (Return ()) (StateT Int m)
 stateHComp1 = bindOpsHandler
   stateTHandler stateBaseComp
 
 stateTHandlerComp
-  :: forall eff . (Monad eff)
-  => StateT Int eff ()
+  :: forall m . (Monad m)
+  => StateT Int m ()
 stateTHandlerComp = returnVal $ runComp stateHComp1 idLift NoOp

@@ -16,17 +16,17 @@ import Casimir.Base.EffOps
 import Casimir.Base.Implicit
 import Casimir.Base.EffFunctor
 
--- | Combines two effect operations into a new effect operation. Union can
--- be used multiple times to combine multiple effect operations into one.
+-- | Combines two mect operations into a new mect operation. Union can
+-- be used multiple times to combine multiple mect operations into one.
 
 data Union ops1 ops2
 
--- | The 'Operation' of @ops1 '∪' ops2@ undef effect @eff@
--- is the product of the underlying @'Operation' ops1 eff@ and
--- @'Operation' ops2 eff@.
+-- | The 'Operation' of @ops1 '∪' ops2@ undef mect @m@
+-- is the product of the underlying @'Operation' ops1 m@ and
+-- @'Operation' ops2 m@.
 data UnionOps ops1 ops2
-  (eff :: Type -> Type)
-  = UnionOps (ops1 eff) (ops2 eff)
+  (m :: Type -> Type)
+  = UnionOps (ops1 m) (ops2 m)
 
 infixr 7 ∪
 infixr 7 `Union`
@@ -45,10 +45,10 @@ type (∪) = Union
 -- forall ops1 ops2 ops3 .
 --   ops1 ∪ ops2 ∪ ops3 === Union ops1 (Union ops2 ops3)
 -- @
-(∪) :: forall ops1 ops2 eff
-     . ops1 eff
-    -> ops2 eff
-    -> UnionOps ops1 ops2 eff
+(∪) :: forall ops1 ops2 m
+     . ops1 m
+    -> ops2 m
+    -> UnionOps ops1 ops2 m
 (∪) = UnionOps
 
 instance
@@ -70,7 +70,7 @@ instance {-# INCOHERENT #-}
 -- | @ops1 '∪' ops2@ is a 'ImplicitOps' if both @ops1@ and @ops2@ are instance of
 -- 'ImplicitOps', with @'OpsConstraint' (ops1 '∪' ops2)@ being the **reversed**
 -- order of @'OpsConstraint' ops2@, followed by @'OpsConstraint' ops1@.
--- This means that if there is an overlap of two effect operations with
+-- This means that if there is an overlap of two mect operations with
 -- the same implicit parameter label, the one defined at the right side
 -- of '∪' gets selected by GHC. For plain implicit parameter constraints,
 -- when there is an overlap, the left most implicit parameter is used,
@@ -81,8 +81,8 @@ instance
    where
     -- | Reverse the order as the left most constraint
     -- gets precedence if there is an overlap
-    type OpsConstraint (Union ops1 ops2) eff =
-      (OpsConstraint ops2 eff, OpsConstraint ops1 eff)
+    type OpsConstraint (Union ops1 ops2) m =
+      (OpsConstraint ops2 m, OpsConstraint ops1 m)
 
     withOps (UnionOps ops1 ops2) comp =
       withOps ops1 $ withOps ops2 comp
@@ -91,14 +91,14 @@ instance
 
 -- | Get the left operation of the @'Operation' (ops1 '∪' ops2)@ product.
 leftOps
-  :: forall ops1 ops2 eff
-   . UnionOps ops1 ops2 eff
-  -> ops1 eff
+  :: forall ops1 ops2 m
+   . UnionOps ops1 ops2 m
+  -> ops1 m
 leftOps (UnionOps ops _) = ops
 
 -- | Get the right operation of the @'Operation' (ops1 '∪' ops2)@ product.
 rightOps
-  :: forall ops1 ops2 eff
-   . UnionOps ops1 ops2 eff
-  -> ops2 eff
+  :: forall ops1 ops2 m
+   . UnionOps ops1 ops2 m
+  -> ops2 m
 rightOps (UnionOps _ ops) = ops

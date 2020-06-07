@@ -15,12 +15,12 @@ import Casimir.Ops.Env
 data YieldEff a
 data AwaitEff a
 
-data YieldOps a eff = YieldOps {
-  yieldOp :: a -> eff ()
+data YieldOps a m = YieldOps {
+  yieldOp :: a -> m ()
 }
 
-data AwaitOps a eff = AwaitOps {
-  awaitOp :: eff a
+data AwaitOps a m = AwaitOps {
+  awaitOp :: m a
 }
 
 data YieldCoOp a r =
@@ -60,8 +60,8 @@ instance FreeOps (AwaitEff a) where
     liftCoOp $ AwaitOp id
 
 instance ImplicitOps (YieldEff a) where
-  type OpsConstraint (YieldEff a) eff =
-    (?yieldOps :: YieldOps a eff)
+  type OpsConstraint (YieldEff a) m =
+    (?yieldOps :: YieldOps a m)
 
   withOps yieldOps comp
     = let ?yieldOps = yieldOps in comp
@@ -69,8 +69,8 @@ instance ImplicitOps (YieldEff a) where
   captureOps = ?yieldOps
 
 instance ImplicitOps (AwaitEff a) where
-  type OpsConstraint (AwaitEff a) eff =
-    (?awaitOps :: AwaitOps a eff)
+  type OpsConstraint (AwaitEff a) m =
+    (?awaitOps :: AwaitOps a m)
 
   withOps awaitOps comp
     = let ?awaitOps = awaitOps in comp
@@ -83,70 +83,70 @@ yield = yieldOp ?yieldOps
 await :: forall a . Eff (AwaitEff a) a
 await = awaitOp ?awaitOps
 
-runPipe :: forall a r ops eff1
-   . ( Monad eff1
+runPipe :: forall a r ops m1
+   . ( Monad m1
    , EffOps ops
    , EffFunctor Lift (Operation ops)
    )
-  => BaseComputation ((YieldEff a) ∪ ops) (Return r) eff1
-  -> BaseComputation ((AwaitEff a) ∪ ops) (Return r) eff1
-  -> BaseComputation ops (Return r) eff1
+  => BaseComputation ((YieldEff a) ∪ ops) (Return r) m1
+  -> BaseComputation ((AwaitEff a) ∪ ops) (Return r) m1
+  -> BaseComputation ops (Return r) m1
 runPipe producer1 consumer1 = Computation comp
    where
-    comp :: forall eff2 . (Monad eff2)
-      => Lift eff1 eff2
-      -> Operation ops eff2
-      -> Return r eff2
+    comp :: forall m2 . (Monad m2)
+      => Lift m1 m2
+      -> Operation ops m2
+      -> Return r m2
     comp lifter ops = Return $ pipe producer2 consumer2
      where
-      producer2 :: FreeT (YieldCoOp a) eff2 r
+      producer2 :: FreeT (YieldCoOp a) m2 r
       producer2 = returnVal $ runComp producer1
         (joinLift lifter (Lift lift)) $
         (mkFreeOps liftF) ∪ (effmap (Lift lift) ops)
 
-      consumer2 :: FreeT (AwaitCoOp a) eff2 r
+      consumer2 :: FreeT (AwaitCoOp a) m2 r
       consumer2 = returnVal $ runComp consumer1
         (joinLift lifter (Lift lift)) $
         (mkFreeOps liftF) ∪ (effmap (Lift lift) ops)
 
 pipe
-  :: forall a r eff
-   . (Monad eff)
-  => FreeT (YieldCoOp a) eff r
-  -> FreeT (AwaitCoOp a) eff r
-  -> eff r
+  :: forall a r m
+   . (Monad m)
+  => FreeT (YieldCoOp a) m r
+  -> FreeT (AwaitCoOp a) m r
+  -> m r
 pipe producer consumer = runFreeT consumer >>= handleConsumer
  where
   handleConsumer
-    :: FreeF (AwaitCoOp a) r (FreeT (AwaitCoOp a) eff r)
-    -> eff r
+    :: FreeF (AwaitCoOp a) r (FreeT (AwaitCoOp a) m r)
+    -> m r
   handleConsumer (Pure r) = return r
   handleConsumer
     (Free (AwaitOp
-      (cont :: a -> (FreeT (AwaitCoOp a) eff r))))
+      (cont :: a -> (FreeT (AwaitCoOp a) m r))))
     = copipe cont producer
 
 copipe
-  :: forall a r eff
-   . (Monad eff)
-  => (a -> FreeT (AwaitCoOp a) eff r)
-  -> FreeT (YieldCoOp a) eff r
-  -> eff r
+  :: forall a r m
+   . (Monad m)
+  => (a -> FreeT (AwaitCoOp a) m r)
+  -> FreeT (YieldCoOp a) m r
+  -> m r
 copipe consumer producer = runFreeT producer >>= handleProducer
  where
   handleProducer
-    :: FreeF (YieldCoOp a) r (FreeT (YieldCoOp a) eff r)
-    -> eff r
+    :: FreeF (YieldCoOp a) r (FreeT (YieldCoOp a) m r)
+    -> m r
   handleProducer (Pure r) = return r
   handleProducer
     (Free (YieldOp x
-      (cont :: () -> (FreeT (YieldCoOp a) eff r))))
+      (cont :: () -> (FreeT (YieldCoOp a) m r))))
     = pipe (cont ()) $ consumer x
 
 producerComp
-  :: forall a eff
-   . (Monad eff)
-  => BaseComputation ((YieldEff Int) ∪ (EnvEff Int)) (Return a) eff
+  :: forall a m
+   . (Monad m)
+  => BaseComputation ((YieldEff Int) ∪ (EnvEff Int)) (Return a) m
 producerComp = genericReturn comp1
  where
   comp1 :: Eff (EnvEff Int ∪ YieldEff Int) a
@@ -160,8 +160,8 @@ producerComp = genericReturn comp1
           comp2 $ acc + 1
 
 consumerComp
-  :: forall eff . (Monad eff)
-  => BaseComputation ((AwaitEff Int) ∪ (EnvEff Int)) (Return Int) eff
+  :: forall m . (Monad m)
+  => BaseComputation ((AwaitEff Int) ∪ (EnvEff Int)) (Return Int) m
 consumerComp = genericReturn $
  do
   x <- await
@@ -169,8 +169,8 @@ consumerComp = genericReturn $
   z <- await
   return $ x + y + z
 
-pipedComp :: forall eff . (Monad eff)
-  => BaseComputation (EnvEff Int) (Return Int) eff
+pipedComp :: forall m . (Monad m)
+  => BaseComputation (EnvEff Int) (Return Int) m
 pipedComp = runPipe producerComp consumerComp
 
 pipeTest :: TestTree

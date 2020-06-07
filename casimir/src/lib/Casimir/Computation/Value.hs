@@ -20,22 +20,22 @@ import Casimir.Computation.Computation
 
 class FunctorComp ret where
   mapComp
-    :: forall a b eff
-     . (Monad eff)
+    :: forall a b m
+     . (Monad m)
     => (a -> b)
-    -> ret a eff
-    -> ret b eff
+    -> ret a m
+    -> ret b m
 
-newtype Return a eff = Return {
-  returnVal :: eff a
+newtype Return a m = Return {
+  returnVal :: m a
 }
 
-newtype Arrow a ret b (eff :: Type -> Type) = Arrow {
-  arrowVal :: a -> ret b eff
+newtype Arrow a ret b (m :: Type -> Type) = Arrow {
+  arrowVal :: a -> ret b m
 }
 
-newtype ReturnCtx f ret a (eff :: Type -> Type) = ReturnCtx {
-  returnCtx :: ret (f a) eff
+newtype ReturnCtx f ret a (m :: Type -> Type) = ReturnCtx {
+  returnCtx :: ret (f a) m
 }
 
 instance EffFunctor Lift (Return a) where
@@ -72,10 +72,10 @@ instance
 genericComputation
   :: forall ops comp lift
    . (ImplicitOps ops)
-  => (forall eff
-        . (EffConstraint ops eff)
-       => comp eff)
-  -> (forall eff . (Monad eff) => Computation lift ops comp eff)
+  => (forall m
+        . (EffConstraint ops m)
+       => comp m)
+  -> (forall m . (Monad m) => Computation lift ops comp m)
 genericComputation comp = Computation $
   \ _ ops -> withOps ops comp
 
@@ -83,22 +83,22 @@ genericComputation comp = Computation $
 genericReturn
   :: forall ops lift a
    . (ImplicitOps ops)
-  => (forall eff
-       . (EffConstraint ops eff)
-       => eff a)
-  -> (forall eff . (Monad eff)
-      => Computation lift ops (Return a) eff)
+  => (forall m
+       . (EffConstraint ops m)
+       => m a)
+  -> (forall m . (Monad m)
+      => Computation lift ops (Return a) m)
 genericReturn comp = genericComputation $ Return comp
 
 arrowComputation
   :: forall ops lift a b
    . (ImplicitOps ops)
-  => (forall eff
-        . (EffConstraint ops eff)
+  => (forall m
+        . (EffConstraint ops m)
        => a
-       -> eff b)
-  -> (forall eff . (Monad eff)
-       => Computation lift ops (Arrow a Return b) eff)
+       -> m b)
+  -> (forall m . (Monad m)
+       => Computation lift ops (Arrow a Return b) m)
 arrowComputation fn = genericComputation $ Arrow $
   \x -> Return $ fn x
 
@@ -110,12 +110,12 @@ runIdentityComp
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
 
 execComp
-  :: forall ops lift eff a .
+  :: forall ops lift m a .
   ( ImplicitOps ops
-  , EffConstraint ops eff
+  , EffConstraint ops m
   , LiftMonoid lift
   , EffFunctor lift (Operation ops)
   )
-  => Computation lift ops (Return a) eff
-  -> eff a
+  => Computation lift ops (Return a) m
+  -> m a
 execComp comp = returnVal $ runComp comp idLift captureOps

@@ -20,45 +20,45 @@ import Casimir.Ops.State.Lift
 import Benchmark.State.Base
 
 stateOpsToEnvOpsPipeline
-  :: forall s a eff1
-   . (Monad eff1)
-  => BaseComputation (StateEff s) (Return a) eff1
-  -> BaseComputation (EnvEff s) (Return a) eff1
+  :: forall s a m1
+   . (Monad m1)
+  => BaseComputation (StateEff s) (Return a) m1
+  -> BaseComputation (EnvEff s) (Return a) m1
 stateOpsToEnvOpsPipeline comp1 = Computation comp2
  where
-  comp2 :: forall eff2 . (Monad eff2)
-    => Lift eff1 eff2
-    -> EnvOps s eff2
-    -> Return a eff2
+  comp2 :: forall m2 . (Monad m2)
+    => Lift m1 m2
+    -> EnvOps s m2
+    -> Return a m2
   comp2 lift12 ops = withOps ops $ Return comp5
    where
-    comp3 :: BaseComputation NoEff (Return a) (StateT s eff2)
+    comp3 :: BaseComputation NoEff (Return a) (StateT s m2)
     comp3 = bindOpsHandler
       stateTHandler
       (liftComputation (joinLift lift12 stateTLift) comp1)
 
-    comp4 :: StateT s eff2 a
+    comp4 :: StateT s m2 a
     comp4 = returnVal $ runComp comp3 idLift NoOp
 
-    comp5 :: (OpsConstraint (EnvEff s) eff2) => eff2 a
+    comp5 :: (OpsConstraint (EnvEff s) m2) => m2 a
     comp5 = do
       s <- ask
       evalStateT comp4 s
 
 statePComp1
-  :: forall eff . (Monad eff)
-  => BaseComputation (EnvEff Int) (Return ()) eff
+  :: forall m . (Monad m)
+  => BaseComputation (EnvEff Int) (Return ()) m
 statePComp1 = stateOpsToEnvOpsPipeline stateBaseComp
 
 statePComp2
-  :: forall eff . (Monad eff)
-  => BaseComputation NoEff (Return ()) (ReaderT Int eff)
+  :: forall m . (Monad m)
+  => BaseComputation NoEff (Return ()) (ReaderT Int m)
 statePComp2 = bindOpsHandler
   readerTHandler statePComp1
 
 stateOpsToEnvOpsToReaderTComp
-  :: forall eff . (Monad eff)
-  => ReaderT Int eff ()
+  :: forall m . (Monad m)
+  => ReaderT Int m ()
 stateOpsToEnvOpsToReaderTComp = returnVal $ runComp statePComp2 idLift NoOp
 
 stateOpsToEnvOpsToReaderTIdentityComp

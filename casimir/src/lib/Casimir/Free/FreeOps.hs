@@ -8,10 +8,10 @@ where
 import Casimir.Base
 import Casimir.Free.CoOp
 
--- | A 'FreeOps' @ops@ has associated types that can be used for effect
+-- | A 'FreeOps' @ops@ has associated types that can be used for mect
 -- operations and interpretations. We typically use dummy datatypes with
 -- empty declaration for @ops@ to signify that @ops@ is only used for
--- tagging effects and are not used at the value level.
+-- tagging mects and are not used at the value level.
 class
   ( EffOps ops
   , EffCoOp ops
@@ -20,14 +20,14 @@ class
   => FreeOps ops where
 
     -- | The free ops constructor is used for generating free operations that
-    -- can work under any free monad transformer @t@ and any 'Monad' @eff@.
+    -- can work under any free monad transformer @t@ and any 'Monad' @m@.
     -- It is given a payload lifter that can lift a @'CoOperation' ops@ into
-    -- the free monad transformed effect @t eff@, which can be used to
-    -- construct a free @'Operation' ops@ under the effect @t eff@. 'mkFreeOps'
+    -- the free monad transformed mect @t m@, which can be used to
+    -- construct a free @'Operation' ops@ under the mect @t m@. 'mkFreeOps'
     -- is used by 'Casimir.Free.FreeEff' instances so that
     -- they can create a free operation for any free monad.
     mkFreeOps
-      :: forall eff
-      . (Monad eff)
-      => (forall a . CoOperation ops a -> eff a)
-      -> Operation ops eff
+      :: forall m
+      . (Monad m)
+      => (forall a . CoOperation ops a -> m a)
+      -> Operation ops m

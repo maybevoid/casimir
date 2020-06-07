@@ -14,8 +14,8 @@ import Casimir.Base.EffFunctor
 
 data NoEff
 
--- | The trivial effect 'NoOp' have singleton operation and can be trivially
--- satisfied for all 'Monad' @eff@. It is the identity for the
+-- | The trivial mect 'NoOp' have singleton operation and can be trivially
+-- satisfied for all 'Monad' @m@. It is the identity for the
 -- @Casimir.Base.Union@ type operator such that:
 --
 -- @
@@ -28,23 +28,23 @@ data NoEff
 -- equivalent set of 'OpsConstraints' up to casting equivalents by
 -- 'Casimir.Computation.OpsCast'.
 
--- | @'Operation' 'NoOp' eff@ is really just @()@ for all 'Monad' @eff@. We instead define
--- 'NoOp' with phantom type @eff@ so that the injectivity condition for
+-- | @'Operation' 'NoOp' m@ is really just @()@ for all 'Monad' @m@. We instead define
+-- 'NoOp' with phantom type @m@ so that the injectivity condition for
 -- 'Operation' can be satisfied.
-data NoOp (eff :: Type -> Type) = NoOp
+data NoOp (m :: Type -> Type) = NoOp
 
 instance EffOps NoEff where
   type Operation NoEff = NoOp
 
--- | @'OpsConstraint' 'NoOp' eff@ is just the empty constraint @()@ for all
--- 'Monad' @eff@. We instead define the empty class 'NoConstraint' with
--- trivial instance for all 'Monad' @eff@ so that the injectivity condition
+-- | @'OpsConstraint' 'NoOp' m@ is just the empty constraint @()@ for all
+-- 'Monad' @m@. We instead define the empty class 'NoConstraint' with
+-- trivial instance for all 'Monad' @m@ so that the injectivity condition
 -- for 'OpsConstraint' can be satisfied.
-class NoConstraint (eff :: Type -> Type) where
+class NoConstraint (m :: Type -> Type) where
 
 -- | 'NoConstraint' is really just the empty constraint '()' and can be trivially
 -- satisfied.
-instance NoConstraint eff where
+instance NoConstraint m where
 
 instance EffFunctor Lift NoOp where
   effmap _ _ = NoOp
@@ -53,7 +53,7 @@ instance EffFunctor Lift NoOp where
 -- make use of implicit parameters, as its 'Operation' can be trivially be
 -- constructed.
 instance ImplicitOps NoEff where
-  type OpsConstraint NoEff eff = NoConstraint eff
+  type OpsConstraint NoEff m = NoConstraint m
 
   withOps _ = id
 

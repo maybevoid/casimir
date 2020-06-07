@@ -29,17 +29,17 @@ data ResourceTag
 type ResourceOps t = LowerOps (HigherResourceOps t)
 
 pattern ResourceOps
-  :: forall t eff
-   . (forall a b. t a -> (a -> eff b) -> eff b)
-  -> LowerOps (HigherResourceOps t) eff
+  :: forall t m
+   . (forall a b. t a -> (a -> m b) -> m b)
+  -> LowerOps (HigherResourceOps t) m
 pattern ResourceOps t = LowerOps (HigherResourceOps t)
 
-data HigherResourceOps t inEff eff = HigherResourceOps {
+data HigherResourceOps t inEff m = HigherResourceOps {
   withResourceOp
     :: forall a b
      . t a
     -> (a -> inEff b)
-    -> eff b
+    -> m b
 }
 
 data ResourceCoOp t f r where
@@ -63,8 +63,8 @@ instance Base.EffOps (ResourceEff t) where
 instance LowerEffOps (ResourceEff t)
 
 instance ImplicitOps (ResourceEff t) where
-  type OpsConstraint (ResourceEff t) eff =
-    Param ResourceTag (LowerOps (HigherResourceOps t) eff)
+  type OpsConstraint (ResourceEff t) m =
+    Param ResourceTag (LowerOps (HigherResourceOps t) m)
 
   withOps = withParam @ResourceTag
   captureOps = captureParam @ResourceTag
@@ -79,13 +79,13 @@ instance
 
 instance HigherEffFunctor HigherLift (HigherResourceOps t) where
   higherEffmap
-    :: forall eff1 eff2
-      . ( Monad eff1
-        , Monad eff2
+    :: forall m1 m2
+      . ( Monad m1
+        , Monad m2
         )
-    => HigherLift eff1 eff2
-    -> HigherResourceOps t eff1 eff1
-    -> HigherResourceOps t eff2 eff2
+    => HigherLift m1 m2
+    -> HigherResourceOps t m1 m1
+    -> HigherResourceOps t m2 m2
   higherEffmap
     (HigherLift _ (ContraLift contraLift1))
     (HigherResourceOps doResource) =
@@ -94,17 +94,17 @@ instance HigherEffFunctor HigherLift (HigherResourceOps t) where
         ops
           :: forall a b
            . t a
-          -> (a -> eff2 b)
-          -> eff2 b
+          -> (a -> m2 b)
+          -> m2 b
         ops resource cont1 = contraLift1 cont2
          where
           cont2
             :: forall w
-             . (forall x . eff2 x -> eff1 (w x))
-            -> eff1 (w b)
+             . (forall x . m2 x -> m1 (w x))
+            -> m1 (w b)
           cont2 contraLift2 = doResource resource cont3
            where
-            cont3 :: a -> eff1 (w b)
+            cont3 :: a -> m1 (w b)
             cont3 x = contraLift2 $ cont1 x
 
 instance EffCoOp (ResourceEff t) where
@@ -128,17 +128,17 @@ instance CoOpFunctor (ResourceCoOp t) where
 
 instance FreeOps (ResourceEff t) where
   mkFreeOps
-    :: forall eff
-    . (Monad eff)
-    => (forall a . ResourceCoOp t eff a -> eff a)
-    -> HigherResourceOps t eff eff
+    :: forall m
+    . (Monad m)
+    => (forall a . ResourceCoOp t m a -> m a)
+    -> HigherResourceOps t m m
   mkFreeOps lifter = HigherResourceOps handler
    where
     handler
       :: forall a b
        . t a
-      -> (a -> eff b)
-      -> eff b
+      -> (a -> m b)
+      -> m b
     handler resource comp = lifter $
       ResourceOp resource comp
 
@@ -162,9 +162,9 @@ ioBracketCoOpHandler = CoOpHandler
     cont a
 
 withResource
-  :: forall t eff a b
-   . (EffConstraint (ResourceEff t) eff)
+  :: forall t m a b
+   . (EffConstraint (ResourceEff t) m)
   => t a
-  -> (a -> eff b)
-  -> eff b
+  -> (a -> m b)
+  -> m b
 withResource = withResourceOp $ unLowerOps captureOps

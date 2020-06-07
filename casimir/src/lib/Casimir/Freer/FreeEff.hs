@@ -10,31 +10,31 @@ import Casimir.Base
 import Casimir.Freer.CoOp
 import Casimir.Freer.FreeOps
 
-data CoOpHandler handler a r eff =
+data CoOpHandler handler a r m =
   CoOpHandler {
-    returnHandler :: a -> eff r,
+    returnHandler :: a -> m r,
     coOpHandler
       :: forall x
        . CoOperation handler x
-      -> (x -> (eff r))
-      -> eff r
+      -> (x -> (m r))
+      -> m r
   }
 
 class
-  (forall ops eff . (FreeOps ops, Monad eff) => Monad (free ops eff))
+  (forall ops m . (FreeOps ops, Monad m) => Monad (free ops m))
   => FreeEff free where
-    freeOps :: forall ops eff
-      . (FreeOps ops, Monad eff)
-      => Operation ops (free ops eff)
+    freeOps :: forall ops m
+      . (FreeOps ops, Monad m)
+      => Operation ops (free ops m)
 
-    liftFree :: forall ops eff a
-       . (FreeOps ops, Monad eff)
-      => eff a
-      -> free ops eff a
+    liftFree :: forall ops m a
+       . (FreeOps ops, Monad m)
+      => m a
+      -> free ops m a
 
     handleFree
-      :: forall ops eff a r
-      . (Monad eff, FreeOps ops)
-      => CoOpHandler ops a r eff
-      -> free ops eff a
-      -> eff r
+      :: forall ops m a r
+      . (Monad m, FreeOps ops)
+      => CoOpHandler ops a r m
+      -> free ops m a
+      -> m r

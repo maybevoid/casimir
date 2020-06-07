@@ -8,8 +8,8 @@ import Casimir.Base
 data IoTag
 data IoEff
 
-data IoOps eff = IoOps {
-  liftIoOp :: forall a . IO a -> eff a
+data IoOps m = IoOps {
+  liftIoOp :: forall a . IO a -> m a
 }
 
 instance EffOps IoEff where
@@ -21,8 +21,8 @@ instance EffFunctor Lift IoOps where
   }
 
 instance ImplicitOps IoEff where
-  type OpsConstraint IoEff eff =
-    Param IoTag (IoOps eff)
+  type OpsConstraint IoEff m =
+    Param IoTag (IoOps m)
 
   withOps = withParam @IoTag
   captureOps = captureParam @IoTag

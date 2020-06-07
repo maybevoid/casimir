@@ -13,60 +13,60 @@ import Casimir.Free.FreeOps
 
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler
-  :: forall free handler eff a r
-   . ( Monad eff
+  :: forall free handler m a r
+   . ( Monad m
      , EffOps handler
      , FreeOps handler
      , FreeHandler free
      , ImplicitOps handler
      )
-  => CoOpHandler handler a r eff
-  -> ((OpsConstraint handler (free handler eff))
-      => free handler eff a)
-  -> eff r
+  => CoOpHandler handler a r m
+  -> ((OpsConstraint handler (free handler m))
+      => free handler m a)
+  -> m r
 withCoOpHandler handler comp1
   = handleFree @free handler
-      $ withOps (freeOps @free @handler @eff) comp1
+      $ withOps (freeOps @free @handler @m) comp1
 
 {-# INLINE withCoOpHandlerAndOps #-}
 withCoOpHandlerAndOps
-  :: forall free ops handler eff a r
+  :: forall free ops handler m a r
     . ( EffOps ops
       , EffOps handler
       , FreeOps handler
       , ImplicitOps ops
       , FreeHandler free
       , ImplicitOps handler
-      , EffConstraint ops eff
+      , EffConstraint ops m
       , EffFunctor Lift (Operation ops)
       )
-  => CoOpHandler handler a r eff
-  -> (( OpsConstraint handler (free handler eff)
-      , OpsConstraint ops (free handler eff)
+  => CoOpHandler handler a r m
+  -> (( OpsConstraint handler (free handler m)
+      , OpsConstraint ops (free handler m)
       )
-      => free handler eff a)
-  -> eff r
+      => free handler m a)
+  -> m r
 withCoOpHandlerAndOps handler comp1
   = handleFree @free handler $
       withOps
-        ( freeOps @free @handler @eff
+        ( freeOps @free @handler @m
         ∪ effmap (Lift $ liftFree @free) (captureOps @ops)
         )
         comp1
 
 {-# INLINE withContextualCoOpHandler #-}
 withContextualCoOpHandler
-  :: forall free handler eff a r
-   . ( Monad eff
+  :: forall free handler m a r
+   . ( Monad m
      , EffOps handler
      , FreeOps handler
      , FreeHandler free
      , ImplicitOps handler
      )
-  => CoOpHandler handler a r eff
-  -> (r -> eff a)
-  -> ((OpsConstraint handler (free handler eff))
-      => free handler eff a)
-  -> eff a
+  => CoOpHandler handler a r m
+  -> (r -> m a)
+  -> ((OpsConstraint handler (free handler m))
+      => free handler m a)
+  -> m a
 withContextualCoOpHandler handler extract comp
   = withCoOpHandler @free handler comp >>= extract

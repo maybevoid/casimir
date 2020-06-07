@@ -1,7 +1,7 @@
 {-|
   Module      : Casimir.Base
 
-  Base module that defines the basic datatypes for implicit-effects.
+  Base module that defines the basic datatypes for implicit-mects.
 -}
 module Casimir.Base
   ( EffOps (..)

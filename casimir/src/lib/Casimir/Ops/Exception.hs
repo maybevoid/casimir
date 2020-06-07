@@ -12,8 +12,8 @@ import Casimir.Ops.Io
 
 data ExceptionEff e
 
-data ExceptionOps e eff = ExceptionOps {
-  raiseOp :: e -> eff Void
+data ExceptionOps e m = ExceptionOps {
+  raiseOp :: e -> m Void
 }
 
 data ExceptionCoOp e r =
@@ -38,11 +38,11 @@ instance FreeOps (ExceptionEff e) where
     raiseOp = \e -> liftCoOp $ RaiseOp e
   }
 
-type ExceptionConstraint e eff =
-  (?_Control_Monad_Implicit_Ops_Exception_exceptionOps :: ExceptionOps e eff)
+type ExceptionConstraint e m =
+  (?_Control_Monad_Implicit_Ops_Exception_exceptionOps :: ExceptionOps e m)
 
 instance ImplicitOps (ExceptionEff e) where
-  type OpsConstraint (ExceptionEff e) eff = ExceptionConstraint e eff
+  type OpsConstraint (ExceptionEff e) m = ExceptionConstraint e m
 
   withOps ops comp =
     let
@@ -53,25 +53,25 @@ instance ImplicitOps (ExceptionEff e) where
     ?_Control_Monad_Implicit_Ops_Exception_exceptionOps
 
 raise
-  :: forall e a eff
-   . (Monad eff, ExceptionConstraint e eff)
+  :: forall e a m
+   . (Monad m, ExceptionConstraint e m)
   => e
-  -> eff a
+  -> m a
 raise e = raiseOp captureOps e >>= absurd
 
 mkExceptionCoOpHandler
-  :: forall eff e a
-   . (Monad eff)
-  => (e -> eff a)
-  -> CoOpHandler (ExceptionEff e) a a eff
+  :: forall m e a
+   . (Monad m)
+  => (e -> m a)
+  -> CoOpHandler (ExceptionEff e) a a m
 mkExceptionCoOpHandler handleException =
   CoOpHandler return $
     \(RaiseOp e) -> handleException e
 
 exceptionToEitherHandler
-  :: forall eff e a
-   . (Monad eff)
-  => CoOpHandler (ExceptionEff e) a (Either e a) eff
+  :: forall m e a
+   . (Monad m)
+  => CoOpHandler (ExceptionEff e) a (Either e a) m
 exceptionToEitherHandler =
   CoOpHandler handleReturn handleCoOp
    where
@@ -90,91 +90,91 @@ tryIo m = do
     Right val -> return val
 
 try
-  :: forall free eff e a
-   . ( Monad eff
+  :: forall free m e a
+   . ( Monad m
      , FreeHandler free
      )
-  => (OpsConstraint (ExceptionEff e) (free (ExceptionEff e) eff)
-      => free (ExceptionEff e) eff a)
-  -> (e -> eff a)
-  -> eff a
+  => (OpsConstraint (ExceptionEff e) (free (ExceptionEff e) m)
+      => free (ExceptionEff e) m a)
+  -> (e -> m a)
+  -> m a
 try comp handler1 = withCoOpHandler @free handler2 comp
  where
-  handler2 :: CoOpHandler (ExceptionEff e) a a eff
+  handler2 :: CoOpHandler (ExceptionEff e) a a m
   handler2 = CoOpHandler return $
     \(RaiseOp e) -> handler1 e
 
 tryFinally
-  :: forall free eff e a
+  :: forall free m e a
    . ( FreeHandler free
-     , EffConstraint (ExceptionEff e) eff
+     , EffConstraint (ExceptionEff e) m
      )
-  => ((OpsConstraint (ExceptionEff e) (free (ExceptionEff e) eff))
-      => free (ExceptionEff e) eff a)
-  -> (() -> eff ())
-  -> eff a
+  => ((OpsConstraint (ExceptionEff e) (free (ExceptionEff e) m))
+      => free (ExceptionEff e) m a)
+  -> (() -> m ())
+  -> m a
 tryFinally comp handler1 =
  do
   res1' <- res1
   handler1 ()
   res2 res1'
    where
-    res1 :: eff (Either e a)
+    res1 :: m (Either e a)
     res1 = withCoOpHandler @free exceptionToEitherHandler comp
 
-    res2 :: Either e a -> eff a
+    res2 :: Either e a -> m a
     res2 res
       = case res of
         Left e -> raise e
         Right x -> return x
 
 tryComp
-  :: forall free eff ops e a
+  :: forall free m ops e a
    . ( FreeHandler free
      , EffOps ops
      , ImplicitOps ops
-     , EffConstraint ops eff
+     , EffConstraint ops m
      , EffFunctor Lift (Operation ops)
      )
-  => Computation Lift ((ExceptionEff e) ∪ ops) (Return a) eff
-  -> (e -> eff a)
-  -> eff a
+  => Computation Lift ((ExceptionEff e) ∪ ops) (Return a) m
+  -> (e -> m a)
+  -> m a
 tryComp comp1 handler1 = handleFree handler2 comp2
  where
-  comp2 :: free (ExceptionEff e) eff a
+  comp2 :: free (ExceptionEff e) m a
   comp2 = returnVal $ runComp comp1 freeLiftEff $
     UnionOps freeOps $ effmap (Lift liftFree) captureOps
 
-  handler2 :: CoOpHandler (ExceptionEff e) a a eff
+  handler2 :: CoOpHandler (ExceptionEff e) a a m
   handler2 = CoOpHandler return $
     \(RaiseOp e) -> handler1 e
 
 bracketComp
-  :: forall free eff ops e a b
+  :: forall free m ops e a b
    . ( FreeHandler free
      , EffOps ops
      , ImplicitOps ops
-     , EffConstraint ops eff
+     , EffConstraint ops m
      , EffFunctor Lift (Operation ops)
      )
-  => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) eff          -- init
-  -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return ()) eff)  -- cleanup
-  -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return b) eff)   -- between
-  -> BaseComputation ((ExceptionEff e) ∪ ops) (Return b) eff
+  => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) m          -- init
+  -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return ()) m)  -- cleanup
+  -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return b) m)   -- between
+  -> BaseComputation ((ExceptionEff e) ∪ ops) (Return b) m
 bracketComp initComp cleanupComp betweenComp = Computation comp1
  where
   comp1
-    :: forall eff2
-     . (Monad eff2)
-    => Lift eff eff2
-    -> Operation ((ExceptionEff e) ∪ ops) eff2
-    -> Return b eff2
+    :: forall m2
+     . (Monad m2)
+    => Lift m m2
+    -> Operation ((ExceptionEff e) ∪ ops) m2
+    -> Return b m2
   comp1 lift12 ops@(UnionOps eOps ops1) = Return comp5
    where
-    comp2 :: eff2 a
+    comp2 :: m2 a
     comp2 = returnVal $ runComp initComp lift12 ops
 
-    comp3 :: a -> eff2 (Either e b)
+    comp3 :: a -> m2 (Either e b)
     comp3 x = handleFree @free
       exceptionToEitherHandler $ returnVal $
         runComp (betweenComp x)
@@ -182,10 +182,10 @@ bracketComp initComp cleanupComp betweenComp = Computation comp1
           UnionOps freeOps $
             effmap (Lift liftFree) ops1
 
-    comp4 :: a -> eff2 ()
+    comp4 :: a -> m2 ()
     comp4 x = returnVal $ runComp (cleanupComp x) lift12 ops
 
-    comp5 :: eff2 b
+    comp5 :: m2 b
     comp5 = do
       x <- comp2
       res <- comp3 x

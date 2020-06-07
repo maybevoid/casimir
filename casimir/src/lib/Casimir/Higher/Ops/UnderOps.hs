@@ -11,12 +11,12 @@ import qualified Casimir.Base as Base
 
 data UnderEff ops (inEff :: Type -> Type)
 
-data UnderOps ops inEff eff where
+data UnderOps ops inEff m where
   UnderOps
-    :: forall ops inEff eff
-     . (Monad eff, Monad inEff)
-    => ops inEff eff
-    -> UnderOps ops inEff eff
+    :: forall ops inEff m
+     . (Monad m, Monad inEff)
+    => ops inEff m
+    -> UnderOps ops inEff m
 
 instance
   (EffFunctor lift (ops inEff))
@@ -27,6 +27,6 @@ instance
 
 instance
   (EffOps ops)
-  => Base.EffOps (UnderEff ops eff) where
-    type Operation (UnderEff ops eff) =
-      UnderOps (Operation ops) eff
+  => Base.EffOps (UnderEff ops m) where
+    type Operation (UnderEff ops m) =
+      UnderOps (Operation ops) m

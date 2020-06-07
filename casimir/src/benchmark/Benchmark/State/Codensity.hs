@@ -10,17 +10,17 @@ import Casimir.Ops.State.Freer
 import Benchmark.State.Base
 
 codensityComp
-    :: forall eff
-     . (Monad eff)
+    :: forall m
+     . (Monad m)
     => Int
-    -> eff ()
+    -> m ()
 codensityComp s = comp2
  where
   handleOps
     :: forall x r
      . CoOperation (StateEff Int) x
-    -> (x -> CoState Int eff r)
-    -> CoState Int eff r
+    -> (x -> CoState Int m r)
+    -> CoState Int m r
   handleOps GetOp cont1 = CoState $
     \s' ->
       let
@@ -33,16 +33,16 @@ codensityComp s = comp2
       in cont3 s'
   {-# INLINABLE handleOps #-}
 
-  handleReturn :: a -> CoState s eff a
+  handleReturn :: a -> CoState s m a
   handleReturn x = CoState $ \_ -> return x
   {-# INLINABLE handleReturn #-}
 
-  ops :: Operation (StateEff Int) (Codensity (CoState Int eff))
+  ops :: Operation (StateEff Int) (Codensity (CoState Int m))
   ops = codensityOps handleOps
 
-  comp1 :: Codensity (CoState Int eff) ()
+  comp1 :: Codensity (CoState Int m) ()
   comp1 = withOps ops stateBaseFunc
 
-  comp2 :: eff ()
+  comp2 :: m ()
   comp2 = runCoState s $ runCodensity comp1 handleReturn
 {-# INLINABLE codensityComp #-}

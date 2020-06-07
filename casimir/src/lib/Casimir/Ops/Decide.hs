@@ -7,8 +7,8 @@ import Casimir.Free
 
 data DecideEff s
 
-data DecideOps s eff = DecideOps {
-  decideOp :: eff s
+data DecideOps s m = DecideOps {
+  decideOp :: m s
 }
 
 data DecideCoOp s a = DecideOp (s -> a)
@@ -31,8 +31,8 @@ instance FreeOps (DecideEff s) where
   }
 
 instance ImplicitOps (DecideEff s) where
-  type OpsConstraint (DecideEff s) eff =
-    (?_Control_Monad_Implicit_Ops_Decide_decideOps :: DecideOps s eff)
+  type OpsConstraint (DecideEff s) m =
+    (?_Control_Monad_Implicit_Ops_Decide_decideOps :: DecideOps s m)
 
   withOps decideOps comp =
     let

@@ -7,7 +7,7 @@
   Stability   : experimental
   Portability : POSIX
 
-  This is the main module for implicit-effects. It re-exports the
+  This is the main module for implicit-mects. It re-exports the
   following submodules for convenience:
 
     - "Casimir.Base"

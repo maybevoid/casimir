@@ -2,10 +2,10 @@
 module Casimir.Higher.ContraLift
 where
 
-type ContraFree eff f =
+type ContraFree m f =
   forall a
    . (forall w
        . (Functor w)
-     => (forall x . f (eff x) -> eff (w x))
-     -> eff (w (eff (f a))))
-  -> eff (f a)
+     => (forall x . f (m x) -> m (w x))
+     -> m (w (m (f a))))
+  -> m (f a)

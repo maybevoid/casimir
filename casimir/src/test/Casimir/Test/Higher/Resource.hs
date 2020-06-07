@@ -37,9 +37,9 @@ ioHandler :: BaseOpsHandler NoEff IoEff IO
 ioHandler = baseOpsHandler ioOps
 
 stateTHandler
-  :: forall s eff
-   . (Monad eff)
-  => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
+  :: forall s m
+   . (Monad m)
+  => BaseOpsHandler NoEff (StateEff s) (StateT s m)
 stateTHandler = baseOpsHandler stateTOps
 
 pushRef :: forall a . IORef [a] -> a
@@ -93,11 +93,11 @@ comp1 ref = do
 
 pipeline1
   :: forall comp
-   . (forall eff . (Monad eff)
+   . (forall m . (Monad m)
       => BaseComputation
           (StateEff [String] ∪ IoEff ∪ BracketResourceEff)
           comp
-          eff)
+          m)
   -> HigherComputation NoEff comp (StateT [String] IO)
 pipeline1 comp11 =
   bindOpsHandler (toHigherComputation stateTHandler) $

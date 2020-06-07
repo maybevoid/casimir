@@ -80,19 +80,19 @@ algCod alg op = Cod comp1
 {-# INLINE algCod #-}
 
 rollCod
-  :: forall eff f a
-   . (Monad eff)
-  => eff (Codensity (Nest eff f) a)
-  -> Codensity (Nest eff f) a
+  :: forall m f a
+   . (Monad m)
+  => m (Codensity (Nest m f) a)
+  -> Codensity (Nest m f) a
 rollCod comp1 = Cod comp2
  where
   comp2
     :: forall x
-     . (a -> Nest eff f x)
-    -> Nest eff f x
+     . (a -> Nest m f x)
+    -> Nest m f x
   comp2 cont1 = Nest comp3
    where
-    comp3 :: eff (f x)
+    comp3 :: m (f x)
     comp3 = do
       Cod comp4 <- comp1
       unNest $ comp4 cont1
@@ -121,37 +121,37 @@ codensityOps handler1 = mkFreeOps handler2
 {-# INLINE codensityOps #-}
 
 toCodensity
-  :: forall free ops eff f a
+  :: forall free ops m f a
    . ( EffCoOp ops
-     , Monad eff
+     , Monad m
      , FreeOps ops
      , FreeEff free
      )
-  => (forall x . CoOpHandler ops x (f x) eff)
-  -> free ops eff a
-  -> Codensity (Nest eff f) a
+  => (forall x . CoOpHandler ops x (f x) m)
+  -> free ops m a
+  -> Codensity (Nest m f) a
 toCodensity handler1 comp = toCodensity' (coOpHandler handler1) comp
 {-# INLINE toCodensity #-}
 
 toCodensity'
-  :: forall free ops eff f a
+  :: forall free ops m f a
    . ( EffCoOp ops
-     , Monad eff
+     , Monad m
      , FreeOps ops
      , FreeEff free
      )
   => (forall x r
        . CoOperation ops x
-      -> (x -> eff (f r))
-      -> eff (f r))
-  -> free ops eff a
-  -> Codensity (Nest eff f) a
+      -> (x -> m (f r))
+      -> m (f r))
+  -> free ops m a
+  -> Codensity (Nest m f) a
 toCodensity' handler1 comp1 = rollCod comp2
  where
   handler2
     :: forall x
-     . CoOpCont (CoOperation ops) (Nest eff f x)
-    -> Nest eff f x
+     . CoOpCont (CoOperation ops) (Nest m f x)
+    -> Nest m f x
   handler2 (CoOpCont coop cont1) = Nest $
     handler1 coop (unNest . cont1)
 
@@ -159,24 +159,24 @@ toCodensity' handler1 comp1 = rollCod comp2
     :: forall x
      . CoOpCont
         (CoOperation ops)
-        (Codensity (Nest eff f) x)
-    -> Codensity (Nest eff f) x
+        (Codensity (Nest m f) x)
+    -> Codensity (Nest m f) x
   handler3 = algCod handler2
 
   handler4
     :: forall x
-     . CoOpHandler ops x (Codensity (Nest eff f) x) eff
+     . CoOpHandler ops x (Codensity (Nest m f) x) m
   handler4 = CoOpHandler (return . return) handler5
    where
     handler5
       :: forall y
        . CoOperation ops y
-      -> (y -> eff (Codensity (Nest eff f) x))
-      -> eff (Codensity (Nest eff f) x)
+      -> (y -> m (Codensity (Nest m f) x))
+      -> m (Codensity (Nest m f) x)
     handler5 coop cont1 = return $
       handler3 $ CoOpCont coop $
         fmap rollCod cont1
 
-  comp2 :: eff (Codensity (Nest eff f) a)
+  comp2 :: m (Codensity (Nest m f) a)
   comp2 = handleFree handler4 comp1
 {-# INLINE toCodensity' #-}

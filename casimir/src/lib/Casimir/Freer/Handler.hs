@@ -11,17 +11,17 @@ import Casimir.Freer.FreeEff
 
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler
-  :: forall free handler eff a r
-   . ( Monad eff
+  :: forall free handler m a r
+   . ( Monad m
      , EffOps handler
      , FreeOps handler
      , ImplicitOps handler
      , FreeEff free
      )
-  => CoOpHandler handler a r eff
-  -> ((OpsConstraint handler (free handler eff))
-      => free handler eff a)
-  -> eff r
+  => CoOpHandler handler a r m
+  -> ((OpsConstraint handler (free handler m))
+      => free handler m a)
+  -> m r
 withCoOpHandler handler comp1
   = handleFree @free handler $
-      withOps (freeOps @free @handler @eff) comp1
+      withOps (freeOps @free @handler @m) comp1

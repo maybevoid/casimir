@@ -13,16 +13,16 @@ import Casimir.Ops.State.Transform
 
 import Benchmark.State.Base
 
-withStateOpsComp :: forall eff . (Monad eff)
-  => StateT Int eff ()
+withStateOpsComp :: forall m . (Monad m)
+  => StateT Int m ()
 withStateOpsComp = withOps stateTOps stateBaseFunc
 
-withStateTHandlerComp :: forall eff . (Monad eff)
-  => StateT Int eff ()
+withStateTHandlerComp :: forall m . (Monad m)
+  => StateT Int m ()
 withStateTHandlerComp = withOpsHandler stateTHandler stateBaseFunc
 
-withStateTReaderTComp :: forall eff . (Monad eff)
-  => ReaderT Int eff ()
+withStateTReaderTComp :: forall m . (Monad m)
+  => ReaderT Int m ()
 withStateTReaderTComp = do
   s <- RT.ask
   lift $ evalStateT withStateTHandlerComp s

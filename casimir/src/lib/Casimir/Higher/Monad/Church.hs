@@ -13,178 +13,178 @@ import Casimir.Higher.CoOp
 
 newtype ChurchMonad
   ops
-  (eff :: Type -> Type)
+  (m :: Type -> Type)
   a =
     ChurchMonad {
       runChurchMonad
         :: forall f r
          . (Functor f)
-        => CoOpHandler ops f eff
-        -> (a -> eff (f r))
-        -> eff (f r)
+        => CoOpHandler ops f m
+        -> (a -> m (f r))
+        -> m (f r)
     }
 
 instance
-  (FreeOps ops, Functor eff)
-  => Functor (ChurchMonad ops eff)
+  (FreeOps ops, Functor m)
+  => Functor (ChurchMonad ops m)
   where
     fmap
       :: forall a b
        . (a -> b)
-      -> ChurchMonad ops eff a
-      -> ChurchMonad ops eff b
+      -> ChurchMonad ops m a
+      -> ChurchMonad ops m b
     fmap f (ChurchMonad m1) = ChurchMonad m2
      where
       m2
         :: forall f r
          . (Functor f)
-        => CoOpHandler ops f eff
-        -> (b -> eff (f r))
-        -> eff (f r)
+        => CoOpHandler ops f m
+        -> (b -> m (f r))
+        -> m (f r)
       m2 handler cont =
         m1 handler $ cont . f
 
 instance
-  (FreeOps ops, Monad eff)
-  => Applicative (ChurchMonad ops eff)
+  (FreeOps ops, Monad m)
+  => Applicative (ChurchMonad ops m)
   where
     pure
       :: forall a
        . a
-      -> ChurchMonad ops eff a
+      -> ChurchMonad ops m a
     pure x = ChurchMonad m
      where
       m :: forall f r
          . (Functor f)
-        => CoOpHandler ops f eff
-        -> (a -> eff (f r))
-        -> eff (f r)
+        => CoOpHandler ops f m
+        -> (a -> m (f r))
+        -> m (f r)
       m _ cont = cont x
 
     (<*>) = ap
 
 instance
-  (FreeOps ops, Monad eff)
-  => Monad (ChurchMonad ops eff)
+  (FreeOps ops, Monad m)
+  => Monad (ChurchMonad ops m)
    where
     (>>=)
       :: forall a b
-       . ChurchMonad ops eff a
-      -> (a -> ChurchMonad ops eff b)
-      -> ChurchMonad ops eff b
+       . ChurchMonad ops m a
+      -> (a -> ChurchMonad ops m b)
+      -> ChurchMonad ops m b
     (ChurchMonad m1) >>= cont1 = ChurchMonad m2
      where
       m2
         :: forall f r
          . (Functor f)
-        => CoOpHandler ops f eff
-        -> (b -> eff (f r))
-        -> eff (f r)
+        => CoOpHandler ops f m
+        -> (b -> m (f r))
+        -> m (f r)
       m2 coopHandler cont2 =
         m1 coopHandler cont3
        where
-        cont3 :: a -> eff (f r)
+        cont3 :: a -> m (f r)
         cont3 a = do
           let (ChurchMonad m3) = cont1 a
           m3 coopHandler cont2
 
 instance FreeEff ChurchMonad where
   freeOps
-    :: forall ops eff
-     . (FreeOps ops, Monad eff)
-    => Operation ops (ChurchMonad ops eff) (ChurchMonad ops eff)
+    :: forall ops m
+     . (FreeOps ops, Monad m)
+    => Operation ops (ChurchMonad ops m) (ChurchMonad ops m)
   freeOps = mkFreeOps liftOps
    where
     liftOps
       :: forall a
-       . CoOperation ops (ChurchMonad ops eff) a
-      -> ChurchMonad ops eff a
+       . CoOperation ops (ChurchMonad ops m) a
+      -> ChurchMonad ops m a
     liftOps coop1 = ChurchMonad m1
      where
       m1
         :: forall f r
          . (Functor f)
-        => CoOpHandler ops f eff
-        -> (a -> eff (f r))
-        -> eff (f r)
+        => CoOpHandler ops f m
+        -> (a -> m (f r))
+        -> m (f r)
       m1 coopHandler cont =
         operationHandler coopHandler coop2 cont
        where
-        coop2 :: CoOperation ops (eff ∘ f) a
+        coop2 :: CoOperation ops (m ∘ f) a
         coop2 = liftCoOp runChurch coop1
 
         runChurch
           :: forall x
-           . ChurchMonad ops eff x
-          -> (eff ∘ f) x
+           . ChurchMonad ops m x
+          -> (m ∘ f) x
         runChurch (ChurchMonad m2) = Nest $
           m2 coopHandler $ returnHandler coopHandler
 
   liftFree
-    :: forall ops eff a
-     . (FreeOps ops, Monad eff)
-    => eff a
-    -> ChurchMonad ops eff a
+    :: forall ops m a
+     . (FreeOps ops, Monad m)
+    => m a
+    -> ChurchMonad ops m a
   liftFree m1 = ChurchMonad m2
    where
     m2
       :: forall f r
         . (Functor f)
-      => CoOpHandler ops f eff
-      -> (a -> eff (f r))
-      -> eff (f r)
+      => CoOpHandler ops f m
+      -> (a -> m (f r))
+      -> m (f r)
     m2 _ cont = m1 >>= cont
 
   freeContraLift
-    :: forall ops eff
-    . (FreeOps ops, Monad eff)
-    => ContraLift eff (ChurchMonad ops eff)
+    :: forall ops m
+    . (FreeOps ops, Monad m)
+    => ContraLift m (ChurchMonad ops m)
   freeContraLift = ContraLift contraLift1
    where
     contraLift1
       :: forall a
       . (forall w
           . (Functor w)
-          => (forall x . ChurchMonad ops eff x -> eff (w x))
-          -> eff (w a))
-      -> ChurchMonad ops eff a
+          => (forall x . ChurchMonad ops m x -> m (w x))
+          -> m (w a))
+      -> ChurchMonad ops m a
     contraLift1 cont1 = ChurchMonad m1
      where
       m1
         :: forall f r
           . (Functor f)
-        => CoOpHandler ops f eff
-        -> (a -> eff (f r))
-        -> eff (f r)
+        => CoOpHandler ops f m
+        -> (a -> m (f r))
+        -> m (f r)
       m1 coopHandler cont2 =
         contraLiftHandler coopHandler cont3
        where
         cont3
           :: forall w
            . (Functor w)
-          => (forall x . f (eff x) -> eff (w x))
-          -> eff (w (eff (f r)))
+          => (forall x . f (m x) -> m (w x))
+          -> m (w (m (f r)))
         cont3 contraFree2 = do
           wa :: w a <- cont1 contraLift2
           return $ fmap cont2 wa
          where
           contraLift2
             :: forall x
-             . ChurchMonad ops eff x
-            -> eff (w x)
+             . ChurchMonad ops m x
+            -> m (w x)
           contraLift2 (ChurchMonad m2) = do
             fx <- m2 coopHandler $ returnHandler coopHandler
             contraFree2 $ fmap return fx
 
 instance FreeHandler ChurchMonad where
   handleFree
-    :: forall ops eff f a
-     . ( Monad eff
+    :: forall ops m f a
+     . ( Monad m
        , FreeOps ops
        , Functor f
        )
-    => CoOpHandler ops f eff
-    -> ChurchMonad ops eff a
-    -> eff (f a)
+    => CoOpHandler ops f m
+    -> ChurchMonad ops m a
+    -> m (f a)
   handleFree coopHandler (ChurchMonad m1) =
     m1 coopHandler $ returnHandler coopHandler

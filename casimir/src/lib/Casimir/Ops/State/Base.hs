@@ -14,9 +14,9 @@ import Casimir.Base
 data StateTag
 data StateEff s
 
-data StateOps s eff = StateOps {
-  getOp :: eff s,
-  putOp :: s -> eff ()
+data StateOps s m = StateOps {
+  getOp :: m s,
+  putOp :: s -> m ()
 }
 
 instance EffOps (StateEff s) where
@@ -29,8 +29,8 @@ instance EffFunctor Lift (StateOps a) where
   }
 
 instance ImplicitOps (StateEff s) where
-  type OpsConstraint (StateEff s) eff =
-    Param StateTag (StateOps s eff)
+  type OpsConstraint (StateEff s) m =
+    Param StateTag (StateOps s m)
 
   withOps = withParam @StateTag
   captureOps = captureParam @StateTag

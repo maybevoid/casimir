@@ -13,8 +13,8 @@ import Casimir.Ops.State
 
 data LogEff l
 
-data LogOps l eff = LogOps {
-  logOp :: l -> eff ()
+data LogOps l m = LogOps {
+  logOp :: l -> m ()
 }
 
 data LogCoOp l r =
@@ -46,8 +46,8 @@ instance Freer.FreeOps (LogEff l) where
     \l -> liftCoOp $ LogOp' l
 
 instance ImplicitOps (LogEff l) where
-  type OpsConstraint (LogEff l) eff =
-    (?_Control_Monad_Implicit_Ops_Log_logOps :: LogOps l eff)
+  type OpsConstraint (LogEff l) m =
+    (?_Control_Monad_Implicit_Ops_Log_logOps :: LogOps l m)
 
   withOps ops comp =
     let
@@ -61,17 +61,17 @@ log :: forall l . l -> Eff (LogEff l) ()
 log l = logOp captureOps l
 
 stateLoggerHandler
-  :: forall l eff
-   . (Monad eff)
-  => BaseOpsHandler (StateEff [l]) (LogEff l) eff
+  :: forall l m
+   . (Monad m)
+  => BaseOpsHandler (StateEff [l]) (LogEff l) m
 stateLoggerHandler = genericOpsHandler $ LogOps $
   \l -> do
     logs <- get
     put $ l : logs
 
 printLoggerHandler
-  :: forall a eff
-   . (Monad eff, Show a)
-  => BaseOpsHandler IoEff (LogEff a) eff
+  :: forall a m
+   . (Monad m, Show a)
+  => BaseOpsHandler IoEff (LogEff a) m
 printLoggerHandler = genericOpsHandler $ LogOps $
   liftIo . print

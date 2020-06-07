@@ -18,9 +18,9 @@ data LabeledEff k (label :: k) ops
 newtype LabeledOps
   k (label :: k)
   ops
-  (eff :: Type -> Type)
+  (m :: Type -> Type)
   = LabeledOps {
-    unlabelOps :: ops eff
+    unlabelOps :: ops m
   }
 
 instance
@@ -40,22 +40,22 @@ instance
   (EffOps ops)
   => ImplicitOps (LabeledEff k (label :: k) ops)
    where
-    type OpsConstraint (LabeledEff k (label :: k) ops) eff =
-      Param k label (LabeledOps k label (Operation ops) eff)
+    type OpsConstraint (LabeledEff k (label :: k) ops) m =
+      Param k label (LabeledOps k label (Operation ops) m)
 
     withOps
-      :: forall eff r
-       . (Monad eff)
-      => LabeledOps k label (Operation ops) eff
-      -> (Param k label (LabeledOps k label (Operation ops) eff)
+      :: forall m r
+       . (Monad m)
+      => LabeledOps k label (Operation ops) m
+      -> (Param k label (LabeledOps k label (Operation ops) m)
           => r)
       -> r
     withOps = withParam @k @label
 
     captureOps
-      :: forall eff
-       . ( Monad eff
-         , Param k label (LabeledOps k label (Operation ops) eff)
+      :: forall m
+       . ( Monad m
+         , Param k label (LabeledOps k label (Operation ops) m)
          )
-      => LabeledOps k label (Operation ops) eff
+      => LabeledOps k label (Operation ops) m
     captureOps = captureParam @k @label

@@ -14,21 +14,21 @@ class EffFunctor
   (comp :: (Type -> Type) -> Type)
   where
     effmap
-      :: forall eff1 eff2
-      .  (Monad eff1, Monad eff2)
-      => lift eff1 eff2
-      -> comp eff1
-      -> comp eff2
+      :: forall m1 m2
+      .  (Monad m1, Monad m2)
+      => lift m1 m2
+      -> comp m1
+      -> comp m2
 
 instance {-# OVERLAPPABLE #-}
   ( EffFunctor Lift comp
   )
   => EffFunctor HigherLift comp where
     effmap
-      :: forall eff1 eff2
-       . (Monad eff1, Monad eff2)
-      => HigherLift eff1 eff2
-      -> comp eff1
-      -> comp eff2
+      :: forall m1 m2
+       . (Monad m1, Monad m2)
+      => HigherLift m1 m2
+      -> comp m1
+      -> comp m2
     effmap (HigherLift lift _) comp =
       effmap (Lift lift) comp

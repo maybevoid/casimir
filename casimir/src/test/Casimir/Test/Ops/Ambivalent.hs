@@ -17,8 +17,8 @@ ambivalentTests = testGroup "Ambivalent Tests"
 
 data AmbEff a
 
-data AmbOps a eff = AmbOps {
-  selectOp :: [a] -> eff a
+data AmbOps a m = AmbOps {
+  selectOp :: [a] -> m a
 }
 
 data AmbCoOp a r
@@ -44,7 +44,7 @@ instance FreeOps (AmbEff a) where
   }
 
 instance ImplicitOps (AmbEff a) where
-  type OpsConstraint (AmbEff a) eff = (?ambOps :: AmbOps a eff)
+  type OpsConstraint (AmbEff a) m = (?ambOps :: AmbOps a m)
 
   withOps ops comp = let ?ambOps = ops in comp
   captureOps = ?ambOps
@@ -78,9 +78,9 @@ solveQueen = solveQueen' 1 []
       solveQueen' (x+1) ((x, y) : qs)
 
 dfsHandler
-  :: forall a r eff
-   . (Monad eff)
-  => CoOpHandler (AmbEff a) r (Maybe r) eff
+  :: forall a r m
+   . (Monad m)
+  => CoOpHandler (AmbEff a) r (Maybe r) m
 dfsHandler = CoOpHandler handleReturn handleCoOp
  where
   handleReturn x = return $ Just x
