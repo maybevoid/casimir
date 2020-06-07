@@ -53,29 +53,29 @@ class
    where
     mkFreeOps
       :: forall eff
-      . (Effect eff)
+      . (Monad eff)
       => (forall a . CoOperation ops eff a -> eff a)
       -> Operation ops eff eff
 
 class
   ( forall ops eff
-     . (FreeOps ops, Effect eff)
-    => Effect (free ops eff)
+     . (FreeOps ops, Monad eff)
+    => Monad (free ops eff)
   )
   => FreeEff free
    where
     freeOps :: forall ops eff
-       . (FreeOps ops, Effect eff)
+       . (FreeOps ops, Monad eff)
       => Operation ops (free ops eff) (free ops eff)
 
     liftFree :: forall ops eff a
-       . (FreeOps ops, Effect eff)
+       . (FreeOps ops, Monad eff)
       => eff a
       -> free ops eff a
 
     freeContraLift
       :: forall eff ops
-       . ( Effect eff
+       . ( Monad eff
          , FreeOps ops
          )
       => ContraLift eff (free ops eff)
@@ -87,7 +87,7 @@ class
    where
     handleFree
       :: forall ops eff f a
-       . ( Effect eff
+       . ( Monad eff
          , FreeOps ops
          , Functor f
          )
@@ -107,7 +107,7 @@ instance
   where
     mkFreeOps
       :: forall eff
-       . (Effect eff)
+       . (Monad eff)
       => (forall a
            . HigherCoOp (Base.CoOperation ops) eff a
           -> eff a)
@@ -125,7 +125,7 @@ instance
 
 freeHigherLift
   :: forall free ops eff
-   . (FreeEff free, FreeOps ops, Effect eff)
+   . (FreeEff free, FreeOps ops, Monad eff)
   => HigherLift eff (free ops eff)
 freeHigherLift = HigherLift liftFree freeContraLift
 
@@ -133,7 +133,7 @@ freeHigherLift = HigherLift liftFree freeContraLift
 withCoOpHandler
   :: forall free ops eff f r
    . ( Functor f
-     , Effect eff
+     , Monad eff
      , FreeEff free
      , FreeHandler free
      , EffOps ops
@@ -154,7 +154,7 @@ withCoOpHandler handler comp1
 
 liftCoOpHandler
   :: forall ops eff f
-   . ( Effect eff
+   . ( Monad eff
      , HigherEffOps ops
      , HigherEffCoOp ops
      )
@@ -177,7 +177,7 @@ liftCoOpHandler handler1 contraLift =
 
 lowerCoOpHandler
   :: forall ops eff f
-   . ( Effect eff
+   . ( Monad eff
      , HigherEffOps ops
      , HigherEffCoOp ops
      )

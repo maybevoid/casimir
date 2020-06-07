@@ -45,7 +45,7 @@ instance
         m1 handler $ cont . f
 
 instance
-  (FreeOps ops, Effect eff)
+  (FreeOps ops, Monad eff)
   => Applicative (ChurchMonad ops eff)
   where
     pure
@@ -64,7 +64,7 @@ instance
     (<*>) = ap
 
 instance
-  (FreeOps ops, Effect eff)
+  (FreeOps ops, Monad eff)
   => Monad (ChurchMonad ops eff)
    where
     (>>=)
@@ -91,7 +91,7 @@ instance
 instance FreeEff ChurchMonad where
   freeOps
     :: forall ops eff
-     . (FreeOps ops, Effect eff)
+     . (FreeOps ops, Monad eff)
     => Operation ops (ChurchMonad ops eff) (ChurchMonad ops eff)
   freeOps = mkFreeOps liftOps
    where
@@ -122,7 +122,7 @@ instance FreeEff ChurchMonad where
 
   liftFree
     :: forall ops eff a
-     . (FreeOps ops, Effect eff)
+     . (FreeOps ops, Monad eff)
     => eff a
     -> ChurchMonad ops eff a
   liftFree m1 = ChurchMonad m2
@@ -137,7 +137,7 @@ instance FreeEff ChurchMonad where
 
   freeContraLift
     :: forall ops eff
-    . (FreeOps ops, Effect eff)
+    . (FreeOps ops, Monad eff)
     => ContraLift eff (ChurchMonad ops eff)
   freeContraLift = ContraLift contraLift1
    where
@@ -179,7 +179,7 @@ instance FreeEff ChurchMonad where
 instance FreeHandler ChurchMonad where
   handleFree
     :: forall ops eff f a
-     . ( Effect eff
+     . ( Monad eff
        , FreeOps ops
        , Functor f
        )

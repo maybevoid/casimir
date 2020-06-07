@@ -4,12 +4,11 @@ where
 
 import Control.Monad.Identity
 
-import Casimir.Base
 import Casimir.Higher.ContraLift
 
 contraIdentity
   :: forall eff
-   . (Effect eff)
+   . (Monad eff)
   => ContraFree eff Identity
 contraIdentity = handler1
  where

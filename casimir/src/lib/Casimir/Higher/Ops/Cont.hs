@@ -21,7 +21,7 @@ data ContOps eff1 eff2 = ContOps {
 }
 
 instance
-  (Effect eff1)
+  (Monad eff1)
   => EffFunctor Lift (ContOps eff1) where
     effmap
       :: forall eff2 eff3
@@ -34,8 +34,8 @@ instance
 instance HigherEffFunctor HigherLift ContOps where
   higherEffmap
     :: forall eff1 eff2
-      . ( Effect eff1
-        , Effect eff2
+      . ( Monad eff1
+        , Monad eff2
         )
     => HigherLift eff1 eff2
     -> ContOps eff1 eff1
@@ -75,6 +75,6 @@ instance HigherEffFunctor HigherLift ContOps where
             cont4 x2
 
 contTOps
-  :: forall eff r . (Effect eff)
+  :: forall eff r . (Monad eff)
   => ContOps (ContT.ContT r eff) (ContT.ContT r eff)
 contTOps = ContOps ContT.callCC

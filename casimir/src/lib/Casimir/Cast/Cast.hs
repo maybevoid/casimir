@@ -43,7 +43,7 @@ withCast caster res =
 
 castOps
   :: forall eff ops1 ops2 .
-  ( Effect eff
+  ( Monad eff
   , ImplicitOps ops1
   , ImplicitOps ops2
   )

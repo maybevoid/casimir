@@ -15,7 +15,7 @@ import Casimir.Base.EffFunctor
 data NoEff
 
 -- | The trivial effect 'NoOp' have singleton operation and can be trivially
--- satisfied for all 'Effect' @eff@. It is the identity for the
+-- satisfied for all 'Monad' @eff@. It is the identity for the
 -- @Casimir.Base.Union@ type operator such that:
 --
 -- @
@@ -28,7 +28,7 @@ data NoEff
 -- equivalent set of 'OpsConstraints' up to casting equivalents by
 -- 'Casimir.Computation.OpsCast'.
 
--- | @'Operation' 'NoOp' eff@ is really just @()@ for all 'Effect' @eff@. We instead define
+-- | @'Operation' 'NoOp' eff@ is really just @()@ for all 'Monad' @eff@. We instead define
 -- 'NoOp' with phantom type @eff@ so that the injectivity condition for
 -- 'Operation' can be satisfied.
 data NoOp (eff :: Type -> Type) = NoOp
@@ -37,8 +37,8 @@ instance EffOps NoEff where
   type Operation NoEff = NoOp
 
 -- | @'OpsConstraint' 'NoOp' eff@ is just the empty constraint @()@ for all
--- 'Effect' @eff@. We instead define the empty class 'NoConstraint' with
--- trivial instance for all 'Effect' @eff@ so that the injectivity condition
+-- 'Monad' @eff@. We instead define the empty class 'NoConstraint' with
+-- trivial instance for all 'Monad' @eff@ so that the injectivity condition
 -- for 'OpsConstraint' can be satisfied.
 class NoConstraint (eff :: Type -> Type) where
 

@@ -15,14 +15,14 @@ import Benchmark.State.Base
 {-# INLINE statePipeline1 #-}
 statePipeline1
   :: forall free s eff1 .
-  (Effect eff1, FreeHandler free)
+  (Monad eff1, FreeHandler free)
   => GenericPipeline Lift (EnvEff s) (StateEff s) eff1
 statePipeline1 = contextualHandlerToPipeline @free $
   Computation handler
    where
     handler
       :: forall eff2 .
-      (Effect eff2)
+      (Monad eff2)
       => Lift eff1 eff2
       -> EnvOps s eff2
       -> ContextualHandler (CoState s) (StateEff s) eff2
@@ -40,14 +40,14 @@ statePipeline1 = contextualHandlerToPipeline @free $
 
 stateFreeComp1
   :: forall free eff .
-  (FreeHandler free, Effect eff)
+  (FreeHandler free, Monad eff)
   => BaseComputation (EnvEff Int) (Return ()) eff
 stateFreeComp1 = runPipeline
   (statePipeline1 @free) stateBaseComp
 
 stateFreeComp2
   :: forall free eff .
-  (FreeHandler free, Effect eff)
+  (FreeHandler free, Monad eff)
   => BaseComputation NoEff (Return ()) (ReaderT Int eff)
 stateFreeComp2 = bindOpsHandler
   readerTHandler
@@ -55,13 +55,13 @@ stateFreeComp2 = bindOpsHandler
 
 readerTFreeComp
   :: forall free eff .
-  (FreeHandler free, Effect eff)
+  (FreeHandler free, Monad eff)
   => ReaderT Int eff ()
 readerTFreeComp = returnVal $ runComp (stateFreeComp2 @free) idLift NoOp
 
 curriedFreeComp
   :: forall free eff .
-  (FreeHandler free, Effect eff)
+  (FreeHandler free, Monad eff)
   => Int
   -> BaseComputation NoEff (Return ()) eff
 curriedFreeComp s = bindOpsHandler

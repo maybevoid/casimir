@@ -45,7 +45,7 @@ instance
 
     withOps
       :: forall eff r
-       . (Effect eff)
+       . (Monad eff)
       => LabeledOps k label (Operation ops) eff
       -> (Param k label (LabeledOps k label (Operation ops) eff)
           => r)
@@ -54,7 +54,7 @@ instance
 
     captureOps
       :: forall eff
-       . ( Effect eff
+       . ( Monad eff
          , Param k label (LabeledOps k label (Operation ops) eff)
          )
       => LabeledOps k label (Operation ops) eff

@@ -21,7 +21,7 @@ newtype ChurchMonad ops eff a = ChurchMonad {
 
 withCoOpHandler
   :: forall handler eff a r
-   . ( Effect eff
+   . ( Monad eff
      , EffOps handler
      , FreeOps handler
      , ImplicitOps handler
@@ -84,7 +84,7 @@ instance
 
 liftChurchMonad
   :: forall ops eff a .
-  ( Effect eff
+  ( Monad eff
   , FreeOps ops
   )
   => eff a
@@ -98,7 +98,7 @@ liftChurchMonad mx = ChurchMonad $
 
 liftChurchOps
   :: forall ops eff a .
-  ( Effect eff
+  ( Monad eff
   , FreeOps ops
   )
   => CoOperation ops a
@@ -112,14 +112,14 @@ liftChurchOps ops = ChurchMonad cont
 
 churchOps
   :: forall ops eff .
-  (FreeOps ops, Effect eff)
+  (FreeOps ops, Monad eff)
   => Operation ops (ChurchMonad ops eff)
 churchOps = mkFreeOps liftChurchOps
 {-# INLINE churchOps #-}
 
 mapChurchMonad
   :: forall ops eff a b .
-  ( Effect eff
+  ( Monad eff
   , FreeOps ops
   )
   => (a -> b)
@@ -136,7 +136,7 @@ mapChurchMonad f (ChurchMonad m1) = ChurchMonad m2
 
 bindChurchMonad
   :: forall ops eff a b .
-  ( Effect eff
+  ( Monad eff
   , FreeOps ops
   )
   => ChurchMonad ops eff a
@@ -156,7 +156,7 @@ bindChurchMonad (ChurchMonad m1) cont1 = ChurchMonad m2
 
 liftPure
   :: forall ops eff a .
-  ( Effect eff
+  ( Monad eff
   , FreeOps ops
   )
   => a

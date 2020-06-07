@@ -21,12 +21,12 @@ import Benchmark.State.Base
 
 stateOpsToEnvOpsPipeline
   :: forall s a eff1
-   . (Effect eff1)
+   . (Monad eff1)
   => BaseComputation (StateEff s) (Return a) eff1
   -> BaseComputation (EnvEff s) (Return a) eff1
 stateOpsToEnvOpsPipeline comp1 = Computation comp2
  where
-  comp2 :: forall eff2 . (Effect eff2)
+  comp2 :: forall eff2 . (Monad eff2)
     => Lift eff1 eff2
     -> EnvOps s eff2
     -> Return a eff2
@@ -46,18 +46,18 @@ stateOpsToEnvOpsPipeline comp1 = Computation comp2
       evalStateT comp4 s
 
 statePComp1
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => BaseComputation (EnvEff Int) (Return ()) eff
 statePComp1 = stateOpsToEnvOpsPipeline stateBaseComp
 
 statePComp2
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => BaseComputation NoEff (Return ()) (ReaderT Int eff)
 statePComp2 = bindOpsHandler
   readerTHandler statePComp1
 
 stateOpsToEnvOpsToReaderTComp
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => ReaderT Int eff ()
 stateOpsToEnvOpsToReaderTComp = returnVal $ runComp statePComp2 idLift NoOp
 

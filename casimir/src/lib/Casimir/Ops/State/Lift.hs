@@ -11,19 +11,19 @@ import Casimir.Transform
 
 liftStateT
   :: forall s eff a
-   . (Effect eff)
+   . (Monad eff)
   => eff a
   -> StateT s eff a
 liftStateT = lift
 
 stateTLift
-  :: forall s eff . (Effect eff)
+  :: forall s eff . (Monad eff)
   => Lift eff (StateT s eff)
 stateTLift = Lift liftStateT
 
 stateTContraLift
   :: forall eff s
-   . (Effect eff)
+   . (Monad eff)
   => ContraLift eff (StateT s eff)
 stateTContraLift = ContraLift contraLift1
  where
@@ -45,14 +45,14 @@ stateTContraLift = ContraLift contraLift1
 -- MonadTransControl instance
 stateTContraLift'
   :: forall eff s
-   . (Effect eff)
+   . (Monad eff)
   => ContraLift eff (StateT s eff)
 stateTContraLift' = transformContraLift
   @eff @(StateT s) @((,) s)
   swap swap
 
 stateTHigherLift
-  :: forall s eff . (Effect eff)
+  :: forall s eff . (Monad eff)
   => HigherLift eff (StateT s eff)
 stateTHigherLift =
   HigherLift liftStateT stateTContraLift

@@ -84,7 +84,7 @@ await :: forall a . Eff (AwaitEff a) a
 await = awaitOp ?awaitOps
 
 runPipe :: forall a r ops eff1
-   . ( Effect eff1
+   . ( Monad eff1
    , EffOps ops
    , EffFunctor Lift (Operation ops)
    )
@@ -93,7 +93,7 @@ runPipe :: forall a r ops eff1
   -> BaseComputation ops (Return r) eff1
 runPipe producer1 consumer1 = Computation comp
    where
-    comp :: forall eff2 . (Effect eff2)
+    comp :: forall eff2 . (Monad eff2)
       => Lift eff1 eff2
       -> Operation ops eff2
       -> Return r eff2
@@ -111,7 +111,7 @@ runPipe producer1 consumer1 = Computation comp
 
 pipe
   :: forall a r eff
-   . (Effect eff)
+   . (Monad eff)
   => FreeT (YieldCoOp a) eff r
   -> FreeT (AwaitCoOp a) eff r
   -> eff r
@@ -128,7 +128,7 @@ pipe producer consumer = runFreeT consumer >>= handleConsumer
 
 copipe
   :: forall a r eff
-   . (Effect eff)
+   . (Monad eff)
   => (a -> FreeT (AwaitCoOp a) eff r)
   -> FreeT (YieldCoOp a) eff r
   -> eff r
@@ -145,7 +145,7 @@ copipe consumer producer = runFreeT producer >>= handleProducer
 
 producerComp
   :: forall a eff
-   . (Effect eff)
+   . (Monad eff)
   => BaseComputation ((YieldEff Int) ∪ (EnvEff Int)) (Return a) eff
 producerComp = genericReturn comp1
  where
@@ -160,7 +160,7 @@ producerComp = genericReturn comp1
           comp2 $ acc + 1
 
 consumerComp
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => BaseComputation ((AwaitEff Int) ∪ (EnvEff Int)) (Return Int) eff
 consumerComp = genericReturn $
  do
@@ -169,7 +169,7 @@ consumerComp = genericReturn $
   z <- await
   return $ x + y + z
 
-pipedComp :: forall eff . (Effect eff)
+pipedComp :: forall eff . (Monad eff)
   => BaseComputation (EnvEff Int) (Return Int) eff
 pipedComp = runPipe producerComp consumerComp
 

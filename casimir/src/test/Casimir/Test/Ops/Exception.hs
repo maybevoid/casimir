@@ -30,7 +30,7 @@ divideComp1 x y =
   else return $ quot x y
 
 testComp1
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => Int
   -> Int
   -> eff (Either Error Int)
@@ -59,13 +59,13 @@ test2 = testCase
       res
 
 exceptionHandler
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => CoOpHandler (ExceptionEff Error) Int Int eff
 exceptionHandler = mkExceptionCoOpHandler $
   \_ -> return 0
 
 testComp2
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => Int
   -> Int
   -> eff Int

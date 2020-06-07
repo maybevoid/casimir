@@ -1,6 +1,6 @@
 {-|
   Module      : Casimir
-  Description : Algebraic Effects in Haskell using Implicit Parameters
+  Description : Algebraic Monads in Haskell using Implicit Parameters
   Copyright   : (c) Soares Ruofei Chen, 2019
   License     : BSD-3
   Maintainer  : soares.chen@maybevoid.com

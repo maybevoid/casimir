@@ -25,14 +25,14 @@ type HigherPipeline = Pipeline HigherLift
 
 higherToBaseLift
   :: forall eff1 eff2
-   . (Effect eff1, Effect eff2)
+   . (Monad eff1, Monad eff2)
   => HigherLift eff1 eff2
   -> Lift eff1 eff2
 higherToBaseLift higherLift = Lift $ hlBaseLift higherLift
 
 toHigherComputation
   :: forall ops comp eff
-   . (Base.EffOps ops, Effect eff)
+   . (Base.EffOps ops, Monad eff)
   => BaseComputation ops comp eff
   -> HigherComputation ops comp eff
 toHigherComputation = strengthenComputation higherToBaseLift
@@ -41,7 +41,7 @@ toHigherComputation = strengthenComputation higherToBaseLift
 coopHandlerToPipeline
   :: forall free ops1 handler eff1 f a .
   ( Functor f
-  , Effect eff1
+  , Monad eff1
   , Base.EffOps ops1
   , EffOps handler
   , ImplicitOps handler
@@ -63,7 +63,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
    where
     comp2
       :: forall eff2
-       . (Effect eff2)
+       . (Monad eff2)
       => HigherLift eff1 eff2
       -> Base.Operation (ops1 ∪ ops2) eff2
       -> Return (f a) eff2

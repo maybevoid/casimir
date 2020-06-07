@@ -44,29 +44,29 @@ instance FreeOps (AsyncEff t) where
   }
 
 type AsyncConstraint t eff =
-  (?_Control_Effect_Implicit_Ops_Async_asyncOps :: AsyncOps t eff)
+  (?_Control_Monad_Implicit_Ops_Async_asyncOps :: AsyncOps t eff)
 
 instance ImplicitOps (AsyncEff t) where
   type OpsConstraint (AsyncEff t) eff = AsyncConstraint t eff
 
   captureOps =
-    ?_Control_Effect_Implicit_Ops_Async_asyncOps
+    ?_Control_Monad_Implicit_Ops_Async_asyncOps
 
   withOps ops comp =
     let
-      ?_Control_Effect_Implicit_Ops_Async_asyncOps
+      ?_Control_Monad_Implicit_Ops_Async_asyncOps
         = ops in comp
 
 await
   :: forall a t eff
-   . (Effect eff, AsyncConstraint t eff)
+   . (Monad eff, AsyncConstraint t eff)
   => t a
   -> eff a
 await = awaitOp captureOps
 
 awaitAll
   :: forall a t eff
-   . (Effect eff, AsyncConstraint t eff)
+   . (Monad eff, AsyncConstraint t eff)
   => [t a]
   -> eff [a]
 awaitAll = awaitAllOp captureOps

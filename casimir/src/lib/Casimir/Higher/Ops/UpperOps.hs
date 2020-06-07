@@ -29,7 +29,7 @@ instance
     type Operation (UpperEff ops) = UpperOps (Base.Operation ops)
 
 instance
-  ( Effect eff
+  ( Monad eff
   , EffFunctor lift ops
   )
   => EffFunctor lift (UpperOps ops eff)

@@ -70,7 +70,7 @@ instance ImplicitOps (ResourceEff t) where
   captureOps = captureParam @ResourceTag
 
 instance
-  (Effect inEff)
+  (Monad inEff)
   => EffFunctor Lift (HigherResourceOps t inEff) where
     effmap (Lift lift) (HigherResourceOps handleResource) =
       HigherResourceOps $
@@ -80,8 +80,8 @@ instance
 instance HigherEffFunctor HigherLift (HigherResourceOps t) where
   higherEffmap
     :: forall eff1 eff2
-      . ( Effect eff1
-        , Effect eff2
+      . ( Monad eff1
+        , Monad eff2
         )
     => HigherLift eff1 eff2
     -> HigherResourceOps t eff1 eff1
@@ -129,7 +129,7 @@ instance CoOpFunctor (ResourceCoOp t) where
 instance FreeOps (ResourceEff t) where
   mkFreeOps
     :: forall eff
-    . (Effect eff)
+    . (Monad eff)
     => (forall a . ResourceCoOp t eff a -> eff a)
     -> HigherResourceOps t eff eff
   mkFreeOps lifter = HigherResourceOps handler

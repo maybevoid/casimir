@@ -64,18 +64,18 @@ instance
       (stateTContraLift @(OpsMonad t) @s)
 
 instance
-  (Effect eff)
+  (Monad eff)
   => FreeLift (StateEff s) Lift eff (StateT s eff) where
     freeLift = Lift liftStateT
 
 instance
-  (Effect eff)
+  (Monad eff)
   => FreeLift (StateEff s) HigherLift eff (StateT s eff) where
     freeLift = HigherLift liftStateT stateTContraLift
 
 stateTOps
   :: forall eff s
-   . (Effect eff)
+   . (Monad eff)
   => StateOps s (StateT s eff)
 stateTOps = StateOps {
   getOp = get,
@@ -84,7 +84,7 @@ stateTOps = StateOps {
 
 monadStateOps
   :: forall eff s
-   . (Effect eff, MonadState s eff)
+   . (Monad eff, MonadState s eff)
   => StateOps s eff
 monadStateOps = StateOps {
   getOp = get,
@@ -95,7 +95,7 @@ withStateTAndOps
   :: forall ops s r eff .
   ( EffOps ops
   , EffFunctor Lift (Operation ops)
-  , Effect eff
+  , Monad eff
   )
   => s
   -> Base.Operation ops eff
@@ -113,14 +113,14 @@ withStateTAndOps i ops1 comp1 = evalStateT comp2 i
 {-# INLINE stateTPipeline #-}
 stateTPipeline
   :: forall s eff1 comp .
-  (Effect eff1, EffFunctor Lift comp)
+  (Monad eff1, EffFunctor Lift comp)
   => s
   -> SimplePipeline Lift NoEff (StateEff s) comp eff1
 stateTPipeline i = transformePipeline $ genericComputation handler
  where
   {-# INLINE handler #-}
   handler :: forall eff
-    . (Effect eff)
+    . (Monad eff)
     => TransformerHandler (StateT s) (StateEff s) eff
   handler = TransformerHandler stateTOps stateTLift $ Lift $
     \comp -> evalStateT comp i

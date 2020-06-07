@@ -15,18 +15,18 @@ import Casimir.Ops.Env.Base
 
 liftReaderT
   :: forall e eff a
-   . (Effect eff)
+   . (Monad eff)
   => eff a
   -> ReaderT e eff a
 liftReaderT = lift
 
 readerTLift
   :: forall a eff
-   . (Effect eff)
+   . (Monad eff)
   => Lift eff (ReaderT a eff)
 readerTLift = Lift lift
 
-readerTOps :: forall a eff . (Effect eff)
+readerTOps :: forall a eff . (Monad eff)
   => EnvOps a (ReaderT a eff)
 readerTOps = EnvOps {
   askOp = ask

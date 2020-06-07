@@ -15,6 +15,6 @@ class
    where
     mkFreeOps
       :: forall eff
-        . (Effect eff)
+        . (Monad eff)
       => (forall a . CoOperation ops a -> eff a)
       -> Operation ops eff

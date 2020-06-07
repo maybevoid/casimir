@@ -16,8 +16,8 @@ import qualified Casimir.Base as Base
 class HigherEffFunctor lift ops where
   higherEffmap
     :: forall eff1 eff2
-      . ( Effect eff1
-        , Effect eff2
+      . ( Monad eff1
+        , Monad eff2
         )
     => lift eff1 eff2
     -> ops eff1 eff1

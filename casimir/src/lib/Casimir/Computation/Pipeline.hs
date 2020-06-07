@@ -52,7 +52,7 @@ type GenericPipeline lift ops handler eff
 
 opsHandlerToPipeline
   :: forall ops1 lift handler eff
-   . ( Effect eff
+   . ( Monad eff
      , ImplicitOps ops1
      , ImplicitOps handler
      , LiftMonoid lift
@@ -77,10 +77,10 @@ opsHandlerToPipeline handler1 = Pipeline pipeline
 {-# INLINE transformePipeline #-}
 transformePipeline
   :: forall t ops1 handler eff1 .
-  ( Effect eff1
+  ( Monad eff1
   , ImplicitOps ops1
   , ImplicitOps handler
-  , (forall eff . (Effect eff) => Effect (t eff))
+  , (forall eff . (Monad eff) => Monad (t eff))
   )
   => Computation Lift ops1 (TransformerHandler t handler) eff1
   -> GenericPipeline Lift ops1 handler eff1
@@ -97,7 +97,7 @@ transformePipeline handler1 = Pipeline pipeline
   pipeline comp1 = Computation comp2
    where
     comp2
-      :: forall eff2 . (Effect eff2)
+      :: forall eff2 . (Monad eff2)
       => Lift eff1 eff2
       -> Operation (ops1 ∪ ops2) eff2
       -> comp eff2
@@ -112,8 +112,8 @@ transformePipeline handler1 = Pipeline pipeline
 
 castPipelineOps
   :: forall ops1 ops2 lift handler comp1 comp2 eff1 eff2  .
-  ( Effect eff1
-  , Effect eff2
+  ( Monad eff1
+  , Monad eff2
   , ImplicitOps ops1
   , ImplicitOps ops2
   , ImplicitOps handler
@@ -142,8 +142,8 @@ castPipelineOps cast21 pipeline1 = Pipeline pipeline2
 
 castPipelineHandler
   :: forall ops1 lift handler1 handler2 comp1 comp2 eff1 eff2
-   . ( Effect eff1
-     , Effect eff2
+   . ( Monad eff1
+     , Monad eff2
      , ImplicitOps ops1
      , ImplicitOps handler1
      , ImplicitOps handler2
@@ -173,9 +173,9 @@ castPipelineHandler cast1 pipeline1 = Pipeline pipeline2
 
 composeExactPipelines
   :: forall ops1 ops2 lift handler1 handler2 comp1 comp2 comp3 eff1 eff2 eff3 .
-  ( Effect eff1
-  , Effect eff2
-  , Effect eff3
+  ( Monad eff1
+  , Monad eff2
+  , Monad eff3
   , LiftMonoid lift
   , ImplicitOps ops1
   , ImplicitOps ops2
@@ -214,8 +214,8 @@ composeExactPipelines pipeline1 pipeline2 = Pipeline pipeline3
 
 runPipelineWithCast
   :: forall ops3 ops1 ops2 lift handler comp1 comp2 eff1 eff2 .
-  ( Effect eff1
-  , Effect eff2
+  ( Monad eff1
+  , Monad eff2
   , ImplicitOps ops1
   , ImplicitOps ops2
   , ImplicitOps ops3
@@ -239,8 +239,8 @@ runPipelineWithCast cast1 cast2 pipeline1 comp1 =
 
 runPipeline
   :: forall ops3 ops1 ops2 lift handler comp1 comp2 eff1 eff2 .
-  ( Effect eff1
-  , Effect eff2
+  ( Monad eff1
+  , Monad eff2
   , ops3 ⊇ ops1
   , (handler ∪ ops3) ⊇ ops2
   , ImplicitOps ops1
@@ -259,9 +259,9 @@ runPipeline = runPipelineWithCast
 composePipelinesWithCast
   :: forall ops1 ops2 ops3 lift handler1 handler2 handler3
       comp1 comp2 comp3 eff1 eff2 eff3
-   . ( Effect eff1
-     , Effect eff2
-     , Effect eff3
+   . ( Monad eff1
+     , Monad eff2
+     , Monad eff3
      , LiftMonoid lift
      , ImplicitOps ops1
      , ImplicitOps ops2
@@ -293,9 +293,9 @@ composePipelinesWithCast cast1 cast2 cast3 pipeline1 pipeline2
 
 composePipelines
   :: forall ops1 ops2 ops3 lift handler1 handler2 handler3 comp1 comp2 comp3 eff1 eff2 eff3
-   . ( Effect eff1
-     , Effect eff2
-     , Effect eff3
+   . ( Monad eff1
+     , Monad eff2
+     , Monad eff3
      , LiftMonoid lift
      , ImplicitOps ops1
      , ImplicitOps ops2

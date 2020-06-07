@@ -11,7 +11,7 @@ import Benchmark.State.Base
 
 codensityComp
     :: forall eff
-     . (Effect eff)
+     . (Monad eff)
     => Int
     -> eff ()
 codensityComp s = comp2

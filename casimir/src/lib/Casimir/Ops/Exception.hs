@@ -39,29 +39,29 @@ instance FreeOps (ExceptionEff e) where
   }
 
 type ExceptionConstraint e eff =
-  (?_Control_Effect_Implicit_Ops_Exception_exceptionOps :: ExceptionOps e eff)
+  (?_Control_Monad_Implicit_Ops_Exception_exceptionOps :: ExceptionOps e eff)
 
 instance ImplicitOps (ExceptionEff e) where
   type OpsConstraint (ExceptionEff e) eff = ExceptionConstraint e eff
 
   withOps ops comp =
     let
-      ?_Control_Effect_Implicit_Ops_Exception_exceptionOps
+      ?_Control_Monad_Implicit_Ops_Exception_exceptionOps
         = ops in comp
 
   captureOps =
-    ?_Control_Effect_Implicit_Ops_Exception_exceptionOps
+    ?_Control_Monad_Implicit_Ops_Exception_exceptionOps
 
 raise
   :: forall e a eff
-   . (Effect eff, ExceptionConstraint e eff)
+   . (Monad eff, ExceptionConstraint e eff)
   => e
   -> eff a
 raise e = raiseOp captureOps e >>= absurd
 
 mkExceptionCoOpHandler
   :: forall eff e a
-   . (Effect eff)
+   . (Monad eff)
   => (e -> eff a)
   -> CoOpHandler (ExceptionEff e) a a eff
 mkExceptionCoOpHandler handleException =
@@ -70,7 +70,7 @@ mkExceptionCoOpHandler handleException =
 
 exceptionToEitherHandler
   :: forall eff e a
-   . (Effect eff)
+   . (Monad eff)
   => CoOpHandler (ExceptionEff e) a (Either e a) eff
 exceptionToEitherHandler =
   CoOpHandler handleReturn handleCoOp
@@ -91,7 +91,7 @@ tryIo m = do
 
 try
   :: forall free eff e a
-   . ( Effect eff
+   . ( Monad eff
      , FreeHandler free
      )
   => (OpsConstraint (ExceptionEff e) (free (ExceptionEff e) eff)
@@ -165,7 +165,7 @@ bracketComp initComp cleanupComp betweenComp = Computation comp1
  where
   comp1
     :: forall eff2
-     . (Effect eff2)
+     . (Monad eff2)
     => Lift eff eff2
     -> Operation ((ExceptionEff e) ∪ ops) eff2
     -> Return b eff2

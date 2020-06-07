@@ -12,7 +12,7 @@ import Casimir.Freer.FreeEff
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler
   :: forall free handler eff a r
-   . ( Effect eff
+   . ( Monad eff
      , EffOps handler
      , FreeOps handler
      , ImplicitOps handler

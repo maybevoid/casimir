@@ -21,17 +21,17 @@ data CoOpHandler handler a r eff = CoOpHandler {
 
 class
   ( forall ops eff
-    . (FreeOps ops, Effect eff)
+    . (FreeOps ops, Monad eff)
     => Monad (free ops eff)
   )
   => FreeEff free
   where
     freeOps :: forall ops eff
-       . (FreeOps ops, Effect eff)
+       . (FreeOps ops, Monad eff)
       => Operation ops (free ops eff)
 
     liftFree :: forall ops eff a
-       . (FreeOps ops, Effect eff)
+       . (FreeOps ops, Monad eff)
       => eff a
       -> free ops eff a
 
@@ -41,7 +41,7 @@ class
    where
     handleFree
       :: forall ops eff a r
-      . (Effect eff, FreeOps ops)
+      . (Monad eff, FreeOps ops)
       => CoOpHandler ops a r eff
       -> free ops eff a
       -> eff r
@@ -59,6 +59,6 @@ data ContextualHandler w handler eff = ContextualHandler {
 
 freeLiftEff
   :: forall free ops eff
-   . (FreeEff free, FreeOps ops, Effect eff)
+   . (FreeEff free, FreeOps ops, Monad eff)
   => Lift eff (free ops eff)
 freeLiftEff = Lift liftFree

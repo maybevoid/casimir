@@ -7,8 +7,6 @@ where
 
 import Control.Monad
 
-import Casimir.Base
-
 import Casimir.Freer.CoOp
 import Casimir.Freer.FreeOps
 import Casimir.Freer.FreeEff
@@ -88,7 +86,7 @@ instance FreeEff FreerMonad where
 
 doHandleFreer
   :: forall ops eff a r
-   . (Effect eff, FreeOps ops)
+   . (Monad eff, FreeOps ops)
   => CoOpHandler ops a r eff
   -> FreerMonad ops eff a
   -> eff r
@@ -112,7 +110,7 @@ doHandleFreer handler = handleFree'
 
 liftFreeOps
   :: forall eff ops a
-   . (Effect eff, FreeOps ops)
+   . (Monad eff, FreeOps ops)
   => CoOperation ops a
   -> FreerMonad ops eff a
 liftFreeOps ops =

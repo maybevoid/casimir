@@ -9,8 +9,6 @@ where
 import Control.Monad.Identity
 import Data.Functor.Compose
 
-import Casimir.Base.Effect
-
 newtype ContraLift eff1 eff2 = ContraLift {
   runContraLift
     :: forall a
@@ -22,7 +20,7 @@ newtype ContraLift eff1 eff2 = ContraLift {
 }
 
 identityContraLift
-  :: forall eff . Effect eff
+  :: forall eff . Monad eff
   => ContraLift eff eff
 identityContraLift = ContraLift contraLift1
  where
@@ -36,9 +34,9 @@ identityContraLift = ContraLift contraLift1
 
 joinContraLift
   :: forall eff1 eff2 eff3
-   . ( Effect eff1
-     , Effect eff2
-     , Effect eff3
+   . ( Monad eff1
+     , Monad eff2
+     , Monad eff3
      )
   => ContraLift eff1 eff2
   -> ContraLift eff2 eff3

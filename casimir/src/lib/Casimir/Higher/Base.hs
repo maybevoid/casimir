@@ -5,13 +5,12 @@ module Casimir.Higher.Base
   , LowerOps (..)
   , HigherEffOps
   , LowerEffOps
-  , Effect
   )
 where
 
 import Data.Kind
 
-import Casimir.Base (Effect, EffFunctor (..))
+import Casimir.Base (EffFunctor (..))
 import qualified Casimir.Base as Base
 
 newtype LowerOps ops

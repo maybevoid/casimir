@@ -9,7 +9,7 @@ import Casimir.Ops.State.Transform
 
 import Benchmark.State.Base
 
-curriedStateTComp :: forall eff . (Effect eff)
+curriedStateTComp :: forall eff . (Monad eff)
   => Int
   -> BaseComputation NoEff (Return ()) eff
 curriedStateTComp i = runPipeline

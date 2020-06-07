@@ -31,7 +31,7 @@ stateTests = testGroup "StateOps Tests"
 
 stateTHandler
   :: forall eff s .
-  (Effect eff)
+  (Monad eff)
   => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
 stateTHandler = opsHandlerComp $
   \lifter -> effmap lifter stateTOps
@@ -43,7 +43,7 @@ ioHandler = baseOpsHandler IoOps {
 
 stateTToEnvOpsPipeline
   :: forall s eff1 comp .
-  ( Effect eff1
+  ( Monad eff1
   , EffFunctor Lift comp
   )
   => SimplePipeline Lift (EnvEff s) (StateEff s) comp eff1
@@ -68,12 +68,12 @@ stateComp1 = do
   return (s1, s2, s3)
 
 stateComp2
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => BaseComputation (StateEff Int) (Return StateCompRes) eff
 stateComp2 = genericReturn stateComp1
 
 stateTComp
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => BaseComputation NoEff (Return StateCompRes) (StateT Int eff)
 stateTComp = bindOpsHandler
   stateTHandler stateComp2
@@ -110,7 +110,7 @@ stateTToEnvOpsPipelineTest = testCase "StateT pipeline test" $
 
 ioStateHandler
   :: forall eff s .
-  (Effect eff)
+  (Monad eff)
   => BaseOpsHandler (IoEff ∪ EnvEff (IORef s)) (StateEff s) eff
 ioStateHandler = genericOpsHandler StateOps {
   getOp =
@@ -151,14 +151,14 @@ ioStateTest = testCase "IO State Test" $
 
 newtype CoState s eff a = CoState (s -> eff a)
 
-runCoState :: forall s eff . (Effect eff)
+runCoState :: forall s eff . (Monad eff)
   => s
   -> (forall a . CoState s eff a -> eff a)
 runCoState i (CoState cont) = cont i
 
 stateCoOpHandler
   :: forall eff s a .
-  (Effect eff)
+  (Monad eff)
   => CoOpHandler (StateEff s) a (CoState s eff a) eff
 stateCoOpHandler = CoOpHandler handleReturn handleOps
  where
@@ -179,11 +179,11 @@ stateCoOpHandler = CoOpHandler handleReturn handleOps
 
 stateDynComp1
   :: forall eff .
-  (Effect eff)
+  (Monad eff)
   => ChurchMonad (StateEff Int) eff StateCompRes
 stateDynComp1 = withOps @(StateEff Int) freeOps stateComp1
 
-stateDynComp2 :: forall eff . (Effect eff)
+stateDynComp2 :: forall eff . (Monad eff)
   => eff (CoState Int eff StateCompRes)
 stateDynComp2 = withCoOpHandler @ChurchMonad stateCoOpHandler stateDynComp1
 
@@ -198,14 +198,14 @@ churchStateTest1 = testCase "Church state test 1" $
 
 statePipeline1
   :: forall s eff1 .
-  (Effect eff1)
+  (Monad eff1)
   => GenericPipeline Lift (EnvEff s) (StateEff s) eff1
 statePipeline1 = contextualHandlerToPipeline @ChurchMonad $
   Computation handler
    where
     handler
       :: forall eff2 .
-      (Effect eff2)
+      (Monad eff2)
       => Lift eff1 eff2
       -> EnvOps s eff2
       -> ContextualHandler (CoState s) (StateEff s) eff2
@@ -221,12 +221,12 @@ statePipeline1 = contextualHandlerToPipeline @ChurchMonad $
         s <- ask
         cont s
 
-stateDynComp4 :: forall eff . (Effect eff)
+stateDynComp4 :: forall eff . (Monad eff)
   => BaseComputation (EnvEff Int) (Return StateCompRes) eff
 stateDynComp4 = runPipeline
   statePipeline1 stateComp2
 
-stateDynComp5 :: forall eff . (Effect eff)
+stateDynComp5 :: forall eff . (Monad eff)
   => BaseComputation NoEff (Return StateCompRes) eff
 stateDynComp5 = bindOpsHandler
   (mkEnvHandler (6 :: Int))
@@ -238,7 +238,7 @@ churchStateTest2 = testCase "Church state test 2" $
     (6, 8, 8) $
     runIdentityComp stateDynComp5
 
-stateFreeComp1 :: forall eff . (Effect eff)
+stateFreeComp1 :: forall eff . (Monad eff)
   => eff (CoState Int eff StateCompRes)
 stateFreeComp1 = handleFree @FreeMonad stateCoOpHandler $
   withOps @(StateEff Int) freeOps stateComp1

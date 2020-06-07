@@ -25,7 +25,7 @@ exceptionTests = testGroup "ExceptionEff Tests"
 
 exceptionPipeline
   :: forall eff e a
-   . (Effect eff)
+   . (Monad eff)
   => HigherPipeline NoEff (ExceptionEff e) (Return a) (Return (Either e a)) eff eff
 exceptionPipeline = coopHandlerToPipeline @ChurchMonad $
   genericComputation exceptionCoOpHandler
@@ -64,7 +64,7 @@ testException2 =
         (throw "error")
         (\_ -> return 0)
 
-    comp2 :: forall eff . (Effect eff)
+    comp2 :: forall eff . (Monad eff)
       => HigherComputation NoEff (Return (Either String Int)) eff
     comp2 = runPipeline exceptionPipeline $
       genericReturn @(ExceptionEff String) comp1

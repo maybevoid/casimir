@@ -14,7 +14,7 @@ import Casimir.Free.FreeOps
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler
   :: forall free handler eff a r
-   . ( Effect eff
+   . ( Monad eff
      , EffOps handler
      , FreeOps handler
      , FreeHandler free
@@ -57,7 +57,7 @@ withCoOpHandlerAndOps handler comp1
 {-# INLINE withContextualCoOpHandler #-}
 withContextualCoOpHandler
   :: forall free handler eff a r
-   . ( Effect eff
+   . ( Monad eff
      , EffOps handler
      , FreeOps handler
      , FreeHandler free

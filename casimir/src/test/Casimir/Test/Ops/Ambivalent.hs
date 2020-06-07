@@ -79,7 +79,7 @@ solveQueen = solveQueen' 1 []
 
 dfsHandler
   :: forall a r eff
-   . (Effect eff)
+   . (Monad eff)
   => CoOpHandler (AmbEff a) r (Maybe r) eff
 dfsHandler = CoOpHandler handleReturn handleCoOp
  where

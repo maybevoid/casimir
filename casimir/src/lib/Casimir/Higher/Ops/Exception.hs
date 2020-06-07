@@ -80,11 +80,11 @@ instance ImplicitOps (ExceptionEff e) where
   captureOps = captureParam @ExceptionTag
 
 instance
-  (Effect inEff)
+  (Monad inEff)
   => EffFunctor Lift (HigherExceptionOps e inEff) where
     effmap
       :: forall eff1 eff2
-       . (Effect eff1, Effect eff2)
+       . (Monad eff1, Monad eff2)
       => Lift eff1 eff2
       -> HigherExceptionOps e inEff eff1
       -> HigherExceptionOps e inEff eff2
@@ -102,7 +102,7 @@ instance
 instance HigherEffFunctor HigherLift (HigherExceptionOps e) where
   higherEffmap
     :: forall eff1 eff2
-     . (Effect eff1, Effect eff2)
+     . (Monad eff1, Monad eff2)
     => HigherLift eff1 eff2
     -> HigherExceptionOps e eff1 eff1
     -> HigherExceptionOps e eff2 eff2
@@ -155,7 +155,7 @@ instance CoOpFunctor (ExceptionCoOp e) where
 instance FreeOps (ExceptionEff e) where
   mkFreeOps
     :: forall eff
-    . (Effect eff)
+    . (Monad eff)
     => (forall a . ExceptionCoOp e eff a -> eff a)
     -> HigherExceptionOps e eff eff
   mkFreeOps lifter = HigherExceptionOps handleTry handleThrow
@@ -170,7 +170,7 @@ instance FreeOps (ExceptionEff e) where
 
 exceptionCoOpHandler
   :: forall e eff
-   . (Effect eff)
+   . (Monad eff)
   => CoOpHandler (ExceptionEff e) (Either e) eff
 exceptionCoOpHandler = CoOpHandler
   (return . Right) handleOp contraEither

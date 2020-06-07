@@ -11,17 +11,17 @@ import Casimir.Base
 
 transformLift
   :: forall t eff
-   . ( Effect eff
+   . ( Monad eff
      , MonadTrans t
-     , Effect (t eff)
+     , Monad (t eff)
      )
   => Lift eff (t eff)
 transformLift = Lift lift
 
 transformContraLift
   :: forall eff t w
-   . ( Effect eff
-     , Effect (t eff)
+   . ( Monad eff
+     , Monad (t eff)
      , MonadTransControl t
      , Functor w
      )
@@ -52,8 +52,8 @@ transformContraLift id1 id2 = ContraLift contraLift1
 
 baseContraLift
   :: forall eff1 eff2 w
-   . ( Effect eff1
-     , Effect eff2
+   . ( Monad eff1
+     , Monad eff2
      , Functor w
      , MonadBaseControl eff1 eff2
      )

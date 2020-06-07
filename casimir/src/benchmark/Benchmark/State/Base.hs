@@ -31,26 +31,26 @@ stateBaseFunc =
       stateBaseFunc
 {-# INLINE stateBaseFunc #-}
 
-stateBaseComp :: forall eff . (Effect eff)
+stateBaseComp :: forall eff . (Monad eff)
   => BaseComputation (StateEff Int) (Return ()) eff
 stateBaseComp = genericReturn stateBaseFunc
 
 readerTHandler
   :: forall a eff .
-  (Effect eff)
+  (Monad eff)
   => BaseOpsHandler NoEff (EnvEff a) (ReaderT a eff)
 readerTHandler = opsHandlerComp $
   \lifter -> effmap lifter readerTOps
 
 stateTHandler
   :: forall eff s .
-  (Effect eff)
+  (Monad eff)
   => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
 stateTHandler = opsHandlerComp $
   \lifter -> effmap lifter stateTOps
 
 runCoState
-  :: forall s eff . (Effect eff)
+  :: forall s eff . (Monad eff)
   => s
   -> (forall a . CoState s eff a -> eff a)
 runCoState i (CoState cont) = cont i
@@ -58,7 +58,7 @@ runCoState i (CoState cont) = cont i
 
 stateCoOpHandler
   :: forall eff s a .
-  (Effect eff)
+  (Monad eff)
   => Free.CoOpHandler (StateEff s) a (CoState s eff a) eff
 stateCoOpHandler = Free.CoOpHandler handleReturn handleOps
  where
@@ -82,7 +82,7 @@ stateCoOpHandler = Free.CoOpHandler handleReturn handleOps
 
 stateFreerCoOpHandler
   :: forall eff s a .
-  (Effect eff)
+  (Monad eff)
   => Freer.CoOpHandler (StateEff s) a (CoState s eff a) eff
 stateFreerCoOpHandler = Freer.CoOpHandler handleReturn handleOps
  where

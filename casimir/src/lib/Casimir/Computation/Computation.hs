@@ -15,8 +15,8 @@ newtype Computation lift ops comp eff1 = Computation {
   runComp
     :: forall eff2
      . ( EffOps ops
-       , Effect eff1
-       , Effect eff2
+       , Monad eff1
+       , Monad eff2
        )
     => lift eff1 eff2
     -> Operation ops eff2
@@ -39,8 +39,8 @@ instance
 liftComputation
   :: forall lift ops comp eff1 eff2
    . ( EffOps ops
-     , Effect eff1
-     , Effect eff2
+     , Monad eff1
+     , Monad eff2
      , LiftMonoid lift
      )
   => lift eff1 eff2
@@ -49,7 +49,7 @@ liftComputation
 liftComputation lift12 comp1 = Computation comp2
   where
     comp2 :: forall eff3 .
-      ( Effect eff3
+      ( Monad eff3
       )
       => lift eff2 eff3
       -> Operation ops eff3
@@ -59,12 +59,12 @@ liftComputation lift12 comp1 = Computation comp2
 strengthenComputation
   :: forall lift1 lift2 ops comp eff
    . ( EffOps ops
-     , Effect eff
+     , Monad eff
      , LiftMonoid lift1
      , LiftMonoid lift2
      )
   => (forall eff1 eff2
-       . (Effect eff1, Effect eff2)
+       . (Monad eff1, Monad eff2)
       => lift2 eff1 eff2
       -> lift1 eff1 eff2)
   -> Computation lift1 ops comp eff
@@ -73,7 +73,7 @@ strengthenComputation strengthenLift comp1 =
   Computation comp2
  where
   comp2 :: forall eff2 .
-    ( Effect eff2
+    ( Monad eff2
     )
     => lift2 eff eff2
     -> Operation ops eff2

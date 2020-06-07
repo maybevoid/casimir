@@ -10,7 +10,6 @@ where
 import Data.Kind
 
 import Casimir.Base.EffOps
-import Casimir.Base.Effect
 
 -- | 'ImplicitOps' gives computations access to effect operations of an
 -- operation through implicit parameter constraints. It hides the machinery
@@ -33,7 +32,7 @@ class
   (EffOps ops)
   => ImplicitOps ops where
 
-    -- | The constraint kind for the effect operation under 'Effect' @eff@.
+    -- | The constraint kind for the effect operation under 'Monad' @eff@.
     -- This is typically an implicit parameter with a unique name, e.g.
     -- @type OpsConstraint FooOps eff = (?fooOps :: FooOps eff)@.
     --
@@ -52,7 +51,7 @@ class
     -- @withOps fooOps cont = let ?fooOps = fooOps in cont @.
     withOps
       :: forall eff r
-       . (Effect eff)
+       . (Monad eff)
       => Operation ops eff
       -> (OpsConstraint ops eff => r)
       -> r
@@ -62,13 +61,13 @@ class
     -- @FooEff@, the body for 'captureOps' can be defined as @captureOps = ?fooOps@.
     captureOps
       :: forall eff
-       . (Effect eff, OpsConstraint ops eff)
+       . (Monad eff, OpsConstraint ops eff)
       => Operation ops eff
 
 -- | This is a type alias for the implicit parameter constraint for @ops@,
--- in addition to requiring @eff@ to be an 'Effect'. This helps reducing
+-- in addition to requiring @eff@ to be an 'Monad'. This helps reducing
 -- boilerplate in generic computations so that we do not have to keep
--- repeating the @(Effect eff)@ constraint in our type signatures.
-type EffConstraint ops eff = (Effect eff, OpsConstraint ops eff)
+-- repeating the @(Monad eff)@ constraint in our type signatures.
+type EffConstraint ops eff = (Monad eff, OpsConstraint ops eff)
 
 type Eff ops a = forall eff . (EffConstraint ops eff) => eff a

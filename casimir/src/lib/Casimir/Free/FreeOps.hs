@@ -20,7 +20,7 @@ class
   => FreeOps ops where
 
     -- | The free ops constructor is used for generating free operations that
-    -- can work under any free monad transformer @t@ and any 'Effect' @eff@.
+    -- can work under any free monad transformer @t@ and any 'Monad' @eff@.
     -- It is given a payload lifter that can lift a @'CoOperation' ops@ into
     -- the free monad transformed effect @t eff@, which can be used to
     -- construct a free @'Operation' ops@ under the effect @t eff@. 'mkFreeOps'
@@ -28,6 +28,6 @@ class
     -- they can create a free operation for any free monad.
     mkFreeOps
       :: forall eff
-      . (Effect eff)
+      . (Monad eff)
       => (forall a . CoOperation ops a -> eff a)
       -> Operation ops eff

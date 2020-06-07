@@ -15,7 +15,7 @@ import Casimir.Free.FreeOps
 {-# INLINE coopHandlerToPipeline #-}
 coopHandlerToPipeline
   :: forall free ops1 handler eff1 a b .
-  ( Effect eff1
+  ( Monad eff1
   , EffOps ops1
   , EffOps handler
   , FreeOps handler
@@ -37,7 +37,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
    where
     comp2
       :: forall eff2
-       . (Effect eff2)
+       . (Monad eff2)
       => Lift eff1 eff2
       -> Operation (ops1 ∪ ops2) eff2
       -> Return b eff2
@@ -57,7 +57,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
 {-# INLINE genericCoOpHandlerToPipeline #-}
 genericCoOpHandlerToPipeline
   :: forall free ops1 handler eff1 .
-  ( Effect eff1
+  ( Monad eff1
   , EffOps ops1
   , EffOps handler
   , FreeOps handler
@@ -72,7 +72,7 @@ genericCoOpHandlerToPipeline handler1
  where
   handler2
     :: forall eff2 .
-    (Effect eff2)
+    (Monad eff2)
     => Lift eff1 eff2
     -> Operation ops1 eff2
     -> TransformerHandler (free handler) handler eff2
@@ -90,7 +90,7 @@ genericCoOpHandlerToPipeline handler1
 {-# INLINE contextualHandlerToPipeline #-}
 contextualHandlerToPipeline
   :: forall free w ops1 handler eff1 .
-  ( Effect eff1
+  ( Monad eff1
   , EffOps ops1
   , EffOps handler
   , FreeOps handler
@@ -105,7 +105,7 @@ contextualHandlerToPipeline handler1
  where
   handler2
     :: forall eff2 .
-    (Effect eff2)
+    (Monad eff2)
     => Lift eff1 eff2
     -> Operation ops1 eff2
     -> TransformerHandler (free handler) handler eff2

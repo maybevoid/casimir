@@ -38,7 +38,7 @@ ioHandler = baseOpsHandler ioOps
 
 stateTHandler
   :: forall s eff
-   . (Effect eff)
+   . (Monad eff)
   => BaseOpsHandler NoEff (StateEff s) (StateT s eff)
 stateTHandler = baseOpsHandler stateTOps
 
@@ -93,7 +93,7 @@ comp1 ref = do
 
 pipeline1
   :: forall comp
-   . (forall eff . (Effect eff)
+   . (forall eff . (Monad eff)
       => BaseComputation
           (StateEff [String] ∪ IoEff ∪ BracketResourceEff)
           comp

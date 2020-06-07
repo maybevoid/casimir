@@ -23,7 +23,7 @@ envComp1 = do
 
 envComp2 ::
   forall a eff .
-  (Show a, Effect eff)
+  (Show a, Monad eff)
   => BaseComputation (EnvEff a) (Return String) eff
 envComp2 = genericReturn envComp1
 

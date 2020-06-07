@@ -22,7 +22,7 @@ import Casimir.Computation.Computation
 
 bindOps
   :: forall ops1 ops2 lift comp eff
-   . ( Effect eff
+   . ( Monad eff
      , ImplicitOps ops1
      , ImplicitOps ops2
      , LiftMonoid lift
@@ -41,7 +41,7 @@ opsHandlerComp
   :: forall ops lift handler eff1
    . ( ImplicitOps ops
      , ImplicitOps handler
-     , Effect eff1
+     , Monad eff1
      )
   => (forall eff2 .
        (EffConstraint ops eff2)
@@ -55,7 +55,7 @@ opsHandlerComp comp = Computation $
 baseOpsHandler
   :: forall lift handler eff
    . ( ImplicitOps handler
-     , Effect eff
+     , Monad eff
      , LiftMonoid lift
      , EffFunctor lift (Operation handler)
      )
@@ -78,7 +78,7 @@ bindExactOpsHandler
   :: forall ops lift handler eff1 comp
    . ( ImplicitOps ops
      , ImplicitOps handler
-     , Effect eff1
+     , Monad eff1
      , LiftMonoid lift
      , EffFunctor lift (Operation handler)
      )
@@ -90,7 +90,7 @@ bindExactOpsHandler handler1 comp1
    where
     comp2
       :: forall eff2
-       . (Effect eff2)
+       . (Monad eff2)
       => lift eff1 eff2
       -> Operation ops eff2
       -> comp eff2
@@ -107,7 +107,7 @@ composeExactOpsHandlers
    . ( ImplicitOps ops
      , ImplicitOps handler1
      , ImplicitOps handler2
-     , Effect eff1
+     , Monad eff1
      )
   => OpsHandler lift ops handler1 eff1
   -> OpsHandler lift (handler1 ∪ ops) handler2 eff1
@@ -117,7 +117,7 @@ composeExactOpsHandlers handler1 handler2
    where
     comp1
       :: forall eff2
-       . (Effect eff2)
+       . (Monad eff2)
       => lift eff1 eff2
       -> Operation ops eff2
       -> Operation (handler1 ∪ handler2) eff2
@@ -147,7 +147,7 @@ withOpsHandler handler =
 
 castOpsHandler
   :: forall ops1 ops2 lift handler eff
-   . ( Effect eff
+   . ( Monad eff
      , ImplicitOps ops1
      , ImplicitOps ops2
      )
@@ -163,7 +163,7 @@ composeOpsHandlersWithCast
      , ImplicitOps ops3
      , ImplicitOps handler1
      , ImplicitOps handler2
-     , Effect eff
+     , Monad eff
      )
   => OpsCast ops3 ops1
   -> OpsCast (handler1 ∪ ops3) ops2
@@ -182,7 +182,7 @@ composeOpsHandlers
      , ImplicitOps ops3
      , ImplicitOps handler1
      , ImplicitOps handler2
-     , Effect eff
+     , Monad eff
      , ops3 ⊇ ops1
      , (handler1 ∪ ops3) ⊇ ops2
      )
@@ -200,7 +200,7 @@ bindOpsHandlerWithCast
      , ImplicitOps ops2
      , ImplicitOps ops3
      , ImplicitOps handler
-     , Effect eff
+     , Monad eff
      , LiftMonoid lift
      , EffFunctor lift (Operation handler)
      )
@@ -223,7 +223,7 @@ bindOpsHandler
      , ops3 ⊇ ops1
      , (handler ∪ ops3) ⊇ ops2
      , ImplicitOps handler
-     , Effect eff
+     , Monad eff
      , LiftMonoid lift
      , EffFunctor lift (Operation handler)
      )

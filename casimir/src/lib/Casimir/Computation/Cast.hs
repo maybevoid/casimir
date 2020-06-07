@@ -10,7 +10,7 @@ import Casimir.Computation.Computation
 
 castComputation
   :: forall ops1 ops2 lift comp eff .
-  ( Effect eff
+  ( Monad eff
   , ImplicitOps ops1
   , ImplicitOps ops2
   )

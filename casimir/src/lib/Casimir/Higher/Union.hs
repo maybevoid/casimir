@@ -45,7 +45,7 @@ instance
       HUnionCoOp (CoOperation ops1) (CoOperation ops2)
 
 instance
-  ( Effect eff
+  ( Monad eff
   , EffFunctor lift (ops1 eff)
   , EffFunctor lift (ops2 eff)
   )

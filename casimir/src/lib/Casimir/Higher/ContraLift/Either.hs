@@ -2,12 +2,11 @@
 module Casimir.Higher.ContraLift.Either
 where
 
-import Casimir.Base
 import Casimir.Higher.ContraLift
 
 contraEither
   :: forall eff e
-   . (Effect eff)
+   . (Monad eff)
   => ContraFree eff (Either e)
 contraEither = handler1
  where

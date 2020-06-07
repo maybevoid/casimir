@@ -161,7 +161,6 @@ library
 
   other-modules:
     Casimir.Base.EffOps
-    Casimir.Base.Effect
     Casimir.Base.EffFunctor
     Casimir.Base.Implicit
     Casimir.Base.Lift

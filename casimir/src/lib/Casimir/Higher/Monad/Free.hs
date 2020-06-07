@@ -108,7 +108,7 @@ instance
 
 contraLiftFree
   :: forall ops eff
-   . (FreeOps ops, Effect eff)
+   . (FreeOps ops, Monad eff)
   => ContraLift eff (FreeMonad ops eff)
 contraLiftFree = ContraLift contraLift1
  where

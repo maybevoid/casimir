@@ -36,7 +36,7 @@ instance FreeHandler FreeMonad where
 
 liftFreeMonad
   :: forall eff ops a
-   . (Effect eff, FreeOps ops)
+   . (Monad eff, FreeOps ops)
    => eff a
    -> FreeMonad ops eff a
 liftFreeMonad = FreeMonad . lift
@@ -44,14 +44,14 @@ liftFreeMonad = FreeMonad . lift
 
 freeMonadOps
   :: forall ops eff .
-  (FreeOps ops, Effect eff)
+  (FreeOps ops, Monad eff)
   => Operation ops (FreeMonad ops eff)
 freeMonadOps = mkFreeOps (FreeMonad . liftF)
 {-# INLINE freeMonadOps #-}
 
 handleFreeMonad
   :: forall ops eff a r
-   . (Effect eff, FreeOps ops)
+   . (Monad eff, FreeOps ops)
   => CoOpHandler ops a r eff
   -> FreeMonad ops eff a
   -> eff r

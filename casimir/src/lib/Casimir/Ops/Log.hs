@@ -47,22 +47,22 @@ instance Freer.FreeOps (LogEff l) where
 
 instance ImplicitOps (LogEff l) where
   type OpsConstraint (LogEff l) eff =
-    (?_Control_Effect_Implicit_Ops_Log_logOps :: LogOps l eff)
+    (?_Control_Monad_Implicit_Ops_Log_logOps :: LogOps l eff)
 
   withOps ops comp =
     let
-      ?_Control_Effect_Implicit_Ops_Log_logOps =
+      ?_Control_Monad_Implicit_Ops_Log_logOps =
         ops in comp
 
   captureOps =
-    ?_Control_Effect_Implicit_Ops_Log_logOps
+    ?_Control_Monad_Implicit_Ops_Log_logOps
 
 log :: forall l . l -> Eff (LogEff l) ()
 log l = logOp captureOps l
 
 stateLoggerHandler
   :: forall l eff
-   . (Effect eff)
+   . (Monad eff)
   => BaseOpsHandler (StateEff [l]) (LogEff l) eff
 stateLoggerHandler = genericOpsHandler $ LogOps $
   \l -> do
@@ -71,7 +71,7 @@ stateLoggerHandler = genericOpsHandler $ LogOps $
 
 printLoggerHandler
   :: forall a eff
-   . (Effect eff, Show a)
+   . (Monad eff, Show a)
   => BaseOpsHandler IoEff (LogEff a) eff
 printLoggerHandler = genericOpsHandler $ LogOps $
   liftIo . print

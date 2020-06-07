@@ -14,7 +14,7 @@ data UnderEff ops (inEff :: Type -> Type)
 data UnderOps ops inEff eff where
   UnderOps
     :: forall ops inEff eff
-     . (Effect eff, Effect inEff)
+     . (Monad eff, Monad inEff)
     => ops inEff eff
     -> UnderOps ops inEff eff
 

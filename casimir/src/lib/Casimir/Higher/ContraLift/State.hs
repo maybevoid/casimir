@@ -2,7 +2,6 @@
 module Casimir.Higher.ContraLift.State
 where
 
-import Casimir.Base
 import Casimir.Higher.ContraLift
 
 data CoState s eff a = CoState {
@@ -11,7 +10,7 @@ data CoState s eff a = CoState {
 
 contraState
   :: forall s eff
-   . (Effect eff)
+   . (Monad eff)
   => ContraFree eff (CoState s eff)
 contraState = handler1
  where

@@ -1,6 +1,7 @@
 
 module Casimir.Base.Lift
-  ( IdLift (..)
+  ( type (~>)
+  , IdLift (..)
   , Lift (..)
   , LiftMonoid (..)
   , MaybeLift (..)
@@ -13,8 +14,9 @@ where
 import Data.Kind
 import Data.Functor.Identity
 
-import Casimir.Base.Effect
 import Casimir.Base.ContraLift
+
+type eff1 ~> eff2 = forall x . eff1 x -> eff2 x
 
 class LiftFunctor
   (lift1 :: (Type -> Type) -> (Type -> Type) -> Type)
@@ -22,7 +24,7 @@ class LiftFunctor
   where
     transformLift
       :: forall eff1 eff2
-       . (Effect eff1, Effect eff2)
+       . (Monad eff1, Monad eff2)
       => lift1 eff1 eff2
       -> lift2 eff1 eff2
 
@@ -57,13 +59,13 @@ class
 
 class LiftMonoid lift where
   idLift
-    :: forall eff . (Effect eff) => lift eff eff
+    :: forall eff . (Monad eff) => lift eff eff
 
   joinLift
     :: forall eff1 eff2 eff3
-     . ( Effect eff1
-       , Effect eff2
-       , Effect eff3
+     . ( Monad eff1
+       , Monad eff2
+       , Monad eff3
        )
     => lift eff1 eff2
     -> lift eff2 eff3
@@ -104,7 +106,7 @@ instance LiftFunctor IdLift Lift where
 instance LiftFunctor IdLift HigherLift where
   transformLift
     :: forall eff1 eff2
-      . (Effect eff1, Effect eff2)
+      . (Monad eff1, Monad eff2)
     => IdLift eff1 eff2
     -> HigherLift eff1 eff2
   transformLift IdLift = HigherLift id $

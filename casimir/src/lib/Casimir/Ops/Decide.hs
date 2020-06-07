@@ -32,15 +32,15 @@ instance FreeOps (DecideEff s) where
 
 instance ImplicitOps (DecideEff s) where
   type OpsConstraint (DecideEff s) eff =
-    (?_Control_Effect_Implicit_Ops_Decide_decideOps :: DecideOps s eff)
+    (?_Control_Monad_Implicit_Ops_Decide_decideOps :: DecideOps s eff)
 
   withOps decideOps comp =
     let
-      ?_Control_Effect_Implicit_Ops_Decide_decideOps =
+      ?_Control_Monad_Implicit_Ops_Decide_decideOps =
         decideOps in comp
 
   captureOps =
-    ?_Control_Effect_Implicit_Ops_Decide_decideOps
+    ?_Control_Monad_Implicit_Ops_Decide_decideOps
 
 decide :: forall a . Eff (DecideEff a) a
 decide = decideOp captureOps

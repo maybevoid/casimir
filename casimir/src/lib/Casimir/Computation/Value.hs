@@ -21,7 +21,7 @@ import Casimir.Computation.Computation
 class FunctorComp ret where
   mapComp
     :: forall a b eff
-     . (Effect eff)
+     . (Monad eff)
     => (a -> b)
     -> ret a eff
     -> ret b eff
@@ -75,7 +75,7 @@ genericComputation
   => (forall eff
         . (EffConstraint ops eff)
        => comp eff)
-  -> (forall eff . (Effect eff) => Computation lift ops comp eff)
+  -> (forall eff . (Monad eff) => Computation lift ops comp eff)
 genericComputation comp = Computation $
   \ _ ops -> withOps ops comp
 
@@ -86,7 +86,7 @@ genericReturn
   => (forall eff
        . (EffConstraint ops eff)
        => eff a)
-  -> (forall eff . (Effect eff)
+  -> (forall eff . (Monad eff)
       => Computation lift ops (Return a) eff)
 genericReturn comp = genericComputation $ Return comp
 
@@ -97,7 +97,7 @@ arrowComputation
         . (EffConstraint ops eff)
        => a
        -> eff b)
-  -> (forall eff . (Effect eff)
+  -> (forall eff . (Monad eff)
        => Computation lift ops (Arrow a Return b) eff)
 arrowComputation fn = genericComputation $ Arrow $
   \x -> Return $ fn x

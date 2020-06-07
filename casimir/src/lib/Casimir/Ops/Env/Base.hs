@@ -34,20 +34,20 @@ ask = askOp captureOps
 
 withEnv
   :: forall r e eff
-   . (Effect eff)
+   . (Monad eff)
   => e
   -> (EnvOps e eff -> eff r)
   -> eff r
 withEnv x cont = cont (mkEnvOps x)
 
-mkEnvOps :: forall e eff . (Effect eff) => e -> EnvOps e eff
+mkEnvOps :: forall e eff . (Monad eff) => e -> EnvOps e eff
 mkEnvOps x = EnvOps {
   askOp = return x
 }
 
 mkEnvHandler
   :: forall e eff .
-  (Effect eff)
+  (Monad eff)
   => e
   -> BaseOpsHandler NoEff (EnvEff e) eff
 mkEnvHandler = baseOpsHandler . mkEnvOps

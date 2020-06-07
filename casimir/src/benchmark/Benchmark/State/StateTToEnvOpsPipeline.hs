@@ -22,7 +22,7 @@ import Benchmark.State.Base
 
 stateTToEnvOpsPipeline
   :: forall s eff1 comp .
-  (Effect eff1, EffFunctor Lift comp)
+  (Monad eff1, EffFunctor Lift comp)
   => SimplePipeline Lift (EnvEff s) (StateEff s) comp eff1
 stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
  where
@@ -34,17 +34,17 @@ stateTToEnvOpsPipeline = transformePipeline $ genericComputation handler
       i <- ask
       evalStateT comp i
 
-stateTComp1 :: forall eff . (Effect eff)
+stateTComp1 :: forall eff . (Monad eff)
   => BaseComputation (EnvEff Int) (Return ()) eff
 stateTComp1 = runPipeline
   stateTToEnvOpsPipeline stateBaseComp
 
-stateTComp2 :: forall eff . (Effect eff)
+stateTComp2 :: forall eff . (Monad eff)
   => BaseComputation NoEff (Return ()) (ReaderT Int eff)
 stateTComp2 = bindOpsHandler
   readerTHandler stateTComp1
 
-stateToReaderComp :: forall eff . (Effect eff)
+stateToReaderComp :: forall eff . (Monad eff)
   => ReaderT Int eff ()
 stateToReaderComp = returnVal $ runComp stateTComp2 idLift NoOp
 

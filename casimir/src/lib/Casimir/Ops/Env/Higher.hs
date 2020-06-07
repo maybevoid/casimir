@@ -29,15 +29,15 @@ instance EffOps (ReaderEff e) where
   type Operation (ReaderEff e) = ReaderOps e
 
 instance
-  (Effect inEff)
+  (Monad inEff)
   => EffFunctor Lift (ReaderOps e inEff) where
     effmap _ = undefined
 
 instance HigherEffFunctor HigherLift (ReaderOps e) where
   higherEffmap
     :: forall eff1 eff2
-     . ( Effect eff1
-       , Effect eff2
+     . ( Monad eff1
+       , Monad eff2
        )
     => HigherLift eff1 eff2
     -> ReaderOps e eff1 eff1

@@ -81,7 +81,7 @@ algCod alg op = Cod comp1
 
 rollCod
   :: forall eff f a
-   . (Effect eff)
+   . (Monad eff)
   => eff (Codensity (Nest eff f) a)
   -> Codensity (Nest eff f) a
 rollCod comp1 = Cod comp2
@@ -123,7 +123,7 @@ codensityOps handler1 = mkFreeOps handler2
 toCodensity
   :: forall free ops eff f a
    . ( EffCoOp ops
-     , Effect eff
+     , Monad eff
      , FreeOps ops
      , FreeEff free
      )
@@ -136,7 +136,7 @@ toCodensity handler1 comp = toCodensity' (coOpHandler handler1) comp
 toCodensity'
   :: forall free ops eff f a
    . ( EffCoOp ops
-     , Effect eff
+     , Monad eff
      , FreeOps ops
      , FreeEff free
      )

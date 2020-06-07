@@ -17,12 +17,12 @@ import Benchmark.State.Base
 
 stateOpsToReaderTPipeline
   :: forall s a eff1
-   . (Effect eff1)
+   . (Monad eff1)
   => BaseComputation (StateEff s) (Return a) eff1
   -> BaseComputation NoEff (Return a) (ReaderT s eff1)
 stateOpsToReaderTPipeline comp1 = Computation comp2
  where
-  comp2 :: forall eff2 . (Effect eff2)
+  comp2 :: forall eff2 . (Monad eff2)
     => Lift (ReaderT s eff1) eff2
     -> NoOp eff2
     -> Return a eff2
@@ -42,11 +42,11 @@ stateOpsToReaderTPipeline comp1 = Computation comp2
     lift $ evalStateT comp4 s
 
 stateComp1
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => BaseComputation NoEff (Return ()) (ReaderT Int eff)
 stateComp1 = stateOpsToReaderTPipeline stateBaseComp
 
 stateOpsToReaderTComp
-  :: forall eff . (Effect eff)
+  :: forall eff . (Monad eff)
   => ReaderT Int eff ()
 stateOpsToReaderTComp = returnVal $ runComp stateComp1 idLift NoOp
