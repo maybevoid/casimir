@@ -22,7 +22,7 @@ import Benchmark.State.Base
 stateOpsToEnvOpsPipeline
   :: forall s a m1
    . (Monad m1)
-  => BaseComputation (StateEff s) (Return a) m1
+  => BaseComputation (State s) (Return a) m1
   -> BaseComputation (EnvEff s) (Return a) m1
 stateOpsToEnvOpsPipeline comp1 = Computation comp2
  where

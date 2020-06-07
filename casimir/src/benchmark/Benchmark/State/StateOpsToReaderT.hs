@@ -18,7 +18,7 @@ import Benchmark.State.Base
 stateOpsToReaderTPipeline
   :: forall s a m1
    . (Monad m1)
-  => BaseComputation (StateEff s) (Return a) m1
+  => BaseComputation (State s) (Return a) m1
   -> BaseComputation NoEff (Return a) (ReaderT s m1)
 stateOpsToReaderTPipeline comp1 = Computation comp2
  where

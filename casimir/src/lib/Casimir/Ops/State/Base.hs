@@ -1,7 +1,7 @@
 
 module Casimir.Ops.State.Base
   ( StateTag
-  , StateEff
+  , State
   , StateOps (..)
   , get
   , put
@@ -12,15 +12,15 @@ import QuasiParam.Tag
 import Casimir.Base
 
 data StateTag
-data StateEff s
+data State s
 
 data StateOps s m = StateOps {
   getOp :: m s,
   putOp :: s -> m ()
 }
 
-instance Effect (StateEff s) where
-  type Operation (StateEff s) = StateOps s
+instance Effect (State s) where
+  type Operation (State s) = StateOps s
 
 instance EffFunctor Lift (StateOps a) where
   effmap (Lift lift) stateOps = StateOps {
@@ -28,17 +28,17 @@ instance EffFunctor Lift (StateOps a) where
     putOp = lift . putOp stateOps
   }
 
-instance ImplicitOps (StateEff s) where
-  type OpsConstraint (StateEff s) m =
+instance ImplicitOps (State s) where
+  type OpsConstraint (State s) m =
     Param StateTag (StateOps s m)
 
   withOps = withParam @StateTag
   captureOps = captureParam @StateTag
 
 {-# INLINE get #-}
-get :: forall s . Eff (StateEff s) s
+get :: forall s . Eff (State s) s
 get = getOp captureOps
 
 {-# INLINE put #-}
-put :: forall s . s -> Eff (StateEff s) ()
+put :: forall s . s -> Eff (State s) ()
 put = putOp captureOps

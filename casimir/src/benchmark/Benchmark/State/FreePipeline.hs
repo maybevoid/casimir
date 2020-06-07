@@ -16,7 +16,7 @@ import Benchmark.State.Base
 statePipeline1
   :: forall free s m1 .
   (Monad m1, FreeHandler free)
-  => GenericPipeline Lift (EnvEff s) (StateEff s) m1
+  => GenericPipeline Lift (EnvEff s) (State s) m1
 statePipeline1 = contextualHandlerToPipeline @free $
   Computation handler
    where
@@ -25,11 +25,11 @@ statePipeline1 = contextualHandlerToPipeline @free $
       (Monad m2)
       => Lift m1 m2
       -> EnvOps s m2
-      -> ContextualHandler (CoState s) (StateEff s) m2
+      -> ContextualHandler (CoState s) (State s) m2
     handler _ envOps = ContextualHandler coopHandler extract
      where
       coopHandler :: forall a .
-        CoOpHandler (StateEff s) a (CoState s m2 a) m2
+        CoOpHandler (State s) a (CoState s m2 a) m2
       coopHandler = stateCoOpHandler
 
       extract :: forall a . CoState s m2 a -> m2 a

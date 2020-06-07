@@ -17,10 +17,10 @@ instance Functor (StateCoOp s) where
   fmap f (GetOp cont) = GetOp $ fmap f cont
   fmap f (PutOp s cont) = PutOp s $ fmap f cont
 
-instance EffCoOp (StateEff s) where
-  type CoOperation (StateEff s) = StateCoOp s
+instance EffCoOp (State s) where
+  type CoOperation (State s) = StateCoOp s
 
-instance FreeOps (StateEff s) where
+instance FreeOps (State s) where
   mkFreeOps liftCoOp = StateOps {
     getOp = liftCoOp $ GetOp id,
     putOp = \x -> liftCoOp $ PutOp x id

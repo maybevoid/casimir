@@ -10,13 +10,13 @@ import Casimir.Ops.State.Freer
 
 import Casimir.Higher
 
-instance Effect (StateEff s) where
-  type Operation (StateEff s) =
+instance Effect (State s) where
+  type Operation (State s) =
     HigherOps (StateOps s)
 
-instance EffCoOp (StateEff s) where
-  type CoOperation (StateEff s) =
+instance EffCoOp (State s) where
+  type CoOperation (State s) =
     HigherCoOp (StateCoOp s)
 
-instance HigherEffect (StateEff s)
-instance HigherEffCoOp (StateEff s)
+instance HigherEffect (State s)
+instance HigherEffCoOp (State s)

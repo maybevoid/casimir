@@ -20,7 +20,7 @@ import qualified Casimir.Freer as Freer
 
 newtype CoState s m a = CoState (s -> m a)
 
-stateBaseFunc :: Eff (StateEff Int) ()
+stateBaseFunc :: Eff (State Int) ()
 stateBaseFunc =
  do
   s <- get
@@ -32,7 +32,7 @@ stateBaseFunc =
 {-# INLINE stateBaseFunc #-}
 
 stateBaseComp :: forall m . (Monad m)
-  => BaseComputation (StateEff Int) (Return ()) m
+  => BaseComputation (State Int) (Return ()) m
 stateBaseComp = genericReturn stateBaseFunc
 
 readerTHandler
@@ -45,7 +45,7 @@ readerTHandler = opsHandlerComp $
 stateTHandler
   :: forall m s .
   (Monad m)
-  => BaseOpsHandler NoEff (StateEff s) (StateT s m)
+  => BaseOpsHandler NoEff (State s) (StateT s m)
 stateTHandler = opsHandlerComp $
   \lifter -> effmap lifter stateTOps
 
@@ -59,7 +59,7 @@ runCoState i (CoState cont) = cont i
 stateCoOpHandler
   :: forall m s a .
   (Monad m)
-  => Free.CoOpHandler (StateEff s) a (CoState s m a) m
+  => Free.CoOpHandler (State s) a (CoState s m a) m
 stateCoOpHandler = Free.CoOpHandler handleReturn handleOps
  where
   handleReturn :: a -> m (CoState s m a)
@@ -83,7 +83,7 @@ stateCoOpHandler = Free.CoOpHandler handleReturn handleOps
 stateFreerCoOpHandler
   :: forall m s a .
   (Monad m)
-  => Freer.CoOpHandler (StateEff s) a (CoState s m a) m
+  => Freer.CoOpHandler (State s) a (CoState s m a) m
 stateFreerCoOpHandler = Freer.CoOpHandler handleReturn handleOps
  where
   handleReturn :: a -> m (CoState s m a)
@@ -92,7 +92,7 @@ stateFreerCoOpHandler = Freer.CoOpHandler handleReturn handleOps
 
   handleOps
     :: forall x
-     . Freer.CoOperation (StateEff s) x
+     . Freer.CoOperation (State s) x
     -> (x -> m (CoState s m a))
     -> m (CoState s m a)
   handleOps Freer.GetOp cont1 = return $ CoState $

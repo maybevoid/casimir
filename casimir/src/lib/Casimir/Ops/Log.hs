@@ -63,7 +63,7 @@ log l = logOp captureOps l
 stateLoggerHandler
   :: forall l m
    . (Monad m)
-  => BaseOpsHandler (StateEff [l]) (LogEff l) m
+  => BaseOpsHandler (State [l]) (LogEff l) m
 stateLoggerHandler = genericOpsHandler $ LogOps $
   \l -> do
     logs <- get

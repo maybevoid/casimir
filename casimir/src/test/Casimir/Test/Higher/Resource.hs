@@ -39,7 +39,7 @@ ioHandler = baseOpsHandler ioOps
 stateTHandler
   :: forall s m
    . (Monad m)
-  => BaseOpsHandler NoEff (StateEff s) (StateT s m)
+  => BaseOpsHandler NoEff (State s) (StateT s m)
 stateTHandler = baseOpsHandler stateTOps
 
 pushRef :: forall a . IORef [a] -> a
@@ -53,7 +53,7 @@ pushIo = Base.withOps ioOps pushRef
 
 pushState
   :: forall a . a
-  -> Eff (StateEff [a]) ()
+  -> Eff (State [a]) ()
 pushState x = do
   xs <- get
   put $ xs <> [x]
@@ -75,7 +75,7 @@ makeResource name value ref = BracketResource alloc release
 
 comp1
   :: IORef [String]
-  -> Eff (StateEff [String] ∪ IoEff ∪ BracketResourceEff) ()
+  -> Eff (State [String] ∪ IoEff ∪ BracketResourceEff) ()
 comp1 ref = do
   push "outer-comp: start"
   res <- withResource resource1 $ \arg -> do
@@ -83,7 +83,7 @@ comp1 ref = do
     return "inner-result"
   push $ "result from inner-comp: " <> res
  where
-  push :: String -> Eff (StateEff [String] ∪ IoEff) ()
+  push :: String -> Eff (State [String] ∪ IoEff) ()
   push x = do
     pushRef ref x
     pushState x
@@ -95,16 +95,16 @@ pipeline1
   :: forall comp
    . (forall m . (Monad m)
       => BaseComputation
-          (StateEff [String] ∪ IoEff ∪ BracketResourceEff)
+          (State [String] ∪ IoEff ∪ BracketResourceEff)
           comp
           m)
   -> HigherComputation NoEff comp (StateT [String] IO)
 pipeline1 comp11 =
   bindOpsHandler (toHigherComputation stateTHandler) $
     liftComputation stateTHigherLift $
-      bindOpsHandler @(StateEff [String]) bracketHandler $
+      bindOpsHandler @(State [String]) bracketHandler $
         toHigherComputation $
-          bindOpsHandler @(StateEff [String] ∪ BracketResourceEff) ioHandler $
+          bindOpsHandler @(State [String] ∪ BracketResourceEff) ioHandler $
             comp11
 
 comp2
@@ -141,7 +141,7 @@ instance Exception DummyError
 
 comp3
   :: IORef [String]
-  -> Eff (StateEff [String] ∪ IoEff ∪ BracketResourceEff) ()
+  -> Eff (State [String] ∪ IoEff ∪ BracketResourceEff) ()
 comp3 ref = do
   push "outer-comp: start"
   res1 <- withResource resource1 $ \arg1 -> do
@@ -153,7 +153,7 @@ comp3 ref = do
     return "inner-result-1"
   push $ "result from inner-comp: " <> res1
  where
-  push :: String -> Eff (StateEff [String] ∪ IoEff) ()
+  push :: String -> Eff (State [String] ∪ IoEff) ()
   push x = do
     pushRef ref x
     pushState x

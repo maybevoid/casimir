@@ -18,7 +18,7 @@ codensityComp s = comp2
  where
   handleOps
     :: forall x r
-     . CoOperation (StateEff Int) x
+     . CoOperation (State Int) x
     -> (x -> CoState Int m r)
     -> CoState Int m r
   handleOps GetOp cont1 = CoState $
@@ -37,7 +37,7 @@ codensityComp s = comp2
   handleReturn x = CoState $ \_ -> return x
   {-# INLINABLE handleReturn #-}
 
-  ops :: Operation (StateEff Int) (Codensity (CoState Int m))
+  ops :: Operation (State Int) (Codensity (CoState Int m))
   ops = codensityOps handleOps
 
   comp1 :: Codensity (CoState Int m) ()
