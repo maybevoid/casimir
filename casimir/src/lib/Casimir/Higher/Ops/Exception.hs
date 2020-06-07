@@ -6,7 +6,7 @@ import Data.Void
 
 import qualified Control.Exception as Ex
 
-import Data.QuasiParam.Tag
+import QuasiParam.Tag
 
 import Casimir.Base
   ( Eff

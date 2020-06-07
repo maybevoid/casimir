@@ -6,7 +6,7 @@ import Data.Kind
 import Control.Monad.Identity
 import Control.Exception (bracket)
 
-import Data.QuasiParam.Tag
+import QuasiParam.Tag
 
 import Casimir.Base
   ( ContraLift (..)

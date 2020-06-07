@@ -1,7 +1,7 @@
 module Casimir.Ops.Io.Base
 where
 
-import Data.QuasiParam.Tag
+import QuasiParam.Tag
 
 import Casimir.Base
 

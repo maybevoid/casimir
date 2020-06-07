@@ -2,7 +2,7 @@
 module Casimir.Ops.Env.Base
 where
 
-import Data.QuasiParam.Tag
+import QuasiParam.Tag
 
 import Casimir.Base
 import Casimir.Computation

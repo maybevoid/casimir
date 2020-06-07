@@ -1,4 +1,4 @@
-cabal-version: 2.4
+cabal-version: 3.0
 
 name:           casimir
 version:        0.1.0
@@ -20,12 +20,16 @@ source-repository head
   type: git
   location: https://github.com/maybevoid/casimir
 
-common deps
+common common
   ghc-options: -Wall -O2 -flate-specialise
   default-language: Haskell2010
+  build-depends: base
+
+common deps
+  import: common
+
   build-depends:
-      base
-    , quasi-params
+      quasi-params
     , async
     , constraints
     , free
@@ -63,134 +67,169 @@ common deps
     TypeFamilyDependencies
     GeneralizedNewtypeDeriving
 
-library
-  import: deps
-  exposed-modules:
-      Casimir
-      Casimir.Base
-      Casimir.Computation
-      Casimir.Free
-      Casimir.Freer
-      Casimir.Cast
-      Casimir.Higher
-
-      Casimir.MonadOps
-
-      Casimir.Ops
-      Casimir.Ops.Label
-      Casimir.Ops.Async
-      Casimir.Ops.Decide
-      Casimir.Ops.Exception
-      Casimir.Ops.Log
-
-      Casimir.Ops.State
-      Casimir.Ops.State.Base
-      Casimir.Ops.State.Free
-      Casimir.Ops.State.Freer
-      Casimir.Ops.State.Lift
-      Casimir.Ops.State.Higher
-      Casimir.Ops.State.Transform
-
-      Casimir.Ops.Io
-      Casimir.Ops.Io.Base
-      Casimir.Ops.Io.Free
-      Casimir.Ops.Io.Freer
-      Casimir.Ops.Io.Transform
-
-      Casimir.Ops.Env
-      Casimir.Ops.Env.Base
-      Casimir.Ops.Env.Free
-      Casimir.Ops.Env.Freer
-      Casimir.Ops.Env.Higher
-      Casimir.Ops.Env.Transform
-
-      Casimir.Transform
-
-      Casimir.Higher.Ops
-      Casimir.Higher.Ops.Cont
-      Casimir.Higher.Ops.Resource
-      Casimir.Higher.Ops.Exception
-      Casimir.Higher.Ops.UnderOps
-      Casimir.Higher.Ops.UpperOps
-
-      Casimir.Higher.Free
-      Casimir.Higher.Monad.Free
-      Casimir.Higher.Monad.Church
-      Casimir.Higher.ContraLift.State
-      Casimir.Higher.ContraLift.Either
-      Casimir.Higher.ContraLift.Identity
-
-  other-modules:
-      Casimir.Base.EffOps
-      Casimir.Base.Effect
-      Casimir.Base.EffFunctor
-      Casimir.Base.Implicit
-      Casimir.Base.Lift
-      Casimir.Base.ContraLift
-      Casimir.Base.NoOp
-      Casimir.Base.Union
-
-      Casimir.Computation.Cast
-      Casimir.Computation.Computation
-      Casimir.Computation.Handler
-      Casimir.Computation.Pipeline
-      Casimir.Computation.Value
-
-      Casimir.Free.CoOp
-      Casimir.Free.FreeOps
-      Casimir.Free.FreeEff
-      Casimir.Free.NoOp
-      Casimir.Free.Union
-      Casimir.Free.Pipeline
-      Casimir.Free.Handler
-      Casimir.Free.Monad.Free
-      Casimir.Free.Monad.Church
-
-      Casimir.Freer.CoOp
-      Casimir.Freer.FreeOps
-      Casimir.Freer.Monad.Church
-      Casimir.Freer.Monad.Freer
-      Casimir.Freer.FreeEff
-      Casimir.Freer.Handler
-      Casimir.Freer.NoOp
-      Casimir.Freer.Union
-      Casimir.Freer.Codensity
-
-      Casimir.Cast.Cast
-      Casimir.Cast.Entail
-
-      Casimir.Higher.Base
-      Casimir.Higher.CoOp
-      Casimir.Higher.NoOp
-      Casimir.Higher.Union
-      Casimir.Higher.EffFunctor
-      Casimir.Higher.ContraLift
-      Casimir.Higher.Computation
-
-      Casimir.Transform.Lift
+library quasi-params-casimir-sig
+  import: common
 
   hs-source-dirs:
-      src/lib
+    src/signature
+
+  exposed-modules:
+    QuasiParam.Casimir.Sig
+
+library quasi-params-casimir
+  import: common
+
+  build-depends:
+      quasi-params-multi
+    , quasi-params-casimir-sig
+
+  reexported-modules:
+    QuasiParam.Casimir
+
+  mixins:
+    quasi-params-multi
+      ( QuasiParam.MultiParam.Module
+        as QuasiParam.Casimir
+      ) requires
+        ( QuasiParam.MultiParam.Sig
+          as QuasiParam.Casimir.Sig
+        )
+
+library
+  import: deps
+
+  hs-source-dirs:
+    src/lib
+
+  build-depends:
+    quasi-params-casimir
+
+  exposed-modules:
+    Casimir
+    Casimir.Base
+    Casimir.Computation
+    Casimir.Free
+    Casimir.Freer
+    Casimir.Cast
+    Casimir.Higher
+
+    Casimir.MonadOps
+
+    Casimir.Ops
+    Casimir.Ops.Label
+    Casimir.Ops.Async
+    Casimir.Ops.Decide
+    Casimir.Ops.Exception
+    Casimir.Ops.Log
+
+    Casimir.Ops.State
+    Casimir.Ops.State.Base
+    Casimir.Ops.State.Free
+    Casimir.Ops.State.Freer
+    Casimir.Ops.State.Lift
+    Casimir.Ops.State.Higher
+    Casimir.Ops.State.Transform
+
+    Casimir.Ops.Io
+    Casimir.Ops.Io.Base
+    Casimir.Ops.Io.Free
+    Casimir.Ops.Io.Freer
+    Casimir.Ops.Io.Transform
+
+    Casimir.Ops.Env
+    Casimir.Ops.Env.Base
+    Casimir.Ops.Env.Free
+    Casimir.Ops.Env.Freer
+    Casimir.Ops.Env.Higher
+    Casimir.Ops.Env.Transform
+
+    Casimir.Transform
+
+    Casimir.Higher.Ops
+    Casimir.Higher.Ops.Cont
+    Casimir.Higher.Ops.Resource
+    Casimir.Higher.Ops.Exception
+    Casimir.Higher.Ops.UnderOps
+    Casimir.Higher.Ops.UpperOps
+
+    Casimir.Higher.Free
+    Casimir.Higher.Monad.Free
+    Casimir.Higher.Monad.Church
+    Casimir.Higher.ContraLift.State
+    Casimir.Higher.ContraLift.Either
+    Casimir.Higher.ContraLift.Identity
+
+  other-modules:
+    Casimir.Base.EffOps
+    Casimir.Base.Effect
+    Casimir.Base.EffFunctor
+    Casimir.Base.Implicit
+    Casimir.Base.Lift
+    Casimir.Base.ContraLift
+    Casimir.Base.NoOp
+    Casimir.Base.Union
+
+    Casimir.Computation.Cast
+    Casimir.Computation.Computation
+    Casimir.Computation.Handler
+    Casimir.Computation.Pipeline
+    Casimir.Computation.Value
+
+    Casimir.Free.CoOp
+    Casimir.Free.FreeOps
+    Casimir.Free.FreeEff
+    Casimir.Free.NoOp
+    Casimir.Free.Union
+    Casimir.Free.Pipeline
+    Casimir.Free.Handler
+    Casimir.Free.Monad.Free
+    Casimir.Free.Monad.Church
+
+    Casimir.Freer.CoOp
+    Casimir.Freer.FreeOps
+    Casimir.Freer.Monad.Church
+    Casimir.Freer.Monad.Freer
+    Casimir.Freer.FreeEff
+    Casimir.Freer.Handler
+    Casimir.Freer.NoOp
+    Casimir.Freer.Union
+    Casimir.Freer.Codensity
+
+    Casimir.Cast.Cast
+    Casimir.Cast.Entail
+
+    Casimir.Higher.Base
+    Casimir.Higher.CoOp
+    Casimir.Higher.NoOp
+    Casimir.Higher.Union
+    Casimir.Higher.EffFunctor
+    Casimir.Higher.ContraLift
+    Casimir.Higher.Computation
+
+    Casimir.Transform.Lift
 
 benchmark casimir-benchmark
   import: deps
   type: exitcode-stdio-1.0
   main-is: Main.hs
-  other-modules:
-      Benchmark.State
-      Benchmark.State.Base
-      Benchmark.State.CurriedStateTPipeline
-      Benchmark.State.FreePipeline
-      Benchmark.State.HandleFree
-      Benchmark.State.MTL
-      Benchmark.State.StateOpsToEnvOps
-      Benchmark.State.StateOpsToReaderT
-      Benchmark.State.StateTHandler
-      Benchmark.State.StateTToEnvOpsPipeline
-      Benchmark.State.WithStateT
-      Benchmark.State.Codensity
+
   hs-source-dirs:
-      src/benchmark
+    src/benchmark
+
+  other-modules:
+    Benchmark.State
+    Benchmark.State.Base
+    Benchmark.State.CurriedStateTPipeline
+    Benchmark.State.FreePipeline
+    Benchmark.State.HandleFree
+    Benchmark.State.MTL
+    Benchmark.State.StateOpsToEnvOps
+    Benchmark.State.StateOpsToReaderT
+    Benchmark.State.StateTHandler
+    Benchmark.State.StateTToEnvOpsPipeline
+    Benchmark.State.WithStateT
+    Benchmark.State.Codensity
+
   build-depends:
       casimir
     , criterion

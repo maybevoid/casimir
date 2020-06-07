@@ -8,7 +8,7 @@ module Casimir.Ops.State.Base
   )
 where
 
-import Data.QuasiParam.Tag
+import QuasiParam.Tag
 import Casimir.Base
 
 data StateTag

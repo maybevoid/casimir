@@ -6,7 +6,7 @@ where
 
 import Data.Kind (Type)
 import GHC.Types (Symbol)
-import Data.QuasiParam.Label
+import QuasiParam.Label
 
 import Casimir.Base
 
