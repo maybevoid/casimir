@@ -6,8 +6,12 @@ where
 import Data.Kind
 
 import Casimir.Base
-  (ContraLift (..), HigherLift (..))
-import Casimir.Base.Implicit
+  ( ContraLift (..)
+  , HigherLift (..)
+  , ImplicitOps (..)
+  , OpsConstraint
+  )
+
 import Casimir.Higher.Base
 import Casimir.Higher.CoOp
 import Casimir.Higher.ContraLift

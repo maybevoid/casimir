@@ -95,6 +95,27 @@ library quasi-params-casimir
           as QuasiParam.Casimir.Sig
         )
 
+library casimir-base
+  import: deps
+
+  hs-source-dirs:
+    src/base
+
+  build-depends:
+    quasi-params-casimir
+
+  exposed-modules:
+    Casimir.Base
+
+  other-modules:
+    Casimir.Base.Effect
+    Casimir.Base.EffFunctor
+    Casimir.Base.Implicit
+    Casimir.Base.Lift
+    Casimir.Base.ContraLift
+    Casimir.Base.NoOp
+    Casimir.Base.Union
+
 library
   import: deps
 
@@ -102,11 +123,13 @@ library
     src/lib
 
   build-depends:
-    quasi-params-casimir
+    casimir-base
+
+  reexported-modules:
+    Casimir.Base
 
   exposed-modules:
     Casimir
-    Casimir.Base
     Casimir.Computation
     Casimir.Free
     Casimir.Freer
@@ -160,14 +183,6 @@ library
     Casimir.Higher.ContraLift.Identity
 
   other-modules:
-    Casimir.Base.Effect
-    Casimir.Base.EffFunctor
-    Casimir.Base.Implicit
-    Casimir.Base.Lift
-    Casimir.Base.ContraLift
-    Casimir.Base.NoOp
-    Casimir.Base.Union
-
     Casimir.Computation.Cast
     Casimir.Computation.Computation
     Casimir.Computation.Handler

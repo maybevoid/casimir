@@ -12,6 +12,8 @@ import Casimir.Base
   ( ContraLift (..)
   , EffFunctor (..)
   , HigherLift (..)
+  , ImplicitOps (..)
+  , EffConstraint
   , Lift (..)
   , type (~>)
   )
@@ -20,7 +22,6 @@ import Casimir.Higher
 import Casimir.Higher.Free
 import Casimir.Higher.ContraLift.Identity
 
-import Casimir.Base.Implicit
 import qualified Casimir.Base as Base
 
 data ResourceEff (t :: Type -> Type)

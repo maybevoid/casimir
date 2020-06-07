@@ -5,9 +5,9 @@ where
 
 import Data.Kind
 
-import Casimir.Base.NoOp (NoEff, NoOp (..))
-import Casimir.Freer.NoOp
+import Casimir.Base (NoEff, NoOp (..))
 
+import Casimir.Freer.NoOp
 import Casimir.Higher.Base
 import Casimir.Higher.CoOp
 
