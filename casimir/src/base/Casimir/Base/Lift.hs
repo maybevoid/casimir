@@ -90,7 +90,7 @@ instance LiftMonoid HigherLift where
       (lift2 . lift1)
       (joinContraLift contraLift1 contraLift2)
 
-instance
+instance {-# INCOHERENT #-}
   (LiftMonoid lift)
   => LiftMonoid (MaybeLift lift) where
     idLift = NoLift
@@ -120,7 +120,7 @@ instance LiftFunctor IdLift HigherLift where
     contraLift cont =
       fmap runIdentity $ cont $ fmap Identity
 
-instance
+instance {-# INCOHERENT #-}
   LiftFunctor IdLift (MaybeLift lift) where
     transformLift
       :: forall m1 m2
@@ -128,7 +128,7 @@ instance
       -> MaybeLift lift m1 m2
     transformLift IdLift = NoLift
 
-instance {-# OVERLAPPABLE #-}
+instance {-# INCOHERENT #-}
   LiftFunctor lift (MaybeLift lift) where
     transformLift
       :: forall m1 m2

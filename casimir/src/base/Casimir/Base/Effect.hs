@@ -1,11 +1,26 @@
 
 module Casimir.Base.Effect
-  ( Effects (..)
+  ( Effect (..)
+  , Effects (..)
+  , Singleton
   )
 where
 
 import Data.Kind
 
-class Effects ops where
-  type family Operations ops
-    = (operation :: (Type -> Type) -> Type) | operation -> ops
+import QuasiParam.Casimir as Param
+
+data Singleton eff
+
+class Effects eff where
+  type family Operations eff
+    = (ops :: (Type -> Type) -> Type) | ops -> eff
+
+class Effect eff where
+  type family Operation eff
+    = (ops :: (Type -> Type) -> Type) | ops -> eff
+
+instance
+  ( Effect eff )
+  => Effects (Singleton eff) where
+    type Operations (Singleton eff) = Param.Cell (Operation eff)

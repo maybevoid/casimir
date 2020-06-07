@@ -115,6 +115,7 @@ library casimir-base
     Casimir.Base.ContraLift
     Casimir.Base.NoOp
     Casimir.Base.Union
+    Casimir.Base.List
     Casimir.Base.Cast
 
 library casimir-computation

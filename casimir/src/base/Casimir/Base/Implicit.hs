@@ -3,6 +3,7 @@
 
 module Casimir.Base.Implicit
   ( ImplicitOps
+  , OpsConstraint
   , EffConstraint
   , Eff
   )
@@ -11,6 +12,7 @@ where
 import QuasiParam.Casimir
 
 import Casimir.Base.Effect
+import Casimir.Base.List
 
 class
   ( Effects eff
@@ -30,6 +32,24 @@ class
   )
   => OpsConstraint eff m
 
-type EffConstraint eff m = (Monad m, OpsConstraint eff m)
+instance
+  ( ImplicitOps eff
+  , ParamConstraint (Operations eff) m
+  )
+  => OpsConstraint eff m
 
-type Eff eff a = forall m . (EffConstraint eff m) => m a
+class
+  ( Monad m
+  , EffectList effs
+  , OpsConstraint (ToEffects effs) m
+  )
+  => EffConstraint effs m
+
+instance
+  ( Monad m
+  , EffectList effs
+  , OpsConstraint (ToEffects effs) m
+  )
+  => EffConstraint effs m
+
+type Eff effs a = forall m . (EffConstraint effs m) => m a

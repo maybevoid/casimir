@@ -20,7 +20,7 @@ class EffFunctor
       -> comp m1
       -> comp m2
 
-instance {-# OVERLAPPABLE #-}
+instance {-# INCOHERENT #-}
   ( EffFunctor Lift comp
   )
   => EffFunctor HigherLift comp where

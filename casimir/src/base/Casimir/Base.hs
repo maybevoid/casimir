@@ -4,30 +4,42 @@
   Base module that defines the basic datatypes for implicit-mects.
 -}
 module Casimir.Base
-  ( Effects (..)
+  ( Effect (..)
+  , Effects (..)
   , EffFunctor (..)
+
   , ImplicitOps
   , Eff
+  , OpsConstraint
   , EffConstraint
+
   , NoEff
   , NoOp
+
   , Lift (..)
   , MaybeLift (..)
   , LiftMonoid (..)
   , LiftFunctor (..)
   , FreeLift (..)
   , HigherLift (..)
-  , type (∪)
-  , type (~>)
+
   , Union
   , UnionOps
+  , Cons
+  , EffectList (..)
   , ContraLift (..)
-  , EntailOps
   , CastOps
+  , EntailOps
+
+  , type (:+)
+  , type (∪)
+  , type (~>)
   , type (⊇)
+
   , (∪)
+  , pattern Cons
   , pattern NoOp
-  , pattern UnionOps
+  , pattern Union
   , castOps
   , leftOps
   , rightOps
@@ -43,4 +55,5 @@ import Casimir.Base.Union
 import Casimir.Base.NoOp
 import Casimir.Base.Lift
 import Casimir.Base.ContraLift
+import Casimir.Base.List
 import Casimir.Base.Cast
