@@ -13,7 +13,7 @@ data IoOps m = IoOps {
 }
 
 instance Effects IoEff where
-  type Operations IoEff = IoOps
+  type Operations' IoEff = IoOps
 
 instance EffFunctor Lift IoOps where
   effmap (Lift lift) ops = IoOps {

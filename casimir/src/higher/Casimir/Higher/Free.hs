@@ -59,7 +59,7 @@ class
       :: forall m
       . (Monad m)
       => (forall a . CoOperation ops m a -> m a)
-      -> Operations ops m m
+      -> Operations' ops m m
 
 class
   ( forall ops m
@@ -70,7 +70,7 @@ class
    where
     freeOps :: forall ops m
        . (FreeOps ops, Monad m)
-      => Operations ops (free ops m) (free ops m)
+      => Operations' ops (free ops m) (free ops m)
 
     liftFree :: forall ops m a
        . (FreeOps ops, Monad m)
@@ -115,10 +115,10 @@ instance
       => (forall a
            . HigherCoOp (Base.CoOperation ops) m a
           -> m a)
-      -> HigherOps (Base.Operations ops) m m
+      -> HigherOps (Base.Operations' ops) m m
     mkFreeOps liftCoOp1 = HigherOps ops
      where
-      ops :: Base.Operations ops m
+      ops :: Base.Operations' ops m
       ops = Base.mkFreeOps liftCoOp2
 
       liftCoOp2
@@ -153,7 +153,7 @@ withCoOpHandler handler comp1
   = handleFree @free handler $
       withOps ops1 comp1
  where
-  ops1 :: Base.Operations ops (free ops m)
+  ops1 :: Base.Operations' ops (free ops m)
   ops1 = LowerOps freeOps
 
 liftCoOpHandler

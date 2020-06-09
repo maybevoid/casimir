@@ -15,7 +15,7 @@ data EnvOps e m = EnvOps {
 }
 
 instance Effects (EnvEff e) where
-  type Operations (EnvEff e) = EnvOps e
+  type Operations' (EnvEff e) = EnvOps e
 
 instance EffFunctor Lift (EnvOps e) where
   effmap (Lift lift) envOps = EnvOps {

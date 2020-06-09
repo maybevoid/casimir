@@ -62,10 +62,10 @@ data ExceptionCoOp e f r where
     -> ExceptionCoOp e f r
 
 instance Base.Effects (ExceptionEff e) where
-  type Operations (ExceptionEff e) = ExceptionOps e
+  type Operations' (ExceptionEff e) = ExceptionOps e
 
 instance Higher.Effects (ExceptionEff e) where
-  type Operations (ExceptionEff e) = HigherExceptionOps e
+  type Operations' (ExceptionEff e) = HigherExceptionOps e
 
 instance EffCoOp (ExceptionEff e) where
   type CoOperation (ExceptionEff e) = ExceptionCoOp e

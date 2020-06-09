@@ -17,4 +17,4 @@ class
       :: forall m
         . (Monad m)
       => (forall a . CoOperation ops a -> m a)
-      -> Operations ops m
+      -> Operations' ops m

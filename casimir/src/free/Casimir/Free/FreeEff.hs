@@ -28,7 +28,7 @@ class
   where
     freeOps :: forall ops m
        . (FreeOps ops, Monad m)
-      => Operations ops (free ops m)
+      => Operations' ops (free ops m)
 
     liftFree :: forall ops m a
        . (FreeOps ops, Monad m)

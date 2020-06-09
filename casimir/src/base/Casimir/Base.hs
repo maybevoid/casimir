@@ -5,7 +5,7 @@
 -}
 module Casimir.Base
   ( Effect (..)
-  , Effects (..)
+  , NormalizedEffects (..)
   , EffFunctor (..)
 
   , ImplicitOps
@@ -26,7 +26,7 @@ module Casimir.Base
   , Union
   , UnionOps
   , Cons
-  , EffectList (..)
+  , Effects (..)
 
   , ContraLift (..)
 
@@ -35,7 +35,6 @@ module Casimir.Base
   , CastDict
   , EntailDict
 
-  , type (:+)
   , type (∪)
   , type (~>)
   , type (⊇)

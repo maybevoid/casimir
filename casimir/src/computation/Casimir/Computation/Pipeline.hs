@@ -27,14 +27,14 @@ newtype Pipeline lift ops1 handler comp1 comp2 m1 m2
   { runExactPipeline
       :: forall ops2
        . ( ImplicitOps ops2
-         , EffFunctor lift (Operations ops2)
+         , EffFunctor lift (Operations' ops2)
          )
       => Computation lift (handler ∪ ops2) comp1 m1
       -> Computation lift (ops1 ∪ ops2) comp2 m2
   }
 
 data TransformerHandler t handler m = TransformerHandler {
-  tCoOpHandler :: Operations handler (t m),
+  tCoOpHandler :: Operations' handler (t m),
   tLift :: Lift m (t m),
   tUnliftEff :: Lift (t m) m
 }
@@ -53,7 +53,7 @@ opsHandlerToPipeline
      , ImplicitOps ops1
      , ImplicitOps handler
      , LiftMonoid lift
-      , EffFunctor lift (Operations handler)
+      , EffFunctor lift (Operations' handler)
      )
   => OpsHandler lift ops1 handler m
   -> (forall comp
@@ -86,7 +86,7 @@ transformePipeline handler1 = Pipeline pipeline
   pipeline :: forall ops2 comp .
     ( ImplicitOps ops2
     , EffFunctor Lift comp
-    , EffFunctor Lift (Operations ops2)
+    , EffFunctor Lift (Operations' ops2)
     )
     => BaseComputation (handler ∪ ops2) comp m1
     -> BaseComputation (ops1 ∪ ops2) comp m1
@@ -95,7 +95,7 @@ transformePipeline handler1 = Pipeline pipeline
     comp2
       :: forall m2 . (Monad m2)
       => Lift m1 m2
-      -> Operations (ops1 ∪ ops2) m2
+      -> Operations' (ops1 ∪ ops2) m2
       -> comp m2
     comp2 lift12 (Union ops1 ops2) = effmap unliftT comp3
      where
@@ -121,7 +121,7 @@ castPipelineOps pipeline1 = Pipeline pipeline2
  where
   pipeline2 :: forall ops3
      . ( ImplicitOps ops3
-       , EffFunctor lift (Operations ops3)
+       , EffFunctor lift (Operations' ops3)
        )
     => Computation lift (handler ∪ ops3) comp1 m1
     -> Computation lift (ops2 ∪ ops3) comp2 m2
@@ -144,7 +144,7 @@ castPipelineOps pipeline1 = Pipeline pipeline2
 --      , ImplicitOps handler1
 --      , ImplicitOps handler2
 --      , LiftMonoid lift
---      , EffFunctor lift (Operations handler1)
+--      , EffFunctor lift (Operations' handler1)
 --      )
 --   => OpsCast handler1 handler2
 --   -> Pipeline lift ops1 handler1 comp1 comp2 m1 m2
@@ -154,7 +154,7 @@ castPipelineOps pipeline1 = Pipeline pipeline2
 --   pipeline2
 --     :: forall ops2
 --      . ( ImplicitOps ops2
---        , EffFunctor lift (Operations ops2)
+--        , EffFunctor lift (Operations' ops2)
 --        )
 --     => Computation lift (handler2 ∪ ops2) comp1 m1
 --     -> Computation lift (ops1 ∪ ops2) comp2 m2
@@ -177,9 +177,9 @@ castPipelineOps pipeline1 = Pipeline pipeline2
 --   , ImplicitOps ops2
 --   , ImplicitOps handler1
 --   , ImplicitOps handler2
---   , EffFunctor lift (Operations ops1)
---   , EffFunctor lift (Operations handler1)
---   , EffFunctor lift (Operations handler2)
+--   , EffFunctor lift (Operations' ops1)
+--   , EffFunctor lift (Operations' handler1)
+--   , EffFunctor lift (Operations' handler2)
 --   )
 --   => Pipeline lift (handler2 ∪ ops1) handler1 comp1 comp2 m1 m2
 --   -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3
@@ -188,8 +188,8 @@ castPipelineOps pipeline1 = Pipeline pipeline2
 --  where
 --   pipeline3 :: forall ops3
 --      . ( ImplicitOps ops3
---        , EffFunctor lift (Operations ops3)
---        , EffFunctor lift (UnionOps (Operations handler2) (Operations ops3))
+--        , EffFunctor lift (Operations' ops3)
+--        , EffFunctor lift (UnionOps (Operations' handler2) (Operations' ops3))
 --        )
 --     => Computation lift ((handler1 ∪ handler2) ∪ ops3) comp1 m1
 --     -> Computation lift ((ops1 ∪ ops2) ∪ ops3) comp3 m3
@@ -216,7 +216,7 @@ castPipelineOps pipeline1 = Pipeline pipeline2
 --   , ImplicitOps ops2
 --   , ImplicitOps ops3
 --   , ImplicitOps handler
---   , EffFunctor lift (Operations ops3)
+--   , EffFunctor lift (Operations' ops3)
 --   )
 --   => OpsCast ops3 ops1
 --   -> OpsCast (handler ∪ ops3) ops2
@@ -243,7 +243,7 @@ castPipelineOps pipeline1 = Pipeline pipeline2
 --   , ImplicitOps ops2
 --   , ImplicitOps ops3
 --   , ImplicitOps handler
---   , EffFunctor lift (Operations ops3)
+--   , EffFunctor lift (Operations' ops3)
 --   )
 --   => Pipeline lift ops1 handler comp1 comp2 m1 m2
 --   -> Computation lift ops2 comp1 m1
@@ -265,10 +265,10 @@ castPipelineOps pipeline1 = Pipeline pipeline2
 --      , ImplicitOps handler1
 --      , ImplicitOps handler2
 --      , ImplicitOps handler3
---      , EffFunctor lift (Operations ops3)
---      , EffFunctor lift (Operations handler1)
---      , EffFunctor lift (Operations handler2)
---      , EffFunctor lift (Operations (handler1 ∪ handler2))
+--      , EffFunctor lift (Operations' ops3)
+--      , EffFunctor lift (Operations' handler1)
+--      , EffFunctor lift (Operations' handler2)
+--      , EffFunctor lift (Operations' (handler1 ∪ handler2))
 --      )
 --   => OpsCast (handler2 ∪ ops3) ops1
 --   -> OpsCast ops3 ops2
@@ -302,10 +302,10 @@ castPipelineOps pipeline1 = Pipeline pipeline2
 --      , (handler2 ∪ ops3) ⊇ ops1
 --      , ops3 ⊇ ops2
 --      , (handler1 ∪ handler2) ⊇ handler3
---      , EffFunctor lift (Operations ops3)
---      , EffFunctor lift (Operations handler1)
---      , EffFunctor lift (Operations handler2)
---      , EffFunctor lift (Operations (handler1 ∪ handler2))
+--      , EffFunctor lift (Operations' ops3)
+--      , EffFunctor lift (Operations' handler1)
+--      , EffFunctor lift (Operations' handler2)
+--      , EffFunctor lift (Operations' (handler1 ∪ handler2))
 --      )
 --   => Pipeline lift ops1 handler1 comp1 comp2 m1 m2
 --   -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3

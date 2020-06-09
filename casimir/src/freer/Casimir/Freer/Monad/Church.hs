@@ -75,7 +75,7 @@ liftChurchOps ops = ChurchMonad cont
 churchOps
   :: forall ops m .
   (FreeOps ops, Monad m)
-  => Operations ops (ChurchMonad ops m)
+  => Operations' ops (ChurchMonad ops m)
 churchOps = mkFreeOps liftChurchOps
 {-# INLINE churchOps #-}
 

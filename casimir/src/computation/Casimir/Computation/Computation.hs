@@ -24,19 +24,19 @@ newtype Computation
            , Monad m2
            )
         => lift m1 m2
-        -> Operations eff m2
+        -> Operations' eff m2
         -> comp m2
     }
 
 type BaseComputation = Computation Lift
 
-type OpsHandler lift ops handler = Computation lift ops (Operations handler)
+type OpsHandler lift ops handler = Computation lift ops (Operations' handler)
 type BaseOpsHandler ops handler = OpsHandler Lift ops handler
 
 instance
   ( Effects ops
   , LiftMonoid lift
-  , EffFunctor lift (Operations ops)
+  , EffFunctor lift (Operations' ops)
   )
   => EffFunctor lift (Computation lift ops comp) where
     effmap = liftComputation
@@ -57,7 +57,7 @@ liftComputation lift12 comp1 = Computation comp2
       ( Monad m3
       )
       => lift m2 m3
-      -> Operations ops m3
+      -> Operations' ops m3
       -> comp m3
     comp2 lift23 = runComp comp1 $ joinLift lift12 lift23
 
@@ -81,6 +81,6 @@ strengthenComputation strengthenLift comp1 =
     ( Monad m2
     )
     => lift2 m m2
-    -> Operations ops m2
+    -> Operations' ops m2
     -> comp m2
   comp2 lift = runComp comp1 $ strengthenLift lift

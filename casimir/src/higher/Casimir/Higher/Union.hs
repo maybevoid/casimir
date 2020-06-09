@@ -33,8 +33,8 @@ instance
   , Effects ops2
   )
   => Effects (Union ops1 ops2) where
-    type Operations (Union ops1 ops2) =
-      HUnionOps (Operations ops1) (Operations ops2)
+    type Operations' (Union ops1 ops2) =
+      HUnionOps (Operations' ops1) (Operations' ops2)
 
 instance
   ( EffCoOp ops1

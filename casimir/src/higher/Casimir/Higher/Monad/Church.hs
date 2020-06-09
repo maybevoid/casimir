@@ -92,7 +92,7 @@ instance FreeEff ChurchMonad where
   freeOps
     :: forall ops m
      . (FreeOps ops, Monad m)
-    => Operations ops (ChurchMonad ops m) (ChurchMonad ops m)
+    => Operations' ops (ChurchMonad ops m) (ChurchMonad ops m)
   freeOps = mkFreeOps liftOps
    where
     liftOps

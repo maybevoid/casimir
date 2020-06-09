@@ -20,7 +20,7 @@ data ExceptionCoOp e r =
   RaiseOp e
 
 instance Effects (ExceptionEff e) where
-  type Operations (ExceptionEff e) = ExceptionOps e
+  type Operations' (ExceptionEff e) = ExceptionOps e
 
 instance EffCoOp (ExceptionEff e) where
   type CoOperation (ExceptionEff e) = ExceptionCoOp e
@@ -134,7 +134,7 @@ tryComp
      , Effects ops
      , ImplicitOps ops
      , EffConstraint ops m
-     , EffFunctor Lift (Operations ops)
+     , EffFunctor Lift (Operations' ops)
      )
   => Computation Lift ((ExceptionEff e) ∪ ops) (Return a) m
   -> (e -> m a)
@@ -155,7 +155,7 @@ bracketComp
      , Effects ops
      , ImplicitOps ops
      , EffConstraint ops m
-     , EffFunctor Lift (Operations ops)
+     , EffFunctor Lift (Operations' ops)
      )
   => BaseComputation ((ExceptionEff e) ∪ ops) (Return a) m          -- init
   -> (a -> BaseComputation ((ExceptionEff e) ∪ ops) (Return ()) m)  -- cleanup
@@ -167,7 +167,7 @@ bracketComp initComp cleanupComp betweenComp = Computation comp1
     :: forall m2
      . (Monad m2)
     => Lift m m2
-    -> Operations ((ExceptionEff e) ∪ ops) m2
+    -> Operations' ((ExceptionEff e) ∪ ops) m2
     -> Return b m2
   comp1 lift12 ops@(UnionOps eOps ops1) = Return comp5
    where

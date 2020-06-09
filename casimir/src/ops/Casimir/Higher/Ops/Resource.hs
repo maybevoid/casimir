@@ -56,10 +56,10 @@ data BracketResource a = BracketResource
   }
 
 instance Effects (ResourceEff t) where
-  type Operations (ResourceEff t) = HigherResourceOps t
+  type Operations' (ResourceEff t) = HigherResourceOps t
 
 instance Base.Effects (ResourceEff t) where
-  type Operations (ResourceEff t) = LowerOps (HigherResourceOps t)
+  type Operations' (ResourceEff t) = LowerOps (HigherResourceOps t)
 
 instance LowerEffect (ResourceEff t)
 

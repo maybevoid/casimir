@@ -115,7 +115,7 @@ execComp
   , ImplicitOps ops
   , OpsConstraint ops m
   , LiftMonoid lift
-  , EffFunctor lift (Operations ops)
+  , EffFunctor lift (Operations' ops)
   )
   => Computation lift ops (Return a) m
   -> m a

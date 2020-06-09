@@ -25,7 +25,7 @@ data AmbCoOp a r
   = SelectOp [a] (a -> r)
 
 instance Effects (AmbEff a) where
-  type Operations (AmbEff a) = AmbOps a
+  type Operations' (AmbEff a) = AmbOps a
 
 instance EffCoOp (AmbEff a) where
   type CoOperation (AmbEff a) = AmbCoOp a

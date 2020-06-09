@@ -11,7 +11,7 @@ import Casimir.Ops.State.Freer
 import Casimir.Higher
 
 instance Effects (State s) where
-  type Operations (State s) =
+  type Operations' (State s) =
     HigherOps (StateOps s)
 
 instance EffCoOp (State s) where

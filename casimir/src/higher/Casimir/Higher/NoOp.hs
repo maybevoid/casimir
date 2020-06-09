@@ -15,7 +15,7 @@ class NoConstraint (m1 :: Type -> Type) (m2 :: Type -> Type)
 instance NoConstraint m1 m2
 
 instance Effects NoEff where
-  type Operations NoEff = HigherOps NoOp
+  type Operations' NoEff = HigherOps NoOp
 
 instance EffCoOp NoEff where
   type CoOperation NoEff = HigherCoOp NoCoOp

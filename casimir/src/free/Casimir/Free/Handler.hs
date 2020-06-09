@@ -38,7 +38,7 @@ withCoOpHandlerAndOps
       , FreeHandler free
       , ImplicitOps handler
       , EffConstraint ops m
-      , EffFunctor Lift (Operations ops)
+      , EffFunctor Lift (Operations' ops)
       )
   => CoOpHandler handler a r m
   -> (( OpsConstraint handler (free handler m)

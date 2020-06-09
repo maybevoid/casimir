@@ -14,7 +14,6 @@ module Casimir.Base.Cast
 where
 
 import Casimir.Base.Effect
-import Casimir.Base.Union
 import Casimir.Base.Implicit
 import qualified QuasiParam.Casimir as Param
 

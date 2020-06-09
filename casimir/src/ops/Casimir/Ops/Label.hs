@@ -26,8 +26,8 @@ newtype LabeledOps
 instance
   (Effects ops)
   => Effects (LabeledEff k label ops) where
-  type Operations (LabeledEff k label ops) =
-    LabeledOps k label (Operations ops)
+  type Operations' (LabeledEff k label ops) =
+    LabeledOps k label (Operations' ops)
 
 instance
   (EffFunctor lift ops)
@@ -41,13 +41,13 @@ instance
   => ImplicitOps (LabeledEff k (label :: k) ops)
    where
     type OpsConstraint (LabeledEff k (label :: k) ops) m =
-      Param k label (LabeledOps k label (Operations ops) m)
+      Param k label (LabeledOps k label (Operations' ops) m)
 
     withOps
       :: forall m r
        . (Monad m)
-      => LabeledOps k label (Operations ops) m
-      -> (Param k label (LabeledOps k label (Operations ops) m)
+      => LabeledOps k label (Operations' ops) m
+      -> (Param k label (LabeledOps k label (Operations' ops) m)
           => r)
       -> r
     withOps = withParam @k @label
@@ -55,7 +55,7 @@ instance
     captureOps
       :: forall m
        . ( Monad m
-         , Param k label (LabeledOps k label (Operations ops) m)
+         , Param k label (LabeledOps k label (Operations' ops) m)
          )
-      => LabeledOps k label (Operations ops) m
+      => LabeledOps k label (Operations' ops) m
     captureOps = captureParam @k @label

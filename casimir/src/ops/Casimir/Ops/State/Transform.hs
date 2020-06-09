@@ -34,7 +34,7 @@ instance
 instance
   ( MonadOps t
   , LiftMonoid lift
-  , EffFunctor lift (Operations (SupportedOps t))
+  , EffFunctor lift (Operations' (SupportedOps t))
   , FreeLift (State s) lift (OpsMonad t) (StateT s (OpsMonad t))
   )
   => MonadOps (UseStateLift lift s t) where
@@ -94,12 +94,12 @@ monadStateOps = StateOps {
 withStateTAndOps
   :: forall ops s r m .
   ( Effects ops
-  , EffFunctor Lift (Operations ops)
+  , EffFunctor Lift (Operations' ops)
   , Monad m
   )
   => s
-  -> Base.Operations ops m
-  -> (Base.Operations (State s ∪ ops) (StateT s m)
+  -> Base.Operations' ops m
+  -> (Base.Operations' (State s ∪ ops) (StateT s m)
       -> StateT s m r)
   -> m r
 withStateTAndOps i ops1 comp1 = evalStateT comp2 i
@@ -107,7 +107,7 @@ withStateTAndOps i ops1 comp1 = evalStateT comp2 i
   comp2 :: StateT s m r
   comp2 = comp1 ops2
 
-  ops2 :: Base.Operations (State s ∪ ops) (StateT s m)
+  ops2 :: Base.Operations' (State s ∪ ops) (StateT s m)
   ops2 = stateTOps ∪ (effmap (Lift lift) ops1)
 
 {-# INLINE stateTPipeline #-}

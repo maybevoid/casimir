@@ -17,8 +17,6 @@ import qualified QuasiParam.Casimir as Param
 import Casimir.Base.Effect
 import Casimir.Base.EffFunctor
 
-data Union eff1 eff2
-
 type UnionOps = Param.Union
 
 pattern Union
@@ -39,13 +37,6 @@ type (∪) = Union
     -> ops2 m
     -> UnionOps ops1 ops2 m
 (∪) = Union
-
-instance
-  (Effects ops1, Effects ops2)
-  => Effects (Union ops1 ops2)
-  where
-    type Operations (Union ops1 ops2) =
-      UnionOps (Operations ops1) (Operations ops2)
 
 instance {-# INCOHERENT #-}
   ( EffFunctor lift ops1

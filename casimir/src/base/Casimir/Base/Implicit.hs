@@ -1,3 +1,4 @@
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
@@ -13,10 +14,10 @@ module Casimir.Base.Implicit
   )
 where
 
-import QuasiParam.Casimir
+import QuasiParam.Casimir (MultiParam (..))
+import qualified QuasiParam.Casimir as Param
 
 import Casimir.Base.Effect
-import Casimir.Base.List
 
 class
   ( Effects eff
@@ -44,15 +45,14 @@ instance
 
 class
   ( Monad m
-  , EffectList effs
-  , OpsConstraint (ToEffects effs) m
+  , OpsConstraint effs m
   )
   => EffConstraint effs m
 
 instance
   ( Monad m
-  , EffectList effs
-  , OpsConstraint (ToEffects effs) m
+  , Effects effs
+  , OpsConstraint effs m
   )
   => EffConstraint effs m
 
@@ -78,7 +78,7 @@ captureOp
      , OpsConstraint (Singleton eff) m
      )
   => Operation eff m
-captureOp = unCell captureOps
+captureOp = Param.unSingleton captureOps
 
 withOp
   :: forall eff m r
@@ -88,4 +88,4 @@ withOp
   => Operation eff m
   -> ((OpsConstraint (Singleton eff) m) => r)
   -> r
-withOp ops = withOps (Cell ops)
+withOp ops = withOps (Param.Singleton ops)

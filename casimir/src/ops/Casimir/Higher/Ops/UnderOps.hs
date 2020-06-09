@@ -28,5 +28,5 @@ instance
 instance
   (Effects ops)
   => Base.Effects (UnderEff ops m) where
-    type Operations (UnderEff ops m) =
-      UnderOps (Operations ops) m
+    type Operations' (UnderEff ops m) =
+      UnderOps (Operations' ops) m

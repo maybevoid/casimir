@@ -108,7 +108,7 @@ codensityOps
        . CoOperation ops x
       -> (x -> h r)
       -> h r)
-  -> Operations ops (Codensity h)
+  -> Operations' ops (Codensity h)
 codensityOps handler1 = mkFreeOps handler2
  where
   handler2 :: forall a . CoOperation ops a -> Codensity h a

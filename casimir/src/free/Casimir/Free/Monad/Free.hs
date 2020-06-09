@@ -45,7 +45,7 @@ liftFreeMonad = FreeMonad . lift
 freeMonadOps
   :: forall ops m .
   (FreeOps ops, Monad m)
-  => Operations ops (FreeMonad ops m)
+  => Operations' ops (FreeMonad ops m)
 freeMonadOps = mkFreeOps (FreeMonad . liftF)
 {-# INLINE freeMonadOps #-}
 
