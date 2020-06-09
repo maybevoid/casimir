@@ -5,7 +5,6 @@
 -}
 module Casimir.Base
   ( Effect (..)
-  , NormalizedEffects (..)
   , EffFunctor (..)
 
   , ImplicitOps
