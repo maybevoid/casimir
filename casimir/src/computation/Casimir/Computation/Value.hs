@@ -105,7 +105,7 @@ arrowComputation fn = genericComputation $ Arrow $
 runIdentityComp
   :: forall a lift
    . (LiftMonoid lift)
-  => Computation lift NoEff (Return a) Identity
+  => Computation lift '[] (Return a) Identity
   -> a
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
 
@@ -115,7 +115,7 @@ execComp
   , ImplicitOps ops
   , OpsConstraint ops m
   , LiftMonoid lift
-  , EffFunctor lift (Operations' ops)
+  , EffFunctor lift (Operations ops)
   )
   => Computation lift ops (Return a) m
   -> m a

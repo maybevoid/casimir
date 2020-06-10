@@ -15,7 +15,6 @@ module Casimir.Base.Implicit
 where
 
 import QuasiParam.Casimir (MultiParam (..))
-import qualified QuasiParam.Casimir as Param
 
 import Casimir.Base.Effect
 
@@ -75,17 +74,17 @@ withOps = withParam
 captureOp
   :: forall eff m
    . ( Effect eff
-     , OpsConstraint (Singleton eff) m
+     , OpsConstraint '[eff] m
      )
   => Operation eff m
-captureOp = Param.unSingleton captureOps
+captureOp = ops
+ where
+  ops :+ _ = captureOps @'[eff]
 
 withOp
   :: forall eff m r
-   . ( Effect eff
-     , ImplicitOps (Singleton eff)
-     )
+   . ( Effect eff, ImplicitOps '[eff] )
   => Operation eff m
-  -> ((OpsConstraint (Singleton eff) m) => r)
+  -> ((OpsConstraint '[eff] m) => r)
   -> r
-withOp ops = withOps (Param.Singleton ops)
+withOp ops = withOps $ ops :+ NoOp

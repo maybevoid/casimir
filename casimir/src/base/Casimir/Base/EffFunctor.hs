@@ -8,6 +8,7 @@ where
 import Data.Kind
 
 import Casimir.Base.Lift
+import Casimir.Base.Effect
 
 class EffFunctor
   (lift :: (Type -> Type) -> (Type -> Type) -> Type)
@@ -32,3 +33,15 @@ instance {-# INCOHERENT #-}
       -> comp m2
     effmap (HigherLift lift _) comp =
       effmap (Lift lift) comp
+
+instance EffFunctor Lift NoOp where
+  effmap _ _ = NoOp
+
+instance {-# INCOHERENT #-}
+  ( EffFunctor lift ops1
+  , EffFunctor lift ops2
+  )
+  => EffFunctor lift (UnionOps ops1 ops2)
+  where
+    effmap f (Union x y)
+      = Union (effmap f x) (effmap f y)

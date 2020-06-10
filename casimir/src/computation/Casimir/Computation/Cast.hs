@@ -32,7 +32,7 @@ castComputationWithDict dict comp1 = Computation comp2
            , Monad m2
            )
         => lift m m2
-        -> Operations' eff1 m2
+        -> Operations eff1 m2
         -> comp m2
   comp2 lift12 ops =
     runComp comp1 lift12 $ castOpsWithDict dict ops

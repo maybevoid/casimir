@@ -27,14 +27,14 @@ newtype Pipeline lift ops1 handler comp1 comp2 m1 m2
   { runExactPipeline
       :: forall ops2
        . ( ImplicitOps ops2
-         , EffFunctor lift (Operations' ops2)
+         , EffFunctor lift (Operations ops2)
          )
       => Computation lift (handler ∪ ops2) comp1 m1
       -> Computation lift (ops1 ∪ ops2) comp2 m2
   }
 
 data TransformerHandler t handler m = TransformerHandler {
-  tCoOpHandler :: Operations' handler (t m),
+  tCoOpHandler :: Operations handler (t m),
   tLift :: Lift m (t m),
   tUnliftEff :: Lift (t m) m
 }
@@ -53,7 +53,7 @@ opsHandlerToPipeline
      , ImplicitOps ops1
      , ImplicitOps handler
      , LiftMonoid lift
-      , EffFunctor lift (Operations' handler)
+      , EffFunctor lift (Operations handler)
      )
   => OpsHandler lift ops1 handler m
   -> (forall comp
@@ -86,7 +86,7 @@ transformePipeline handler1 = Pipeline pipeline
   pipeline :: forall ops2 comp .
     ( ImplicitOps ops2
     , EffFunctor Lift comp
-    , EffFunctor Lift (Operations' ops2)
+    , EffFunctor Lift (Operations ops2)
     )
     => BaseComputation (handler ∪ ops2) comp m1
     -> BaseComputation (ops1 ∪ ops2) comp m1
@@ -95,7 +95,7 @@ transformePipeline handler1 = Pipeline pipeline
     comp2
       :: forall m2 . (Monad m2)
       => Lift m1 m2
-      -> Operations' (ops1 ∪ ops2) m2
+      -> Operations (ops1 ∪ ops2) m2
       -> comp m2
     comp2 lift12 (Union ops1 ops2) = effmap unliftT comp3
      where
@@ -113,15 +113,15 @@ castPipelineOps
   , ImplicitOps ops1
   , ImplicitOps ops2
   , ImplicitOps handler
-  , ops2 ⊇ ops1
   )
-  => Pipeline lift ops1 handler comp1 comp2 m1 m2
+  => CastDict ops2 ops1
+  -> Pipeline lift ops1 handler comp1 comp2 m1 m2
   -> Pipeline lift ops2 handler comp1 comp2 m1 m2
-castPipelineOps pipeline1 = Pipeline pipeline2
+castPipelineOps cast pipeline1 = Pipeline pipeline2
  where
   pipeline2 :: forall ops3
      . ( ImplicitOps ops3
-       , EffFunctor lift (Operations' ops3)
+       , EffFunctor lift (Operations ops3)
        )
     => Computation lift (handler ∪ ops3) comp1 m1
     -> Computation lift (ops2 ∪ ops3) comp2 m2
@@ -134,183 +134,183 @@ castPipelineOps pipeline1 = Pipeline pipeline2
     comp3 = runExactPipeline pipeline1 comp1
 
     cast21 :: CastDict (ops2 ∪ ops3) (ops1 ∪ ops3)
-    cast21 = extendCast @ops2 @ops1 $ castDict @ops2 @ops1
+    cast21 = extendCast @ops2 @ops1 $ cast
 
--- castPipelineHandler
---   :: forall ops1 lift handler1 handler2 comp1 comp2 m1 m2
---    . ( Monad m1
---      , Monad m2
---      , ImplicitOps ops1
---      , ImplicitOps handler1
---      , ImplicitOps handler2
---      , LiftMonoid lift
---      , EffFunctor lift (Operations' handler1)
---      )
---   => OpsCast handler1 handler2
---   -> Pipeline lift ops1 handler1 comp1 comp2 m1 m2
---   -> Pipeline lift ops1 handler2 comp1 comp2 m1 m2
--- castPipelineHandler cast1 pipeline1 = Pipeline pipeline2
---  where
---   pipeline2
---     :: forall ops2
---      . ( ImplicitOps ops2
---        , EffFunctor lift (Operations' ops2)
---        )
---     => Computation lift (handler2 ∪ ops2) comp1 m1
---     -> Computation lift (ops1 ∪ ops2) comp2 m2
---   pipeline2 comp1 =
---     runExactPipeline pipeline1 comp2
---    where
---     comp2 :: Computation lift (handler1 ∪ ops2) comp1 m1
---     comp2 = castComputation cast2 comp1
+castPipelineHandler
+  :: forall ops1 lift handler1 handler2 comp1 comp2 m1 m2
+   . ( Monad m1
+     , Monad m2
+     , ImplicitOps ops1
+     , ImplicitOps handler1
+     , ImplicitOps handler2
+     , LiftMonoid lift
+     , EffFunctor lift (Operations handler1)
+     )
+  => CastDict handler1 handler2
+  -> Pipeline lift ops1 handler1 comp1 comp2 m1 m2
+  -> Pipeline lift ops1 handler2 comp1 comp2 m1 m2
+castPipelineHandler cast1 pipeline1 = Pipeline pipeline2
+ where
+  pipeline2
+    :: forall ops2
+     . ( ImplicitOps ops2
+       , EffFunctor lift (Operations ops2)
+       )
+    => Computation lift (handler2 ∪ ops2) comp1 m1
+    -> Computation lift (ops1 ∪ ops2) comp2 m2
+  pipeline2 comp1 =
+    runExactPipeline pipeline1 comp2
+   where
+    comp2 :: Computation lift (handler1 ∪ ops2) comp1 m1
+    comp2 = castComputationWithDict cast2 comp1
 
---     cast2 :: OpsCast (handler1 ∪ ops2) (handler2 ∪ ops2)
---     cast2 = extendCast @handler1 @handler2 cast1
+    cast2 :: CastDict (handler1 ∪ ops2) (handler2 ∪ ops2)
+    cast2 = extendCast @handler1 @handler2 cast1
 
--- composeExactPipelines
---   :: forall ops1 ops2 lift handler1 handler2 comp1 comp2 comp3 m1 m2 m3 .
---   ( Monad m1
---   , Monad m2
---   , Monad m3
---   , LiftMonoid lift
---   , ImplicitOps ops1
---   , ImplicitOps ops2
---   , ImplicitOps handler1
---   , ImplicitOps handler2
---   , EffFunctor lift (Operations' ops1)
---   , EffFunctor lift (Operations' handler1)
---   , EffFunctor lift (Operations' handler2)
---   )
---   => Pipeline lift (handler2 ∪ ops1) handler1 comp1 comp2 m1 m2
---   -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3
---   -> Pipeline lift (ops1 ∪ ops2) (handler1 ∪ handler2) comp1 comp3 m1 m3
--- composeExactPipelines pipeline1 pipeline2 = Pipeline pipeline3
---  where
---   pipeline3 :: forall ops3
---      . ( ImplicitOps ops3
---        , EffFunctor lift (Operations' ops3)
---        , EffFunctor lift (UnionOps (Operations' handler2) (Operations' ops3))
---        )
---     => Computation lift ((handler1 ∪ handler2) ∪ ops3) comp1 m1
---     -> Computation lift ((ops1 ∪ ops2) ∪ ops3) comp3 m3
---   pipeline3 comp1 =
---     castComputation cast comp4
---      where
---       comp1' :: Computation lift (handler1 ∪ handler2 ∪ ops3) comp1 m1
---       comp1' = castComputation cast comp1
+composeExactPipelines
+  :: forall ops1 ops2 lift handler1 handler2 comp1 comp2 comp3 m1 m2 m3 .
+  ( Monad m1
+  , Monad m2
+  , Monad m3
+  , LiftMonoid lift
+  , ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps handler1
+  , ImplicitOps handler2
+  , EffFunctor lift (Operations ops1)
+  , EffFunctor lift (Operations handler1)
+  , EffFunctor lift (Operations handler2)
+  )
+  => Pipeline lift (handler2 ∪ ops1) handler1 comp1 comp2 m1 m2
+  -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3
+  -> Pipeline lift (ops1 ∪ ops2) (handler1 ∪ handler2) comp1 comp3 m1 m3
+composeExactPipelines pipeline1 pipeline2 = Pipeline pipeline3
+ where
+  pipeline3 :: forall ops3
+     . ( ImplicitOps ops3
+       , EffFunctor lift (Operations ops3)
+       , EffFunctor lift (UnionOps (Operations handler2) (Operations ops3))
+       )
+    => Computation lift ((handler1 ∪ handler2) ∪ ops3) comp1 m1
+    -> Computation lift ((ops1 ∪ ops2) ∪ ops3) comp3 m3
+  pipeline3 comp1 =
+    castComputation  comp4
+     where
+      comp1' :: Computation lift (handler1 ∪ handler2 ∪ ops3) comp1 m1
+      comp1' = castComputation comp1
 
---       comp3 :: Computation lift ((handler2 ∪ ops1) ∪ (handler2 ∪ ops3)) comp2 m2
---       comp3 = runExactPipeline pipeline1 comp1'
+      comp3 :: Computation lift ((handler2 ∪ ops1) ∪ (handler2 ∪ ops3)) comp2 m2
+      comp3 = runExactPipeline pipeline1 comp1'
 
---       comp3' :: Computation lift (handler2 ∪ ops1 ∪ ops3) comp2 m2
---       comp3' = castComputation cast comp3
+      comp3' :: Computation lift (handler2 ∪ ops1 ∪ ops3) comp2 m2
+      comp3' = castComputation comp3
 
---       comp4 :: Computation lift (ops2 ∪ ops1 ∪ ops3) comp3 m3
---       comp4 = runExactPipeline pipeline2 comp3'
+      comp4 :: Computation lift (ops2 ∪ ops1 ∪ ops3) comp3 m3
+      comp4 = runExactPipeline pipeline2 comp3'
 
--- runPipelineWithCast
---   :: forall ops3 ops1 ops2 lift handler comp1 comp2 m1 m2 .
---   ( Monad m1
---   , Monad m2
---   , ImplicitOps ops1
---   , ImplicitOps ops2
---   , ImplicitOps ops3
---   , ImplicitOps handler
---   , EffFunctor lift (Operations' ops3)
---   )
---   => OpsCast ops3 ops1
---   -> OpsCast (handler ∪ ops3) ops2
---   -> Pipeline lift ops1 handler comp1 comp2 m1 m2
---   -> Computation lift ops2 comp1 m1
---   -> Computation lift ops3 comp2 m2
--- runPipelineWithCast cast1 cast2 pipeline1 comp1 =
---   castComputation cast $
---     runExactPipeline pipeline2 comp2
---  where
---    pipeline2 :: Pipeline lift ops3 handler comp1 comp2 m1 m2
---    pipeline2 = castPipelineOps cast1 pipeline1
+runPipelineWithCast
+  :: forall ops3 ops1 ops2 lift handler comp1 comp2 m1 m2 .
+  ( Monad m1
+  , Monad m2
+  , ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps ops3
+  , ImplicitOps handler
+  , EffFunctor lift (Operations ops3)
+  )
+  => CastDict ops3 ops1
+  -> CastDict (handler ∪ ops3) ops2
+  -> Pipeline lift ops1 handler comp1 comp2 m1 m2
+  -> Computation lift ops2 comp1 m1
+  -> Computation lift ops3 comp2 m2
+runPipelineWithCast cast1 cast2 pipeline1 comp1 =
+  castComputation $
+    runExactPipeline pipeline2 comp2
+ where
+   pipeline2 :: Pipeline lift ops3 handler comp1 comp2 m1 m2
+   pipeline2 = castPipelineOps cast1 pipeline1
 
---    comp2 :: Computation lift (handler ∪ ops3) comp1 m1
---    comp2 = castComputation cast2 comp1
+   comp2 :: Computation lift (handler ∪ ops3) comp1 m1
+   comp2 = castComputationWithDict cast2 comp1
 
--- runPipeline
---   :: forall ops3 ops1 ops2 lift handler comp1 comp2 m1 m2 .
---   ( Monad m1
---   , Monad m2
---   , ops3 ⊇ ops1
---   , (handler ∪ ops3) ⊇ ops2
---   , ImplicitOps ops1
---   , ImplicitOps ops2
---   , ImplicitOps ops3
---   , ImplicitOps handler
---   , EffFunctor lift (Operations' ops3)
---   )
---   => Pipeline lift ops1 handler comp1 comp2 m1 m2
---   -> Computation lift ops2 comp1 m1
---   -> Computation lift ops3 comp2 m2
--- runPipeline = runPipelineWithCast
---   (entailOps @ops3 @ops1)
---   (entailOps @(handler ∪ ops3) @ops2)
+runPipeline
+  :: forall ops3 ops1 ops2 lift handler comp1 comp2 m1 m2 .
+  ( Monad m1
+  , Monad m2
+  , ops3 ⊇ ops1
+  , (handler ∪ ops3) ⊇ ops2
+  , ImplicitOps ops1
+  , ImplicitOps ops2
+  , ImplicitOps ops3
+  , ImplicitOps handler
+  , EffFunctor lift (Operations ops3)
+  )
+  => Pipeline lift ops1 handler comp1 comp2 m1 m2
+  -> Computation lift ops2 comp1 m1
+  -> Computation lift ops3 comp2 m2
+runPipeline = runPipelineWithCast
+  (castDict @ops3 @ops1)
+  (castDict @(handler ∪ ops3) @ops2)
 
--- composePipelinesWithCast
---   :: forall ops1 ops2 ops3 lift handler1 handler2 handler3
---       comp1 comp2 comp3 m1 m2 m3
---    . ( Monad m1
---      , Monad m2
---      , Monad m3
---      , LiftMonoid lift
---      , ImplicitOps ops1
---      , ImplicitOps ops2
---      , ImplicitOps ops3
---      , ImplicitOps handler1
---      , ImplicitOps handler2
---      , ImplicitOps handler3
---      , EffFunctor lift (Operations' ops3)
---      , EffFunctor lift (Operations' handler1)
---      , EffFunctor lift (Operations' handler2)
---      , EffFunctor lift (Operations' (handler1 ∪ handler2))
---      )
---   => OpsCast (handler2 ∪ ops3) ops1
---   -> OpsCast ops3 ops2
---   -> OpsCast (handler1 ∪ handler2) handler3
---   -> Pipeline lift ops1 handler1 comp1 comp2 m1 m2
---   -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3
---   -> Pipeline lift ops3 handler3 comp1 comp3 m1 m3
--- composePipelinesWithCast cast1 cast2 cast3 pipeline1 pipeline2
---   = castPipelineHandler cast3 $
---     castPipelineOps cast $
---     composeExactPipelines pipeline1' pipeline2'
---   where
---     pipeline1' :: Pipeline lift (handler2 ∪ ops3) handler1 comp1 comp2 m1 m2
---     pipeline1' = castPipelineOps cast1 pipeline1
+composePipelinesWithCast
+  :: forall ops1 ops2 ops3 lift handler1 handler2 handler3
+      comp1 comp2 comp3 m1 m2 m3
+   . ( Monad m1
+     , Monad m2
+     , Monad m3
+     , LiftMonoid lift
+     , ImplicitOps ops1
+     , ImplicitOps ops2
+     , ImplicitOps ops3
+     , ImplicitOps handler1
+     , ImplicitOps handler2
+     , ImplicitOps handler3
+     , EffFunctor lift (Operations ops3)
+     , EffFunctor lift (Operations handler1)
+     , EffFunctor lift (Operations handler2)
+     , EffFunctor lift (Operations (handler1 ∪ handler2))
+     )
+  => CastDict (handler2 ∪ ops3) ops1
+  -> CastDict ops3 ops2
+  -> CastDict (handler1 ∪ handler2) handler3
+  -> Pipeline lift ops1 handler1 comp1 comp2 m1 m2
+  -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3
+  -> Pipeline lift ops3 handler3 comp1 comp3 m1 m3
+composePipelinesWithCast cast1 cast2 cast3 pipeline1 pipeline2
+  = castPipelineHandler cast3 $
+    castPipelineOps (castDict @ops3) $
+    composeExactPipelines pipeline1' pipeline2'
+  where
+    pipeline1' :: Pipeline lift (handler2 ∪ ops3) handler1 comp1 comp2 m1 m2
+    pipeline1' = castPipelineOps cast1 pipeline1
 
---     pipeline2' :: Pipeline lift ops3 handler2 comp2 comp3 m2 m3
---     pipeline2' = castPipelineOps cast2 pipeline2
+    pipeline2' :: Pipeline lift ops3 handler2 comp2 comp3 m2 m3
+    pipeline2' = castPipelineOps cast2 pipeline2
 
--- composePipelines
---   :: forall ops1 ops2 ops3 lift handler1 handler2 handler3 comp1 comp2 comp3 m1 m2 m3
---    . ( Monad m1
---      , Monad m2
---      , Monad m3
---      , LiftMonoid lift
---      , ImplicitOps ops1
---      , ImplicitOps ops2
---      , ImplicitOps ops3
---      , ImplicitOps handler1
---      , ImplicitOps handler2
---      , ImplicitOps handler3
---      , (handler2 ∪ ops3) ⊇ ops1
---      , ops3 ⊇ ops2
---      , (handler1 ∪ handler2) ⊇ handler3
---      , EffFunctor lift (Operations' ops3)
---      , EffFunctor lift (Operations' handler1)
---      , EffFunctor lift (Operations' handler2)
---      , EffFunctor lift (Operations' (handler1 ∪ handler2))
---      )
---   => Pipeline lift ops1 handler1 comp1 comp2 m1 m2
---   -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3
---   -> Pipeline lift ops3 handler3 comp1 comp3 m1 m3
--- composePipelines = composePipelinesWithCast
---   (entailOps @(handler2 ∪ ops3) @ops1)
---   (entailOps @ops3 @ops2)
---   (entailOps @(handler1 ∪ handler2) @handler3)
+composePipelines
+  :: forall ops1 ops2 ops3 lift handler1 handler2 handler3 comp1 comp2 comp3 m1 m2 m3
+   . ( Monad m1
+     , Monad m2
+     , Monad m3
+     , LiftMonoid lift
+     , ImplicitOps ops1
+     , ImplicitOps ops2
+     , ImplicitOps ops3
+     , ImplicitOps handler1
+     , ImplicitOps handler2
+     , ImplicitOps handler3
+     , (handler2 ∪ ops3) ⊇ ops1
+     , ops3 ⊇ ops2
+     , (handler1 ∪ handler2) ⊇ handler3
+     , EffFunctor lift (Operations ops3)
+     , EffFunctor lift (Operations handler1)
+     , EffFunctor lift (Operations handler2)
+     , EffFunctor lift (Operations (handler1 ∪ handler2))
+     )
+  => Pipeline lift ops1 handler1 comp1 comp2 m1 m2
+  -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3
+  -> Pipeline lift ops3 handler3 comp1 comp3 m1 m3
+composePipelines = composePipelinesWithCast
+  (castDict @(handler2 ∪ ops3) @ops1)
+  (castDict @ops3 @ops2)
+  (castDict @(handler1 ∪ handler2) @handler3)

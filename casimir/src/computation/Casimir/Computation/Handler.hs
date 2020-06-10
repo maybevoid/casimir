@@ -1,3 +1,4 @@
+{-# LANGUAGE PolyKinds #-}
 
 module Casimir.Computation.Handler
   ( bindOps
@@ -18,10 +19,10 @@ bindOps
      , ImplicitOps ops1
      , ImplicitOps ops2
      , LiftMonoid lift
-     , EffFunctor lift (Operations' ops1)
-     , EffFunctor lift (Operations' ops2)
+     , EffFunctor lift (Operations ops1)
+     , EffFunctor lift (Operations ops2)
      )
-  => Operations' ops1 m
+  => Operations ops1 m
   -> Computation lift (ops1 ∪ ops2) comp m
   -> Computation lift ops2 comp m
 bindOps ops1 comp = Computation $
@@ -35,7 +36,7 @@ bindExactOpsHandler
      , ImplicitOps handler
      , Monad m1
      , LiftMonoid lift
-     , EffFunctor lift (Operations' handler)
+     , EffFunctor lift (Operations handler)
      )
   => OpsHandler lift ops handler m1
   -> Computation lift (handler ∪ ops) comp m1
@@ -47,12 +48,12 @@ bindExactOpsHandler handler1 comp1
       :: forall m2
        . (Monad m2)
       => lift m1 m2
-      -> Operations' ops m2
+      -> Operations ops m2
       -> comp m2
     comp2 lift12 ops
       = runComp comp1 lift12 (handler2 ∪ ops)
        where
-        handler2 :: Operations' handler m2
+        handler2 :: Operations handler m2
         handler2 = runComp handler1 lift12 ops
     {-# INLINE comp2 #-}
 {-# INLINE bindExactOpsHandler #-}
@@ -74,15 +75,15 @@ composeExactOpsHandlers handler1 handler2
       :: forall m2
        . (Monad m2)
       => lift m1 m2
-      -> Operations' ops m2
-      -> Operations' (handler1 ∪ handler2) m2
+      -> Operations ops m2
+      -> Operations (handler1 ∪ handler2) m2
     comp1 lift12 ops
       = handler3 ∪ handler4
        where
-        handler3 :: Operations' handler1 m2
+        handler3 :: Operations handler1 m2
         handler3 = runComp handler1 lift12 ops
 
-        handler4 :: Operations' handler2 m2
+        handler4 :: Operations handler2 m2
         handler4 = runComp handler2 lift12 (handler3 ∪ ops)
 
 composeOpsHandlers
@@ -114,7 +115,7 @@ bindOpsHandler
      , ImplicitOps handler
      , Monad m
      , LiftMonoid lift
-     , EffFunctor lift (Operations' handler)
+     , EffFunctor lift (Operations handler)
      )
   => OpsHandler lift ops1 handler m
   -> Computation lift ops2 r m

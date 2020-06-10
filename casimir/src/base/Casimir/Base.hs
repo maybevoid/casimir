@@ -5,15 +5,26 @@
 -}
 module Casimir.Base
   ( Effect (..)
+  , Effects (..)
+  , Union
+  , Cons
+  , NoOp
+  , ConsOps
+  , UnionOps
+  , type (∪)
+  , (∪)
+  , pattern (:∪)
+  , pattern (:+)
+  , pattern NoOp
+  , pattern Cons
+  , pattern Union
+
   , EffFunctor (..)
 
   , ImplicitOps
   , Eff
   , OpsConstraint
   , EffConstraint
-
-  , NoEff
-  , NoOp
 
   , Lift (..)
   , MaybeLift (..)
@@ -22,11 +33,6 @@ module Casimir.Base
   , FreeLift (..)
   , HigherLift (..)
 
-  , Union
-  , UnionOps
-  , Cons
-  , Effects (..)
-
   , ContraLift (..)
 
   , CastOps
@@ -34,21 +40,13 @@ module Casimir.Base
   , CastDict
   , EntailDict
 
-  , type (∪)
   , type (~>)
   , type (⊇)
-
-  , (∪)
-  , pattern Cons
-  , pattern NoOp
-  , pattern Union
 
   , withOp
   , withOps
   , captureOp
   , captureOps
-  , leftOps
-  , rightOps
   , joinContraLift
   , identityContraLift
 
@@ -65,9 +63,6 @@ where
 import Casimir.Base.Effect
 import Casimir.Base.EffFunctor
 import Casimir.Base.Implicit
-import Casimir.Base.Union
-import Casimir.Base.NoOp
 import Casimir.Base.Lift
 import Casimir.Base.ContraLift
-import Casimir.Base.List
 import Casimir.Base.Cast
