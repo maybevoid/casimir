@@ -7,9 +7,7 @@ import Control.Monad (ap)
 import Data.Kind
 
 import Casimir.Base (ContraLift (..))
-import Casimir.Higher.Base
 import Casimir.Higher.Free
-import Casimir.Higher.CoOp
 
 newtype ChurchMonad
   ops
@@ -92,7 +90,7 @@ instance FreeEff ChurchMonad where
   freeOps
     :: forall ops m
      . (FreeOps ops, Monad m)
-    => Operations ops (ChurchMonad ops m) (ChurchMonad ops m)
+    => ops (ChurchMonad ops m) (ChurchMonad ops m)
   freeOps = mkFreeOps liftOps
    where
     liftOps

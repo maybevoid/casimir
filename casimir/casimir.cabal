@@ -203,8 +203,6 @@ library casimir-higher
 
   other-modules:
     Casimir.Higher.Base
-    Casimir.Higher.CoOp
-    Casimir.Higher.NoOp
     Casimir.Higher.Union
     Casimir.Higher.EffFunctor
     Casimir.Higher.Computation

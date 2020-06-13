@@ -6,7 +6,6 @@ import Control.Monad (ap)
 
 import Casimir.Base
 import Casimir.Higher.Free
-import Casimir.Higher.CoOp
 
 data FreeF
   ops

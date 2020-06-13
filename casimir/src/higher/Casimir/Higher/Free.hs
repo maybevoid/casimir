@@ -6,29 +6,51 @@ where
 import Data.Kind
 
 import Casimir.Base
-  ( ContraLift (..)
+  ( type (~>)
+  , ContraLift (..)
   , HigherLift (..)
-  , ImplicitOps (..)
+  , ImplicitOps
   , OpsConstraint
+  , withOps
   )
 
 import Casimir.Higher.Base
-import Casimir.Higher.CoOp
 import Casimir.Higher.ContraLift
 
 import qualified Casimir.Base as Base
 import qualified Casimir.Freer as Base
 
-newtype Nest f g a = Nest {
-  unNest :: f (g a)
-}
+newtype Nest f g a = Nest
+  { unNest :: f (g a) }
 
 type f ∘ g = Nest f g
 
+data HigherCoOp coop (f :: Type -> Type) a =
+  HigherOp (coop a)
+
+class CoOpFunctor coop where
+  liftCoOp
+    :: forall f1 f2 a
+     . (Functor f1, Functor f2)
+    => f1 ~> f2
+    -> coop f1 a
+    -> coop f2 a
+
+instance
+  (Functor coop)
+  => Functor (HigherCoOp coop f)
+  where
+    fmap f (HigherOp ops) = HigherOp $ fmap f ops
+
+instance
+  (Functor coop)
+  => CoOpFunctor (HigherCoOp coop)
+  where
+    liftCoOp _ (HigherOp ops) = (HigherOp ops)
+
 instance
   (Functor f, Functor g)
-  => Functor (Nest f g)
-   where
+  => Functor (Nest f g) where
     fmap f (Nest mx) = Nest $ fmap (fmap f) mx
 
 data CoOpHandler
@@ -36,33 +58,32 @@ data CoOpHandler
   (f :: Type -> Type)
   (m :: Type -> Type)
   = CoOpHandler
-    { returnHandler
-        :: forall a . a -> m (f a)
+      { returnHandler
+          :: forall a . a -> m (f a)
 
-    , operationHandler
-        :: forall a r
-        . CoOperation ops (m ∘ f) a
-        -> (a -> m (f r))
-        -> m (f r)
+      , operationHandler
+          :: forall a r
+          . CoOperation ops (m ∘ f) a
+          -> (a -> m (f r))
+          -> m (f r)
 
-    , contraLiftHandler
-        :: ContraFree m f
-    }
+      , contraLiftHandler
+          :: ContraFree m f
+      }
 
 class
   ( CoOpFunctor (CoOperation ops) )
-  => FreeOps ops
-   where
-    type family CoOperation ops
-      :: (Type -> Type)
-      -> Type
-      -> Type
+  => FreeOps ops where
+  type family CoOperation ops
+    :: (Type -> Type)
+    -> Type
+    -> Type
 
-    mkFreeOps
-      :: forall m
-      . (Monad m)
-      => (forall a . CoOperation ops m a -> m a)
-      -> ops m m
+  mkFreeOps
+    :: forall m
+    . (Monad m)
+    => (forall a . CoOperation ops m a -> m a)
+    -> ops m m
 
 class
   ( forall ops m
@@ -73,7 +94,7 @@ class
    where
     freeOps :: forall ops m
        . (FreeOps ops, Monad m)
-      => Operations ops (free ops m) (free ops m)
+      => ops (free ops m) (free ops m)
 
     liftFree :: forall ops m a
        . (FreeOps ops, Monad m)
@@ -86,7 +107,6 @@ class
          , FreeOps ops
          )
       => ContraLift m (free ops m)
-
 
 class
   (FreeEff free)
@@ -104,24 +124,23 @@ class
 
 instance
   {-# OVERLAPPABLE #-}
-  ( HigherEffect ops
-  , HigherEffCoOp ops
-  , EffCoOp ops
+  ( Base.FreeOps ops
   , Functor (Base.CoOperation ops)
-  , Base.FreeOps ops
   )
-  => FreeOps ops
-  where
+  => FreeOps (HigherOps ops) where
+    type CoOperation (HigherOps ops) =
+      HigherCoOp (Base.CoOperation ops)
+
     mkFreeOps
       :: forall m
        . (Monad m)
       => (forall a
            . HigherCoOp (Base.CoOperation ops) m a
           -> m a)
-      -> HigherOps (Base.Operations ops) m m
+      -> HigherOps ops m m
     mkFreeOps liftCoOp1 = HigherOps ops
      where
-      ops :: Base.Operations ops m
+      ops :: ops m
       ops = Base.mkFreeOps liftCoOp2
 
       liftCoOp2
@@ -138,39 +157,43 @@ freeHigherLift = HigherLift liftFree freeContraLift
 
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler
-  :: forall free ops m f r
+  :: forall free eff ops m f r
    . ( Functor f
      , Monad m
-     , FreeEff free
-     , FreeHandler free
-     , Effects ops
+     , Effects eff
+     , Base.Effects eff
      , FreeOps ops
-     , ImplicitOps ops
-     , LowerEffect ops
+     , FreeEff free
+     , ImplicitOps eff
+     , FreeHandler free
+     , Operations eff ~ ops
+     , Base.Operations eff ~ LowerOps ops
      )
   => CoOpHandler ops f m
-  -> ((OpsConstraint ops (free ops m))
+  -> ((OpsConstraint eff (free ops m))
       => free ops m r)
   -> m (f r)
 withCoOpHandler handler comp1
   = handleFree @free handler $
       withOps ops1 comp1
  where
-  ops1 :: Base.Operations ops (free ops m)
+  ops1 :: LowerOps ops (free ops m)
   ops1 = LowerOps freeOps
 
 liftCoOpHandler
-  :: forall ops m f
+  :: forall eff ops m f
    . ( Monad m
-     , HigherEffect ops
-     , HigherEffCoOp ops
+     , Effects eff
+     , Base.Effects eff
+     , Base.Operations eff ~ ops
+     , Operations eff ~ HigherOps ops
      )
   => (forall a . Base.CoOpHandler ops a (f a) m)
   -> ContraFree m f
-  -> CoOpHandler ops f m
+  -> CoOpHandler (HigherOps ops) f m
 liftCoOpHandler handler1 contraLift =
   CoOpHandler handleReturn handleOps contraLift
-  where
+   where
     handleReturn :: forall a . a -> m (f a)
     handleReturn = Base.returnHandler handler1
 
@@ -183,12 +206,14 @@ liftCoOpHandler handler1 contraLift =
       Base.coOpHandler handler1 coop cont
 
 lowerCoOpHandler
-  :: forall ops m f
+  :: forall eff ops m f
    . ( Monad m
-     , HigherEffect ops
-     , HigherEffCoOp ops
+     , Effects eff
+     , Base.Effects eff
+     , Base.Operations eff ~ ops
+     , Operations eff ~ HigherOps ops
      )
-  => CoOpHandler ops f m
+  => CoOpHandler (HigherOps ops) f m
   -> (forall a . Base.CoOpHandler ops a (f a) m)
 lowerCoOpHandler
   (CoOpHandler handleReturn1 handleOp1 _) =

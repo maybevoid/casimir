@@ -1,17 +1,19 @@
+{-# language PolyKinds #-}
 
 module Casimir.Higher.Base
   ( Effects (..)
   , HigherOps (..)
   , LowerOps (..)
-  , HigherEffect
-  , LowerEffect
   )
 where
 
 import Data.Kind
 
-import Casimir.Base (EffFunctor (..))
-import qualified Casimir.Base as Base
+import Casimir.Base
+  ( NoEff
+  , NoOp
+  , EffFunctor (..)
+  )
 
 newtype LowerOps ops
   (m :: Type -> Type)
@@ -24,27 +26,19 @@ newtype HigherOps ops
   = HigherOps
     { unHigherOps :: ops m2 }
 
-class Effects eff where
+class Effects (eff :: k) where
   type family Operations eff
     = (ops :: (Type -> Type) -> (Type -> Type) -> Type)
     | ops -> eff
-
-class
-  ( Effects ops
-  , Base.Effects ops
-  , Base.Operations ops ~ LowerOps (Operations ops)
-  )
-  => LowerEffect ops
-
-class
-  ( Effects ops
-  , Base.Effects ops
-  , Operations ops ~ HigherOps (Base.Operations ops)
-  )
-  => HigherEffect ops
 
 instance
   (EffFunctor lift ops)
   => EffFunctor lift (HigherOps ops m) where
     effmap lift (HigherOps ops) = HigherOps $
       effmap lift ops
+
+class NoConstraint (m1 :: Type -> Type) (m2 :: Type -> Type)
+instance NoConstraint m1 m2
+
+instance Effects NoEff where
+  type Operations NoEff = HigherOps NoOp

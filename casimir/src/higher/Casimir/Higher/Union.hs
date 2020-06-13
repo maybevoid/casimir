@@ -11,7 +11,6 @@ import Casimir.Base
   , EffFunctor (..)
   )
 import Casimir.Higher.Base
-import Casimir.Higher.CoOp
 import Casimir.Higher.Free
 import Casimir.Higher.EffFunctor
 
@@ -35,14 +34,6 @@ instance
   => Effects (Union ops1 ops2) where
     type Operations (Union ops1 ops2) =
       HUnionOps (Operations ops1) (Operations ops2)
-
-instance
-  ( EffCoOp ops1
-  , EffCoOp ops2
-  )
-  => EffCoOp (Union ops1 ops2) where
-    type CoOperation (Union ops1 ops2) =
-      HUnionCoOp (CoOperation ops1) (CoOperation ops2)
 
 instance
   ( Monad m
@@ -88,7 +79,10 @@ instance
   ( FreeOps ops1
   , FreeOps ops2
   )
-  => FreeOps (Union ops1 ops2) where
+  => FreeOps (HUnionOps ops1 ops2) where
+    type CoOperation (HUnionOps ops1 ops2) =
+      HUnionCoOp (CoOperation ops1) (CoOperation ops2)
+
     mkFreeOps liftReturn = HUnionOps ops1 ops2
      where
       ops1 = mkFreeOps (liftReturn . LeftOp)
