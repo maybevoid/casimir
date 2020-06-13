@@ -24,21 +24,22 @@ newtype HigherOps ops
   = HigherOps
     { unHigherOps :: ops m2 }
 
-class Effects sig where
-  type family Operations' sig
-    = (ops :: (Type -> Type) -> (Type -> Type) -> Type) | ops -> sig
+class Effects eff where
+  type family Operations eff
+    = (ops :: (Type -> Type) -> (Type -> Type) -> Type)
+    | ops -> eff
 
 class
   ( Effects ops
   , Base.Effects ops
-  , Base.Operations' ops ~ LowerOps (Operations' ops)
+  , Base.Operations ops ~ LowerOps (Operations ops)
   )
   => LowerEffect ops
 
 class
   ( Effects ops
   , Base.Effects ops
-  , Operations' ops ~ HigherOps (Base.Operations' ops)
+  , Operations ops ~ HigherOps (Base.Operations ops)
   )
   => HigherEffect ops
 

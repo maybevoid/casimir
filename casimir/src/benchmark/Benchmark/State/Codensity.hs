@@ -37,7 +37,7 @@ codensityComp s = comp2
   handleReturn x = CoState $ \_ -> return x
   {-# INLINABLE handleReturn #-}
 
-  ops :: Operations' (State Int) (Codensity (CoState Int m))
+  ops :: Operations (State Int) (Codensity (CoState Int m))
   ops = codensityOps handleOps
 
   comp1 :: Codensity (CoState Int m) ()

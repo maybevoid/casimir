@@ -56,7 +56,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
   pipeline
     :: forall ops2
      . ( ImplicitOps ops2
-       , EffFunctor HigherLift (Base.Operations' ops2))
+       , EffFunctor HigherLift (Base.Operations ops2))
     => HigherComputation (handler ∪ ops2) (Return a) m1
     -> HigherComputation (ops1 ∪ ops2) (Return (f a)) m1
   pipeline comp1 = Computation comp2
@@ -65,7 +65,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
       :: forall m2
        . (Monad m2)
       => HigherLift m1 m2
-      -> Base.Operations' (ops1 ∪ ops2) m2
+      -> Base.Operations (ops1 ∪ ops2) m2
       -> Return (f a) m2
     comp2 lift12 (UnionOps ops1 ops2) =
       Return comp4

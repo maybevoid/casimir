@@ -25,7 +25,7 @@ data UpperOps ops
 instance
   (Base.Effects ops)
   => Effects (UpperEff ops) where
-    type Operations' (UpperEff ops) = UpperOps (Base.Operations' ops)
+    type Operations (UpperEff ops) = UpperOps (Base.Operations ops)
 
 instance
   ( Monad m

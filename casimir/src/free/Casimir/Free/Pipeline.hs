@@ -20,7 +20,7 @@ coopHandlerToPipeline
   , Effects handler
   , FreeOps handler
   , FreeHandler free
-  , EffFunctor Lift (Operations' ops1)
+  , EffFunctor Lift (Operations ops1)
   )
   => Computation Lift ops1 (CoOpHandler handler a b) m1
   -> Pipeline Lift ops1 handler (Return a) (Return b) m1 m1
@@ -29,7 +29,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
   pipeline
     :: forall ops2
      . ( Effects ops2
-       , EffFunctor Lift (Operations' ops2)
+       , EffFunctor Lift (Operations ops2)
        )
     => Computation Lift (handler ∪ ops2) (Return a) m1
     -> Computation Lift (ops1 ∪ ops2) (Return b) m1
@@ -39,7 +39,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
       :: forall m2
        . (Monad m2)
       => Lift m1 m2
-      -> Operations' (ops1 ∪ ops2) m2
+      -> Operations (ops1 ∪ ops2) m2
       -> Return b m2
     comp2 lift12 (UnionOps ops1 ops2) = Return comp4
      where
@@ -74,7 +74,7 @@ genericCoOpHandlerToPipeline handler1
     :: forall m2 .
     (Monad m2)
     => Lift m1 m2
-    -> Operations' ops1 m2
+    -> Operations ops1 m2
     -> TransformerHandler (free handler) handler m2
   handler2 lift12 ops1
     = TransformerHandler freeOps freeLiftEff (Lift unliftFree)
@@ -107,7 +107,7 @@ contextualHandlerToPipeline handler1
     :: forall m2 .
     (Monad m2)
     => Lift m1 m2
-    -> Operations' ops1 m2
+    -> Operations ops1 m2
     -> TransformerHandler (free handler) handler m2
   handler2 lift12 ops1
     = TransformerHandler freeOps freeLiftEff (Lift unliftFree)

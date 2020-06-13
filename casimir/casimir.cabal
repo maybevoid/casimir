@@ -171,14 +171,11 @@ library casimir-freer
     Casimir.Freer
 
   other-modules:
-    Casimir.Freer.CoOp
     Casimir.Freer.FreeOps
     Casimir.Freer.Monad.Church
     Casimir.Freer.Monad.Freer
-    Casimir.Freer.FreeEff
+    Casimir.Freer.FreeTransformer
     Casimir.Freer.Handler
-    Casimir.Freer.NoOp
-    Casimir.Freer.Union
     Casimir.Freer.Codensity
 
 library casimir-higher

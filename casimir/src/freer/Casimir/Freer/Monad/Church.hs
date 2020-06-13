@@ -6,11 +6,8 @@ where
 
 import Control.Monad (ap)
 
-import Casimir.Base
-
-import Casimir.Freer.CoOp
 import Casimir.Freer.FreeOps
-import Casimir.Freer.FreeEff
+import Casimir.Freer.FreeTransformer
 
 newtype ChurchMonad ops m a = ChurchMonad {
   runChurchMonad :: forall r . CoOpHandler ops a r m -> m r
@@ -38,9 +35,14 @@ instance
     {-# INLINE (>>=) #-}
 
 instance
-  FreeEff ChurchMonad
+  FreeTransformer ChurchMonad
   where
-    freeOps = churchOps
+    freeOps
+      :: forall ops m
+       . ( Monad m, FreeOps ops )
+      => ops (ChurchMonad ops m)
+    freeOps = mkFreeOps liftChurchOps
+
     liftFree = liftChurchMonad
     handleFree handler m = runChurchMonad m handler
 
@@ -71,13 +73,6 @@ liftChurchOps ops = ChurchMonad cont
   cont (CoOpHandler handleReturn handleCoOp) =
     handleCoOp ops handleReturn
 {-# INLINE liftChurchOps #-}
-
-churchOps
-  :: forall ops m .
-  (FreeOps ops, Monad m)
-  => Operations' ops (ChurchMonad ops m)
-churchOps = mkFreeOps liftChurchOps
-{-# INLINE churchOps #-}
 
 mapChurchMonad
   :: forall ops m a b .

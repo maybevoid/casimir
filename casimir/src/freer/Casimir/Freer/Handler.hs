@@ -7,21 +7,22 @@ where
 import Casimir.Base
 
 import Casimir.Freer.FreeOps
-import Casimir.Freer.FreeEff
+import Casimir.Freer.FreeTransformer
 
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler
-  :: forall free handler m a r
+  :: forall free eff ops m a r
    . ( Monad m
-     , Effects handler
-     , FreeOps handler
-     , ImplicitOps handler
-     , FreeEff free
+     , Effects eff
+     , FreeOps ops
+     , ImplicitOps eff
+     , FreeTransformer free
+     , Operations eff ~ ops
      )
-  => CoOpHandler handler a r m
-  -> ((OpsConstraint handler (free handler m))
-      => free handler m a)
+  => CoOpHandler ops a r m
+  -> ((OpsConstraint eff (free ops m))
+      => free ops m a)
   -> m r
 withCoOpHandler handler comp1
   = handleFree @free handler $
-      withOps (freeOps @free @handler @m) comp1
+      withOps (freeOps @free @ops @m) comp1

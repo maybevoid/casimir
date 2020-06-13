@@ -2,10 +2,8 @@ module Casimir.Freer.Codensity
 where
 
 import Control.Monad (ap)
-import Casimir.Base
-import Casimir.Freer.CoOp
 import Casimir.Freer.FreeOps
-import Casimir.Freer.FreeEff
+import Casimir.Freer.FreeTransformer
 
 newtype Nest f g a = Nest {
   unNest :: f (g a)
@@ -100,15 +98,12 @@ rollCod comp1 = Cod comp2
 
 codensityOps
   :: forall ops h
-   . ( Effects ops
-     , EffCoOp ops
-     , FreeOps ops
-     )
+   . ( FreeOps ops )
   => (forall x r
        . CoOperation ops x
       -> (x -> h r)
       -> h r)
-  -> Operations' ops (Codensity h)
+  -> ops (Codensity h)
 codensityOps handler1 = mkFreeOps handler2
  where
   handler2 :: forall a . CoOperation ops a -> Codensity h a
@@ -122,10 +117,9 @@ codensityOps handler1 = mkFreeOps handler2
 
 toCodensity
   :: forall free ops m f a
-   . ( EffCoOp ops
-     , Monad m
+   . ( Monad m
      , FreeOps ops
-     , FreeEff free
+     , FreeTransformer free
      )
   => (forall x . CoOpHandler ops x (f x) m)
   -> free ops m a
@@ -135,10 +129,9 @@ toCodensity handler1 comp = toCodensity' (coOpHandler handler1) comp
 
 toCodensity'
   :: forall free ops m f a
-   . ( EffCoOp ops
-     , Monad m
+   . ( Monad m
      , FreeOps ops
-     , FreeEff free
+     , FreeTransformer free
      )
   => (forall x r
        . CoOperation ops x

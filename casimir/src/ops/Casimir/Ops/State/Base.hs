@@ -20,7 +20,7 @@ data StateOps s m = StateOps {
 }
 
 instance Effects (State s) where
-  type Operations' (State s) = StateOps s
+  type Operations (State s) = StateOps s
 
 instance EffFunctor Lift (StateOps a) where
   effmap (Lift lift) stateOps = StateOps {

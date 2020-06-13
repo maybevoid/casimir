@@ -22,7 +22,7 @@ class
     type family OpsMonad t :: Type -> Type
 
     monadOps
-      :: Operations' (SupportedOps t) (OpsMonad t)
+      :: Operations (SupportedOps t) (OpsMonad t)
 
 class
   ( MonadOps t
@@ -51,19 +51,19 @@ withMonadOps
 withMonadOps cont = withOps (monadOps @t) cont
 
 class
-  ( EffFunctor Lift (Operations' (SupportedOps t))
+  ( EffFunctor Lift (Operations (SupportedOps t))
   ) => HasBaseOps t
 
 instance
-  ( EffFunctor Lift (Operations' (SupportedOps t))
+  ( EffFunctor Lift (Operations (SupportedOps t))
   ) => HasBaseOps t
 
 class
-  ( EffFunctor HigherLift (Operations' (SupportedOps t))
+  ( EffFunctor HigherLift (Operations (SupportedOps t))
   ) => HasHigherOps t
 
 instance
-  ( EffFunctor HigherLift (Operations' (SupportedOps t))
+  ( EffFunctor HigherLift (Operations (SupportedOps t))
   ) => HasHigherOps t
 
 instance HasOps (UseBase m) where

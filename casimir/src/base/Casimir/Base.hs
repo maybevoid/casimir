@@ -8,6 +8,7 @@ module Casimir.Base
   , Effects (..)
   , Union
   , Cons
+  , NoEff
   , NoOp
   , ConsOps
   , UnionOps

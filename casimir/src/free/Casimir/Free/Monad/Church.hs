@@ -40,7 +40,7 @@ withCoOpHandlerAndOps
       , ImplicitOps ops
       , ImplicitOps handler
       , EffConstraint ops m
-      , EffFunctor Lift (Operations' ops)
+      , EffFunctor Lift (Operations ops)
       )
   => CoOpHandler handler a r m
   -> (( OpsConstraint handler (ChurchMonad handler m)
@@ -113,7 +113,7 @@ liftChurchOps ops = ChurchMonad cont
 churchOps
   :: forall ops m .
   (FreeOps ops, Monad m)
-  => Operations' ops (ChurchMonad ops m)
+  => Operations ops (ChurchMonad ops m)
 churchOps = mkFreeOps liftChurchOps
 {-# INLINE churchOps #-}
 

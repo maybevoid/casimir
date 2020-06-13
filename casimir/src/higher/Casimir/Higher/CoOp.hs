@@ -13,13 +13,13 @@ import qualified Casimir.Freer as Base
 data HigherCoOp coop (f :: Type -> Type) a =
   HigherOp (coop a)
 
-class EffCoOp ops where
-  type family CoOperation ops =
-    ( coop
-      :: (Type -> Type)
-      -> Type
-      -> Type
-    ) | coop -> ops
+-- class EffCoOp ops where
+--   type family CoOperation ops =
+--     ( coop
+--       :: (Type -> Type)
+--       -> Type
+--       -> Type
+--     ) | coop -> ops
 
 class CoOpFunctor coop where
   liftCoOp
@@ -29,12 +29,12 @@ class CoOpFunctor coop where
     -> coop f1 a
     -> coop f2 a
 
-class
-  ( EffCoOp ops
-  , Base.EffCoOp ops
-  , CoOperation ops ~ HigherCoOp (Base.CoOperation ops)
-  )
-  => HigherEffCoOp ops
+-- class
+--   ( EffCoOp ops
+--   , Base.EffCoOp ops
+--   , CoOperation ops ~ HigherCoOp (Base.CoOperation ops)
+--   )
+--   => HigherEffCoOp ops
 
 instance
   (Functor coop)

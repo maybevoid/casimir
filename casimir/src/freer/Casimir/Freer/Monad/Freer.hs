@@ -7,9 +7,8 @@ where
 
 import Control.Monad
 
-import Casimir.Freer.CoOp
 import Casimir.Freer.FreeOps
-import Casimir.Freer.FreeEff
+import Casimir.Freer.FreeTransformer
 
 data FreerF ops a b where
   PureF :: a -> FreerF ops a b
@@ -74,46 +73,41 @@ instance
       {-# INLINE cont2 #-}
     {-# INLINE (>>=) #-}
 
-instance FreeEff FreerMonad where
-  handleFree = doHandleFreer
-  {-# INLINE handleFree #-}
+instance FreeTransformer FreerMonad where
+  handleFree
+    :: forall ops m a r
+    . (Monad m, FreeOps ops)
+    => CoOpHandler ops a r m
+    -> FreerMonad ops m a
+    -> m r
+  handleFree handler = handleFree'
+   where
+    handleFree'
+      :: FreerMonad ops m a
+      -> m r
+    handleFree' comp = runFreerMonad comp >>= handleComp
+    {-# INLINE handleFree' #-}
+
+    handleComp
+      :: FreerF ops a (FreerMonad ops m a)
+      -> m r
+    handleComp (PureF x) = returnHandler handler x
+    handleComp (FreeF ops cont)
+      = coOpHandler handler ops $
+          \x -> handleFree' $ cont x
 
   liftFree m = FreerMonad $ fmap PureF m
   {-# INLINE liftFree #-}
 
   freeOps = mkFreeOps liftFreeOps
+   where
+    liftFreeOps
+      :: forall m ops a
+      . (Monad m, FreeOps ops)
+      => CoOperation ops a
+      -> FreerMonad ops m a
+    liftFreeOps ops =
+      FreerMonad $ return $ FreeF ops $
+        FreerMonad . return . PureF
+    {-# INLINE liftFreeOps #-}
   {-# INLINE freeOps #-}
-
-doHandleFreer
-  :: forall ops m a r
-   . (Monad m, FreeOps ops)
-  => CoOpHandler ops a r m
-  -> FreerMonad ops m a
-  -> m r
-doHandleFreer handler = handleFree'
- where
-  handleFree'
-   :: FreerMonad ops m a
-    -> m r
-  handleFree' comp = runFreerMonad comp >>= handleComp
-  {-# INLINE handleFree' #-}
-
-  handleComp
-    :: FreerF ops a (FreerMonad ops m a)
-    -> m r
-  handleComp (PureF x) = returnHandler handler x
-  handleComp (FreeF ops cont)
-    = coOpHandler handler ops $
-        \x -> handleFree' $ cont x
-  {-# INLINE handleComp #-}
-{-# INLINE doHandleFreer #-}
-
-liftFreeOps
-  :: forall m ops a
-   . (Monad m, FreeOps ops)
-  => CoOperation ops a
-  -> FreerMonad ops m a
-liftFreeOps ops =
-  FreerMonad $ return $ FreeF ops $
-    FreerMonad . return . PureF
-{-# INLINE liftFreeOps #-}
