@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Casimir.Ops.State.Transform
@@ -21,7 +22,8 @@ import Casimir.Ops.State.Lift
 
 data UseStateLift
   (lift :: (Type -> Type) -> (Type -> Type) -> Type)
-  s t
+  (s :: Type)
+  t
 
 type UseState = UseStateLift Lift
 type UseHigherState = UseStateLift HigherLift
@@ -29,12 +31,12 @@ type UseHigherState = UseStateLift HigherLift
 instance
   ( HasOps t )
   => HasOps (UseStateLift lift s t) where
-    type SupportedOps (UseStateLift lift s t) = State s ∪ SupportedOps t
+    type SupportedOps (UseStateLift lift s t) = UnionOps (StateOps s) (SupportedOps t)
 
 instance
   ( MonadOps t
   , LiftMonoid lift
-  , EffFunctor lift (Operations (SupportedOps t))
+  , EffFunctor lift (SupportedOps t)
   , FreeLift (State s) lift (OpsMonad t) (StateT s (OpsMonad t))
   )
   => MonadOps (UseStateLift lift s t) where
@@ -99,7 +101,7 @@ withStateTAndOps
   )
   => s
   -> Base.Operations ops m
-  -> (Base.Operations (State s ∪ ops) (StateT s m)
+  -> (Base.Operations (State s ': ops) (StateT s m)
       -> StateT s m r)
   -> m r
 withStateTAndOps i ops1 comp1 = evalStateT comp2 i
@@ -107,20 +109,20 @@ withStateTAndOps i ops1 comp1 = evalStateT comp2 i
   comp2 :: StateT s m r
   comp2 = comp1 ops2
 
-  ops2 :: Base.Operations (State s ∪ ops) (StateT s m)
-  ops2 = stateTOps ∪ (effmap (Lift lift) ops1)
+  ops2 :: Base.Operations (State s ': ops) (StateT s m)
+  ops2 = Cons stateTOps (effmap (Lift lift) ops1)
 
 {-# INLINE stateTPipeline #-}
 stateTPipeline
   :: forall s m1 comp .
   (Monad m1, EffFunctor Lift comp)
   => s
-  -> SimplePipeline Lift NoEff (State s) comp m1
-stateTPipeline i = transformePipeline $ genericComputation handler
+  -> SimplePipeline Lift NoEff '[State s] comp m1
+stateTPipeline i = transformePipeline $ genericComputation @NoEff handler
  where
   {-# INLINE handler #-}
   handler :: forall m
     . (Monad m)
-    => TransformerHandler (StateT s) (State s) m
-  handler = TransformerHandler stateTOps stateTLift $ Lift $
+    => TransformerHandler (StateT s) '[State s] m
+  handler = TransformerHandler (Cons stateTOps NoOp) stateTLift $ Lift $
     \comp -> evalStateT comp i

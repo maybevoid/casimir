@@ -59,7 +59,7 @@ instance FreeOps (AwaitEff a) where
   mkFreeOps liftCoOp = AwaitOps $
     liftCoOp $ AwaitOp id
 
-instance ImplicitOps (YieldEff a) where
+instance Effects (YieldEff a) where
   type OpsConstraint (YieldEff a) m =
     (?yieldOps :: YieldOps a m)
 
@@ -68,7 +68,7 @@ instance ImplicitOps (YieldEff a) where
 
   captureOps = ?yieldOps
 
-instance ImplicitOps (AwaitEff a) where
+instance Effects (AwaitEff a) where
   type OpsConstraint (AwaitEff a) m =
     (?awaitOps :: AwaitOps a m)
 

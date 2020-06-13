@@ -15,7 +15,7 @@ import Casimir.Base
   , ContraLift (..)
   , HigherLift (..)
   , EffFunctor (..)
-  , ImplicitOps (..)
+  , Effects (..)
   , HasLabel (..)
   , Tag
   , type (∪)

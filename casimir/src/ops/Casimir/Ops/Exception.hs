@@ -1,14 +1,8 @@
 module Casimir.Ops.Exception
 where
 
-import Data.Void
-import qualified Control.Exception as Ex
-
 import Casimir.Base
 import Casimir.Freer
-import Casimir.Computation
-
-import Casimir.Ops.Io
 
 data ExceptionTag
 data ExceptionEff e
@@ -20,8 +14,8 @@ data ExceptionOps e m = ExceptionOps {
 data ExceptionCoOp e a where
   RaiseOp :: e -> ExceptionCoOp e a
 
-instance Effects (ExceptionEff e) where
-  type Operations (ExceptionEff e) = ExceptionOps e
+instance Effect (ExceptionEff e) where
+  type Operation (ExceptionEff e) = ExceptionOps e
 
 instance EffFunctor Lift (ExceptionOps e) where
   effmap (Lift lift) ops = ExceptionOps {
@@ -42,10 +36,10 @@ instance HasLabel (ExceptionOps e) where
   type GetLabel (ExceptionOps e) = Tag ExceptionTag
 
 raise
-  :: forall e a m
+  :: forall e a
    . e
-  -> Eff (ExceptionEff e) a
-raise e = raiseOp captureOps e
+  -> Eff '[ExceptionEff e] a
+raise e = raiseOp captureOp e
 
 -- mkExceptionCoOpHandler
 --   :: forall m e a
@@ -120,7 +114,7 @@ raise e = raiseOp captureOps e
 --   :: forall free m ops e a
 --    . ( FreeHandler free
 --      , Effects ops
---      , ImplicitOps ops
+--      , Effects ops
 --      , EffConstraint ops m
 --      , EffFunctor Lift (Operations ops)
 --      )
@@ -141,7 +135,7 @@ raise e = raiseOp captureOps e
 --   :: forall free m ops e a b
 --    . ( FreeHandler free
 --      , Effects ops
---      , ImplicitOps ops
+--      , Effects ops
 --      , EffConstraint ops m
 --      , EffFunctor Lift (Operations ops)
 --      )

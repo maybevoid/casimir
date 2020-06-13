@@ -1,3 +1,4 @@
+{-# language PolyKinds #-}
 
 module Casimir.Computation.Pipeline
   -- ( Pipeline (..)
@@ -22,16 +23,26 @@ import Casimir.Computation.Cast
 import Casimir.Computation.Handler
 import Casimir.Computation.Computation
 
-newtype Pipeline lift ops1 handler comp1 comp2 m1 m2
+data Pipeline lift ops1 handler comp1 comp2 m1 m2
   = Pipeline
-  { runExactPipeline
-      :: forall ops2
-       . ( ImplicitOps ops2
+  { unPipeline
+      :: forall k (ops2 :: k)
+       . ( Effects ops2
          , EffFunctor lift (Operations ops2)
          )
       => Computation lift (handler ∪ ops2) comp1 m1
       -> Computation lift (ops1 ∪ ops2) comp2 m2
   }
+
+runExactPipeline
+  :: forall lift ops1 ops2 handler comp1 comp2 m1 m2
+   . ( Effects ops2
+     , EffFunctor lift (Operations ops2)
+     )
+  => Pipeline lift ops1 handler comp1 comp2 m1 m2
+  -> Computation lift (handler ∪ ops2) comp1 m1
+  -> Computation lift (ops1 ∪ ops2) comp2 m2
+runExactPipeline (Pipeline runner) comp = runner @_ @ops2 comp
 
 data TransformerHandler t handler m = TransformerHandler {
   tCoOpHandler :: Operations handler (t m),
@@ -50,8 +61,8 @@ type GenericPipeline lift ops handler m
 opsHandlerToPipeline
   :: forall ops1 lift handler m
    . ( Monad m
-     , ImplicitOps ops1
-     , ImplicitOps handler
+     , Effects ops1
+     , Effects handler
      , LiftMonoid lift
       , EffFunctor lift (Operations handler)
      )
@@ -62,20 +73,20 @@ opsHandlerToPipeline
 opsHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline :: forall ops2 comp
-     . ( ImplicitOps ops2
+     . ( Effects ops2
        , EffFunctor lift comp
        )
     => Computation lift (handler ∪ ops2) comp m
     -> Computation lift (ops1 ∪ ops2) comp m
-  pipeline comp1 = bindOpsHandler @(ops1 ∪ ops2)
+  pipeline comp1 = bindOpsHandler @(ops1 ∪ ops2) @ops1
     handler1 comp1
 
 {-# INLINE transformePipeline #-}
 transformePipeline
   :: forall t ops1 handler m1 .
   ( Monad m1
-  , ImplicitOps ops1
-  , ImplicitOps handler
+  , Effects ops1
+  , Effects handler
   , (forall m . (Monad m) => Monad (t m))
   )
   => Computation Lift ops1 (TransformerHandler t handler) m1
@@ -84,7 +95,7 @@ transformePipeline handler1 = Pipeline pipeline
  where
   {-# INLINE pipeline #-}
   pipeline :: forall ops2 comp .
-    ( ImplicitOps ops2
+    ( Effects ops2
     , EffFunctor Lift comp
     , EffFunctor Lift (Operations ops2)
     )
@@ -110,9 +121,9 @@ castPipelineOps
   :: forall ops1 ops2 lift handler comp1 comp2 m1 m2  .
   ( Monad m1
   , Monad m2
-  , ImplicitOps ops1
-  , ImplicitOps ops2
-  , ImplicitOps handler
+  , Effects ops1
+  , Effects ops2
+  , Effects handler
   )
   => CastDict ops2 ops1
   -> Pipeline lift ops1 handler comp1 comp2 m1 m2
@@ -120,7 +131,7 @@ castPipelineOps
 castPipelineOps cast pipeline1 = Pipeline pipeline2
  where
   pipeline2 :: forall ops3
-     . ( ImplicitOps ops3
+     . ( Effects ops3
        , EffFunctor lift (Operations ops3)
        )
     => Computation lift (handler ∪ ops3) comp1 m1
@@ -140,9 +151,9 @@ castPipelineHandler
   :: forall ops1 lift handler1 handler2 comp1 comp2 m1 m2
    . ( Monad m1
      , Monad m2
-     , ImplicitOps ops1
-     , ImplicitOps handler1
-     , ImplicitOps handler2
+     , Effects ops1
+     , Effects handler1
+     , Effects handler2
      , LiftMonoid lift
      , EffFunctor lift (Operations handler1)
      )
@@ -153,7 +164,7 @@ castPipelineHandler cast1 pipeline1 = Pipeline pipeline2
  where
   pipeline2
     :: forall ops2
-     . ( ImplicitOps ops2
+     . ( Effects ops2
        , EffFunctor lift (Operations ops2)
        )
     => Computation lift (handler2 ∪ ops2) comp1 m1
@@ -173,10 +184,10 @@ composeExactPipelines
   , Monad m2
   , Monad m3
   , LiftMonoid lift
-  , ImplicitOps ops1
-  , ImplicitOps ops2
-  , ImplicitOps handler1
-  , ImplicitOps handler2
+  , Effects ops1
+  , Effects ops2
+  , Effects handler1
+  , Effects handler2
   , EffFunctor lift (Operations ops1)
   , EffFunctor lift (Operations handler1)
   , EffFunctor lift (Operations handler2)
@@ -187,7 +198,7 @@ composeExactPipelines
 composeExactPipelines pipeline1 pipeline2 = Pipeline pipeline3
  where
   pipeline3 :: forall ops3
-     . ( ImplicitOps ops3
+     . ( Effects ops3
        , EffFunctor lift (Operations ops3)
        , EffFunctor lift (UnionOps (Operations handler2) (Operations ops3))
        )
@@ -212,10 +223,10 @@ runPipelineWithCast
   :: forall ops3 ops1 ops2 lift handler comp1 comp2 m1 m2 .
   ( Monad m1
   , Monad m2
-  , ImplicitOps ops1
-  , ImplicitOps ops2
-  , ImplicitOps ops3
-  , ImplicitOps handler
+  , Effects ops1
+  , Effects ops2
+  , Effects ops3
+  , Effects handler
   , EffFunctor lift (Operations ops3)
   )
   => CastDict ops3 ops1
@@ -239,10 +250,10 @@ runPipeline
   , Monad m2
   , ops3 ⊇ ops1
   , (handler ∪ ops3) ⊇ ops2
-  , ImplicitOps ops1
-  , ImplicitOps ops2
-  , ImplicitOps ops3
-  , ImplicitOps handler
+  , Effects ops1
+  , Effects ops2
+  , Effects ops3
+  , Effects handler
   , EffFunctor lift (Operations ops3)
   )
   => Pipeline lift ops1 handler comp1 comp2 m1 m2
@@ -259,12 +270,12 @@ composePipelinesWithCast
      , Monad m2
      , Monad m3
      , LiftMonoid lift
-     , ImplicitOps ops1
-     , ImplicitOps ops2
-     , ImplicitOps ops3
-     , ImplicitOps handler1
-     , ImplicitOps handler2
-     , ImplicitOps handler3
+     , Effects ops1
+     , Effects ops2
+     , Effects ops3
+     , Effects handler1
+     , Effects handler2
+     , Effects handler3
      , EffFunctor lift (Operations ops3)
      , EffFunctor lift (Operations handler1)
      , EffFunctor lift (Operations handler2)
@@ -293,12 +304,12 @@ composePipelines
      , Monad m2
      , Monad m3
      , LiftMonoid lift
-     , ImplicitOps ops1
-     , ImplicitOps ops2
-     , ImplicitOps ops3
-     , ImplicitOps handler1
-     , ImplicitOps handler2
-     , ImplicitOps handler3
+     , Effects ops1
+     , Effects ops2
+     , Effects ops3
+     , Effects handler1
+     , Effects handler2
+     , Effects handler3
      , (handler2 ∪ ops3) ⊇ ops1
      , ops3 ⊇ ops2
      , (handler1 ∪ handler2) ⊇ handler3

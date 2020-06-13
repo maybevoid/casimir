@@ -31,8 +31,8 @@ newtype Computation
 
 type BaseComputation = Computation Lift
 
-type OpsHandler lift ops handler = Computation lift ops (Operations handler)
-type BaseOpsHandler ops handler = OpsHandler Lift ops handler
+type OpsHandler lift (eff :: k) handler = Computation lift eff (Operations handler)
+type BaseOpsHandler eff handler = OpsHandler Lift eff handler
 
 instance
   ( Effects ops

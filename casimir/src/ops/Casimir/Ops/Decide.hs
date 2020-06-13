@@ -15,8 +15,8 @@ data DecideOps s m = DecideOps {
 data DecideCoOp s a = DecideOp (s -> a)
   deriving (Functor)
 
-instance Effects (DecideEff s) where
-  type Operations (DecideEff s) = DecideOps s
+instance Effect (DecideEff s) where
+  type Operation (DecideEff s) = DecideOps s
 
 instance EffFunctor Lift (DecideOps s) where
   effmap (Lift lift) ops = DecideOps {
@@ -26,5 +26,5 @@ instance EffFunctor Lift (DecideOps s) where
 instance HasLabel (DecideOps s) where
   type GetLabel (DecideOps s) = Tag DecideTag
 
-decide :: forall a . Eff (DecideEff a) a
-decide = decideOp captureOps
+decide :: forall a . Eff '[DecideEff a] a
+decide = decideOp captureOp

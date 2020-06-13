@@ -5,7 +5,6 @@ where
 import QuasiParam.Tag
 
 import Casimir.Base
-import Casimir.Computation
 
 data EnvTag
 data EnvEff e

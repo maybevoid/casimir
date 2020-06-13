@@ -7,7 +7,6 @@ module Casimir.Base
   ( Effect (..)
   , Effects (..)
   , Union
-  , Cons
   , NoEff
   , NoOp
   , ConsOps
@@ -22,7 +21,6 @@ module Casimir.Base
 
   , EffFunctor (..)
 
-  , ImplicitOps
   , Eff
   , OpsConstraint
   , EffConstraint

@@ -18,7 +18,7 @@ withCoOpHandler
      , Effects handler
      , FreeOps handler
      , FreeHandler free
-     , ImplicitOps handler
+     , Effects handler
      )
   => CoOpHandler handler a r m
   -> ((OpsConstraint handler (free handler m))
@@ -34,9 +34,9 @@ withCoOpHandlerAndOps
     . ( Effects ops
       , Effects handler
       , FreeOps handler
-      , ImplicitOps ops
+      , Effects ops
       , FreeHandler free
-      , ImplicitOps handler
+      , Effects handler
       , EffConstraint ops m
       , EffFunctor Lift (Operations ops)
       )
@@ -61,7 +61,7 @@ withContextualCoOpHandler
      , Effects handler
      , FreeOps handler
      , FreeHandler free
-     , ImplicitOps handler
+     , Effects handler
      )
   => CoOpHandler handler a r m
   -> (r -> m a)

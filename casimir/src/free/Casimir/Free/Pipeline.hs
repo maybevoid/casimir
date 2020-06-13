@@ -61,8 +61,8 @@ genericCoOpHandlerToPipeline
   , Effects ops1
   , Effects handler
   , FreeOps handler
-  , ImplicitOps ops1
-  , ImplicitOps handler
+  , Effects ops1
+  , Effects handler
   , FreeHandler free
   )
   => BaseComputation ops1 (GenericCoOpHandler handler) m1
@@ -95,8 +95,8 @@ contextualHandlerToPipeline
   , Effects handler
   , FreeOps handler
   , FreeHandler free
-  , ImplicitOps ops1
-  , ImplicitOps handler
+  , Effects ops1
+  , Effects handler
   )
   => BaseComputation ops1 (ContextualHandler w handler) m1
   -> GenericPipeline Lift ops1 handler m1

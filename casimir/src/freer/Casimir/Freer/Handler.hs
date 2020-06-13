@@ -1,3 +1,4 @@
+{-# Language PolyKinds #-}
 
 module Casimir.Freer.Handler
   ( withCoOpHandler
@@ -15,7 +16,7 @@ withCoOpHandler
    . ( Monad m
      , Effects eff
      , FreeOps ops
-     , ImplicitOps eff
+     , Effects eff
      , FreeTransformer free
      , Operations eff ~ ops
      )

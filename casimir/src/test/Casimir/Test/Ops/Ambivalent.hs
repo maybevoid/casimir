@@ -43,7 +43,7 @@ instance FreeOps (AmbEff a) where
     selectOp = \choice -> liftCoOp $ SelectOp choice id
   }
 
-instance ImplicitOps (AmbEff a) where
+instance Effects (AmbEff a) where
   type OpsConstraint (AmbEff a) m = (?ambOps :: AmbOps a m)
 
   withOps ops comp = let ?ambOps = ops in comp

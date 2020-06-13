@@ -9,7 +9,6 @@ import Casimir.Base
   ( type (~>)
   , ContraLift (..)
   , HigherLift (..)
-  , ImplicitOps
   , OpsConstraint
   , withOps
   )
@@ -161,7 +160,7 @@ withCoOpHandler
      , Base.Effects eff
      , FreeOps ops
      , FreeEff free
-     , ImplicitOps eff
+     , Effects eff
      , FreeHandler free
      , Operations eff ~ ops
      , Base.Operations eff ~ LowerOps ops

@@ -24,7 +24,7 @@ withCoOpHandler
    . ( Monad m
      , Effects handler
      , FreeOps handler
-     , ImplicitOps handler
+     , Effects handler
      )
   => CoOpHandler handler a r m
   -> ((OpsConstraint handler (ChurchMonad handler m))
@@ -37,8 +37,8 @@ withCoOpHandlerAndOps
     . ( Effects ops
       , Effects handler
       , FreeOps handler
-      , ImplicitOps ops
-      , ImplicitOps handler
+      , Effects ops
+      , Effects handler
       , EffConstraint ops m
       , EffFunctor Lift (Operations ops)
       )

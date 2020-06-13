@@ -1,3 +1,4 @@
+{-# language PolyKinds #-}
 
 module Casimir.Higher.Computation
 where
@@ -6,7 +7,6 @@ import Casimir.Base
   ( Lift (..)
   , HigherLift (..)
   , EffFunctor (..)
-  , ImplicitOps
   , LiftMonoid (..)
   , pattern Union
   , type (∪)
@@ -43,10 +43,10 @@ coopHandlerToPipeline
    . ( Functor f
      , Monad m1
      , Base.Effects eff1
-     , Effects eff2
      , Base.Effects eff2
+     , Effects eff2
      , FreeOps ops2
-     , ImplicitOps eff2
+     , Effects eff2
      , FreeHandler free
      , Operations eff2 ~ ops2
      , Base.Operations eff2 ~ LowerOps ops2
@@ -57,7 +57,7 @@ coopHandlerToPipeline handler1 = Pipeline pipeline
  where
   pipeline
     :: forall eff3 ops3
-     . ( ImplicitOps eff3
+     . ( Base.Effects eff3
        , Base.Operations eff3 ~ ops3
        , EffFunctor HigherLift ops3
        )

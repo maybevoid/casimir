@@ -1,3 +1,5 @@
+{-# language PolyKinds #-}
+
 module Casimir.Base.Cast
   ( EntailOps
   , CastOps
@@ -14,33 +16,32 @@ module Casimir.Base.Cast
 where
 
 import Casimir.Base.Effect
-import Casimir.Base.Implicit
 import qualified Casimir.Param as Param
 
 class
-  ( ImplicitOps eff1
-  , ImplicitOps eff2
+  ( Effects eff1
+  , Effects eff2
   , Param.EntailParam (Operations eff1) (Operations eff2) m
   )
   => EntailOps eff1 eff2 m
 
 instance
-  ( ImplicitOps eff1
-  , ImplicitOps eff2
+  ( Effects eff1
+  , Effects eff2
   , Param.EntailParam (Operations eff1) (Operations eff2) m
   )
   => EntailOps eff1 eff2 m
 
 class
-  ( ImplicitOps eff1
-  , ImplicitOps eff2
+  ( Effects eff1
+  , Effects eff2
   , Param.CastParam (Operations eff1) (Operations eff2)
   )
   => CastOps eff1 eff2
 
 instance
-  ( ImplicitOps eff1
-  , ImplicitOps eff2
+  ( Effects eff1
+  , Effects eff2
   , Param.CastParam (Operations eff1) (Operations eff2)
   )
   => CastOps eff1 eff2
@@ -63,8 +64,8 @@ castOps = Param.castValue
 
 castOpsWithDict
   :: forall eff1 eff2 m
-   . ( ImplicitOps eff1
-     , ImplicitOps eff2
+   . ( Effects eff1
+     , Effects eff2
      )
   => CastDict eff1 eff2
   -> Operations eff1 m

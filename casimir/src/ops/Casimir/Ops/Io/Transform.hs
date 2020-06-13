@@ -10,7 +10,7 @@ import Casimir.Ops.Io.Base
 data UseIo
 
 instance HasOps UseIo where
-  type SupportedOps UseIo = IoEff
+  type SupportedOps UseIo = IoOps
 
 instance MonadOps UseIo where
   type OpsMonad UseIo = IO

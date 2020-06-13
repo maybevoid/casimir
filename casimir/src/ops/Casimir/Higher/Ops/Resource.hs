@@ -10,13 +10,12 @@ import Casimir.Base
   ( ContraLift (..)
   , EffFunctor (..)
   , HigherLift (..)
-  , ImplicitOps (..)
   , EffConstraint
   , HasLabel (..)
   , Tag
   , Lift (..)
   , type (~>)
-  , captureOps
+  , captureOp
   )
 
 import Casimir.Higher
@@ -56,11 +55,11 @@ data BracketResource a = BracketResource
   , releaseOp :: (a -> IO ())
   }
 
-instance Effects (ResourceEff t) where
-  type Operations (ResourceEff t) = HigherResourceOps t
+instance Effect (ResourceEff t) where
+  type Operation (ResourceEff t) = HigherResourceOps t
 
-instance Base.Effects (ResourceEff t) where
-  type Operations (ResourceEff t) = LowerOps (HigherResourceOps t)
+instance Base.Effect (ResourceEff t) where
+  type Operation (ResourceEff t) = LowerOps (HigherResourceOps t)
 
 instance HasLabel (HigherResourceOps t) where
   type GetLabel (HigherResourceOps t) = Tag ResourceTag
@@ -158,8 +157,8 @@ ioBracketCoOpHandler = CoOpHandler
 
 withResource
   :: forall t m a b
-   . (EffConstraint (ResourceEff t) m)
+   . (EffConstraint '[ResourceEff t] m)
   => t a
   -> (a -> m b)
   -> m b
-withResource = withResourceOp $ unLowerOps captureOps
+withResource = withResourceOp $ unLowerOps captureOp

@@ -1,3 +1,4 @@
+{-# LANGUAGE PolyKinds #-}
 
 module Casimir.Computation.Cast
   ( castComputation
@@ -20,7 +21,7 @@ castComputation comp = Computation $
 
 castComputationWithDict
   :: forall eff1 eff2 lift comp m
-   . (ImplicitOps eff1, ImplicitOps eff2)
+   . (Effects eff1, Effects eff2)
   => CastDict eff1 eff2
   -> Computation lift eff2 comp m
   -> Computation lift eff1 comp m

@@ -1,3 +1,4 @@
+{-# language PolyKinds #-}
 
 module Casimir.Computation.Value
   ( FunctorComp (..)
@@ -71,7 +72,7 @@ instance
 {-# INLINE genericComputation #-}
 genericComputation
   :: forall eff comp lift
-   . (ImplicitOps eff)
+   . (Effects eff)
   => (forall m
        . (Monad m, OpsConstraint eff m)
        => comp m)
@@ -82,7 +83,7 @@ genericComputation comp = Computation $
 {-# INLINE genericReturn #-}
 genericReturn
   :: forall ops lift a
-   . (ImplicitOps ops)
+   . (Effects ops)
   => (forall m
        . (Monad m, OpsConstraint ops m)
        => m a)
@@ -92,7 +93,7 @@ genericReturn comp = genericComputation $ Return comp
 
 arrowComputation
   :: forall ops lift a b
-   . (ImplicitOps ops)
+   . (Effects ops)
   => (forall m
         . (Monad m, OpsConstraint ops m)
        => a
@@ -105,14 +106,14 @@ arrowComputation fn = genericComputation $ Arrow $
 runIdentityComp
   :: forall a lift
    . (LiftMonoid lift)
-  => Computation lift '[] (Return a) Identity
+  => Computation lift NoEff (Return a) Identity
   -> a
 runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
 
 execComp
   :: forall ops lift m a .
   ( Monad m
-  , ImplicitOps ops
+  , Effects ops
   , OpsConstraint ops m
   , LiftMonoid lift
   , EffFunctor lift (Operations ops)

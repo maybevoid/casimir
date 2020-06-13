@@ -5,7 +5,6 @@ module Casimir.Base.Effect
   , Effects (..)
   , NoEff
   , Union
-  , Cons
   , NoOp
   , ConsOps
   , UnionOps
@@ -24,8 +23,7 @@ import Data.Kind
 import QuasiParam.Label (HasLabel (..))
 import qualified Casimir.Param as Param
 
-data Cons (eff1 :: Type) (eff2 :: Type)
-data Union (eff1 :: Type) (eff2 :: Type)
+data Union (eff1 :: k1) (eff2 :: k2)
 
 type NoEff = ('[] :: [Type])
 type NoOp = Param.Nil

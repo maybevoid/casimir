@@ -3,8 +3,7 @@
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Casimir.Base.Implicit
-  ( ImplicitOps
-  , OpsConstraint
+  ( OpsConstraint
   , EffConstraint
   , Eff
   , withOp
@@ -19,21 +18,13 @@ import Casimir.Param (MultiParam (..))
 import Casimir.Base.Effect
 
 class
-  ( Effects eff )
-  => ImplicitOps eff
-
-instance
-  ( Effects eff )
-  => ImplicitOps eff
-
-class
-  ( ImplicitOps eff
+  ( Effects eff
   , ParamConstraint (Operations eff) m
   )
   => OpsConstraint eff m
 
 instance
-  ( ImplicitOps eff
+  ( Effects eff
   , ParamConstraint (Operations eff) m
   )
   => OpsConstraint eff m
@@ -61,7 +52,7 @@ captureOps = captureParam
 
 withOps
   :: forall eff m r
-   . ( ImplicitOps eff )
+   . ( Effects eff )
   => Operations eff m
   -> ((OpsConstraint eff m) => r)
   -> r
@@ -79,7 +70,7 @@ captureOp = ops
 
 withOp
   :: forall eff m r
-   . ( Effect eff, ImplicitOps '[eff] )
+   . ( Effect eff, Effects '[eff] )
   => Operation eff m
   -> ((OpsConstraint '[eff] m) => r)
   -> r

@@ -16,8 +16,8 @@ import Casimir.Computation.Computation
 bindOps
   :: forall ops1 ops2 lift comp m
    . ( Monad m
-     , ImplicitOps ops1
-     , ImplicitOps ops2
+     , Effects ops1
+     , Effects ops2
      , LiftMonoid lift
      , EffFunctor lift (Operations ops1)
      , EffFunctor lift (Operations ops2)
@@ -32,8 +32,8 @@ bindOps ops1 comp = Computation $
 
 bindExactOpsHandler
   :: forall ops lift handler m1 comp
-   . ( ImplicitOps ops
-     , ImplicitOps handler
+   . ( Effects ops
+     , Effects handler
      , Monad m1
      , LiftMonoid lift
      , EffFunctor lift (Operations handler)
@@ -59,10 +59,10 @@ bindExactOpsHandler handler1 comp1
 {-# INLINE bindExactOpsHandler #-}
 
 composeExactOpsHandlers
-  :: forall ops lift handler1 handler2 m1
-   . ( ImplicitOps ops
-     , ImplicitOps handler1
-     , ImplicitOps handler2
+  :: forall ops handler1 handler2 lift m1
+   . ( Effects ops
+     , Effects handler1
+     , Effects handler2
      , Monad m1
      )
   => OpsHandler lift ops handler1 m1
@@ -88,11 +88,11 @@ composeExactOpsHandlers handler1 handler2
 
 composeOpsHandlers
   :: forall ops1 ops2 ops3 lift handler1 handler2 m
-   . ( ImplicitOps ops1
-     , ImplicitOps ops2
-     , ImplicitOps ops3
-     , ImplicitOps handler1
-     , ImplicitOps handler2
+   . ( Effects ops1
+     , Effects ops2
+     , Effects ops3
+     , Effects handler1
+     , Effects handler2
      , Monad m
      , ops3 ⊇ ops1
      , (handler1 ∪ ops3) ⊇ ops2
@@ -107,12 +107,12 @@ composeOpsHandlers handler1 handler2 =
 
 bindOpsHandler
   :: forall ops3 ops1 ops2 lift handler m r
-   . ( ImplicitOps ops1
-     , ImplicitOps ops2
-     , ImplicitOps ops3
+   . ( Effects ops1
+     , Effects ops2
+     , Effects ops3
      , ops3 ⊇ ops1
      , (handler ∪ ops3) ⊇ ops2
-     , ImplicitOps handler
+     , Effects handler
      , Monad m
      , LiftMonoid lift
      , EffFunctor lift (Operations handler)
