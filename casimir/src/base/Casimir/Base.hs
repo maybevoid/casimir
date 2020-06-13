@@ -58,6 +58,10 @@ module Casimir.Base
   , composeCast
   , castOpsWithDict
 
+  , HasLabel (..)
+  , Tag
+  , Name
+  , Label
 )
 where
 
@@ -67,3 +71,7 @@ import Casimir.Base.Implicit
 import Casimir.Base.Lift
 import Casimir.Base.ContraLift
 import Casimir.Base.Cast
+
+import QuasiParam.Tag (Tag)
+import QuasiParam.Name (Name)
+import QuasiParam.Label (Label, HasLabel (..))

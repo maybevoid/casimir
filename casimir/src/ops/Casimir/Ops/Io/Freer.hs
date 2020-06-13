@@ -10,10 +10,9 @@ import Casimir.Freer
 data IoCoOp r where
   LiftIoOp :: IO a -> IoCoOp a
 
-instance EffCoOp IoEff where
-  type CoOperation IoEff = IoCoOp
+instance FreeOps IoOps where
+  type CoOperation IoOps = IoCoOp
 
-instance FreeOps IoEff where
   mkFreeOps liftCoOp = IoOps {
     liftIoOp = \io -> liftCoOp $ LiftIoOp io
   }

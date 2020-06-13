@@ -74,7 +74,7 @@ library quasi-params-casimir-sig
     src/signature
 
   exposed-modules:
-    QuasiParam.Casimir.Sig
+    Casimir.Param.Sig
 
 library quasi-params-casimir
   import: common
@@ -84,15 +84,15 @@ library quasi-params-casimir
     , quasi-params-casimir-sig
 
   reexported-modules:
-    QuasiParam.Casimir
+    Casimir.Param
 
   mixins:
     quasi-params-multi
       ( QuasiParam.MultiParam.Module
-        as QuasiParam.Casimir
+        as Casimir.Param
       ) requires
         ( QuasiParam.MultiParam.Sig
-          as QuasiParam.Casimir.Sig
+          as Casimir.Param.Sig
         )
 
 library casimir-base
@@ -106,6 +106,9 @@ library casimir-base
 
   exposed-modules:
     Casimir.Base
+
+  reexported-modules:
+    Casimir.Param
 
   other-modules:
     Casimir.Base.Effect
@@ -215,7 +218,6 @@ library casimir-ops
 
   build-depends:
       casimir-base
-    , casimir-free
     , casimir-freer
     , casimir-higher
     , casimir-computation
@@ -233,7 +235,6 @@ library casimir-ops
 
     Casimir.Ops.State
     Casimir.Ops.State.Base
-    Casimir.Ops.State.Free
     Casimir.Ops.State.Freer
     Casimir.Ops.State.Lift
     Casimir.Ops.State.Higher
@@ -241,13 +242,11 @@ library casimir-ops
 
     Casimir.Ops.Io
     Casimir.Ops.Io.Base
-    Casimir.Ops.Io.Free
     Casimir.Ops.Io.Freer
     Casimir.Ops.Io.Transform
 
     Casimir.Ops.Env
     Casimir.Ops.Env.Base
-    Casimir.Ops.Env.Free
     Casimir.Ops.Env.Freer
     Casimir.Ops.Env.Higher
     Casimir.Ops.Env.Transform

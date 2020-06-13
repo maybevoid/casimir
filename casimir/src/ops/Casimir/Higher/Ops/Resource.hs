@@ -6,16 +6,17 @@ import Data.Kind
 import Control.Monad.Identity
 import Control.Exception (bracket)
 
-import QuasiParam.Tag
-
 import Casimir.Base
   ( ContraLift (..)
   , EffFunctor (..)
   , HigherLift (..)
   , ImplicitOps (..)
   , EffConstraint
+  , HasLabel (..)
+  , Tag
   , Lift (..)
   , type (~>)
+  , captureOps
   )
 
 import Casimir.Higher
@@ -24,8 +25,8 @@ import Casimir.Higher.ContraLift.Identity
 
 import qualified Casimir.Base as Base
 
-data ResourceEff (t :: Type -> Type)
 data ResourceTag
+data ResourceEff (t :: Type -> Type)
 
 type ResourceOps t = LowerOps (HigherResourceOps t)
 
@@ -61,14 +62,8 @@ instance Effects (ResourceEff t) where
 instance Base.Effects (ResourceEff t) where
   type Operations (ResourceEff t) = LowerOps (HigherResourceOps t)
 
-instance LowerEffect (ResourceEff t)
-
-instance ImplicitOps (ResourceEff t) where
-  type OpsConstraint (ResourceEff t) m =
-    Param ResourceTag (LowerOps (HigherResourceOps t) m)
-
-  withOps = withParam @ResourceTag
-  captureOps = captureParam @ResourceTag
+instance HasLabel (HigherResourceOps t) where
+  type GetLabel (HigherResourceOps t) = Tag ResourceTag
 
 instance
   (Monad inEff)
@@ -108,9 +103,6 @@ instance HigherEffFunctor HigherLift (HigherResourceOps t) where
             cont3 :: a -> m1 (w b)
             cont3 x = contraLift2 $ cont1 x
 
-instance EffCoOp (ResourceEff t) where
-  type CoOperation (ResourceEff t) = ResourceCoOp t
-
 instance
   (Functor f)
   => Functor (ResourceCoOp t f) where
@@ -127,7 +119,9 @@ instance CoOpFunctor (ResourceCoOp t) where
   liftCoOp lifter (ResourceOp resource comp) =
     ResourceOp resource (fmap lifter comp)
 
-instance FreeOps (ResourceEff t) where
+instance FreeOps (HigherResourceOps t) where
+  type CoOperation (HigherResourceOps t) = ResourceCoOp t
+
   mkFreeOps
     :: forall m
     . (Monad m)
@@ -149,7 +143,7 @@ ioBracketOps = ResourceOps $
     bracket alloc release cont
 
 ioBracketCoOpHandler
-  :: CoOpHandler (ResourceEff BracketResource) Identity IO
+  :: CoOpHandler (HigherResourceOps BracketResource) Identity IO
 ioBracketCoOpHandler = CoOpHandler
   (return . Identity) handleOp contraIdentity
  where

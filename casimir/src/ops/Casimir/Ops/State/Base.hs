@@ -19,8 +19,8 @@ data StateOps s m = StateOps {
   putOp :: s -> m ()
 }
 
-instance Effects (State s) where
-  type Operations (State s) = StateOps s
+instance Effect (State s) where
+  type Operation (State s) = StateOps s
 
 instance EffFunctor Lift (StateOps a) where
   effmap (Lift lift) stateOps = StateOps {
@@ -28,17 +28,13 @@ instance EffFunctor Lift (StateOps a) where
     putOp = lift . putOp stateOps
   }
 
-instance ImplicitOps (State s) where
-  type OpsConstraint (State s) m =
-    Param StateTag (StateOps s m)
-
-  withOps = withParam @StateTag
-  captureOps = captureParam @StateTag
+instance HasLabel (StateOps s) where
+  type GetLabel (StateOps s) = Tag StateTag
 
 {-# INLINE get #-}
-get :: forall s . Eff (State s) s
-get = getOp captureOps
+get :: forall s . Eff '[State s] s
+get = getOp captureOp
 
 {-# INLINE put #-}
-put :: forall s . s -> Eff (State s) ()
-put = putOp captureOps
+put :: forall s . s -> Eff '[State s] ()
+put = putOp captureOp

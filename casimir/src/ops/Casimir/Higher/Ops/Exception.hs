@@ -16,8 +16,11 @@ import Casimir.Base
   , HigherLift (..)
   , EffFunctor (..)
   , ImplicitOps (..)
+  , HasLabel (..)
+  , Tag
   , type (∪)
   , type (~>)
+  , captureOp
   )
 
 import Casimir.Ops.Io
@@ -28,9 +31,8 @@ import Casimir.Higher
 import Casimir.Higher.Free
 import Casimir.Higher.ContraLift.Either
 
-data ExceptionEff e
-
 data ExceptionTag
+data ExceptionEff e
 
 data HigherExceptionOps e inEff m = HigherExceptionOps
   { tryOp
@@ -61,23 +63,14 @@ data ExceptionCoOp e f r where
      . e
     -> ExceptionCoOp e f r
 
-instance Base.Effects (ExceptionEff e) where
-  type Operations (ExceptionEff e) = ExceptionOps e
+instance Base.Effect (ExceptionEff e) where
+  type Operation (ExceptionEff e) = ExceptionOps e
 
-instance Higher.Effects (ExceptionEff e) where
-  type Operations (ExceptionEff e) = HigherExceptionOps e
+instance Higher.Effect (ExceptionEff e) where
+  type Operation (ExceptionEff e) = HigherExceptionOps e
 
-instance EffCoOp (ExceptionEff e) where
-  type CoOperation (ExceptionEff e) = ExceptionCoOp e
-
-instance LowerEffect (ExceptionEff e)
-
-instance ImplicitOps (ExceptionEff e) where
-  type OpsConstraint (ExceptionEff e) m =
-    Param ExceptionTag (LowerOps (HigherExceptionOps e) m)
-
-  withOps = withParam @ExceptionTag
-  captureOps = captureParam @ExceptionTag
+instance HasLabel (HigherExceptionOps e) where
+  type GetLabel (HigherExceptionOps e) = Tag ExceptionTag
 
 instance
   (Monad inEff)
@@ -152,7 +145,9 @@ instance CoOpFunctor (ExceptionCoOp e) where
 
   liftCoOp _ (ThrowOp e) = ThrowOp e
 
-instance FreeOps (ExceptionEff e) where
+instance FreeOps (HigherExceptionOps e) where
+  type CoOperation (HigherExceptionOps e) = ExceptionCoOp e
+
   mkFreeOps
     :: forall m
     . (Monad m)
@@ -171,7 +166,7 @@ instance FreeOps (ExceptionEff e) where
 exceptionCoOpHandler
   :: forall e m
    . (Monad m)
-  => CoOpHandler (ExceptionEff e) (Either e) m
+  => CoOpHandler (HigherExceptionOps e) (Either e) m
 exceptionCoOpHandler = CoOpHandler
   (return . Right) handleOp contraEither
  where
@@ -188,11 +183,10 @@ exceptionCoOpHandler = CoOpHandler
 tryIo
   :: forall m e1 e2 a
    . ( Ex.Exception e1
-     , EffConstraint (ExceptionEff e2 ∪ IoEff) m
      )
   => (e1 -> e2)
   -> IO a
-  -> Eff (IoEff ∪ (ExceptionEff e2)) a
+  -> Eff '[IoEff, (ExceptionEff e2)] a
 tryIo liftErr comp = do
   res <- liftIo $ Ex.try comp
   case res of
@@ -202,7 +196,7 @@ tryIo liftErr comp = do
 tryIoOps
   :: forall m e1 e2
    . ( Ex.Exception e1
-     , EffConstraint (ExceptionEff e2 ∪ IoEff) m
+     , EffConstraint '[ExceptionEff e2, IoEff] m
      )
   => (e1 -> e2)
   -> IoOps m
@@ -210,21 +204,20 @@ tryIoOps liftErr = IoOps $ tryIo liftErr
 
 try
   :: forall m e a
-   . (EffConstraint (ExceptionEff e) m)
+   . (EffConstraint '[ExceptionEff e] m)
   => m a
   -> m (Either e a)
-try = tryOp $ unLowerOps captureOps
+try = tryOp $ unLowerOps captureOp
 
 throw
-  :: forall m e a
-   . (EffConstraint (ExceptionEff e) m)
-  => e
-  -> m a
-throw e = throwOp (unLowerOps captureOps) e >>= absurd
+  :: forall e a
+   . e
+  -> Eff '[ExceptionEff e] a
+throw e = throwOp (unLowerOps captureOp) e >>= absurd
 
 tryCatch
   :: forall m e a
-   . (EffConstraint (ExceptionEff e) m)
+   . (EffConstraint '[ExceptionEff e] m)
   => m a
   -> (e -> m a)
   -> m a
@@ -238,7 +231,7 @@ tryCatch comp handler = do
 
 tryFinally
   :: forall m e a
-   . (EffConstraint (ExceptionEff e) m)
+   . (EffConstraint '[ExceptionEff e] m)
   => m a
   -> m ()
   -> m a
@@ -253,7 +246,7 @@ tryFinally comp finalizer = do
 
 tryCatchFinally
   :: forall m e a
-   . (EffConstraint (ExceptionEff e) m)
+   . (EffConstraint '[ExceptionEff e] m)
   => m a
   -> (e -> m a)
   -> m ()

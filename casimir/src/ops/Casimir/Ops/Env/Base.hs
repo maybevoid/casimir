@@ -14,23 +14,19 @@ data EnvOps e m = EnvOps {
   askOp :: m e
 }
 
-instance Effects (EnvEff e) where
-  type Operations (EnvEff e) = EnvOps e
+instance Effect (EnvEff e) where
+  type Operation (EnvEff e) = EnvOps e
 
 instance EffFunctor Lift (EnvOps e) where
   effmap (Lift lift) envOps = EnvOps {
     askOp = lift $ askOp envOps
   }
 
-instance ImplicitOps (EnvEff e) where
-  type OpsConstraint (EnvEff e) m =
-    Param EnvTag (EnvOps e m)
+instance HasLabel (EnvOps e) where
+  type GetLabel (EnvOps e) = Tag EnvTag
 
-  withOps = withParam @EnvTag
-  captureOps = captureParam @EnvTag
-
-ask :: forall e . Eff (EnvEff e) e
-ask = askOp captureOps
+ask :: forall e . Eff '[EnvEff e] e
+ask = askOp $ captureOp
 
 withEnv
   :: forall r e m
@@ -44,10 +40,3 @@ mkEnvOps :: forall e m . (Monad m) => e -> EnvOps e m
 mkEnvOps x = EnvOps {
   askOp = return x
 }
-
-mkEnvHandler
-  :: forall e m .
-  (Monad m)
-  => e
-  -> BaseOpsHandler NoEff (EnvEff e) m
-mkEnvHandler = baseOpsHandler . mkEnvOps

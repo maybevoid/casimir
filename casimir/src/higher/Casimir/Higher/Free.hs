@@ -42,11 +42,8 @@ instance
   where
     fmap f (HigherOp ops) = HigherOp $ fmap f ops
 
-instance
-  (Functor coop)
-  => CoOpFunctor (HigherCoOp coop)
-  where
-    liftCoOp _ (HigherOp ops) = (HigherOp ops)
+instance CoOpFunctor (HigherCoOp coop) where
+  liftCoOp _ (HigherOp ops) = (HigherOp ops)
 
 instance
   (Functor f, Functor g)

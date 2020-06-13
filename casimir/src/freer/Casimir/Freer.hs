@@ -6,7 +6,7 @@ module Casimir.Freer
   , FreerF (..)
   , CoOpHandler (..)
   , withCoOpHandler
-  , NoCoOp (..)
+  , NoCoOp
   , UnionCoOp (..)
   , module Casimir.Freer.Codensity
   )

@@ -13,10 +13,9 @@ data StateCoOp s a where
   GetOp :: StateCoOp s s
   PutOp :: s -> StateCoOp s ()
 
-instance EffCoOp (State s) where
-  type CoOperation (State s) = StateCoOp s
+instance FreeOps (StateOps s) where
+  type CoOperation (StateOps s) = StateCoOp s
 
-instance FreeOps (State s) where
   mkFreeOps liftCoOp = StateOps {
     getOp = liftCoOp $ GetOp,
     putOp = \x -> liftCoOp $ PutOp x

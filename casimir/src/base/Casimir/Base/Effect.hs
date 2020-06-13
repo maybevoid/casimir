@@ -21,7 +21,8 @@ where
 
 import Data.Kind
 
-import qualified QuasiParam.Casimir as Param
+import QuasiParam.Label (HasLabel (..))
+import qualified Casimir.Param as Param
 
 data Cons (eff1 :: Type) (eff2 :: Type)
 data Union (eff1 :: Type) (eff2 :: Type)
@@ -31,7 +32,9 @@ type NoOp = Param.Nil
 type UnionOps = Param.Union
 type ConsOps = Param.Cons
 
-class Effects (effs :: k) where
+class
+  ( Param.MultiParam (Operations effs) )
+  => Effects (effs :: k) where
     type family Operations effs
       = (ops :: (Type -> Type) -> Type) | ops -> effs
 
@@ -39,8 +42,8 @@ class Effect (eff :: Type) where
   type family Operation eff
     = (ops :: (Type -> Type) -> Type) | ops -> eff
 
-instance Effects ('[] :: [Type]) where
-  type Operations '[] = Param.Nil
+instance Effects NoEff where
+  type Operations NoEff = Param.Nil
 
 instance
   ( Effects effs1
@@ -53,6 +56,7 @@ instance
 instance
   ( Effect eff
   , Effects effs
+  , HasLabel (Operation eff)
   )
   => Effects (eff ': effs) where
     type Operations (eff ': effs) =

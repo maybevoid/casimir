@@ -6,13 +6,12 @@ where
 import Data.Kind
 
 import Casimir.Base
+import Casimir.Param
 
 data UseBase (m :: Type -> Type)
 
-class
-  ( Effects (SupportedOps t) )
-  => HasOps t where
-    type family SupportedOps t :: Type
+class HasOps t where
+  type family SupportedOps t :: (Type -> Type) -> Type
 
 class
   ( HasOps t
@@ -21,8 +20,7 @@ class
   => MonadOps t where
     type family OpsMonad t :: Type -> Type
 
-    monadOps
-      :: Operations (SupportedOps t) (OpsMonad t)
+    monadOps :: SupportedOps t (OpsMonad t)
 
 class
   ( MonadOps t
@@ -31,12 +29,10 @@ class
   => LiftMonadOps t where
     type family BaseMonad t :: Type -> Type
 
-    liftBase
-      :: (BaseMonad t) ~> (OpsMonad t)
+    liftBase :: (BaseMonad t) ~> (OpsMonad t)
 
 class
-  ( LiftMonadOps t
-  )
+  ( LiftMonadOps t )
   => ContraLiftMonadOps t where
     contraLiftBase
       :: ContraLift (BaseMonad t) (OpsMonad t)
@@ -44,37 +40,23 @@ class
 withMonadOps
   :: forall t r
    . ( MonadOps t
-     , ImplicitOps (SupportedOps t)
+     , MultiParam (SupportedOps t)
      )
-  => (EffConstraint (SupportedOps t) (OpsMonad t) => OpsMonad t r)
+  => (ParamConstraint (SupportedOps t) (OpsMonad t) => OpsMonad t r)
   -> OpsMonad t r
-withMonadOps cont = withOps (monadOps @t) cont
-
-class
-  ( EffFunctor Lift (Operations (SupportedOps t))
-  ) => HasBaseOps t
-
-instance
-  ( EffFunctor Lift (Operations (SupportedOps t))
-  ) => HasBaseOps t
-
-class
-  ( EffFunctor HigherLift (Operations (SupportedOps t))
-  ) => HasHigherOps t
-
-instance
-  ( EffFunctor HigherLift (Operations (SupportedOps t))
-  ) => HasHigherOps t
+withMonadOps cont = withParam (monadOps @t) cont
 
 instance HasOps (UseBase m) where
-  type SupportedOps (UseBase m) = NoEff
+  type SupportedOps (UseBase m) = NoOp
 
 instance
-  (Monad m)
+  ( Monad m
+  , Effects NoEff
+  )
   => MonadOps (UseBase m) where
-  type OpsMonad (UseBase m) = m
+    type OpsMonad (UseBase m) = m
 
-  monadOps = NoOp
+    monadOps = NoOp
 
 instance
   (Monad m)

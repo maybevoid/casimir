@@ -14,20 +14,16 @@ module Casimir.Base.Implicit
   )
 where
 
-import QuasiParam.Casimir (MultiParam (..))
+import Casimir.Param (MultiParam (..))
 
 import Casimir.Base.Effect
 
 class
-  ( Effects eff
-  , MultiParam (Operations eff)
-  )
+  ( Effects eff )
   => ImplicitOps eff
 
 instance
-  ( Effects eff
-  , MultiParam (Operations eff)
-  )
+  ( Effects eff )
   => ImplicitOps eff
 
 class

@@ -15,7 +15,7 @@ where
 
 import Casimir.Base.Effect
 import Casimir.Base.Implicit
-import qualified QuasiParam.Casimir as Param
+import qualified Casimir.Param as Param
 
 class
   ( ImplicitOps eff1

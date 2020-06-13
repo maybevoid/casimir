@@ -12,23 +12,19 @@ data IoOps m = IoOps {
   liftIoOp :: forall a . IO a -> m a
 }
 
-instance Effects IoEff where
-  type Operations IoEff = IoOps
+instance Effect IoEff where
+  type Operation IoEff = IoOps
 
 instance EffFunctor Lift IoOps where
   effmap (Lift lift) ops = IoOps {
     liftIoOp = lift . liftIoOp ops
   }
 
-instance ImplicitOps IoEff where
-  type OpsConstraint IoEff m =
-    Param IoTag (IoOps m)
+instance HasLabel IoOps where
+  type GetLabel IoOps = Tag IoTag
 
-  withOps = withParam @IoTag
-  captureOps = captureParam @IoTag
-
-liftIo :: forall a . IO a -> Eff IoEff a
-liftIo = liftIoOp captureOps
+liftIo :: forall a . IO a -> Eff '[IoEff] a
+liftIo = liftIoOp captureOp
 
 ioOps :: IoOps IO
 ioOps = IoOps {

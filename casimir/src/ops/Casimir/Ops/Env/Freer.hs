@@ -9,10 +9,9 @@ import Casimir.Freer
 data EnvCoOp e r where
   AskOp :: EnvCoOp e e
 
-instance EffCoOp (EnvEff e) where
-  type CoOperation (EnvEff e) = EnvCoOp e
+instance FreeOps (EnvOps e) where
+  type CoOperation (EnvOps e) = EnvCoOp e
 
-instance FreeOps (EnvEff e) where
   mkFreeOps liftCoOp = EnvOps {
     askOp = liftCoOp $ AskOp
   }
