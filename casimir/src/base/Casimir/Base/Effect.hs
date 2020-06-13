@@ -6,8 +6,11 @@ module Casimir.Base.Effect
   , NoEff
   , Union
   , NoOp
+  , List
+  , Singleton
   , ConsOps
   , UnionOps
+  , SingleOp
   , type (∪)
   , (∪)
   , pattern (:∪)
@@ -23,25 +26,28 @@ import Data.Kind
 import QuasiParam.Label (HasLabel (..))
 import qualified Casimir.Param as Param
 
-data Union (eff1 :: k1) (eff2 :: k2)
 
-type NoEff = ('[] :: [Type])
+data List (effs :: [Type])
+data Singleton (eff :: Type)
+data Union (eff1 :: Type) (eff2 :: Type)
+
+type NoEff = List '[]
 type NoOp = Param.Nil
+type SingleOp = Param.Singleton
 type UnionOps = Param.Union
 type ConsOps = Param.Cons
 
 class
   ( Param.MultiParam (Operations effs) )
-  => Effects (effs :: k) where
+  => Effects (effs :: Type) where
     type family Operations effs
       = (ops :: (Type -> Type) -> Type) | ops -> effs
 
-class Effect (eff :: Type) where
+class
+  ( HasLabel (Operation eff) )
+  => Effect (eff :: Type) where
   type family Operation eff
     = (ops :: (Type -> Type) -> Type) | ops -> eff
-
-instance Effects NoEff where
-  type Operations NoEff = Param.Nil
 
 instance
   ( Effects effs1
@@ -53,12 +59,20 @@ instance
 
 instance
   ( Effect eff
-  , Effects effs
-  , HasLabel (Operation eff)
+  , Effects (List effs)
   )
-  => Effects (eff ': effs) where
-    type Operations (eff ': effs) =
-      Param.Cons (Operation eff) (Operations effs)
+  => Effects (List (eff ': effs)) where
+    type Operations (List (eff ': effs)) =
+      Param.Cons (Operation eff) (Operations (List effs))
+
+instance
+  ( Effect eff )
+  => Effects (Singleton eff) where
+    type Operations (Singleton eff) =
+      Param.Singleton (Operation eff)
+
+instance Effects (List '[]) where
+  type Operations (List '[]) = Param.Nil
 
 pattern NoOp :: forall m . NoOp m
 pattern NoOp = Param.Nil

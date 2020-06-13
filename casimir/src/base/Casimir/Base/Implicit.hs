@@ -31,14 +31,13 @@ instance
 
 class
   ( Monad m
-  , OpsConstraint effs m
+  , OpsConstraint (List effs) m
   )
   => EffConstraint effs m
 
 instance
   ( Monad m
-  , Effects effs
-  , OpsConstraint effs m
+  , OpsConstraint (List effs) m
   )
   => EffConstraint effs m
 
@@ -60,18 +59,17 @@ withOps = withParam
 
 captureOp
   :: forall eff m
-   . ( Effect eff
-     , OpsConstraint '[eff] m
+   . ( EffConstraint '[eff] m
      )
   => Operation eff m
 captureOp = ops
  where
-  ops :+ _ = captureOps @'[eff]
+  ops :+ _ = captureOps @(List '[eff])
 
 withOp
   :: forall eff m r
-   . ( Effect eff, Effects '[eff] )
+   . ( Effect eff )
   => Operation eff m
-  -> ((OpsConstraint '[eff] m) => r)
+  -> ((OpsConstraint (List '[eff]) m) => r)
   -> r
 withOp ops = withOps $ ops :+ NoOp
