@@ -15,29 +15,29 @@ import Casimir.Base
 
 newtype Computation
   (lift :: (Type -> Type) -> (Type -> Type) -> Type)
-  (eff :: k)
+  (ops :: (Type -> Type) -> Type)
   (comp :: (Type -> Type) -> Type)
   (m1 :: Type -> Type)
   = Computation
     { runComp
         :: forall m2
-         . ( Effects eff
+         . ( Effects ops
            , Monad m2
            )
         => lift m1 m2
-        -> Operations eff m2
+        -> ops m2
         -> comp m2
     }
 
 type BaseComputation = Computation Lift
 
-type OpsHandler lift (eff :: k) handler = Computation lift eff (Operations handler)
-type BaseOpsHandler eff handler = OpsHandler Lift eff handler
+type OpsHandler lift ops handler = Computation lift ops (handler)
+type BaseOpsHandler ops handler = OpsHandler Lift ops handler
 
 instance
   ( Effects ops
   , LiftMonoid lift
-  , EffFunctor lift (Operations ops)
+  , EffFunctor lift (ops)
   )
   => EffFunctor lift (Computation lift ops comp) where
     effmap = liftComputation
@@ -58,7 +58,7 @@ liftComputation lift12 comp1 = Computation comp2
       ( Monad m3
       )
       => lift m2 m3
-      -> Operations ops m3
+      -> ops m3
       -> comp m3
     comp2 lift23 = runComp comp1 $ joinLift lift12 lift23
 
@@ -82,6 +82,6 @@ strengthenComputation strengthenLift comp1 =
     ( Monad m2
     )
     => lift2 m m2
-    -> Operations ops m2
+    -> ops m2
     -> comp m2
   comp2 lift = runComp comp1 $ strengthenLift lift

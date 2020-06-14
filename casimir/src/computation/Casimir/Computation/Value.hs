@@ -71,12 +71,12 @@ instance
 
 {-# INLINE genericComputation #-}
 genericComputation
-  :: forall eff comp lift
-   . (Effects eff)
+  :: forall ops comp lift
+   . (Effects ops)
   => (forall m
-       . (Monad m, OpsConstraint eff m)
+       . (Monad m, OpsConstraint ops m)
        => comp m)
-  -> (forall m . (Monad m) => Computation lift eff comp m)
+  -> (forall m . (Monad m) => Computation lift ops comp m)
 genericComputation comp = Computation $
   \ _ ops -> withOps ops comp
 
@@ -106,9 +106,9 @@ arrowComputation fn = genericComputation $ Arrow $
 runIdentityComp
   :: forall a lift
    . (LiftMonoid lift)
-  => Computation lift NoEff (Return a) Identity
+  => Computation lift Nil (Return a) Identity
   -> a
-runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift NoOp
+runIdentityComp comp = runIdentity $ returnVal $ runComp comp idLift Nil
 
 execComp
   :: forall ops lift m a .
@@ -116,7 +116,7 @@ execComp
   , Effects ops
   , OpsConstraint ops m
   , LiftMonoid lift
-  , EffFunctor lift (Operations ops)
+  , EffFunctor lift (ops)
   )
   => Computation lift ops (Return a) m
   -> m a

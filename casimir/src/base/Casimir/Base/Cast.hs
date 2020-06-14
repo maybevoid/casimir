@@ -19,80 +19,80 @@ import Casimir.Base.Effect
 import qualified Casimir.Param as Param
 
 class
-  ( Effects eff1
-  , Effects eff2
-  , Param.EntailParam (Operations eff1) (Operations eff2) m
+  ( Effects ops1
+  , Effects ops2
+  , Param.EntailParam ops1 ops2 m
   )
-  => EntailOps eff1 eff2 m
+  => EntailOps ops1 ops2 m
 
 instance
-  ( Effects eff1
-  , Effects eff2
-  , Param.EntailParam (Operations eff1) (Operations eff2) m
+  ( Effects ops1
+  , Effects ops2
+  , Param.EntailParam ops1 ops2 m
   )
-  => EntailOps eff1 eff2 m
+  => EntailOps ops1 ops2 m
 
 class
-  ( Effects eff1
-  , Effects eff2
-  , Param.CastParam (Operations eff1) (Operations eff2)
+  ( Effects ops1
+  , Effects ops2
+  , Param.CastParam ops1 ops2
   )
-  => CastOps eff1 eff2
+  => CastOps ops1 ops2
 
 instance
-  ( Effects eff1
-  , Effects eff2
-  , Param.CastParam (Operations eff1) (Operations eff2)
+  ( Effects ops1
+  , Effects ops2
+  , Param.CastParam ops1 ops2
   )
-  => CastOps eff1 eff2
+  => CastOps ops1 ops2
 
 infixl 6 ⊇
-type eff1 ⊇ eff2 = CastOps eff1 eff2
+type ops1 ⊇ ops2 = CastOps ops1 ops2
 
-type EntailDict eff1 eff2 m
-  = Param.EntailDict (Operations eff1) (Operations eff2) m
+type EntailDict ops1 ops2 m
+  = Param.EntailDict ops1 ops2 m
 
-type CastDict eff1 eff2
-  = Param.CastDict (Operations eff1) (Operations eff2)
+type CastDict ops1 ops2
+  = Param.CastDict ops1 ops2
 
 castOps
-  :: forall eff1 eff2 m
-   . ( CastOps eff1 eff2 )
-  => Operations eff1 m
-  -> Operations eff2 m
+  :: forall ops1 ops2 m
+   . ( CastOps ops1 ops2 )
+  => ops1 m
+  -> ops2 m
 castOps = Param.castValue
 
 castOpsWithDict
-  :: forall eff1 eff2 m
-   . ( Effects eff1
-     , Effects eff2
+  :: forall ops1 ops2 m
+   . ( Effects ops1
+     , Effects ops2
      )
-  => CastDict eff1 eff2
-  -> Operations eff1 m
-  -> Operations eff2 m
+  => CastDict ops1 ops2
+  -> ops1 m
+  -> ops2 m
 castOpsWithDict = Param.castValueWithDict
 
 extendCast
-  :: forall eff1 eff2 eff3
-   . CastDict eff1 eff2
-  -> CastDict (Union eff1 eff3) (Union eff2 eff3)
-extendCast = Param.extendCast @(Operations eff1)
+  :: forall ops1 ops2 ops3
+   . CastDict ops1 ops2
+  -> CastDict (Union ops1 ops3) (Union ops2 ops3)
+extendCast = Param.extendCast @ops1
 
 entailDict
-  :: forall eff1 eff2 m
-   . (EntailOps eff1 eff2 m)
-  => EntailDict eff1 eff2 m
-entailDict = Param.entailDict @(Operations eff1)
+  :: forall ops1 ops2 m
+   . (EntailOps ops1 ops2 m)
+  => EntailDict ops1 ops2 m
+entailDict = Param.entailDict @ops1
 
 castDict
-  :: forall eff1 eff2
-   . (CastOps eff1 eff2)
-  => CastDict eff1 eff2
-castDict = Param.castDict @(Operations eff1)
+  :: forall ops1 ops2
+   . (CastOps ops1 ops2)
+  => CastDict ops1 ops2
+castDict = Param.castDict @ops1
 
 composeCast
-  :: forall eff1 eff2 eff3
-   . CastDict eff1 eff2
-  -> CastDict eff2 eff3
-  -> CastDict eff1 eff3
-composeCast = Param.composeCast @(Operations eff1) @(Operations eff2)
+  :: forall ops1 ops2 ops3
+   . CastDict ops1 ops2
+  -> CastDict ops2 ops3
+  -> CastDict ops1 ops3
+composeCast = Param.composeCast @ops1 @ops2

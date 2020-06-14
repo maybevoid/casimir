@@ -113,7 +113,6 @@ library casimir-base
   other-modules:
     Casimir.Base.Effect
     Casimir.Base.EffFunctor
-    Casimir.Base.Implicit
     Casimir.Base.Lift
     Casimir.Base.ContraLift
     Casimir.Base.Cast

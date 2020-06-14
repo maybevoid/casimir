@@ -19,16 +19,16 @@ bindOps
      , Effects ops1
      , Effects ops2
      , LiftMonoid lift
-     , EffFunctor lift (Operations ops1)
-     , EffFunctor lift (Operations ops2)
+     , EffFunctor lift (ops1)
+     , EffFunctor lift (ops2)
      )
-  => Operations ops1 m
+  => ops1 m
   -> Computation lift (ops1 ∪ ops2) comp m
   -> Computation lift ops2 comp m
 bindOps ops1 comp = Computation $
   \lift ops2 ->
     runComp comp lift $
-      (effmap lift ops1) ∪ ops2
+      Union (effmap lift ops1) ops2
 
 bindExactOpsHandler
   :: forall ops lift handler m1 comp
@@ -36,7 +36,7 @@ bindExactOpsHandler
      , Effects handler
      , Monad m1
      , LiftMonoid lift
-     , EffFunctor lift (Operations handler)
+     , EffFunctor lift (handler)
      )
   => OpsHandler lift ops handler m1
   -> Computation lift (handler ∪ ops) comp m1
@@ -48,12 +48,12 @@ bindExactOpsHandler handler1 comp1
       :: forall m2
        . (Monad m2)
       => lift m1 m2
-      -> Operations ops m2
+      -> ops m2
       -> comp m2
     comp2 lift12 ops
-      = runComp comp1 lift12 (handler2 ∪ ops)
+      = runComp comp1 lift12 $ Union handler2 ops
        where
-        handler2 :: Operations handler m2
+        handler2 :: handler m2
         handler2 = runComp handler1 lift12 ops
     {-# INLINE comp2 #-}
 {-# INLINE bindExactOpsHandler #-}
@@ -75,16 +75,16 @@ composeExactOpsHandlers handler1 handler2
       :: forall m2
        . (Monad m2)
       => lift m1 m2
-      -> Operations ops m2
-      -> Operations (handler1 ∪ handler2) m2
+      -> ops m2
+      -> (handler1 ∪ handler2) m2
     comp1 lift12 ops
-      = handler3 ∪ handler4
+      = Union handler3 handler4
        where
-        handler3 :: Operations handler1 m2
+        handler3 :: handler1 m2
         handler3 = runComp handler1 lift12 ops
 
-        handler4 :: Operations handler2 m2
-        handler4 = runComp handler2 lift12 (handler3 ∪ ops)
+        handler4 :: handler2 m2
+        handler4 = runComp handler2 lift12 (Union handler3 ops)
 
 composeOpsHandlers
   :: forall ops1 ops2 ops3 lift handler1 handler2 m
@@ -115,7 +115,7 @@ bindOpsHandler
      , Effects handler
      , Monad m
      , LiftMonoid lift
-     , EffFunctor lift (Operations handler)
+     , EffFunctor lift (handler)
      )
   => OpsHandler lift ops1 handler m
   -> Computation lift ops2 r m

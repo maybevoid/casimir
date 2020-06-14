@@ -1,4 +1,3 @@
-{-# language PolyKinds #-}
 
 module Casimir.Computation.Pipeline
   -- ( Pipeline (..)
@@ -26,9 +25,9 @@ import Casimir.Computation.Computation
 data Pipeline lift ops1 handler comp1 comp2 m1 m2
   = Pipeline
   { unPipeline
-      :: forall k (ops2 :: k)
+      :: forall ops2
        . ( Effects ops2
-         , EffFunctor lift (Operations ops2)
+         , EffFunctor lift (ops2)
          )
       => Computation lift (handler ∪ ops2) comp1 m1
       -> Computation lift (ops1 ∪ ops2) comp2 m2
@@ -37,15 +36,15 @@ data Pipeline lift ops1 handler comp1 comp2 m1 m2
 runExactPipeline
   :: forall lift ops1 ops2 handler comp1 comp2 m1 m2
    . ( Effects ops2
-     , EffFunctor lift (Operations ops2)
+     , EffFunctor lift (ops2)
      )
   => Pipeline lift ops1 handler comp1 comp2 m1 m2
   -> Computation lift (handler ∪ ops2) comp1 m1
   -> Computation lift (ops1 ∪ ops2) comp2 m2
-runExactPipeline (Pipeline runner) comp = runner @_ @ops2 comp
+runExactPipeline (Pipeline runner) comp = runner @ops2 comp
 
 data TransformerHandler t handler m = TransformerHandler {
-  tCoOpHandler :: Operations handler (t m),
+  tCoOpHandler :: handler (t m),
   tLift :: Lift m (t m),
   tUnliftEff :: Lift (t m) m
 }
@@ -64,7 +63,7 @@ opsHandlerToPipeline
      , Effects ops1
      , Effects handler
      , LiftMonoid lift
-      , EffFunctor lift (Operations handler)
+      , EffFunctor lift (handler)
      )
   => OpsHandler lift ops1 handler m
   -> (forall comp
@@ -97,7 +96,7 @@ transformePipeline handler1 = Pipeline pipeline
   pipeline :: forall ops2 comp .
     ( Effects ops2
     , EffFunctor Lift comp
-    , EffFunctor Lift (Operations ops2)
+    , EffFunctor Lift (ops2)
     )
     => BaseComputation (handler ∪ ops2) comp m1
     -> BaseComputation (ops1 ∪ ops2) comp m1
@@ -106,7 +105,7 @@ transformePipeline handler1 = Pipeline pipeline
     comp2
       :: forall m2 . (Monad m2)
       => Lift m1 m2
-      -> Operations (ops1 ∪ ops2) m2
+      -> (ops1 ∪ ops2) m2
       -> comp m2
     comp2 lift12 (Union ops1 ops2) = effmap unliftT comp3
      where
@@ -132,7 +131,7 @@ castPipelineOps cast pipeline1 = Pipeline pipeline2
  where
   pipeline2 :: forall ops3
      . ( Effects ops3
-       , EffFunctor lift (Operations ops3)
+       , EffFunctor lift (ops3)
        )
     => Computation lift (handler ∪ ops3) comp1 m1
     -> Computation lift (ops2 ∪ ops3) comp2 m2
@@ -155,7 +154,7 @@ castPipelineHandler
      , Effects handler1
      , Effects handler2
      , LiftMonoid lift
-     , EffFunctor lift (Operations handler1)
+     , EffFunctor lift (handler1)
      )
   => CastDict handler1 handler2
   -> Pipeline lift ops1 handler1 comp1 comp2 m1 m2
@@ -165,7 +164,7 @@ castPipelineHandler cast1 pipeline1 = Pipeline pipeline2
   pipeline2
     :: forall ops2
      . ( Effects ops2
-       , EffFunctor lift (Operations ops2)
+       , EffFunctor lift (ops2)
        )
     => Computation lift (handler2 ∪ ops2) comp1 m1
     -> Computation lift (ops1 ∪ ops2) comp2 m2
@@ -188,9 +187,9 @@ composeExactPipelines
   , Effects ops2
   , Effects handler1
   , Effects handler2
-  , EffFunctor lift (Operations ops1)
-  , EffFunctor lift (Operations handler1)
-  , EffFunctor lift (Operations handler2)
+  , EffFunctor lift (ops1)
+  , EffFunctor lift (handler1)
+  , EffFunctor lift (handler2)
   )
   => Pipeline lift (handler2 ∪ ops1) handler1 comp1 comp2 m1 m2
   -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3
@@ -199,8 +198,8 @@ composeExactPipelines pipeline1 pipeline2 = Pipeline pipeline3
  where
   pipeline3 :: forall ops3
      . ( Effects ops3
-       , EffFunctor lift (Operations ops3)
-       , EffFunctor lift (UnionOps (Operations handler2) (Operations ops3))
+       , EffFunctor lift (ops3)
+       , EffFunctor lift (handler2 ∪ ops3)
        )
     => Computation lift ((handler1 ∪ handler2) ∪ ops3) comp1 m1
     -> Computation lift ((ops1 ∪ ops2) ∪ ops3) comp3 m3
@@ -227,7 +226,7 @@ runPipelineWithCast
   , Effects ops2
   , Effects ops3
   , Effects handler
-  , EffFunctor lift (Operations ops3)
+  , EffFunctor lift (ops3)
   )
   => CastDict ops3 ops1
   -> CastDict (handler ∪ ops3) ops2
@@ -254,7 +253,7 @@ runPipeline
   , Effects ops2
   , Effects ops3
   , Effects handler
-  , EffFunctor lift (Operations ops3)
+  , EffFunctor lift (ops3)
   )
   => Pipeline lift ops1 handler comp1 comp2 m1 m2
   -> Computation lift ops2 comp1 m1
@@ -276,10 +275,10 @@ composePipelinesWithCast
      , Effects handler1
      , Effects handler2
      , Effects handler3
-     , EffFunctor lift (Operations ops3)
-     , EffFunctor lift (Operations handler1)
-     , EffFunctor lift (Operations handler2)
-     , EffFunctor lift (Operations (handler1 ∪ handler2))
+     , EffFunctor lift (ops3)
+     , EffFunctor lift (handler1)
+     , EffFunctor lift (handler2)
+     , EffFunctor lift ((handler1 ∪ handler2))
      )
   => CastDict (handler2 ∪ ops3) ops1
   -> CastDict ops3 ops2
@@ -313,10 +312,10 @@ composePipelines
      , (handler2 ∪ ops3) ⊇ ops1
      , ops3 ⊇ ops2
      , (handler1 ∪ handler2) ⊇ handler3
-     , EffFunctor lift (Operations ops3)
-     , EffFunctor lift (Operations handler1)
-     , EffFunctor lift (Operations handler2)
-     , EffFunctor lift (Operations (handler1 ∪ handler2))
+     , EffFunctor lift (ops3)
+     , EffFunctor lift (handler1)
+     , EffFunctor lift (handler2)
+     , EffFunctor lift ((handler1 ∪ handler2))
      )
   => Pipeline lift ops1 handler1 comp1 comp2 m1 m2
   -> Pipeline lift ops2 handler2 comp2 comp3 m2 m3

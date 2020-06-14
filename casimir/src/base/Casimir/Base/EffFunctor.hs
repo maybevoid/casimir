@@ -34,14 +34,14 @@ instance {-# INCOHERENT #-}
     effmap (HigherLift lift _) comp =
       effmap (Lift lift) comp
 
-instance EffFunctor Lift NoOp where
-  effmap _ _ = NoOp
+instance EffFunctor Lift Nil where
+  effmap _ _ = Nil
 
 instance {-# INCOHERENT #-}
   ( EffFunctor lift ops1
   , EffFunctor lift ops2
   )
-  => EffFunctor lift (UnionOps ops1 ops2)
+  => EffFunctor lift (Union ops1 ops2)
   where
     effmap f (Union x y)
       = Union (effmap f x) (effmap f y)
