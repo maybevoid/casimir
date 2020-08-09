@@ -25,23 +25,36 @@ import Casimir.Higher.ContraLift.Identity
 import qualified Casimir.Base as Base
 
 data ResourceTag
-data ResourceEff (t :: Type -> Type)
 
 type ResourceOps t = LowerOps (HigherResourceOps t)
 
 pattern ResourceOps
   :: forall t m
    . (forall a b. t a -> (a -> m b) -> m b)
-  -> LowerOps (HigherResourceOps t) m
+  -> ResourceOps t m
 pattern ResourceOps t = LowerOps (HigherResourceOps t)
 
-data HigherResourceOps t inEff m = HigherResourceOps {
-  withResourceOp
-    :: forall a b
-     . t a
-    -> (a -> inEff b)
-    -> m b
-}
+data HigherResourceOps' t m1 m2 = HigherResourceOps'
+  { withResourceOp'
+      :: forall a b
+       . t a
+      -> (a -> m1 b)
+      -> m2 b
+  }
+
+type HigherResourceOps t = Ops (HigherResourceOps' t)
+
+pattern HigherResourceOps
+  :: forall t m1 m2
+   . (forall a b. t a -> (a -> m1 b) -> m2 b)
+  -> Operation (HigherResourceOps t) m1 m2
+pattern HigherResourceOps t = Ops (HigherResourceOps' t)
+
+withResourceOp
+  :: forall t m1 m2
+   . Operation (HigherResourceOps t) m1 m2
+  -> (forall a b. t a -> (a -> m1 b) -> m2 b)
+withResourceOp (HigherResourceOps ops) = ops
 
 data ResourceCoOp t f r where
   ResourceOp
@@ -55,36 +68,30 @@ data BracketResource a = BracketResource
   , releaseOp :: (a -> IO ())
   }
 
-instance Effect (ResourceEff t) where
-  type Operation (ResourceEff t) = HigherResourceOps t
-
-instance Base.Effect (ResourceEff t) where
-  type Operation (ResourceEff t) = LowerOps (HigherResourceOps t)
-
-instance HasLabel (HigherResourceOps t) where
-  type GetLabel (HigherResourceOps t) = Tag ResourceTag
+instance HasLabel (HigherResourceOps' t) where
+  type GetLabel (HigherResourceOps' t) = Tag ResourceTag
 
 instance
   (Monad inEff)
-  => EffFunctor Lift (HigherResourceOps t inEff) where
-    effmap (Lift lift) (HigherResourceOps handleResource) =
-      HigherResourceOps $
+  => EffFunctor Lift (HigherResourceOps' t inEff) where
+    effmap (Lift lift) (HigherResourceOps' handleResource) =
+      HigherResourceOps' $
         \resource cont ->
           lift $ handleResource resource cont
 
-instance HigherEffFunctor HigherLift (HigherResourceOps t) where
-  higherEffmap
+instance EffFunctor HigherLift (ResourceOps t) where
+  effmap
     :: forall m1 m2
       . ( Monad m1
         , Monad m2
         )
     => HigherLift m1 m2
-    -> HigherResourceOps t m1 m1
-    -> HigherResourceOps t m2 m2
-  higherEffmap
+    -> ResourceOps t m1
+    -> ResourceOps t m2
+  effmap
     (HigherLift _ (ContraLift contraLift1))
-    (HigherResourceOps doResource) =
-      HigherResourceOps ops
+    (ResourceOps doResource) =
+      ResourceOps ops
        where
         ops
           :: forall a b
@@ -125,7 +132,7 @@ instance FreeOps (HigherResourceOps t) where
     :: forall m
     . (Monad m)
     => (forall a . ResourceCoOp t m a -> m a)
-    -> HigherResourceOps t m m
+    -> Operation (HigherResourceOps t) m m
   mkFreeOps lifter = HigherResourceOps handler
    where
     handler
@@ -157,8 +164,8 @@ ioBracketCoOpHandler = CoOpHandler
 
 withResource
   :: forall t m a b
-   . (EffConstraint '[ResourceEff t] m)
+   . (Base.EffConstraint '[ResourceOps t] m)
   => t a
   -> (a -> m b)
   -> m b
-withResource = withResourceOp $ unLowerOps captureOp
+withResource = withResourceOp $ unLowerOps Base.captureOp

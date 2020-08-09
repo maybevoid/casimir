@@ -15,6 +15,7 @@ module Casimir.Higher.Base
   , HigherOps (..)
   , LowerOps (..)
   , Ops (..)
+  , MonadPair (..)
   -- , Eff
   , withOps
   , captureOps

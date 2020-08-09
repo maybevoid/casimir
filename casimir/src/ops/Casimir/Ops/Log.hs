@@ -19,9 +19,6 @@ data LogOps l m = LogOps {
 data LogCoOp l r where
   LogOp :: l -> LogCoOp l ()
 
-instance Effect (LogEff l) where
-  type Operation (LogEff l) = LogOps l
-
 instance EffFunctor Lift (LogOps l) where
   effmap (Lift lift) ops = LogOps $
     lift . logOp ops
@@ -35,5 +32,5 @@ instance FreeOps (LogOps l) where
 instance HasLabel (LogOps l) where
   type GetLabel (LogOps l) = Tag LogTag
 
-log :: forall l . l -> Eff '[LogEff l] ()
+log :: forall l . l -> Eff '[LogOps l] ()
 log l = logOp captureOp l

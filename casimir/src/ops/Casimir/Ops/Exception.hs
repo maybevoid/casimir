@@ -5,7 +5,6 @@ import Casimir.Base
 import Casimir.Freer
 
 data ExceptionTag
-data ExceptionEff e
 
 data ExceptionOps e m = ExceptionOps {
   raiseOp :: forall a . e -> m a
@@ -13,9 +12,6 @@ data ExceptionOps e m = ExceptionOps {
 
 data ExceptionCoOp e a where
   RaiseOp :: e -> ExceptionCoOp e a
-
-instance Effect (ExceptionEff e) where
-  type Operation (ExceptionEff e) = ExceptionOps e
 
 instance EffFunctor Lift (ExceptionOps e) where
   effmap (Lift lift) ops = ExceptionOps {
@@ -38,7 +34,7 @@ instance HasLabel (ExceptionOps e) where
 raise
   :: forall e a
    . e
-  -> Eff '[ExceptionEff e] a
+  -> Eff '[ExceptionOps e] a
 raise e = raiseOp captureOp e
 
 -- mkExceptionCoOpHandler

@@ -47,16 +47,15 @@ withMonadOps
 withMonadOps cont = withParam (monadOps @t) cont
 
 instance HasOps (UseBase m) where
-  type SupportedOps (UseBase m) = NoOp
+  type SupportedOps (UseBase m) = Nil
 
 instance
   ( Monad m
-  , Effects NoEff
   )
   => MonadOps (UseBase m) where
     type OpsMonad (UseBase m) = m
 
-    monadOps = NoOp
+    monadOps = Nil
 
 instance
   (Monad m)

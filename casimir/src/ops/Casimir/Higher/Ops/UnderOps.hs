@@ -9,8 +9,6 @@ import Data.Kind
 import Casimir.Base (EffFunctor (..))
 import qualified Casimir.Base as Base
 
-data UnderEff ops (inEff :: Type -> Type)
-
 data UnderOps ops inEff m where
   UnderOps
     :: forall ops inEff m
@@ -24,9 +22,3 @@ instance
    where
     effmap lift (UnderOps ops) =
       UnderOps $ effmap lift ops
-
-instance
-  (Effect eff)
-  => Base.Effect (UnderEff eff m) where
-    type Operation (UnderEff eff m) =
-      UnderOps (Operations eff) m

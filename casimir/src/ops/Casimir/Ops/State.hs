@@ -5,4 +5,3 @@ module Casimir.Ops.State
 where
 
 import Casimir.Ops.State.Base
-import Casimir.Ops.State.Higher ()

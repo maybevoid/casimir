@@ -16,9 +16,11 @@ import Casimir.Computation
 
 import qualified Casimir.Base as Base
 
-import Casimir.Ops.State.Base (State, StateOps(..))
+import Casimir.Ops.State.Base (StateOps(..))
 
 import Casimir.Ops.State.Lift
+
+data LiftState s
 
 data UseStateLift
   (lift :: (Type -> Type) -> (Type -> Type) -> Type)
@@ -31,20 +33,20 @@ type UseHigherState = UseStateLift HigherLift
 instance
   ( HasOps t )
   => HasOps (UseStateLift lift s t) where
-    type SupportedOps (UseStateLift lift s t) = UnionOps (StateOps s) (SupportedOps t)
+    type SupportedOps (UseStateLift lift s t) = Union (StateOps s) (SupportedOps t)
 
 instance
   ( MonadOps t
   , LiftMonoid lift
   , EffFunctor lift (SupportedOps t)
-  , FreeLift (State s) lift (OpsMonad t) (StateT s (OpsMonad t))
+  , FreeLift (LiftState s) lift (OpsMonad t) (StateT s (OpsMonad t))
   )
   => MonadOps (UseStateLift lift s t) where
     type OpsMonad (UseStateLift lift s t) = StateT s (OpsMonad t)
 
-    monadOps = stateTOps ∪
+    monadOps = Union stateTOps $
       effmap
-        (freeLift @(State s) @lift)
+        (freeLift @(LiftState s) @lift)
         (monadOps @t)
 
 instance
@@ -67,12 +69,12 @@ instance
 
 instance
   (Monad m)
-  => FreeLift (State s) Lift m (StateT s m) where
+  => FreeLift (LiftState s) Lift m (StateT s m) where
     freeLift = Lift liftStateT
 
 instance
   (Monad m)
-  => FreeLift (State s) HigherLift m (StateT s m) where
+  => FreeLift (LiftState s) HigherLift m (StateT s m) where
     freeLift = HigherLift liftStateT stateTContraLift
 
 stateTOps
@@ -96,12 +98,12 @@ monadStateOps = StateOps {
 withStateTAndOps
   :: forall ops s r m .
   ( Effects ops
-  , EffFunctor Lift (Operations ops)
+  , EffFunctor Lift ops
   , Monad m
   )
   => s
-  -> Base.Operations ops m
-  -> (Base.Operations (State s ': ops) (StateT s m)
+  -> ops m
+  -> (Cons (StateOps s) ops (StateT s m)
       -> StateT s m r)
   -> m r
 withStateTAndOps i ops1 comp1 = evalStateT comp2 i
@@ -109,7 +111,7 @@ withStateTAndOps i ops1 comp1 = evalStateT comp2 i
   comp2 :: StateT s m r
   comp2 = comp1 ops2
 
-  ops2 :: Base.Operations (State s ': ops) (StateT s m)
+  ops2 :: Cons (StateOps s) ops (StateT s m)
   ops2 = Cons stateTOps (effmap (Lift lift) ops1)
 
 {-# INLINE stateTPipeline #-}
@@ -117,12 +119,12 @@ stateTPipeline
   :: forall s m1 comp .
   (Monad m1, EffFunctor Lift comp)
   => s
-  -> SimplePipeline Lift NoEff '[State s] comp m1
-stateTPipeline i = transformePipeline $ genericComputation @NoEff handler
+  -> SimplePipeline Lift Nil (Multi '[StateOps s]) comp m1
+stateTPipeline i = transformePipeline $ genericComputation @Nil handler
  where
   {-# INLINE handler #-}
   handler :: forall m
     . (Monad m)
-    => TransformerHandler (StateT s) '[State s] m
-  handler = TransformerHandler (Cons stateTOps NoOp) stateTLift $ Lift $
+    => TransformerHandler (StateT s) (Multi '[StateOps s]) m
+  handler = TransformerHandler (Cons stateTOps Nil) stateTLift $ Lift $
     \comp -> evalStateT comp i

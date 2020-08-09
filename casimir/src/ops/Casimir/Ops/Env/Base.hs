@@ -7,14 +7,10 @@ import QuasiParam.Tag
 import Casimir.Base
 
 data EnvTag
-data EnvEff e
 
 data EnvOps e m = EnvOps {
   askOp :: m e
 }
-
-instance Effect (EnvEff e) where
-  type Operation (EnvEff e) = EnvOps e
 
 instance EffFunctor Lift (EnvOps e) where
   effmap (Lift lift) envOps = EnvOps {
@@ -24,7 +20,7 @@ instance EffFunctor Lift (EnvOps e) where
 instance HasLabel (EnvOps e) where
   type GetLabel (EnvOps e) = Tag EnvTag
 
-ask :: forall e . Eff '[EnvEff e] e
+ask :: forall e . Eff '[EnvOps e] e
 ask = askOp $ captureOp
 
 withEnv

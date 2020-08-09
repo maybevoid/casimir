@@ -32,7 +32,6 @@ import Casimir.Higher.Free
 import Casimir.Higher.ContraLift.Either
 
 data ExceptionTag
-data ExceptionEff e
 
 data HigherExceptionOps e inEff m = HigherExceptionOps
   { tryOp
@@ -43,14 +42,15 @@ data HigherExceptionOps e inEff m = HigherExceptionOps
   , throwOp :: e -> inEff Void
   }
 
-type ExceptionOps e = LowerOps (HigherExceptionOps e)
+type ExceptionOps e = LowerOps (Ops (HigherExceptionOps e))
 
 pattern ExceptionOps
   :: forall e m
    . (forall a. m a -> m (Either e a))
   -> (e -> m Void)
-  -> LowerOps (HigherExceptionOps e) m
-pattern ExceptionOps try throw = LowerOps (HigherExceptionOps try throw)
+  -> LowerOps (Ops (HigherExceptionOps e)) m
+pattern ExceptionOps try throw =
+  LowerOps (Ops (HigherExceptionOps try throw))
 
 data ExceptionCoOp e f r where
   TryOp
@@ -62,12 +62,6 @@ data ExceptionCoOp e f r where
     :: forall e f r
      . e
     -> ExceptionCoOp e f r
-
-instance Base.Effect (ExceptionEff e) where
-  type Operation (ExceptionEff e) = ExceptionOps e
-
-instance Higher.Effect (ExceptionEff e) where
-  type Operation (ExceptionEff e) = HigherExceptionOps e
 
 instance HasLabel (HigherExceptionOps e) where
   type GetLabel (HigherExceptionOps e) = Tag ExceptionTag
@@ -92,17 +86,17 @@ instance
 
       handleThrow = throwOp ops1
 
-instance HigherEffFunctor HigherLift (HigherExceptionOps e) where
-  higherEffmap
+instance EffFunctor HigherLift (LowerOps (Ops (HigherExceptionOps e))) where
+  effmap
     :: forall m1 m2
      . (Monad m1, Monad m2)
     => HigherLift m1 m2
-    -> HigherExceptionOps e m1 m1
-    -> HigherExceptionOps e m2 m2
-  higherEffmap
+    -> LowerOps (Ops (HigherExceptionOps e)) m1
+    -> LowerOps (Ops (HigherExceptionOps e)) m2
+  effmap
     (HigherLift lifter contraLift1)
-    (HigherExceptionOps handleTry1 handleThrow1) =
-      HigherExceptionOps handleTry2 handleThrow2
+    (LowerOps (Ops (HigherExceptionOps handleTry1 handleThrow1))) =
+      LowerOps $ Ops $ HigherExceptionOps handleTry2 handleThrow2
    where
     handleTry2
       :: forall a
@@ -145,15 +139,15 @@ instance CoOpFunctor (ExceptionCoOp e) where
 
   liftCoOp _ (ThrowOp e) = ThrowOp e
 
-instance FreeOps (HigherExceptionOps e) where
-  type CoOperation (HigherExceptionOps e) = ExceptionCoOp e
+instance FreeOps (Ops (HigherExceptionOps e)) where
+  type CoOperation (Ops (HigherExceptionOps e)) = ExceptionCoOp e
 
   mkFreeOps
     :: forall m
-    . (Monad m)
+     . (Monad m)
     => (forall a . ExceptionCoOp e m a -> m a)
-    -> HigherExceptionOps e m m
-  mkFreeOps lifter = HigherExceptionOps handleTry handleThrow
+    -> Operation (Ops (HigherExceptionOps e)) m m
+  mkFreeOps lifter = Ops $ HigherExceptionOps handleTry handleThrow
    where
     handleTry
       :: forall a
@@ -166,7 +160,7 @@ instance FreeOps (HigherExceptionOps e) where
 exceptionCoOpHandler
   :: forall e m
    . (Monad m)
-  => CoOpHandler (HigherExceptionOps e) (Either e) m
+  => CoOpHandler (Ops (HigherExceptionOps e)) (Either e) m
 exceptionCoOpHandler = CoOpHandler
   (return . Right) handleOp contraEither
  where
@@ -186,7 +180,7 @@ tryIo
      )
   => (e1 -> e2)
   -> IO a
-  -> Eff '[IoEff, (ExceptionEff e2)] a
+  -> Eff '[IoOps, ExceptionOps e2] a
 tryIo liftErr comp = do
   res <- liftIo $ Ex.try comp
   case res of
@@ -196,7 +190,7 @@ tryIo liftErr comp = do
 tryIoOps
   :: forall m e1 e2
    . ( Ex.Exception e1
-     , EffConstraint '[ExceptionEff e2, IoEff] m
+     , Base.EffConstraint '[ExceptionOps e2, IoOps] m
      )
   => (e1 -> e2)
   -> IoOps m
@@ -204,20 +198,20 @@ tryIoOps liftErr = IoOps $ tryIo liftErr
 
 try
   :: forall m e a
-   . (EffConstraint '[ExceptionEff e] m)
+   . (Base.EffConstraint '[ExceptionOps e] m)
   => m a
   -> m (Either e a)
-try = tryOp $ unLowerOps captureOp
+try = tryOp $ unOps $ unLowerOps Base.captureOp
 
 throw
   :: forall e a
    . e
-  -> Eff '[ExceptionEff e] a
-throw e = throwOp (unLowerOps captureOp) e >>= absurd
+  -> Eff '[ExceptionOps e] a
+throw e = throwOp (unOps $ unLowerOps Base.captureOp) e >>= absurd
 
 tryCatch
   :: forall m e a
-   . (EffConstraint '[ExceptionEff e] m)
+   . (Base.EffConstraint '[ExceptionOps e] m)
   => m a
   -> (e -> m a)
   -> m a
@@ -231,7 +225,7 @@ tryCatch comp handler = do
 
 tryFinally
   :: forall m e a
-   . (EffConstraint '[ExceptionEff e] m)
+   . (Base.EffConstraint '[ExceptionOps e] m)
   => m a
   -> m ()
   -> m a
@@ -246,7 +240,7 @@ tryFinally comp finalizer = do
 
 tryCatchFinally
   :: forall m e a
-   . (EffConstraint '[ExceptionEff e] m)
+   . (Base.EffConstraint '[ExceptionOps e] m)
   => m a
   -> (e -> m a)
   -> m ()

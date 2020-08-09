@@ -27,12 +27,6 @@ instance HasLabel (LabeledOps k (label :: k) ops) where
   type GetLabel (LabeledOps k label ops) = Label k label
 
 instance
-  ( Effect ops )
-  => Effect (LabeledEff k label ops) where
-  type Operation (LabeledEff k label ops) =
-    LabeledOps k label (Operations ops)
-
-instance
   (EffFunctor lift ops)
   => EffFunctor lift (LabeledOps k (label :: k) ops)
    where

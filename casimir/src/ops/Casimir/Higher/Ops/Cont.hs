@@ -31,19 +31,19 @@ instance
     effmap (Lift lift) (ContOps callCC) = ContOps $ \cont ->
       lift $ callCC cont
 
-instance HigherEffFunctor HigherLift ContOps where
-  higherEffmap
+instance EffFunctor HigherLift (LowerOps (Ops ContOps)) where
+  effmap
     :: forall m1 m2
       . ( Monad m1
         , Monad m2
         )
     => HigherLift m1 m2
-    -> ContOps m1 m1
-    -> ContOps m2 m2
-  higherEffmap
+    -> LowerOps (Ops ContOps) m1
+    -> LowerOps (Ops ContOps) m2
+  effmap
     (HigherLift lift (ContraLift contraLift1))
-    ops =
-      ContOps callCC2
+    (LowerOps (Ops ops)) =
+      LowerOps $ Ops $ ContOps callCC2
    where
     callCC1
       :: forall a b

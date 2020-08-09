@@ -6,7 +6,6 @@ import QuasiParam.Tag
 import Casimir.Base
 
 data DecideTag
-data DecideEff s
 
 data DecideOps s m = DecideOps {
   decideOp :: m s
@@ -14,9 +13,6 @@ data DecideOps s m = DecideOps {
 
 data DecideCoOp s a = DecideOp (s -> a)
   deriving (Functor)
-
-instance Effect (DecideEff s) where
-  type Operation (DecideEff s) = DecideOps s
 
 instance EffFunctor Lift (DecideOps s) where
   effmap (Lift lift) ops = DecideOps {
@@ -26,5 +22,5 @@ instance EffFunctor Lift (DecideOps s) where
 instance HasLabel (DecideOps s) where
   type GetLabel (DecideOps s) = Tag DecideTag
 
-decide :: forall a . Eff '[DecideEff a] a
+decide :: forall a . Eff '[DecideOps a] a
 decide = decideOp captureOp

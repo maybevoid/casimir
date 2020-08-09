@@ -6,14 +6,10 @@ import QuasiParam.Tag
 import Casimir.Base
 
 data IoTag
-data IoEff
 
 data IoOps m = IoOps {
   liftIoOp :: forall a . IO a -> m a
 }
-
-instance Effect IoEff where
-  type Operation IoEff = IoOps
 
 instance EffFunctor Lift IoOps where
   effmap (Lift lift) ops = IoOps {
@@ -23,7 +19,7 @@ instance EffFunctor Lift IoOps where
 instance HasLabel IoOps where
   type GetLabel IoOps = Tag IoTag
 
-liftIo :: forall a . IO a -> Eff '[IoEff] a
+liftIo :: forall a . IO a -> Eff '[IoOps] a
 liftIo = liftIoOp captureOp
 
 ioOps :: IoOps IO

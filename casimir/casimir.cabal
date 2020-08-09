@@ -257,7 +257,6 @@ library casimir-ops
     Casimir.Ops.State.Base
     Casimir.Ops.State.Freer
     Casimir.Ops.State.Lift
-    Casimir.Ops.State.Higher
     Casimir.Ops.State.Transform
 
     Casimir.Ops.Io
