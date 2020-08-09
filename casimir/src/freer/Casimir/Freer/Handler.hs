@@ -12,16 +12,14 @@ import Casimir.Freer.FreeTransformer
 
 {-# INLINE withCoOpHandler #-}
 withCoOpHandler
-  :: forall free eff ops m a r
+  :: forall free ops m a r
    . ( Monad m
-     , Effects eff
+     , Effects ops
      , FreeOps ops
-     , Effects eff
      , FreeTransformer free
-     , Operations eff ~ ops
      )
   => CoOpHandler ops a r m
-  -> ((OpsConstraint eff (free ops m))
+  -> ((OpsConstraint ops (free ops m))
       => free ops m a)
   -> m r
 withCoOpHandler handler comp1

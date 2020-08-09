@@ -27,8 +27,8 @@ class FreeOps (ops :: (Type -> Type) -> Type) where
 
 instance
   ( FreeOps ops1, FreeOps ops2 )
-  => FreeOps (UnionOps ops1 ops2) where
-    type CoOperation (UnionOps ops1 ops2) =
+  => FreeOps (Union ops1 ops2) where
+    type CoOperation (Union ops1 ops2) =
       UnionCoOp (CoOperation ops1) (CoOperation ops2)
 
     mkFreeOps liftReturn = Union ops1 ops2
@@ -38,8 +38,8 @@ instance
 
 instance
   ( FreeOps ops1, FreeOps ops2 )
-  => FreeOps (ConsOps ops1 ops2) where
-    type CoOperation (ConsOps ops1 ops2) =
+  => FreeOps (Cons ops1 ops2) where
+    type CoOperation (Cons ops1 ops2) =
       UnionCoOp (CoOperation ops1) (CoOperation ops2)
 
     mkFreeOps liftReturn = Cons ops1 ops2
@@ -47,10 +47,10 @@ instance
       ops1 = mkFreeOps (liftReturn . LeftOp)
       ops2 = mkFreeOps (liftReturn . RightOp)
 
-instance FreeOps NoOp where
-  type CoOperation NoOp = NoCoOp
+instance FreeOps Nil where
+  type CoOperation Nil = NoCoOp
 
-  mkFreeOps _ = NoOp
+  mkFreeOps _ = Nil
 
 instance Functor NoCoOp where
   fmap _ coop = case coop of {}

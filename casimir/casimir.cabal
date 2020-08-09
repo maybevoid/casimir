@@ -74,7 +74,8 @@ library quasi-params-casimir-sig
     src/signature
 
   exposed-modules:
-    Casimir.Param.Sig
+    Casimir.Base.Sig
+    Casimir.Higher.Sig
 
 library quasi-params-casimir
   import: common
@@ -92,7 +93,27 @@ library quasi-params-casimir
         as Casimir.Param
       ) requires
         ( QuasiParam.MultiParam.Sig
-          as Casimir.Param.Sig
+          as Casimir.Base.Sig
+        )
+
+
+library quasi-params-casimir-higher
+  import: common
+
+  build-depends:
+      quasi-params-multi
+    , quasi-params-casimir-sig
+
+  reexported-modules:
+    Casimir.Higher.Param
+
+  mixins:
+    quasi-params-multi
+      ( QuasiParam.MultiParam.Module
+        as Casimir.Higher.Param
+      ) requires
+        ( QuasiParam.MultiParam.Sig
+          as Casimir.Higher.Sig
         )
 
 library casimir-base
@@ -136,29 +157,28 @@ library casimir-computation
     Casimir.Computation.Pipeline
     Casimir.Computation.Value
 
-library casimir-free
-  import: deps
+-- library casimir-free
+--   import: deps
 
-  hs-source-dirs:
-    src/free
+--   hs-source-dirs:
+--     src/free
 
-  build-depends:
-      casimir-base
-    , casimir-computation
+--   build-depends:
+--       casimir-base
+--     , casimir-computation
 
-  exposed-modules:
-    Casimir.Free
+--   exposed-modules:
+--     Casimir.Free
 
-  other-modules:
-    Casimir.Free.CoOp
-    Casimir.Free.FreeOps
-    Casimir.Free.FreeEff
-    Casimir.Free.NoOp
-    Casimir.Free.Union
-    Casimir.Free.Pipeline
-    Casimir.Free.Handler
-    Casimir.Free.Monad.Free
-    Casimir.Free.Monad.Church
+--   other-modules:
+--     Casimir.Free.FreeOps
+--     Casimir.Free.FreeEff
+--     Casimir.Free.NoOp
+--     Casimir.Free.Union
+--     Casimir.Free.Pipeline
+--     Casimir.Free.Handler
+--     Casimir.Free.Monad.Free
+--     Casimir.Free.Monad.Church
 
 library casimir-freer
   import: deps
@@ -190,6 +210,8 @@ library casimir-higher
       casimir-base
     , casimir-freer
     , casimir-computation
+    , quasi-params-casimir-sig
+    , quasi-params-casimir-higher
 
   exposed-modules:
     Casimir.Higher
@@ -206,7 +228,6 @@ library casimir-higher
   other-modules:
     Casimir.Higher.Base
     Casimir.Higher.Union
-    Casimir.Higher.EffFunctor
     Casimir.Higher.Computation
 
 library casimir-ops
@@ -269,7 +290,7 @@ library
 
   build-depends:
       casimir-base
-    , casimir-free
+    -- , casimir-free
     , casimir-freer
     , casimir-higher
     , casimir-computation
@@ -277,7 +298,6 @@ library
 
   reexported-modules:
       Casimir.Base
-    , Casimir.Free
     , Casimir.Freer
     , Casimir.Higher
     , Casimir.Computation

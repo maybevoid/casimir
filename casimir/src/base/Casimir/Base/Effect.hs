@@ -38,7 +38,8 @@ instance (MultiParam ops) => Effects ops
 class (HasLabel ops) => Effect (ops :: (Type -> Type) -> Type)
 instance (HasLabel ops) => Effect ops
 
-pattern (:+) :: forall ops1 ops2 m
+pattern (:+)
+    :: forall ops1 ops2 m
      . ops1 m
     -> ops2 m
     -> Cons ops1 ops2 m
@@ -75,9 +76,9 @@ captureOp
   :: forall ops m
    . ( EffConstraint '[ops] m )
   => ops m
-captureOp = ops2
+captureOp = ops
  where
-  ops2 :+ _ = captureOps @(Multi '[ops])
+  ops :+ _ = captureOps @(Multi '[ops])
 
 withOp
   :: forall ops m r

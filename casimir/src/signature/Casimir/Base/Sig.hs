@@ -1,4 +1,4 @@
-module Casimir.Param.Sig where
+module Casimir.Base.Sig where
 
 import Data.Kind
 
