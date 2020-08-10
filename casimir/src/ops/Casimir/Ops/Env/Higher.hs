@@ -13,8 +13,6 @@ import Casimir.Base
 import Casimir.Higher
 import Casimir.Ops.Env.Base
 
-data ReaderEff e
-
 data ReaderOps e inEff m = ReaderOps
   { innerEnvOps :: EnvOps e inEff
   , outerEnvOps :: EnvOps e m
@@ -25,26 +23,24 @@ data ReaderOps e inEff m = ReaderOps
       -> m a
   }
 
-instance Effects (ReaderEff e) where
-  type Operations (ReaderEff e) = ReaderOps e
-
 instance
   (Monad inEff)
   => EffFunctor Lift (ReaderOps e inEff) where
     effmap _ = undefined
 
-instance HigherEffFunctor HigherLift (ReaderOps e) where
-  higherEffmap
+instance EffFunctor HigherLift (LowerOps (Ops (ReaderOps e))) where
+  effmap
     :: forall m1 m2
      . ( Monad m1
        , Monad m2
        )
     => HigherLift m1 m2
-    -> ReaderOps e m1 m1
-    -> ReaderOps e m2 m2
-  higherEffmap
-    (HigherLift lift (ContraLift contraLift1)) ops
-    = ReaderOps
+    -> LowerOps (Ops (ReaderOps e)) m1
+    -> LowerOps (Ops (ReaderOps e)) m2
+  effmap
+    (HigherLift lift (ContraLift contraLift1))
+    (LowerOps (Ops ops))
+    = LowerOps $ Ops $ ReaderOps
         (effmap (Lift lift) $ innerEnvOps ops)
         (effmap (Lift lift) $ outerEnvOps ops)
         local

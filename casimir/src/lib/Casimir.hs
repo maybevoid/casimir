@@ -25,10 +25,8 @@
 module Casimir
   ( module Casimir.Base
   , module Casimir.Computation
-  , module Casimir.Cast
   )
 where
 
 import Casimir.Base
 import Casimir.Computation
-import Casimir.Cast

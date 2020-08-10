@@ -4,10 +4,6 @@ where
 
 import Casimir.Base
 import Casimir.Freer
-import Casimir.Computation
-
-import Casimir.Ops.Io
-import Casimir.Ops.State
 
 data LogTag
 data LogEff l

@@ -14,8 +14,6 @@ import Casimir.Base
 import Casimir.MonadOps
 import Casimir.Computation
 
-import qualified Casimir.Base as Base
-
 import Casimir.Ops.State.Base (StateOps(..))
 
 import Casimir.Ops.State.Lift

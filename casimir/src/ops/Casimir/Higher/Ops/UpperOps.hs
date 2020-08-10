@@ -8,10 +8,6 @@ import Data.Kind
 import Casimir.Base
   ( EffFunctor (..)
   )
-import Casimir.Higher
-
-import qualified Casimir.Base as Base
-
 data UpperEff ops
 
 data UpperOps ops

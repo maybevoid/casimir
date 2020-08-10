@@ -2,7 +2,6 @@
 module Casimir.Higher.Ops.Resource
 where
 
-import Data.Kind
 import Control.Monad.Identity
 import Control.Exception (bracket)
 
@@ -10,12 +9,10 @@ import Casimir.Base
   ( ContraLift (..)
   , EffFunctor (..)
   , HigherLift (..)
-  , EffConstraint
   , HasLabel (..)
   , Tag
   , Lift (..)
   , type (~>)
-  , captureOp
   )
 
 import Casimir.Higher
@@ -28,6 +25,7 @@ data ResourceTag
 
 type ResourceOps t = LowerOps (HigherResourceOps t)
 
+{-# COMPLETE ResourceOps #-}
 pattern ResourceOps
   :: forall t m
    . (forall a b. t a -> (a -> m b) -> m b)
@@ -44,6 +42,7 @@ data HigherResourceOps' t m1 m2 = HigherResourceOps'
 
 type HigherResourceOps t = Ops (HigherResourceOps' t)
 
+{-# COMPLETE HigherResourceOps #-}
 pattern HigherResourceOps
   :: forall t m1 m2
    . (forall a b. t a -> (a -> m1 b) -> m2 b)

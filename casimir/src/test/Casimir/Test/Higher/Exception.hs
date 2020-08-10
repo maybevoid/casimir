@@ -13,12 +13,18 @@ import Casimir.Higher.Ops.Exception
 import Casimir.Computation
 
 import Casimir.Higher
+  ( HigherPipeline
+  , HigherComputation
+  , coopHandlerToPipeline
+  )
+
 import Casimir.Higher.Monad.Church
 
+import qualified Casimir.Base as Base
 import qualified Casimir.Higher.Free as Higher
 
 exceptionTests :: TestTree
-exceptionTests = testGroup "ExceptionEff Tests"
+exceptionTests = testGroup "ExceptionOps Tests"
   [ testException1
   , testException2
   ]
@@ -26,13 +32,13 @@ exceptionTests = testGroup "ExceptionEff Tests"
 exceptionPipeline
   :: forall m e a
    . (Monad m)
-  => HigherPipeline NoEff (ExceptionEff e) (Return a) (Return (Either e a)) m m
+  => HigherPipeline Nil (Multi '[ExceptionOps e]) (Return a) (Return (Either e a)) m m
 exceptionPipeline = coopHandlerToPipeline @ChurchMonad $
   genericComputation exceptionCoOpHandler
 
 -- data DivisionByZeroErr = DivisionByZeroErr
 
--- divide :: Int -> Int -> Eff (ExceptionEff DivisionByZeroErr) Int
+-- divide :: Int -> Int -> Eff (ExceptionOps DivisionByZeroErr) Int
 -- divide a b =
 --   if b == 0
 --   then throw DivisionByZeroErr
@@ -42,7 +48,7 @@ exceptionPipeline = coopHandlerToPipeline @ChurchMonad $
 testException1 :: TestTree
 testException1 =
   let
-    comp1 :: Eff (ExceptionEff String) Int
+    comp1 :: Eff '[ExceptionOps String] Int
     comp1 = throw "error"
 
     comp2 :: Either String Int
@@ -58,16 +64,16 @@ testException1 =
 testException2 :: TestTree
 testException2 =
   let
-    comp1 :: Eff (ExceptionEff String) Int
+    comp1 :: Eff '[ExceptionOps String] Int
     comp1 =
       tryCatch
         (throw "error")
         (\_ -> return 0)
 
     comp2 :: forall m . (Monad m)
-      => HigherComputation NoEff (Return (Either String Int)) m
+      => HigherComputation Nil (Return (Either String Int)) m
     comp2 = runPipeline exceptionPipeline $
-      genericReturn @(ExceptionEff String) comp1
+      genericReturn @(ExceptionOps String) comp1
 
     comp3 :: Either String Int
     comp3 = runIdentityComp comp2

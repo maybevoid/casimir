@@ -43,7 +43,7 @@ envHandlerTest = testCase "Env handler test" $
   let
     envHandler = mkEnvHandler @Int @IO 4
     envComp3 =
-      bindOpsHandler @NoEff
+      bindOpsHandler @Nil
         envHandler envComp2
   res <- execComp envComp3
   assertEqual
@@ -59,9 +59,9 @@ envPipelineTest = testCase "Env pipeline test" $
     envPipeline
       = opsHandlerToPipeline envHandler @(Return String)
     envComp3
-      = runPipeline @NoEff
+      = runPipeline @Nil
         envPipeline envComp2
-  res <- execComp @NoEff envComp3
+  res <- execComp @Nil envComp3
   assertEqual
     "Computation should read and format '5' from environment"
     "Env: 5"

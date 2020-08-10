@@ -32,11 +32,11 @@ stateTests = testGroup "StateOps Tests"
 stateTHandler
   :: forall m s .
   (Monad m)
-  => BaseOpsHandler NoEff (State s) (StateT s m)
+  => BaseOpsHandler Nil (State s) (StateT s m)
 stateTHandler = opsHandlerComp $
   \lifter -> effmap lifter stateTOps
 
-ioHandler :: BaseOpsHandler NoEff IoEff IO
+ioHandler :: BaseOpsHandler Nil IoEff IO
 ioHandler = baseOpsHandler IoOps {
   liftIoOp = id
 }
@@ -74,7 +74,7 @@ stateComp2 = genericReturn stateComp1
 
 stateTComp
   :: forall m . (Monad m)
-  => BaseComputation NoEff (Return StateCompRes) (StateT Int m)
+  => BaseComputation Nil (Return StateCompRes) (StateT Int m)
 stateTComp = bindOpsHandler
   stateTHandler stateComp2
 
@@ -99,7 +99,7 @@ stateComp3
     stateTToEnvOpsPipeline
     stateComp2
 
-stateComp4 :: BaseComputation NoEff (Return StateCompRes) Identity
+stateComp4 :: BaseComputation Nil (Return StateCompRes) Identity
 stateComp4 = bindOpsHandler
   (mkEnvHandler 4) stateComp3
 
@@ -124,9 +124,9 @@ ioStateHandler = genericOpsHandler StateOps {
     liftIo $ writeIORef ref x
 }
 
-ioStateComp :: IORef Int -> BaseComputation NoEff (Return StateCompRes) IO
+ioStateComp :: IORef Int -> BaseComputation Nil (Return StateCompRes) IO
 ioStateComp ref =
-  bindOpsHandler @NoEff
+  bindOpsHandler @Nil
     ioHandler
     (bindOpsHandler @IoEff
       (mkEnvHandler ref)
@@ -227,7 +227,7 @@ stateDynComp4 = runPipeline
   statePipeline1 stateComp2
 
 stateDynComp5 :: forall m . (Monad m)
-  => BaseComputation NoEff (Return StateCompRes) m
+  => BaseComputation Nil (Return StateCompRes) m
 stateDynComp5 = bindOpsHandler
   (mkEnvHandler (6 :: Int))
   stateDynComp4

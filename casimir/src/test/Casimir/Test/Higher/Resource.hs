@@ -30,16 +30,16 @@ resourceTests = testGroup "ResourceEff Tests"
 type BracketResourceEff = ResourceEff BracketResource
 
 bracketHandler
-  :: HigherOpsHandler NoEff BracketResourceEff IO
+  :: HigherOpsHandler Nil BracketResourceEff IO
 bracketHandler = baseOpsHandler ioBracketOps
 
-ioHandler :: BaseOpsHandler NoEff IoEff IO
+ioHandler :: BaseOpsHandler Nil IoEff IO
 ioHandler = baseOpsHandler ioOps
 
 stateTHandler
   :: forall s m
    . (Monad m)
-  => BaseOpsHandler NoEff (State s) (StateT s m)
+  => BaseOpsHandler Nil (State s) (StateT s m)
 stateTHandler = baseOpsHandler stateTOps
 
 pushRef :: forall a . IORef [a] -> a
@@ -98,7 +98,7 @@ pipeline1
           (State [String] ∪ IoEff ∪ BracketResourceEff)
           comp
           m)
-  -> HigherComputation NoEff comp (StateT [String] IO)
+  -> HigherComputation Nil comp (StateT [String] IO)
 pipeline1 comp11 =
   bindOpsHandler (toHigherComputation stateTHandler) $
     liftComputation stateTHigherLift $
@@ -109,7 +109,7 @@ pipeline1 comp11 =
 
 comp2
   :: IORef [String]
-  -> HigherComputation NoEff (Return ()) (StateT [String] IO)
+  -> HigherComputation Nil (Return ()) (StateT [String] IO)
 comp2 ref = pipeline1 $ genericReturn $ comp1 ref
 
 testResource1 :: TestTree
@@ -166,7 +166,7 @@ comp3 ref = do
 
 comp4
   :: IORef [String]
-  -> HigherComputation NoEff (Return ()) (StateT [String] IO)
+  -> HigherComputation Nil (Return ()) (StateT [String] IO)
 comp4 ref = pipeline1 $ genericReturn $ comp3 ref
 
 testResource2 :: TestTree

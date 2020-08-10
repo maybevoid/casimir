@@ -11,21 +11,15 @@ import QuasiParam.Tag
 import Casimir.Base
   ( Eff
   , Lift (..)
-  , EffConstraint
   , ContraLift (..)
   , HigherLift (..)
   , EffFunctor (..)
-  , Effects (..)
   , HasLabel (..)
-  , Tag
-  , type (∪)
   , type (~>)
-  , captureOp
   )
 
 import Casimir.Ops.Io
 import qualified Casimir.Base as Base
-import qualified Casimir.Higher as Higher
 
 import Casimir.Higher
 import Casimir.Higher.Free
@@ -175,7 +169,7 @@ exceptionCoOpHandler = CoOpHandler
   handleOp (ThrowOp e) _ = return $ Left e
 
 tryIo
-  :: forall m e1 e2 a
+  :: forall e1 e2 a
    . ( Ex.Exception e1
      )
   => (e1 -> e2)

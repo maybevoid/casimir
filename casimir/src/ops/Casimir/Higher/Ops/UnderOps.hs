@@ -3,11 +3,7 @@
 module Casimir.Higher.Ops.UnderOps
 where
 
-import Casimir.Higher
-
-import Data.Kind
 import Casimir.Base (EffFunctor (..))
-import qualified Casimir.Base as Base
 
 data UnderOps ops inEff m where
   UnderOps
