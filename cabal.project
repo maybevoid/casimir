@@ -1,14 +1,9 @@
-packages: casimir
+packages: ./casimir
 write-ghc-environment-files: never
 
 source-repository-package
   type: git
   location: https://github.com/maybevoid/quasi-params.git
-  tag: 6de43f6a5fa1d93a5211afb4a16c979d1874601c
+  tag: c1275a2addec213849c97d68970cfef9618ae126
   subdir: quasi-params
-
-source-repository-package
-  type: git
-  location: https://github.com/maybevoid/quasi-params.git
-  tag: 6de43f6a5fa1d93a5211afb4a16c979d1874601c
-  subdir: quasi-params-multi
+  --sha256: 1lmmh49bwavybh2rgnw2pdybh5qdfiq83d6bvi8ddfnmspd2m8w6

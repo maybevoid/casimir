@@ -29,8 +29,7 @@ common deps
   import: common
 
   build-depends:
-      quasi-params
-    , async
+      async
     , constraints
     , free
     , ghc-prim
@@ -58,7 +57,6 @@ common deps
     FlexibleInstances
     OverloadedStrings
     DerivingStrategies
-    AllowAmbiguousTypes
     ScopedTypeVariables
     UndecidableInstances
     QuantifiedConstraints
@@ -67,219 +65,40 @@ common deps
     TypeFamilyDependencies
     GeneralizedNewtypeDeriving
 
-library quasi-params-casimir-sig
-  import: common
-
+library casimir-argkind
   hs-source-dirs:
-    src/signature
-
-  exposed-modules:
-    Casimir.Base.Sig
-    Casimir.Higher.Sig
-
-library quasi-params-casimir
-  import: common
+    src/argkind
 
   build-depends:
-      quasi-params-multi
-    , quasi-params-casimir-sig
+      base
+
+  exposed-modules:
+    Casimir.Base.ArgKind
+    Casimir.Higher.ArgKind
+
+library casimir-params
+  build-depends:
+      casimir-argkind
+    , quasi-params
 
   reexported-modules:
-    Casimir.Param
+      Casimir.Base.Params
+    , Casimir.Higher.Params
 
   mixins:
-    quasi-params-multi
-      ( QuasiParam.MultiParam.Module
-        as Casimir.Param
-      ) requires
-        ( QuasiParam.MultiParam.Sig
-          as Casimir.Base.Sig
-        )
+      quasi-params
+        ( QuasiParams as Casimir.Base.Params )
+        requires
+          ( QuasiParams.ArgKind
+            as Casimir.Base.ArgKind
+          )
 
-
-library quasi-params-casimir-higher
-  import: common
-
-  build-depends:
-      quasi-params-multi
-    , quasi-params-casimir-sig
-
-  reexported-modules:
-    Casimir.Higher.Param
-
-  mixins:
-    quasi-params-multi
-      ( QuasiParam.MultiParam.Module
-        as Casimir.Higher.Param
-      ) requires
-        ( QuasiParam.MultiParam.Sig
-          as Casimir.Higher.Sig
-        )
-
-library casimir-base
-  import: deps
-
-  hs-source-dirs:
-    src/base
-
-  build-depends:
-    quasi-params-casimir
-
-  exposed-modules:
-    Casimir.Base
-
-  reexported-modules:
-    Casimir.Param
-
-  other-modules:
-    Casimir.Base.Effect
-    Casimir.Base.EffFunctor
-    Casimir.Base.Lift
-    Casimir.Base.ContraLift
-    Casimir.Base.Cast
-
-library casimir-computation
-  import: deps
-
-  hs-source-dirs:
-    src/computation
-
-  build-depends:
-    casimir-base
-
-  exposed-modules:
-    Casimir.Computation
-
-  other-modules:
-    Casimir.Computation.Cast
-    Casimir.Computation.Computation
-    Casimir.Computation.Handler
-    Casimir.Computation.Pipeline
-    Casimir.Computation.Value
-
--- library casimir-free
---   import: deps
-
---   hs-source-dirs:
---     src/free
-
---   build-depends:
---       casimir-base
---     , casimir-computation
-
---   exposed-modules:
---     Casimir.Free
-
---   other-modules:
---     Casimir.Free.FreeOps
---     Casimir.Free.FreeEff
---     Casimir.Free.NoOp
---     Casimir.Free.Union
---     Casimir.Free.Pipeline
---     Casimir.Free.Handler
---     Casimir.Free.Monad.Free
---     Casimir.Free.Monad.Church
-
-library casimir-freer
-  import: deps
-
-  hs-source-dirs:
-    src/freer
-
-  build-depends:
-    casimir-base
-
-  exposed-modules:
-    Casimir.Freer
-
-  other-modules:
-    Casimir.Freer.FreeOps
-    Casimir.Freer.Monad.Church
-    Casimir.Freer.Monad.Freer
-    Casimir.Freer.FreeTransformer
-    Casimir.Freer.Handler
-    Casimir.Freer.Codensity
-
-library casimir-higher
-  import: deps
-
-  hs-source-dirs:
-    src/higher
-
-  build-depends:
-      casimir-base
-    , casimir-freer
-    , casimir-computation
-    , quasi-params-casimir-sig
-    , quasi-params-casimir-higher
-
-  exposed-modules:
-    Casimir.Higher
-    Casimir.Higher.Free
-
-    Casimir.Higher.ContraLift
-    Casimir.Higher.ContraLift.State
-    Casimir.Higher.ContraLift.Either
-    Casimir.Higher.ContraLift.Identity
-
-    Casimir.Higher.Monad.Free
-    Casimir.Higher.Monad.Church
-
-  other-modules:
-    Casimir.Higher.Base
-    Casimir.Higher.Union
-    Casimir.Higher.Computation
-
-library casimir-ops
-  import: deps
-
-  hs-source-dirs:
-    src/ops
-
-  build-depends:
-      casimir-base
-    , casimir-freer
-    , casimir-higher
-    , casimir-computation
-
-  exposed-modules:
-    Casimir.MonadOps
-    Casimir.Transform
-
-    Casimir.Ops
-    Casimir.Ops.Label
-    Casimir.Ops.Async
-    Casimir.Ops.Decide
-    Casimir.Ops.Exception
-    Casimir.Ops.Log
-
-    Casimir.Ops.State
-    Casimir.Ops.State.Base
-    Casimir.Ops.State.Freer
-    Casimir.Ops.State.Lift
-    Casimir.Ops.State.Transform
-
-    Casimir.Ops.Io
-    Casimir.Ops.Io.Base
-    Casimir.Ops.Io.Freer
-    Casimir.Ops.Io.Transform
-
-    Casimir.Ops.Env
-    Casimir.Ops.Env.Base
-    Casimir.Ops.Env.Freer
-    Casimir.Ops.Env.Higher
-    Casimir.Ops.Env.Transform
-
-
-    Casimir.Higher.Ops
-    Casimir.Higher.Ops.Cont
-    Casimir.Higher.Ops.Resource
-    Casimir.Higher.Ops.Exception
-    Casimir.Higher.Ops.UnderOps
-    Casimir.Higher.Ops.UpperOps
-
-  other-modules:
-    Casimir.Transform.Lift
+    , quasi-params
+        ( QuasiParams as Casimir.Higher.Params )
+        requires
+          ( QuasiParams.ArgKind
+            as Casimir.Higher.ArgKind
+          )
 
 library
   import: deps
@@ -288,72 +107,52 @@ library
     src/lib
 
   build-depends:
-      casimir-base
-    -- , casimir-free
-    , casimir-freer
-    , casimir-higher
-    , casimir-computation
-    , casimir-ops
+      casimir-params
+    , casimir-argkind
 
-  reexported-modules:
-      Casimir.Base
-    , Casimir.Freer
-    , Casimir.Higher
-    , Casimir.Computation
+  other-modules:
+    Casimir.Base.Lift
+    Casimir.Base.Effect
+    Casimir.Base.EffFunctor
+    Casimir.Base.ContraLift
+
+    Casimir.Higher.Lift
+    Casimir.Higher.Effect
+    Casimir.Higher.EffFunctor
 
   exposed-modules:
     Casimir
 
-benchmark casimir-benchmark
-  import: deps
-  type: exitcode-stdio-1.0
-  main-is: Main.hs
+    Casimir.Base
+    Casimir.Higher
 
-  hs-source-dirs:
-    src/benchmark
+    Casimir.Ops.State
+    Casimir.Ops.State.Effect
+    Casimir.Ops.State.StateT
+    Casimir.Ops.State.MonadState
 
-  other-modules:
-    Benchmark.State
-    Benchmark.State.Base
-    Benchmark.State.CurriedStateTPipeline
-    Benchmark.State.FreePipeline
-    Benchmark.State.HandleFree
-    Benchmark.State.MTL
-    Benchmark.State.StateOpsToEnvOps
-    Benchmark.State.StateOpsToReaderT
-    Benchmark.State.StateTHandler
-    Benchmark.State.StateTToEnvOpsPipeline
-    Benchmark.State.WithStateT
-    Benchmark.State.Codensity
+    Casimir.Ops.Env
+    Casimir.Ops.Env.Effect
+    Casimir.Ops.Env.ReaderT
+    Casimir.Ops.Env.MonadReader
 
-  build-depends:
-      casimir
-    , casimir-ops
-    , criterion
+    Casimir.Ops.Resource.Higher.Effect
 
 test-suite casimir-test
   import: deps
   type: exitcode-stdio-1.0
   main-is: Main.hs
+
   other-modules:
     Casimir.Test.Main
-    Casimir.Test.Ops
-    Casimir.Test.Ops.Ambivalent
-    Casimir.Test.Ops.Env
-    Casimir.Test.Ops.Exception
-    Casimir.Test.Ops.Pipe
-    Casimir.Test.Ops.State
 
-    Casimir.Test.Higher
-    Casimir.Test.Higher.Resource
-    Casimir.Test.Higher.Exception
+    Casimir.Test.Basic
+    Casimir.Test.Basic.Test1
 
   hs-source-dirs:
       src/test
   build-depends:
       casimir
-    , casimir-ops
-    , casimir-higher
     , tasty
     , tasty-hunit
     , tasty-quickcheck

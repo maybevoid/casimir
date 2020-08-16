@@ -1,15 +1,13 @@
-module Casimir.Test.Main (main) where
+module Casimir.Test.Main where
 
 import Test.Tasty
 
-import Casimir.Test.Ops (opsTests)
-import Casimir.Test.Higher (higherOpsTests)
+import qualified Casimir.Test.Basic as Basic
 
 main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree
-tests = testGroup "Casimir mects tests"
-  [ opsTests
-  , higherOpsTests
+tests = testGroup "Casimir tests"
+  [ Basic.tests
   ]

@@ -1,11 +1,15 @@
-{ useLocal ? false
-, nixpkgs ? import ./nixpkgs.nix {inherit useLocal; }
+{ nixpkgs ? import ./modules/nixpkgs.nix
+, checkMaterialization ? false
 }:
 let
-  release = import ./default.nix
-    { inherit useLocal nixpkgs; };
+  callRelease = ghc-version:
+    import ./modules/release.nix
+      { inherit ghc-version checkMaterialization;
+      };
+
+  ghc86 = callRelease "ghc865";
+  ghc88 = callRelease "ghc884";
+  ghc810 = callRelease "ghc8102";
 in
-{ ghc86 = release.ghc86.build;
-  ghc88 = release.ghc88.build;
-  ghc810 = release.ghc810.build;
+{ inherit ghc86 ghc88 ghc810;
 }
